@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jabri Complex</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: black;
+      color: gold;
+      text-align: center;
+    }
+
+    .container {
+      margin-top: 100px;
+    }
+
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 12px;
+      width: 260px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      border: none;
+      background: gold;
+      color: black;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #result {
+      margin-top: 20px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Jabri Complex</h1>
+    <p>بوابة المستأجرين</p>
+
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة المرور">
+
+    <button onclick="login()">تسجيل الدخول</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "PUT_YOUR_URL_HERE";
+    const SUPABASE_ANON_KEY = "PUT_YOUR_KEY_HERE";
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const result = document.getElementById("result");
+
+      const { data, error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        result.innerHTML = "فشل تسجيل الدخول: " + error.message;
+      } else {
+        result.innerHTML = "تم تسجيل الدخول بنجاح";
+      }
+    }
+  </script>
+
+</body>
+</html>
