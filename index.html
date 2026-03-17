@@ -1,45 +1,607 @@
-<script>
-  const SUPABASE_URL = "https://djdppjhldfiwxmmfjpbs.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_t_-7lfamWxQn9plAEhDB6Q_VOqhlfvr";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jabri Complex</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  async function login() {
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-    const result = document.getElementById("result");
-
-    if (!phone || !password) {
-      result.innerHTML = "يرجى إدخال رقم الهاتف وكلمة المرور";
-      return;
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    const cleanPhone = phone.replace(/\s+/g, "");
-    const email = cleanPhone + "@jabri.com";
-
-    const { data, error } = await client.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
-
-    if (error) {
-      result.innerHTML = "فشل تسجيل الدخول: " + error.message;
-      return;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f6f4ef;
+      color: #111827;
     }
 
-    const { data: tenant, error: tenantError } = await client
-      .from("tenants")
-      .select("*")
-      .eq("phone", cleanPhone)
-      .single();
-
-    if (tenantError || !tenant) {
-      result.innerHTML = "تم تسجيل الدخول لكن لا توجد بيانات للمستأجر";
-    } else {
-      result.innerHTML = `
-        مرحباً ${tenant.name}<br><br>
-        رصيدك الحالي: ${tenant.balance} دينار
-      `;
+    .topbar {
+      height: 82px;
+      background: linear-gradient(135deg, #0b0b0b, #1a1a1a);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
-  }
-</script>
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.95);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 19px;
+      color: #d4af37;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-text p {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: #d1d5db;
+    }
+
+    .menu-btn {
+      width: 46px;
+      height: 46px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      color: #f8e7a0;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f0f0f, #202020);
+      color: white;
+      border-radius: 28px;
+      padding: 30px 24px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+      margin-bottom: 22px;
+      border: 1px solid rgba(212, 175, 55, 0.18);
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 24px;
+      color: #f1d676;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: #e5e7eb;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .login-card,
+    .dashboard-section,
+    .table-card {
+      background: #ffffff;
+      border: 1px solid #ebe6d8;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .section-subtitle {
+      margin: 0 0 18px;
+      color: #6b7280;
+      font-size: 15px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #374151;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid #d8d2c3;
+      background: #fffdf8;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+    }
+
+    .primary-btn {
+      width: 100%;
+      border: none;
+      background: linear-gradient(135deg, #caa22f, #f1d676);
+      color: #111827;
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 10px 24px rgba(212, 175, 55, 0.18);
+    }
+
+    .primary-btn:hover {
+      opacity: 0.96;
+    }
+
+    .result {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #374151;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .dashboard-header h3 {
+      margin: 0;
+      font-size: 28px;
+      color: #111827;
+    }
+
+    .dashboard-header p {
+      margin: 6px 0 0;
+      color: #6b7280;
+    }
+
+    .logout-btn {
+      border: none;
+      background: #111827;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      border-radius: 22px;
+      padding: 18px;
+      min-height: 140px;
+      border: 1px solid #ece7da;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+    }
+
+    .card h4 {
+      margin: 0 0 14px;
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    .card .big {
+      font-size: 34px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .card .small {
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .card-blue {
+      background: #edf4ff;
+    }
+
+    .card-green {
+      background: #edf9f0;
+    }
+
+    .card-purple {
+      background: #f6efff;
+    }
+
+    .card-gold {
+      background: #fff8e7;
+      border-color: #efdba1;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .quick-box {
+      background: #fff;
+      border: 1px solid #ebe6d8;
+      border-radius: 22px;
+      padding: 20px;
+      min-height: 140px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+    }
+
+    .quick-box h4 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      color: #111827;
+    }
+
+    .quick-box p {
+      margin: 0;
+      color: #667085;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 10px 16px;
+      background: #ffefef;
+      color: #d92d20;
+      border-radius: 999px;
+      font-weight: bold;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    .table-title {
+      margin: 0 0 14px;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #eee6d8;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fcfaf4;
+      color: #374151;
+    }
+
+    td {
+      color: #111827;
+      background: white;
+    }
+
+    .menu-panel {
+      position: fixed;
+      top: 0;
+      left: -320px;
+      width: 300px;
+      height: 100%;
+      background: #fffdfa;
+      border-right: 1px solid #ebe6d8;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 24px 18px;
+      transition: 0.25s ease;
+      z-index: 100;
+    }
+
+    .menu-panel.open {
+      left: 0;
+    }
+
+    .menu-panel h3 {
+      margin: 0 0 20px;
+      font-size: 22px;
+      color: #111827;
+    }
+
+    .menu-item {
+      padding: 14px 10px;
+      border-bottom: 1px solid #f4efe3;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      display: none;
+      z-index: 90;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .quick-links {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h2 {
+        font-size: 20px;
+      }
+
+      .dashboard-header h3 {
+        font-size: 24px;
+      }
+
+      .brand-text h1 {
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="logo_complex.png" alt="Jabri Complex Logo" class="logo-img">
+      <div class="brand-text">
+        <h1>Jabri Complex</h1>
+        <p>بوابة المستأجرين</p>
+      </div>
+    </div>
+    <button class="menu-btn" onclick="openMenu()">☰</button>
+  </div>
+
+  <div class="menu-panel" id="menuPanel">
+    <h3>القائمة</h3>
+    <div class="menu-item">الرئيسية</div>
+    <div class="menu-item">كشف الحساب</div>
+    <div class="menu-item">الدفعات</div>
+    <div class="menu-item">الملف الشخصي</div>
+    <div class="menu-item">العقد</div>
+    <div class="menu-item" onclick="logout()" style="cursor:pointer; color:#b42318;">تسجيل الخروج</div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+  <div class="page">
+    <div class="hero">
+      <h2>مرحباً بك في تطبيق مجمع جبري</h2>
+      <p>تابع رصيدك، دفعاتك، كشف حسابك، وبيانات المحل من مكان واحد.</p>
+    </div>
+
+    <div class="login-card" id="loginBox">
+      <h2 class="section-title">تسجيل الدخول</h2>
+      <p class="section-subtitle">يرجى إدخال رقم الهاتف وكلمة المرور</p>
+
+      <div class="input-group">
+        <label for="phone">رقم الهاتف</label>
+        <input type="text" id="phone" placeholder="مثال: 0791234567">
+      </div>
+
+      <div class="input-group">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+
+      <button class="primary-btn" onclick="login()">دخول</button>
+      <div class="result" id="result"></div>
+    </div>
+
+    <div class="dashboard-section hidden" id="dashboardBox">
+      <div class="dashboard-header">
+        <div>
+          <h3 id="welcomeName">مرحباً</h3>
+          <p>لوحة تحكم المستأجر</p>
+        </div>
+        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+      </div>
+
+      <div class="cards">
+        <div class="card card-blue">
+          <h4>رقم المحل</h4>
+          <div class="big" id="shopNo">--</div>
+          <div class="small">المحل المسجل على حسابك</div>
+        </div>
+
+        <div class="card card-green">
+          <h4>الرصيد الحالي</h4>
+          <div class="big" id="balanceValue">0</div>
+          <div class="small">الرصيد المستحق بالدينار الأردني</div>
+        </div>
+
+        <div class="card card-purple">
+          <h4>آخر دفعة</h4>
+          <div class="big" id="lastPayment">--</div>
+          <div class="small">آخر مبلغ تم استلامه</div>
+        </div>
+
+        <div class="card card-gold">
+          <h4>حالة الحساب</h4>
+          <div class="big" id="accountStatus">نشط</div>
+          <div class="small">حالة المستأجر داخل النظام</div>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <div class="quick-box">
+          <h4>الملف الشخصي</h4>
+          <p id="profileInfo">بيانات المستأجر الأساسية ستظهر هنا.</p>
+        </div>
+
+        <div class="quick-box">
+          <h4>الفواتير والتنبيهات</h4>
+          <p>يمكنك متابعة حالة دفعاتك والإشعارات الخاصة بك.</p>
+          <div class="status-badge">غير مدفوع</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card hidden" id="statementBox">
+      <h3 class="table-title">كشف الحساب</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>البيان</th>
+              <th>مدين</th>
+              <th>دائن</th>
+              <th>الرصيد</th>
+            </tr>
+          </thead>
+          <tbody id="statementBody">
+            <tr>
+              <td>01/01/2026</td>
+              <td>إيجار سنوي</td>
+              <td>1836</td>
+              <td>0</td>
+              <td>1836</td>
+            </tr>
+            <tr>
+              <td>15/01/2026</td>
+              <td>دفعة نقدية</td>
+              <td>0</td>
+              <td>400</td>
+              <td>1436</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://djdppjhldfiwxmmfjpbs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_t_-7lfamWxQn9plAEhDB6Q_VOqhlfvr";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function openMenu() {
+      document.getElementById("menuPanel").classList.add("open");
+      document.getElementById("overlay").classList.add("show");
+    }
+
+    function closeMenu() {
+      document.getElementById("menuPanel").classList.remove("open");
+      document.getElementById("overlay").classList.remove("show");
+    }
+
+    function logout() {
+      document.getElementById("dashboardBox").classList.add("hidden");
+      document.getElementById("statementBox").classList.add("hidden");
+      document.getElementById("loginBox").classList.remove("hidden");
+      document.getElementById("phone").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("result").innerHTML = "";
+      closeMenu();
+    }
+
+    async function login() {
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("password").value;
+      const result = document.getElementById("result");
+
+      if (!phone || !password) {
+        result.innerHTML = "يرجى إدخال رقم الهاتف وكلمة المرور";
+        return;
+      }
+
+      const cleanPhone = phone.replace(/\s+/g, "");
+      const email = cleanPhone + "@jabri.com";
+
+      const { error } = await client.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        result.innerHTML = "فشل تسجيل الدخول";
+        return;
+      }
+
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("dashboardBox").classList.remove("hidden");
+      document.getElementById("statementBox").classList.remove("hidden");
+
+      document.getElementById("welcomeName").innerHTML = "مرحباً، المستأجر";
+      document.getElementById("shopNo").innerHTML = "JC-09";
+      document.getElementById("balanceValue").innerHTML = "1436";
+      document.getElementById("lastPayment").innerHTML = "400";
+      document.getElementById("accountStatus").innerHTML = "نشط";
+      document.getElementById("profileInfo").innerHTML = "رقم الهاتف: " + cleanPhone + "<br>نوع الحساب: مستأجر";
+      result.innerHTML = "";
+    }
+  </script>
+
+</body>
+</html>
