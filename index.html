@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jabri Complex</title>
+  <title>مجمع جبري</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -17,8 +17,8 @@
     }
 
     .topbar {
-      height: 88px;
-      background: #fcfbf8;
+      height: 92px;
+      background: rgba(252, 251, 248, 0.96);
       border-bottom: 1px solid #e9e2d3;
       display: flex;
       align-items: center;
@@ -27,6 +27,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
+      backdrop-filter: blur(10px);
     }
 
     .brand {
@@ -36,7 +37,7 @@
     }
 
     .logo-img {
-      height: 56px;
+      height: 72px;
       width: auto;
       object-fit: contain;
       display: block;
@@ -44,9 +45,10 @@
 
     .brand-text h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: 22px;
       color: #b68b2c;
       font-weight: bold;
+      line-height: 1.2;
     }
 
     .brand-text p {
@@ -360,9 +362,11 @@
 
     @media (max-width: 600px) {
       .cards { grid-template-columns: 1fr; }
-      .brand-text h1 { font-size: 20px; }
-      .logo-img { height: 48px; }
+      .brand-text h1 { font-size: 19px; }
+      .brand-text p { font-size: 12px; }
+      .logo-img { height: 58px; }
       .hero h2 { font-size: 24px; }
+      .topbar { padding: 0 14px; }
     }
   </style>
 </head>
@@ -372,7 +376,7 @@
     <div class="brand">
       <img src="logo_complex.png" alt="Jabri Complex Logo" class="logo-img">
       <div class="brand-text">
-        <h1>Jabri Complex</h1>
+        <h1>مجمع جبري</h1>
         <p>بوابة المستأجرين</p>
       </div>
     </div>
