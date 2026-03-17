@@ -1,113 +1,45 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jabri Complex</title>
+<script>
+  const SUPABASE_URL = "https://djdppjhldfiwxmmfjpbs.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_t_-7lfamWxQn9plAEhDB6Q_VOqhlfvr";
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: black;
-      color: gold;
-      text-align: center;
+  async function login() {
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value;
+    const result = document.getElementById("result");
+
+    if (!phone || !password) {
+      result.innerHTML = "يرجى إدخال رقم الهاتف وكلمة المرور";
+      return;
     }
 
-    .container {
-      margin-top: 100px;
+    const cleanPhone = phone.replace(/\s+/g, "");
+    const email = cleanPhone + "@jabri.com";
+
+    const { data, error } = await client.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      result.innerHTML = "فشل تسجيل الدخول: " + error.message;
+      return;
     }
 
-    h1 {
-      font-size: 40px;
-      margin-bottom: 10px;
+    const { data: tenant, error: tenantError } = await client
+      .from("tenants")
+      .select("*")
+      .eq("phone", cleanPhone)
+      .single();
+
+    if (tenantError || !tenant) {
+      result.innerHTML = "تم تسجيل الدخول لكن لا توجد بيانات للمستأجر";
+    } else {
+      result.innerHTML = `
+        مرحباً ${tenant.name}<br><br>
+        رصيدك الحالي: ${tenant.balance} دينار
+      `;
     }
-
-    p {
-      font-size: 18px;
-      color: #ccc;
-    }
-
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 12px;
-      width: 280px;
-      border-radius: 6px;
-      border: 1px solid #555;
-      font-size: 16px;
-      text-align: center;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px 25px;
-      border: none;
-      background: gold;
-      color: black;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background: #d4af37;
-    }
-
-    #result {
-      margin-top: 20px;
-      color: white;
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <h1>Jabri Complex</h1>
-    <p>بوابة المستأجرين</p>
-
-    <input type="text" id="phone" placeholder="رقم الهاتف">
-    <input type="password" id="password" placeholder="كلمة المرور">
-
-    <button onclick="login()">تسجيل الدخول</button>
-
-    <div id="result"></div>
-  </div>
-
-  <script>
-    const SUPABASE_URL = "https://djdppjhldfiwxmmfjpbs.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_t_-7lfamWxQn9plAEhDB6Q_VOqhlfvr";
-
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function login() {
-      const phone = document.getElementById("phone").value.trim();
-      const password = document.getElementById("password").value;
-      const result = document.getElementById("result");
-
-      if (!phone || !password) {
-        result.innerHTML = "يرجى إدخال رقم الهاتف وكلمة المرور";
-        return;
-      }
-
-      const cleanPhone = phone.replace(/\s+/g, "");
-      const email = cleanPhone + "@jabri.com";
-
-      const { data, error } = await client.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        result.innerHTML = "فشل تسجيل الدخول: " + error.message;
-      } else {
-        result.innerHTML = "تم تسجيل الدخول بنجاح";
-      }
-    }
-  </script>
-
-</body>
-</html>
+  }
+</script>
