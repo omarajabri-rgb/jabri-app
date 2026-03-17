@@ -558,7 +558,7 @@
       const { data: tenantsByPhone, error: phoneError } = await client
         .from("المستأجرين")
         .select("*")
-        .eq("رقم_الهاتف", cleanPhone);
+        "رقم الهاتف: " + (tenant["الهاتف"] || "");
 
       if (phoneError) {
         result.innerHTML = "خطأ في قراءة بيانات المستأجرين";
