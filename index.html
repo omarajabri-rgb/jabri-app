@@ -28,6 +28,8 @@
 
       --orange-bg:#fff6ea;
       --orange-text:#d68a1d;
+
+      --red:#e05252;
     }
 
     *{
@@ -49,39 +51,33 @@
     }
 
     .header{
-      padding:22px 12px 18px;
       background:#fff;
       text-align:center;
-      box-shadow:0 8px 25px rgba(0,0,0,0.05);
+      padding:18px 14px 14px;
+      border-bottom:1px solid var(--line);
+      box-shadow:0 6px 20px rgba(0,0,0,0.04);
       position:sticky;
       top:0;
       z-index:10;
     }
 
-    .header-center{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-    }
-
     .header-logo{
-      width:130px;
-      height:130px;
+      width:92px;
+      height:92px;
       object-fit:contain;
       display:block;
-      margin:0 auto 10px;
+      margin:0 auto 8px;
     }
 
     .title{
-      font-size:28px;
+      font-size:24px;
       font-weight:900;
       line-height:1.1;
       margin:0;
     }
 
     .subtitle{
-      font-size:13px;
+      font-size:12px;
       color:var(--muted);
       margin-top:4px;
       font-weight:600;
@@ -102,7 +98,7 @@
 
     .hero h1{
       margin:0 0 8px;
-      font-size:34px;
+      font-size:32px;
       line-height:1.08;
       font-weight:900;
       text-align:center;
@@ -201,7 +197,7 @@
 
     .tenant-name{
       margin:0 0 8px;
-      font-size:30px;
+      font-size:28px;
       line-height:1.15;
       font-weight:900;
       word-break:break-word;
@@ -240,7 +236,7 @@
     .box{
       border-radius:22px;
       padding:18px 16px;
-      min-height:132px;
+      min-height:128px;
       display:flex;
       flex-direction:column;
       justify-content:center;
@@ -256,7 +252,7 @@
     }
 
     .big{
-      font-size:34px;
+      font-size:32px;
       font-weight:900;
       line-height:1;
       letter-spacing:-0.02em;
@@ -288,7 +284,7 @@
     }
 
     .mini-value{
-      font-size:28px;
+      font-size:26px;
       font-weight:900;
     }
 
@@ -297,13 +293,13 @@
     }
 
     .remaining{
-      color:#8d3df2;
+      color:#e05252;
     }
 
     .chart-wrap{
       position:relative;
       width:100%;
-      max-width:280px;
+      max-width:250px;
       margin:10px auto 0;
     }
 
@@ -357,12 +353,12 @@
       }
 
       .header-logo{
-        width:160px;
-        height:160px;
+        width:110px;
+        height:110px;
       }
 
       .title{
-        font-size:32px;
+        font-size:28px;
       }
 
       .grid{
@@ -374,14 +370,13 @@
       }
 
       .chart-legend{
-        grid-template-columns:repeat(2,1fr);
         max-width:420px;
         margin-left:auto;
         margin-right:auto;
       }
 
       .hero h1{
-        font-size:44px;
+        font-size:40px;
       }
     }
   </style>
@@ -390,11 +385,9 @@
   <div class="app">
 
     <div class="header">
-      <div class="header-center">
-        <img src="logo_complex.png" alt="Jabri Complex Logo" class="header-logo">
-        <div class="title">Jabri Complex</div>
-        <div class="subtitle">Tenant Portal</div>
-      </div>
+      <img src="logo_complex.png" alt="Jabri Complex Logo" class="header-logo">
+      <div class="title">Jabri Complex</div>
+      <div class="subtitle">Tenant Portal</div>
     </div>
 
     <div id="heroCard" class="section hero">
@@ -492,7 +485,7 @@
         </div>
 
         <div class="legend-item">
-          <div class="legend-title"><span class="legend-dot" style="background:#8d3df2"></span>المتبقي</div>
+          <div class="legend-title"><span class="legend-dot" style="background:#e05252"></span>المتبقي</div>
           <div id="legendRemaining" class="legend-value">0</div>
         </div>
       </div>
@@ -589,7 +582,7 @@
             data: [paid, remaining],
             backgroundColor: [
               'rgba(24,169,87,0.92)',
-              'rgba(141,61,242,0.92)'
+              'rgba(224,82,82,0.92)'
             ],
             borderColor: ['#ffffff', '#ffffff'],
             borderWidth: 4,
@@ -600,9 +593,7 @@
           responsive: true,
           maintainAspectRatio: true,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: function(context) {
