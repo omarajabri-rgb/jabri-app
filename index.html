@@ -290,7 +290,6 @@
       color:#e05252;
     }
 
-    /* تحديث فقط: تلوين مربعات حالة السداد مثل الملخص المالي */
     .status-grid .mini-card:nth-child(1){
       background:var(--blue-bg);
       color:var(--blue-text);
@@ -333,6 +332,39 @@
     .status-grid .mini-card:nth-child(4) .mini-label,
     .status-grid .mini-card:nth-child(4) .mini-value{
       color:var(--purple-text);
+    }
+
+    .advice-card{
+      background:linear-gradient(180deg,#f7f9fd 0%, #ffffff 100%);
+      border:1px solid var(--line);
+    }
+
+    .advice-title{
+      font-size:18px;
+      font-weight:900;
+      color:#1d2940;
+      margin:0 0 10px;
+    }
+
+    .advice-text{
+      font-size:16px;
+      line-height:1.9;
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .advice-amount{
+      color:var(--blue-text);
+      font-size:28px;
+      font-weight:900;
+    }
+
+    .advice-sub{
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.7;
+      font-weight:600;
     }
 
     .chart-wrap{
@@ -383,38 +415,7 @@
       line-height:1.6;
       font-weight:600;
     }
-.advice-card{
-  background:linear-gradient(180deg,#f7f9fd 0%, #ffffff 100%);
-  border:1px solid var(--line);
-}
 
-.advice-title{
-  font-size:18px;
-  font-weight:900;
-  color:#1d2940;
-  margin:0 0 10px;
-}
-
-.advice-text{
-  font-size:16px;
-  line-height:1.9;
-  color:var(--text);
-  font-weight:700;
-}
-
-.advice-amount{
-  color:var(--blue-text);
-  font-size:28px;
-  font-weight:900;
-}
-
-.advice-sub{
-  margin-top:10px;
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.7;
-  font-weight:600;
-}
     @media (min-width:768px){
       .app{
         max-width:780px;
@@ -539,6 +540,12 @@
       </div>
     </div>
 
+    <div class="section advice-card">
+      <h3 class="advice-title">نصيحة محاسبية</h3>
+      <div id="monthlyAdvice" class="advice-text">-</div>
+      <div id="monthlyAdviceSub" class="advice-sub"></div>
+    </div>
+
     <div class="section">
       <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
       <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
@@ -660,6 +667,26 @@ window.login = async function(){
   document.getElementById('remainingValue').innerText = formatNumber(remaining)
   document.getElementById('paidPercent').innerText = formatPercent(paidPercent)
   document.getElementById('remainingPercent').innerText = formatPercent(remainingPercent)
+
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const monthsLeft = Math.max(12 - currentMonth + 1, 1)
+  const suggestedMonthly = remaining > 0 ? remaining / monthsLeft : 0
+  const roundedMonthly = Math.ceil(suggestedMonthly)
+
+  let adviceText = ''
+  let adviceSub = ''
+
+  if (remaining <= 0) {
+    adviceText = '✅ لا يوجد رصيد متبقٍ حالياً، ولا حاجة لدفعات شهرية إضافية'
+    adviceSub = 'الحساب مسدد أو لا يوجد مبلغ مستحق حتى هذه اللحظة.'
+  } else {
+    adviceText = `لإغلاق الرصيد حتى نهاية السنة، يُنصح بدفع <span class="advice-amount">${formatNumber(roundedMonthly)} د.أ</span> شهرياً`
+    adviceSub = `تم احتسابها على أساس الرصيد المتبقي ${formatNumber(remaining)} د.أ موزعاً على ${monthsLeft} شهر/أشهر متبقية من السنة.`
+  }
+
+  document.getElementById('monthlyAdvice').innerHTML = adviceText
+  document.getElementById('monthlyAdviceSub').innerText = adviceSub
 
   document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
   document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
