@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jabri Complex</title>
+  <title>Jabri Complex Debug</title>
   <style>
     body {
       margin: 0;
@@ -11,37 +11,31 @@
       background: #f6f7fb;
       color: #182033;
     }
-
     .topbar {
       background: #fff;
       padding: 18px;
       border-bottom: 1px solid #eee;
     }
-
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-
     .brand img {
       width: 50px;
       height: 50px;
       object-fit: contain;
       border-radius: 12px;
     }
-
     .brand-title {
       font-weight: bold;
       font-size: 18px;
     }
-
     .page {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       padding: 20px;
     }
-
     .card {
       background: #fff;
       padding: 20px;
@@ -49,7 +43,6 @@
       margin-bottom: 15px;
       border: 1px solid #eceff5;
     }
-
     input {
       width: 100%;
       padding: 12px;
@@ -59,7 +52,6 @@
       box-sizing: border-box;
       font-size: 16px;
     }
-
     button {
       width: 100%;
       padding: 12px;
@@ -71,64 +63,69 @@
       font-size: 16px;
       cursor: pointer;
     }
-
     .result {
       display: none;
     }
-
     .name {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 6px;
     }
-
     .code {
       color: #667085;
       font-weight: bold;
       margin-bottom: 12px;
     }
-
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 15px;
     }
-
     .box {
       padding: 20px;
       border-radius: 16px;
       text-align: center;
     }
-
     .blue { background: #eef4ff; color:#2f6fed; }
     .green { background: #edf8f1; color:#18a957; }
     .purple { background: #f5eefc; color:#8d3df2; }
     .orange { background: #fff6ea; color:#d68a1d; }
-
     .num {
       font-size: 28px;
       font-weight: bold;
       margin-bottom: 8px;
     }
-
     .label {
       font-size: 15px;
       color: #4b5563;
       font-weight: bold;
     }
-
     .error {
       color: #c62828;
-      display: none;
       margin-top: 10px;
       font-weight: bold;
+      white-space: pre-wrap;
     }
-
+    .ok {
+      color: #1b8f4d;
+      font-weight: bold;
+      white-space: pre-wrap;
+    }
+    .debugbox {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      direction: ltr;
+      text-align: left;
+      overflow-x: auto;
+    }
     @media (max-width: 640px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+      .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -144,9 +141,14 @@
   <div class="page">
     <div class="card">
       <h3>بحث المستأجر</h3>
-      <input id="tenantCode" placeholder="JC-01">
-      <button onclick="searchTenant()">بحث</button>
-      <div id="errorMsg" class="error">غير موجود</div>
+      <input id="tenantCode" placeholder="JC-01" value="JC-01">
+      <button id="searchBtn">بحث</button>
+      <div id="msg" class="error"></div>
+    </div>
+
+    <div class="card">
+      <h3>تشخيص الاتصال</h3>
+      <div id="status" class="debugbox">Loading...</div>
     </div>
 
     <div id="result" class="card result">
@@ -185,71 +187,115 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
     )
 
+    const msg = document.getElementById('msg')
+    const statusBox = document.getElementById('status')
+    const result = document.getElementById('result')
+    const searchBtn = document.getElementById('searchBtn')
+
     function formatNumber(value) {
       return Number(value || 0).toLocaleString('en-US')
     }
 
-    window.searchTenant = async function () {
-      const code = document.getElementById('tenantCode').value.trim()
-      const error = document.getElementById('errorMsg')
-      const result = document.getElementById('result')
+    async function runDiagnostics() {
+      let report = []
 
-      error.style.display = 'none'
+      report.push('Testing connection...\n')
+
+      const tenantsTest = await supabase
+        .from('tenants')
+        .select('tenant_code, tenant_name')
+        .limit(5)
+
+      if (tenantsTest.error) {
+        report.push('TENANTS ERROR:')
+        report.push(tenantsTest.error.message)
+      } else {
+        report.push('TENANTS OK')
+        report.push(JSON.stringify(tenantsTest.data, null, 2))
+      }
+
+      report.push('\n----------------------\n')
+
+      const summaryTest = await supabase
+        .from('tenant_summary')
+        .select('*')
+        .limit(5)
+
+      if (summaryTest.error) {
+        report.push('TENANT_SUMMARY ERROR:')
+        report.push(summaryTest.error.message)
+      } else {
+        report.push('TENANT_SUMMARY OK')
+        report.push(JSON.stringify(summaryTest.data, null, 2))
+      }
+
+      statusBox.textContent = report.join('\n')
+    }
+
+    async function searchTenant() {
+      const code = document.getElementById('tenantCode').value.trim()
+      msg.textContent = ''
       result.style.display = 'none'
 
       if (!code) {
-        error.textContent = 'أدخل رمز المستأجر'
-        error.style.display = 'block'
+        msg.textContent = 'أدخل رمز المستأجر'
         return
       }
 
-      const { data: t, error: tError } = await supabase
+      const tenantRes = await supabase
         .from('tenants')
         .select('tenant_code, tenant_name')
         .eq('tenant_code', code)
         .maybeSingle()
 
-      if (tError) {
-        console.error('tenants error:', tError)
-        error.textContent = 'مشكلة في قراءة بيانات المستأجر'
-        error.style.display = 'block'
+      if (tenantRes.error) {
+        msg.textContent = 'خطأ في جدول tenants: ' + tenantRes.error.message
+        console.error('tenants error', tenantRes.error)
         return
       }
 
-      if (!t) {
-        error.textContent = 'الرمز غير موجود'
-        error.style.display = 'block'
+      if (!tenantRes.data) {
+        msg.textContent = 'الرمز غير موجود في tenants'
         return
       }
 
-      const { data: s, error: sError } = await supabase
+      const summaryRes = await supabase
         .from('tenant_summary')
         .select('*')
         .eq('رمز_المستأجر', code)
         .maybeSingle()
 
-      if (sError) {
-        console.error('tenant_summary error:', sError)
-        error.textContent = 'مشكلة في قراءة الملخص المالي'
-        error.style.display = 'block'
+      if (summaryRes.error) {
+        msg.textContent = 'خطأ في tenant_summary: ' + summaryRes.error.message
+        console.error('tenant_summary error', summaryRes.error)
         return
       }
 
-      if (!s) {
-        error.textContent = 'لا يوجد ملخص مالي لهذا المستأجر'
-        error.style.display = 'block'
+      if (!summaryRes.data) {
+        msg.textContent = 'الرمز موجود في tenants لكنه غير موجود في tenant_summary'
         return
       }
 
-      document.getElementById('name').innerText = t.tenant_name || ''
-      document.getElementById('code').innerText = t.tenant_code || ''
-      document.getElementById('debit').innerText = formatNumber(s["إجمالي_المدين"])
-      document.getElementById('credit').innerText = formatNumber(s["إجمالي_الدائن"])
-      document.getElementById('balance').innerText = formatNumber(s["الرصيد"])
-      document.getElementById('rent').innerText = formatNumber(s["إيجار_السنة"])
+      const t = tenantRes.data
+      const s = summaryRes.data
+
+      document.getElementById('name').textContent = t.tenant_name || ''
+      document.getElementById('code').textContent = t.tenant_code || ''
+      document.getElementById('debit').textContent = formatNumber(s["إجمالي_المدين"])
+      document.getElementById('credit').textContent = formatNumber(s["إجمالي_الدائن"])
+      document.getElementById('balance').textContent = formatNumber(s["الرصيد"])
+      document.getElementById('rent').textContent = formatNumber(s["إيجار_السنة"])
 
       result.style.display = 'block'
+      msg.textContent = ''
     }
+
+    searchBtn.addEventListener('click', searchTenant)
+    document.getElementById('tenantCode').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') searchTenant()
+    })
+
+    runDiagnostics()
   </script>
 
 </body>
