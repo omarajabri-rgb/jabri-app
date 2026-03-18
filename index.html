@@ -1,129 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jabri App</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body style="font-family: Arial; padding:20px;">
-
-<h2>Login</h2>
-
-<div id="login">
-  <input id="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Password"><br><br>
-  <button onclick="login()">Login</button>
-</div>
-
-<div id="dashboard" style="display:none;">
-  <h2 id="name"></h2>
-  <h3>Balance: <span id="balance"></span></h3>
-
-  <canvas id="chart" width="300"></canvas>
-
-  <h3>Transactions</h3>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Description</th>
-        <th>Debit</th>
-        <th>Credit</th>
-      </tr>
-    </thead>
-    <tbody id="transactions"></tbody>
-  </table>
-</div>
-
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-// 🔴 ضع بياناتك هنا
-const supabase = createClient(
-  'https://YOUR_PROJECT.supabase.co',
-  'YOUR_ANON_KEY'
-)
-
-async function login() {
-  const email = document.getElementById("email").value
-  const password = document.getElementById("password").value
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email, password
-  })
-
-  if (error) return alert("Login error")
-
-  loadUser(email)
-}
-
-async function loadUser(email) {
-
-  // get tenant_code
-  const { data: user } = await supabase
-    .from('tenant_users')
-    .select('*')
-    .eq('email', email)
-    .single()
-
-  const tenant_code = user.tenant_code
-
-  // get tenant name
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('tenant_code', tenant_code)
-    .single()
-
-  document.getElementById("name").innerText = tenant.tenant_name
-
-  // get balance
-  const { data: balanceData } = await supabase
-    .from('tenant_balances')
-    .select('*')
-    .eq('tenant_code', tenant_code)
-    .single()
-
-  document.getElementById("balance").innerText = balanceData.balance
-
-  // chart
-  new Chart(document.getElementById("chart"), {
-    type: 'bar',
-    data: {
-      labels: ['Debit', 'Credit', 'Balance'],
-      datasets: [{
-        data: [
-          balanceData.total_debit,
-          balanceData.total_credit,
-          balanceData.balance
-        ]
-      }]
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 24px;
     }
-  })
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    input, button {
+      padding: 10px 12px;
+      font-size: 16px;
+      margin: 6px 0;
+    }
+    input {
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn {
+      background: black;
+      color: white;
+    }
+    .btn-secondary {
+      background: #ddd;
+      color: black;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #f0f0f0;
+    }
+    .hidden {
+      display: none;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
 
-  // transactions
-  const { data: trx } = await supabase
-    .from('tenant_transactions')
-    .select('*')
-    .eq('tenant_code', tenant_code)
+    <div id="loginCard" class="card">
+      <h2>Tenant Login</h2>
+      <input id="email" type="email" placeholder="Email" />
+      <br />
+      <input id="password" type="password" placeholder="Password" />
+      <br />
+      <button id="loginBtn" class="btn">Login</button>
+      <div id="loginMessage" class="error"></div>
+    </div>
 
-  let html = ""
-  trx.forEach(t => {
-    html += `<tr>
-      <td>${t.trx_date}</td>
-      <td>${t.description}</td>
-      <td>${t.debit}</td>
-      <td>${t.credit}</td>
-    </tr>`
-  })
+    <div id="dashboard" class="hidden">
+      <div class="card topbar">
+        <div>
+          <h2 id="tenantName">Tenant Name</h2>
+          <div>Code: <span id="tenantCode"></span></div>
+          <div>Balance: <strong id="balance">0</strong></div>
+        </div>
+        <button id="logoutBtn" class="btn-secondary">Logout</button>
+      </div>
 
-  document.getElementById("transactions").innerHTML = html
+      <div class="grid">
+        <div class="card">
+          <h3>Summary Chart</h3>
+          <canvas id="chart"></canvas>
+        </div>
 
-  document.getElementById("login").style.display = "none"
-  document.getElementById("dashboard").style.display = "block"
-}
-</script>
+        <div class="card">
+          <h3>Account Summary</h3>
+          <p>Total Debit: <strong id="totalDebit">0</strong></p>
+          <p>Total Credit: <strong id="totalCredit">0</strong></p>
+          <p>Current Balance: <strong id="currentBalance">0</strong></p>
+        </div>
+      </div>
 
+      <div class="card">
+        <h3>Transactions</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Debit</th>
+              <th>Credit</th>
+              <th>Receipt</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'PUT_YOUR_PROJECT_URL_HERE',
+      'PUT_YOUR_ANON_KEY_HERE'
+    );
+
+    let chartInstance = null;
+
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginMessage = document.getElementById('loginMessage');
+
+    loginBtn.addEventListener('click', handleLogin);
+    logoutBtn.addEventListener('click', handleLogout);
+
+    async function handleLogin() {
+      loginMessage.textContent = '';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        loginMessage.textContent = 'Enter email and password.';
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        loginMessage.textContent = error.message;
+        return;
+      }
+
+      await loadDashboard(email);
+    }
+
+    async function loadDashboard(email) {
+      const { data: userLink, error: linkError } = await supabase
+        .from('tenant_users')
+        .select('tenant_code,email')
+        .eq('email', email)
+        .single();
+
+      if (linkError || !userLink) {
+        loginMessage.textContent = 'No tenant linked to this email.';
+        return;
+      }
+
+      const tenantCode = userLink.tenant_code;
+
+      const { data: tenant, error: tenantError } = await supabase
+        .from('tenants')
+        .select('tenant_code, tenant_name')
+        .eq('tenant_code', tenantCode)
+        .single();
+
+      if (tenantError || !tenant) {
+        loginMessage.textContent = 'Tenant record not found.';
+        return;
+      }
+
+      const { data: balanceData, error: balanceError } = await supabase
+        .from('tenant_balances')
+        .select('*')
+        .eq('tenant_code', tenantCode)
+        .single();
+
+      if (balanceError || !balanceData) {
+        loginMessage.textContent = 'Balance data not found.';
+        return;
+      }
+
+      const { data: trx, error: trxError } = await supabase
+        .from('tenant_transactions')
+        .select('*')
+        .eq('tenant_code', tenantCode)
+        .order('trx_date', { ascending: true });
+
+      if (trxError) {
+        loginMessage.textContent = 'Could not load transactions.';
+        return;
+      }
+
+      document.getElementById('tenantName').textContent = tenant.tenant_name ?? '';
+      document.getElementById('tenantCode').textContent = tenant.tenant_code ?? '';
+      document.getElementById('balance').textContent = balanceData.balance ?? 0;
+      document.getElementById('totalDebit').textContent = balanceData.total_debit ?? 0;
+      document.getElementById('totalCredit').textContent = balanceData.total_credit ?? 0;
+      document.getElementById('currentBalance').textContent = balanceData.balance ?? 0;
+
+      const tbody = document.getElementById('transactionsBody');
+      tbody.innerHTML = '';
+
+      for (const row of trx) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.trx_date ?? ''}</td>
+          <td>${row.description ?? ''}</td>
+          <td>${row.debit ?? 0}</td>
+          <td>${row.credit ?? 0}</td>
+          <td>${row.receipt_no ?? ''}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      const ctx = document.getElementById('chart');
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Debit', 'Credit', 'Balance'],
+          datasets: [{
+            label: 'Summary',
+            data: [
+              balanceData.total_debit ?? 0,
+              balanceData.total_credit ?? 0,
+              balanceData.balance ?? 0
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true
+        }
+      });
+
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+    }
+
+    async function handleLogout() {
+      await supabase.auth.signOut();
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
+      document.getElementById('password').value = '';
+      loginMessage.textContent = '';
+    }
+  </script>
 </body>
 </html>
