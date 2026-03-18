@@ -1,254 +1,209 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jabri App</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jabri Complex</title>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f7f7f7;
       margin: 0;
-      padding: 24px;
-      direction: rtl;
+      font-family: Arial;
+      background: #f6f7fb;
+      color: #182033;
     }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    }
-    input, button {
-      padding: 10px 12px;
-      font-size: 16px;
-      margin: 6px 0;
-    }
-    input {
-      width: 100%;
-      max-width: 360px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    button {
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .btn {
-      background: black;
-      color: white;
-    }
-    .btn-secondary {
-      background: #ddd;
-      color: black;
-    }
+
     .topbar {
+      background: #fff;
+      padding: 18px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .brand {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
     }
+
+    .brand img {
+      width: 50px;
+      border-radius: 12px;
+    }
+
+    .brand-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .page {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #182033;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 10px;
+      margin-top: 15px;
     }
-    .hidden {
-      display: none;
+
+    .box {
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
     }
+
+    .blue { background: #eef4ff; color:#2f6fed;}
+    .green { background: #edf8f1; color:#18a957;}
+    .purple { background: #f5eefc; color:#8d3df2;}
+    .orange { background: #fff6ea; color:#d68a1d;}
+
+    .num {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
     .error {
       color: red;
-      margin-top: 10px;
-    }
-    .summary-line {
-      font-size: 20px;
-      margin: 14px 0;
-    }
-    .note {
-      margin-top: 12px;
-      color: #555;
-      font-size: 14px;
-    }
-    canvas {
-      max-height: 320px;
-    }
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+      display:none;
     }
   </style>
 </head>
-<body>
-  <div class="container">
 
-    <div id="loginCard" class="card">
-      <h2>دخول المستأجر</h2>
-      <input id="email" type="email" placeholder="البريد الإلكتروني" />
-      <br />
-      <input id="password" type="password" placeholder="كلمة المرور" />
-      <br />
-      <button id="loginBtn" class="btn">دخول</button>
-      <div id="loginMessage" class="error"></div>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <img src="logo_complex.png">
+      <div class="brand-title">Jabri Complex</div>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <div class="card">
+      <h3>بحث المستأجر</h3>
+      <input id="tenantCode" placeholder="JC-01">
+      <button onclick="searchTenant()">بحث</button>
+      <div id="errorMsg" class="error">غير موجود</div>
     </div>
 
-    <div id="dashboard" class="hidden">
-      <div class="card topbar">
-        <div>
-          <h2 id="tenantName">اسم المستأجر</h2>
-          <div>الرمز: <span id="tenantCode"></span></div>
-          <div>الرصيد الحالي: <strong id="balance">0</strong></div>
-        </div>
-        <button id="logoutBtn" class="btn-secondary">خروج</button>
-      </div>
+    <div id="result" class="card result">
+
+      <div class="name" id="name"></div>
+      <div id="code"></div>
 
       <div class="grid">
-        <div class="card">
-          <h3>الملخص المالي</h3>
-          <div class="summary-line">إجمالي المدين: <strong id="totalDebit">0</strong></div>
-          <div class="summary-line">إجمالي الدائن: <strong id="totalCredit">0</strong></div>
-          <div class="summary-line">الرصيد النهائي: <strong id="currentBalance">0</strong></div>
-          <div class="note">
-            للتفاصيل الكاملة أو كشف الحساب التفصيلي يرجى مراجعة الإدارة.
-          </div>
+        <div class="box blue">
+          <div id="debit" class="num"></div>
+          <div>مدين</div>
         </div>
 
-        <div class="card">
-          <h3>الرسم البياني</h3>
-          <canvas id="chart"></canvas>
+        <div class="box green">
+          <div id="credit" class="num"></div>
+          <div>دائن</div>
+        </div>
+
+        <div class="box purple">
+          <div id="balance" class="num"></div>
+          <div>الرصيد</div>
+        </div>
+
+        <div class="box orange">
+          <div id="rent" class="num"></div>
+          <div>إيجار السنة</div>
         </div>
       </div>
+
     </div>
 
   </div>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     const supabase = createClient(
       'https://gzukfvxcpfblzqyjzkoz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-    );
+    )
 
-    let chartInstance = null;
+    window.searchTenant = async function() {
 
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loginMessage = document.getElementById('loginMessage');
+      const code = document.getElementById('tenantCode').value.trim()
+      const error = document.getElementById('errorMsg')
+      const result = document.getElementById('result')
 
-    loginBtn.addEventListener('click', handleLogin);
-    logoutBtn.addEventListener('click', handleLogout);
+      error.style.display = 'none'
+      result.style.display = 'none'
 
-    async function handleLogin() {
-      loginMessage.textContent = '';
-
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!email || !password) {
-        loginMessage.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
-        return;
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        loginMessage.textContent = 'بيانات الدخول غير صحيحة.';
-        return;
-      }
-
-      await loadDashboard(email);
-    }
-
-    async function loadDashboard(email) {
-      const { data: userLink, error: linkError } = await supabase
-        .from('tenant_users')
-        .select('tenant_code,email')
-        .eq('email', email)
-        .single();
-
-      if (linkError || !userLink) {
-        loginMessage.textContent = 'لا يوجد مستأجر مرتبط بهذا البريد الإلكتروني.';
-        return;
-      }
-
-      const tenantCode = userLink.tenant_code;
-
-      const { data: tenant, error: tenantError } = await supabase
+      const { data: t } = await supabase
         .from('tenants')
-        .select('tenant_code, tenant_name')
-        .eq('tenant_code', tenantCode)
-        .single();
-
-      if (tenantError || !tenant) {
-        loginMessage.textContent = 'لم يتم العثور على بيانات المستأجر.';
-        return;
-      }
-
-      const { data: balanceData, error: balanceError } = await supabase
-        .from('tenant_balances')
         .select('*')
-        .eq('tenant_code', tenantCode)
-        .single();
+        .eq('tenant_code', code)
+        .maybeSingle()
 
-      if (balanceError || !balanceData) {
-        loginMessage.textContent = 'لم يتم العثور على بيانات الرصيد.';
-        return;
+      if(!t){
+        error.style.display = 'block'
+        return
       }
 
-      document.getElementById('tenantName').textContent = tenant.tenant_name ?? '';
-      document.getElementById('tenantCode').textContent = tenant.tenant_code ?? '';
-      document.getElementById('balance').textContent = balanceData.balance ?? 0;
-      document.getElementById('totalDebit').textContent = balanceData.total_debit ?? 0;
-      document.getElementById('totalCredit').textContent = balanceData.total_credit ?? 0;
-      document.getElementById('currentBalance').textContent = balanceData.balance ?? 0;
+      const { data: s } = await supabase
+        .from('tenant_summary')
+        .select('*')
+        .eq('رمز_المستأجر', code)
+        .maybeSingle()
 
-      const ctx = document.getElementById('chart');
-
-      if (chartInstance) {
-        chartInstance.destroy();
+      if(!s){
+        error.style.display = 'block'
+        return
       }
 
-      chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['المدين', 'الدائن', 'الرصيد'],
-          datasets: [{
-            label: 'الملخص',
-            data: [
-              balanceData.total_debit ?? 0,
-              balanceData.total_credit ?? 0,
-              balanceData.balance ?? 0
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true
-        }
-      });
+      document.getElementById('name').innerText = t.tenant_name
+      document.getElementById('code').innerText = t.tenant_code
 
-      document.getElementById('loginCard').classList.add('hidden');
-      document.getElementById('dashboard').classList.remove('hidden');
-    }
+      document.getElementById('debit').innerText = s["إجمالي_المدين"]
+      document.getElementById('credit').innerText = s["إجمالي_الدائن"]
+      document.getElementById('balance').innerText = s["الرصيد"]
+      document.getElementById('rent').innerText = s["إيجار_السنة"]
 
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      document.getElementById('dashboard').classList.add('hidden');
-      document.getElementById('loginCard').classList.remove('hidden');
-      document.getElementById('password').value = '';
-      loginMessage.textContent = '';
+      result.style.display = 'block'
     }
   </script>
+
 </body>
 </html>
