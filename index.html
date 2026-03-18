@@ -464,8 +464,8 @@
     </div>
 
     <div class="section">
-      <h3 class="section-title">حالة السداد</h3>
-      <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
+      <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
+      <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
 
       <div class="chart-wrap">
         <canvas id="chart"></canvas>
@@ -600,8 +600,28 @@ window.login = async function(){
 
   if(chart) chart.destroy()
 
+  const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw(chartInstance) {
+      const {width, height, ctx} = chartInstance
+      ctx.restore()
+
+      ctx.font = 'bold 26px Arial'
+      ctx.fillStyle = '#1d2940'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(Math.round(paidPercent) + '%', width / 2, height / 2 - 10)
+
+      ctx.font = '14px Arial'
+      ctx.fillStyle = '#7b8497'
+      ctx.fillText('مدفوع', width / 2, height / 2 + 18)
+
+      ctx.save()
+    }
+  }
+
   chart = new Chart(document.getElementById('chart'), {
-    type:'pie',
+    type:'doughnut',
     data:{
       labels:['مدفوع','متبقي'],
       datasets:[{
@@ -609,7 +629,8 @@ window.login = async function(){
         backgroundColor:['#18a957','#e05252'],
         borderColor:['#ffffff','#ffffff'],
         borderWidth:4,
-        hoverOffset:8
+        hoverOffset:8,
+        cutout:'70%'
       }]
     },
     options:{
@@ -618,7 +639,8 @@ window.login = async function(){
       plugins:{
         legend:{ display:false }
       }
-    }
+    },
+    plugins:[centerTextPlugin]
   })
 
   localStorage.setItem('jabri_tenant_code', code)
