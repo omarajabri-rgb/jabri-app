@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Jabri Complex</title>
-
   <style>
     body {
       margin: 0;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f6f7fb;
       color: #182033;
     }
@@ -27,6 +26,8 @@
 
     .brand img {
       width: 50px;
+      height: 50px;
+      object-fit: contain;
       border-radius: 12px;
     }
 
@@ -46,6 +47,7 @@
       padding: 20px;
       border-radius: 20px;
       margin-bottom: 15px;
+      border: 1px solid #eceff5;
     }
 
     input {
@@ -54,6 +56,8 @@
       border-radius: 12px;
       border: 1px solid #ccc;
       margin-bottom: 10px;
+      box-sizing: border-box;
+      font-size: 16px;
     }
 
     button {
@@ -64,6 +68,8 @@
       border: none;
       border-radius: 12px;
       font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
     }
 
     .result {
@@ -71,8 +77,15 @@
     }
 
     .name {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .code {
+      color: #667085;
+      font-weight: bold;
+      margin-bottom: 12px;
     }
 
     .grid {
@@ -88,34 +101,47 @@
       text-align: center;
     }
 
-    .blue { background: #eef4ff; color:#2f6fed;}
-    .green { background: #edf8f1; color:#18a957;}
-    .purple { background: #f5eefc; color:#8d3df2;}
-    .orange { background: #fff6ea; color:#d68a1d;}
+    .blue { background: #eef4ff; color:#2f6fed; }
+    .green { background: #edf8f1; color:#18a957; }
+    .purple { background: #f5eefc; color:#8d3df2; }
+    .orange { background: #fff6ea; color:#d68a1d; }
 
     .num {
       font-size: 28px;
       font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .label {
+      font-size: 15px;
+      color: #4b5563;
+      font-weight: bold;
     }
 
     .error {
-      color: red;
-      display:none;
+      color: #c62828;
+      display: none;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-
 <body>
 
   <div class="topbar">
     <div class="brand">
-      <img src="logo_complex.png">
+      <img src="logo_complex.png" alt="logo">
       <div class="brand-title">Jabri Complex</div>
     </div>
   </div>
 
   <div class="page">
-
     <div class="card">
       <h3>بحث المستأجر</h3>
       <input id="tenantCode" placeholder="JC-01">
@@ -124,34 +150,31 @@
     </div>
 
     <div id="result" class="card result">
-
       <div class="name" id="name"></div>
-      <div id="code"></div>
+      <div class="code" id="code"></div>
 
       <div class="grid">
         <div class="box blue">
-          <div id="debit" class="num"></div>
-          <div>مدين</div>
+          <div id="debit" class="num">0</div>
+          <div class="label">إجمالي المدين</div>
         </div>
 
         <div class="box green">
-          <div id="credit" class="num"></div>
-          <div>دائن</div>
+          <div id="credit" class="num">0</div>
+          <div class="label">إجمالي الدائن</div>
         </div>
 
         <div class="box purple">
-          <div id="balance" class="num"></div>
-          <div>الرصيد</div>
+          <div id="balance" class="num">0</div>
+          <div class="label">الرصيد</div>
         </div>
 
         <div class="box orange">
-          <div id="rent" class="num"></div>
-          <div>إيجار السنة</div>
+          <div id="rent" class="num">0</div>
+          <div class="label">إيجار السنة</div>
         </div>
       </div>
-
     </div>
-
   </div>
 
   <script type="module">
@@ -162,8 +185,11 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
     )
 
-    window.searchTenant = async function() {
+    function formatNumber(value) {
+      return Number(value || 0).toLocaleString('en-US')
+    }
 
+    window.searchTenant = async function () {
       const code = document.getElementById('tenantCode').value.trim()
       const error = document.getElementById('errorMsg')
       const result = document.getElementById('result')
@@ -171,35 +197,56 @@
       error.style.display = 'none'
       result.style.display = 'none'
 
-      const { data: t } = await supabase
-        .from('tenants')
-        .select('*')
-        .eq('tenant_code', code)
-        .maybeSingle()
-
-      if(!t){
+      if (!code) {
+        error.textContent = 'أدخل رمز المستأجر'
         error.style.display = 'block'
         return
       }
 
-      const { data: s } = await supabase
+      const { data: t, error: tError } = await supabase
+        .from('tenants')
+        .select('tenant_code, tenant_name')
+        .eq('tenant_code', code)
+        .maybeSingle()
+
+      if (tError) {
+        console.error('tenants error:', tError)
+        error.textContent = 'مشكلة في قراءة بيانات المستأجر'
+        error.style.display = 'block'
+        return
+      }
+
+      if (!t) {
+        error.textContent = 'الرمز غير موجود'
+        error.style.display = 'block'
+        return
+      }
+
+      const { data: s, error: sError } = await supabase
         .from('tenant_summary')
         .select('*')
         .eq('رمز_المستأجر', code)
         .maybeSingle()
 
-      if(!s){
+      if (sError) {
+        console.error('tenant_summary error:', sError)
+        error.textContent = 'مشكلة في قراءة الملخص المالي'
         error.style.display = 'block'
         return
       }
 
-      document.getElementById('name').innerText = t.tenant_name
-      document.getElementById('code').innerText = t.tenant_code
+      if (!s) {
+        error.textContent = 'لا يوجد ملخص مالي لهذا المستأجر'
+        error.style.display = 'block'
+        return
+      }
 
-      document.getElementById('debit').innerText = s["إجمالي_المدين"]
-      document.getElementById('credit').innerText = s["إجمالي_الدائن"]
-      document.getElementById('balance').innerText = s["الرصيد"]
-      document.getElementById('rent').innerText = s["إيجار_السنة"]
+      document.getElementById('name').innerText = t.tenant_name || ''
+      document.getElementById('code').innerText = t.tenant_code || ''
+      document.getElementById('debit').innerText = formatNumber(s["إجمالي_المدين"])
+      document.getElementById('credit').innerText = formatNumber(s["إجمالي_الدائن"])
+      document.getElementById('balance').innerText = formatNumber(s["الرصيد"])
+      document.getElementById('rent').innerText = formatNumber(s["إيجار_السنة"])
 
       result.style.display = 'block'
     }
