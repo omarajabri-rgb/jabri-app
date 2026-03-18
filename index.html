@@ -1,268 +1,653 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jabri Complex</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jabri Complex</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --primary:#1d2940;
+      --text:#1a2238;
+      --muted:#7b8497;
+      --line:#e8edf4;
+      --green:#18a957;
+      --red:#e05252;
+      --blue-bg:#eef4ff;
+      --blue-text:#2f6fed;
+      --green-bg:#edf8f1;
+      --green-text:#18a957;
+      --purple-bg:#f5eefc;
+      --purple-text:#8d3df2;
+      --orange-bg:#fff6ea;
+      --orange-text:#d68a1d;
+    }
 
-<style>
-:root{
-  --bg:#f6f7fb;
-  --card:#ffffff;
-  --primary:#1d2940;
-  --text:#1a2238;
-  --muted:#7b8497;
-  --line:#e8edf4;
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
 
-  --green:#18a957;
-  --red:#e05252;
-}
+    body{
+      margin:0;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
-body{
-  margin:0;
-  font-family:-apple-system,Segoe UI;
-  background:var(--bg);
-}
+    .app{
+      max-width:430px;
+      margin:auto;
+      min-height:100vh;
+    }
 
-.app{
-  max-width:430px;
-  margin:auto;
-}
+    .header{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      background:rgba(255,255,255,0.96);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      text-align:center;
+      padding:18px 10px 12px;
+      border-bottom:1px solid var(--line);
+      box-shadow:0 6px 20px rgba(0,0,0,0.04);
+    }
 
-/* 🔥 HEADER FIXED STYLE */
-.header{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:rgba(255,255,255,0.96);
-  backdrop-filter:blur(10px);
-  text-align:center;
-  padding:18px 10px 12px;
-  border-bottom:1px solid var(--line);
-}
+    .header-logo{
+      width:100px;
+      height:100px;
+      object-fit:contain;
+      margin-bottom:8px;
+    }
 
-/* 🔥 LOGO PERFECT SIZE */
-.header-logo{
-  width:100px;
-  height:100px;
-  object-fit:contain;
-  margin-bottom:8px;
-}
+    .title{
+      font-size:24px;
+      font-weight:900;
+      margin:0;
+      line-height:1.1;
+    }
 
-.title{
-  font-size:24px;
-  font-weight:900;
-}
+    .subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      font-weight:600;
+    }
 
-.subtitle{
-  font-size:12px;
-  color:var(--muted);
-}
+    .section{
+      background:#fff;
+      margin:16px;
+      padding:20px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      box-shadow:0 8px 24px rgba(16,24,40,0.05);
+    }
 
-.section{
-  background:#fff;
-  margin:16px;
-  padding:20px;
-  border-radius:20px;
-}
+    .hero{
+      background:linear-gradient(180deg,#f7f9fd 0%, #ffffff 100%);
+    }
 
-/* INPUT */
-input{
-  width:100%;
-  height:50px;
-  border-radius:15px;
-  border:1px solid #ccc;
-  padding:10px;
-}
+    .hero h1{
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.08;
+      font-weight:900;
+      text-align:center;
+    }
 
-button{
-  width:100%;
-  height:50px;
-  border-radius:15px;
-  border:none;
-  background:#1d2940;
-  color:#fff;
-  margin-top:10px;
-}
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:15px;
+      font-weight:600;
+      text-align:center;
+    }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
+    .section-title{
+      font-size:20px;
+      font-weight:900;
+      color:#1d2940;
+      margin:0 0 10px;
+    }
 
-.box{
-  padding:15px;
-  border-radius:15px;
-  text-align:center;
-}
+    .section-subtitle{
+      font-size:14px;
+      color:#7b8497;
+      margin:0 0 15px;
+      line-height:1.6;
+    }
 
-.blue{background:#eef4ff}
-.green{background:#edf8f1}
-.purple{background:#f5eefc}
-.orange{background:#fff6ea}
+    .app-input{
+      width:100%;
+      height:50px;
+      border-radius:15px;
+      border:1px solid #d7deea;
+      padding:0 14px;
+      font-size:16px;
+      outline:none;
+      margin-bottom:10px;
+      background:#fff;
+      color:var(--text);
+    }
 
-.big{
-  font-size:26px;
-  font-weight:900;
-}
+    .app-input:focus{
+      border-color:#b9c5d7;
+      box-shadow:0 0 0 4px rgba(29,41,64,0.05);
+    }
 
-.remaining{color:#e05252}
-.paid{color:#18a957}
+    .app-btn{
+      width:100%;
+      height:50px;
+      border-radius:15px;
+      border:none;
+      background:#1d2940;
+      color:#fff;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      margin-top:10px;
+    }
 
-.chart-wrap{
-  max-width:250px;
-  margin:auto;
-}
+    .soft-btn{
+      width:100%;
+      height:50px;
+      border-radius:15px;
+      border:1px solid var(--line);
+      background:#f3f4f6;
+      color:#111827;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      margin-top:14px;
+    }
 
-.legend{
-  display:flex;
-  justify-content:space-around;
-  margin-top:15px;
-}
+    .error{
+      display:none;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      background:#fff1f1;
+      color:#c62828;
+      border:1px solid #ffd8d8;
+      font-size:14px;
+      font-weight:700;
+    }
 
-.hidden{display:none}
+    .hidden{
+      display:none;
+    }
 
-</style>
+    .tenant-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .tenant-name{
+      margin:0 0 8px;
+      font-size:28px;
+      line-height:1.15;
+      font-weight:900;
+      word-break:break-word;
+    }
+
+    .tenant-code{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    #shop{
+      margin-top:6px;
+      font-size:14px;
+      color:#7b8497;
+      font-weight:700;
+    }
+
+    .last-updated{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .badge{
+      white-space:nowrap;
+      padding:10px 14px;
+      border-radius:999px;
+      background:#e9f7ee;
+      color:#16924a;
+      border:1px solid #cfeeda;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .box{
+      padding:15px;
+      border-radius:15px;
+      text-align:center;
+      min-height:120px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .blue{ background:#eef4ff; color:#2f6fed; }
+    .green{ background:#edf8f1; color:#18a957; }
+    .purple{ background:#f5eefc; color:#8d3df2; }
+    .orange{ background:#fff6ea; color:#d68a1d; }
+
+    .label{
+      font-size:14px;
+      opacity:.8;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .big{
+      font-size:32px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    .status-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .mini-card{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .mini-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .mini-value{
+      font-size:28px;
+      font-weight:900;
+    }
+
+    .paid{
+      color:#18a957;
+    }
+
+    .remaining{
+      color:#e05252;
+    }
+
+    .chart-wrap{
+      max-width:250px;
+      margin:auto;
+    }
+
+    .chart-legend{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .legend-item{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+    }
+
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+      margin-left:6px;
+    }
+
+    .legend-title{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .legend-value{
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .note{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      font-weight:600;
+    }
+
+    @media (min-width:768px){
+      .app{
+        max-width:780px;
+      }
+
+      .header-logo{
+        width:110px;
+        height:110px;
+      }
+
+      .title{
+        font-size:28px;
+      }
+
+      .grid{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+      .status-grid{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+      .chart-legend{
+        max-width:420px;
+        margin-left:auto;
+        margin-right:auto;
+      }
+
+      .hero h1{
+        font-size:40px;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="app">
 
-<!-- HEADER -->
-<div class="header">
-  <img src="logo_complex.png" class="header-logo">
-  <div class="title">Jabri Complex</div>
-  <div class="subtitle">Tenant Portal</div>
-</div>
-
-<!-- LOGIN -->
-<div id="loginCard" class="section">
-  <h3>تسجيل الدخول</h3>
-  <input id="code" placeholder="JC-01">
-  <button onclick="login()">دخول</button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
-
-<div class="section">
-  <h2 id="name"></h2>
-  <div id="lastUpdated"></div>
-</div>
-
-<div class="section">
-  <div class="grid">
-    <div class="box blue">
-      <div>المدين</div>
-      <div id="debit" class="big"></div>
-    </div>
-
-    <div class="box green">
-      <div>الدائن</div>
-      <div id="credit" class="big"></div>
-    </div>
-
-    <div class="box purple">
-      <div>الرصيد</div>
-      <div id="balance" class="big"></div>
-    </div>
-
-    <div class="box orange">
-      <div>الإيجار</div>
-      <div id="rent" class="big"></div>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="chart-wrap">
-    <canvas id="chart"></canvas>
+  <div class="header">
+    <img src="logo_complex.png" class="header-logo" alt="Jabri Complex Logo">
+    <div class="title">Jabri Complex</div>
+    <div class="subtitle">Tenant Portal</div>
   </div>
 
-  <div class="legend">
-    <div>🟢 مدفوع</div>
-    <div>🔴 متبقي</div>
+  <div id="heroCard" class="section hero">
+    <h1>أهلاً بكم</h1>
+    <p>بوابة المستأجرين لمجمع جبري الصناعي التجاري. أدخل رمز المستأجر لعرض الحالة المالية بشكل واضح واحترافي.</p>
   </div>
 
-  <button onclick="logout()">تسجيل خروج</button>
-</div>
+  <div id="loginCard" class="section">
+    <h3 class="section-title">تسجيل الدخول</h3>
+    <p class="section-subtitle">أدخل رمز المستأجر مثل JC-01</p>
+    <input id="code" class="app-input" placeholder="JC-01">
+    <button id="loginBtn" class="app-btn" type="button">دخول</button>
+    <div id="error" class="error">رمز المستأجر غير صحيح</div>
+  </div>
 
-</div>
+  <div id="dashboard" class="hidden">
 
+    <div class="section">
+      <div class="tenant-head">
+        <div>
+          <h2 id="name" class="tenant-name"></h2>
+          <div id="codeText" class="tenant-code"></div>
+          <div id="shop"></div>
+          <div id="lastUpdated" class="last-updated"></div>
+        </div>
+        <div class="badge">نشط</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">الملخص المالي</h3>
+
+      <div class="grid">
+        <div class="box blue">
+          <div class="label">المدين</div>
+          <div id="debit" class="big">0</div>
+        </div>
+
+        <div class="box green">
+          <div class="label">الدائن</div>
+          <div id="credit" class="big">0</div>
+        </div>
+
+        <div class="box purple">
+          <div class="label">الرصيد</div>
+          <div id="balance" class="big">0</div>
+        </div>
+
+        <div class="box orange">
+          <div class="label">الإيجار</div>
+          <div id="rent" class="big">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">حالة السداد</h3>
+      <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
+
+      <div class="status-grid">
+        <div class="mini-card">
+          <div class="mini-label">المدفوع</div>
+          <div id="paidValue" class="mini-value paid">0</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">المتبقي</div>
+          <div id="remainingValue" class="mini-value remaining">0</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">نسبة السداد</div>
+          <div id="paidPercent" class="mini-value">0%</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">نسبة المتبقي</div>
+          <div id="remainingPercent" class="mini-value">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">حالة السداد</h3>
+      <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
+
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-title"><span class="legend-dot" style="background:#18a957"></span>المدفوع</div>
+          <div id="legendPaid" class="legend-value">0</div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-title"><span class="legend-dot" style="background:#e05252"></span>المتبقي</div>
+          <div id="legendRemaining" class="legend-value">0</div>
+        </div>
+      </div>
+
+      <div id="paymentNote" class="note"></div>
+
+      <button onclick="logout()" class="soft-btn">تسجيل خروج</button>
+    </div>
+
+  </div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
-'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 let chart
 
-window.login = async function(){
-
-let code = document.getElementById('code').value.trim().toUpperCase()
-
-let {data:tenant} = await supabase
-.from('tenants')
-.select('*')
-.eq('tenant_code',code)
-.single()
-
-let {data:summary} = await supabase
-.from('tenant_summary')
-.select('*')
-.eq('رمز_المستأجر',code)
-.single()
-
-document.getElementById('loginCard').style.display='none'
-document.getElementById('dashboard').classList.remove('hidden')
-
-document.getElementById('name').innerText = tenant.tenant_name
-document.getElementById('lastUpdated').innerText =
-"آخر تحديث: " + new Date().toLocaleString()
-
-let debit = summary["إجمالي_المدين"]
-let credit = summary["إجمالي_الدائن"]
-let balance = summary["الرصيد"]
-let rent = summary["إيجار_السنة"]
-
-document.getElementById('debit').innerText = debit
-document.getElementById('credit').innerText = credit
-document.getElementById('rent').innerText = rent
-
-let balanceEl = document.getElementById('balance')
-balanceEl.innerText = balance
-balanceEl.style.color = balance > 0 ? "#e05252" : "#18a957"
-
-if(chart) chart.destroy()
-
-chart = new Chart(document.getElementById('chart'),{
-type:'pie',
-data:{
-labels:['مدفوع','متبقي'],
-datasets:[{
-data:[credit,balance],
-backgroundColor:[
-'#18a957',
-'#e05252'
-]
-}]
+function formatNumber(n){
+  return Number(n || 0).toLocaleString('en-US')
 }
-})
 
+function formatPercent(n){
+  return `${Number(n || 0).toFixed(0)}%`
+}
+
+function formatDateTime(dateValue){
+  const date = dateValue ? new Date(dateValue) : new Date()
+  return 'آخر تحديث: ' + date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+window.login = async function(){
+  const code = document.getElementById('code').value.trim().toUpperCase()
+
+  document.getElementById('error').style.display = 'none'
+
+  if(!code){
+    document.getElementById('error').innerText = 'يرجى إدخال رمز المستأجر'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  const { data: tenant, error: tenantError } = await supabase
+    .from('tenants')
+    .select('*')
+    .eq('tenant_code', code)
+    .maybeSingle()
+
+  if(tenantError || !tenant){
+    document.getElementById('error').innerText = 'رمز المستأجر غير صحيح'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  const { data: summary, error: summaryError } = await supabase
+    .from('tenant_summary')
+    .select('*')
+    .eq('رمز_المستأجر', code)
+    .maybeSingle()
+
+  if(summaryError || !summary){
+    document.getElementById('error').innerText = 'لا يوجد ملخص مالي لهذا المستأجر'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  document.getElementById('loginCard').style.display = 'none'
+  document.getElementById('heroCard').style.display = 'none'
+  document.getElementById('dashboard').classList.remove('hidden')
+
+  document.getElementById('name').innerText = tenant.tenant_name || ''
+  document.getElementById('codeText').innerText = tenant.tenant_code || ''
+  document.getElementById('shop').innerText = 'رقم المحل: ' + (tenant.shop_no || tenant["رقم_المحل"] || '-')
+  document.getElementById('lastUpdated').innerText = formatDateTime(summary.created_at)
+
+  const debit = Number(summary["إجمالي_المدين"] || 0)
+  const credit = Number(summary["إجمالي_الدائن"] || 0)
+  const balance = Number(summary["الرصيد"] || 0)
+  const rent = Number(summary["إيجار_السنة"] || 0)
+
+  document.getElementById('debit').innerText = formatNumber(debit)
+  document.getElementById('credit').innerText = formatNumber(credit)
+  document.getElementById('rent').innerText = formatNumber(rent)
+
+  const balanceEl = document.getElementById('balance')
+  balanceEl.innerText = formatNumber(balance)
+  balanceEl.style.color = balance > 0 ? '#e05252' : '#18a957'
+
+  const paid = Math.max(credit, 0)
+  const remaining = Math.max(balance, 0)
+  const total = paid + remaining
+
+  const paidPercent = total > 0 ? (paid / total) * 100 : 0
+  const remainingPercent = total > 0 ? (remaining / total) * 100 : 0
+
+  document.getElementById('paidValue').innerText = formatNumber(paid)
+  document.getElementById('remainingValue').innerText = formatNumber(remaining)
+  document.getElementById('paidPercent').innerText = formatPercent(paidPercent)
+  document.getElementById('remainingPercent').innerText = formatPercent(remainingPercent)
+
+  document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
+  document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
+
+  let noteText = ''
+  if (remaining === 0 && paid > 0) {
+    noteText = '✅ حسابك مسدد بالكامل، شكراً لك'
+  } else if (paid === 0 && remaining > 0) {
+    noteText = '⚠️ لا يوجد دفعات مسجلة حتى الآن'
+  } else {
+    noteText = `📊 تم سداد ${formatPercent(paidPercent)} من إجمالي المبلغ`
+  }
+  document.getElementById('paymentNote').innerText = noteText
+
+  if(chart) chart.destroy()
+
+  chart = new Chart(document.getElementById('chart'), {
+    type:'pie',
+    data:{
+      labels:['مدفوع','متبقي'],
+      datasets:[{
+        data:[paid, remaining],
+        backgroundColor:['#18a957','#e05252'],
+        borderColor:['#ffffff','#ffffff'],
+        borderWidth:4,
+        hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:true,
+      plugins:{
+        legend:{ display:false }
+      }
+    }
+  })
+
+  localStorage.setItem('jabri_tenant_code', code)
 }
 
 window.logout = function(){
-location.reload()
+  localStorage.removeItem('jabri_tenant_code')
+  location.reload()
 }
 
+document.getElementById('loginBtn').addEventListener('click', login)
+
+document.getElementById('code').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') login()
+})
+
+const saved = localStorage.getItem('jabri_tenant_code')
+if(saved){
+  document.getElementById('code').value = saved
+  login()
+}
 </script>
 
 </body>
