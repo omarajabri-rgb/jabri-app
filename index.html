@@ -204,13 +204,6 @@
       margin-bottom:6px;
     }
 
-    #shop{
-      margin-top:6px;
-      font-size:14px;
-      color:#7b8497;
-      font-weight:700;
-    }
-
     .last-updated{
       margin-top:6px;
       font-size:13px;
@@ -410,7 +403,6 @@
         <div>
           <h2 id="name" class="tenant-name"></h2>
           <div id="codeText" class="tenant-code"></div>
-          <div id="shop"></div>
           <div id="lastUpdated" class="last-updated"></div>
         </div>
         <div class="badge">نشط</div>
@@ -419,15 +411,16 @@
 
     <div class="section">
       <h3 class="section-title">الملخص المالي</h3>
+      <p class="section-subtitle">عرض سريع لأهم أرقام الحساب</p>
 
       <div class="grid">
         <div class="box blue">
-          <div class="label">المدين</div>
+          <div class="label">إجمالي المدين</div>
           <div id="debit" class="big">0</div>
         </div>
 
         <div class="box green">
-          <div class="label">الدائن</div>
+          <div class="label">إجمالي الدائن</div>
           <div id="credit" class="big">0</div>
         </div>
 
@@ -565,7 +558,6 @@ window.login = async function(){
 
   document.getElementById('name').innerText = tenant.tenant_name || ''
   document.getElementById('codeText').innerText = tenant.tenant_code || ''
-  document.getElementById('shop').innerText = 'رقم المحل: ' + (tenant.shop_no || tenant["رقم_المحل"] || '-')
   document.getElementById('lastUpdated').innerText = formatDateTime(summary.created_at)
 
   const debit = Number(summary["إجمالي_المدين"] || 0)
