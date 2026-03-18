@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
       background: #f7f7f7;
       margin: 0;
       padding: 24px;
+      direction: rtl;
     }
     .container {
       max-width: 1000px;
@@ -59,19 +60,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background: #f0f0f0;
-    }
     .hidden {
       display: none;
     }
@@ -79,13 +67,22 @@
       color: red;
       margin-top: 10px;
     }
+    .summary-line {
+      font-size: 20px;
+      margin: 14px 0;
+    }
+    .note {
+      margin-top: 12px;
+      color: #555;
+      font-size: 14px;
+    }
+    canvas {
+      max-height: 320px;
+    }
     @media (max-width: 768px) {
       .grid {
         grid-template-columns: 1fr;
       }
-    }
-    canvas {
-      max-height: 320px;
     }
   </style>
 </head>
@@ -93,53 +90,40 @@
   <div class="container">
 
     <div id="loginCard" class="card">
-      <h2>Tenant Login</h2>
-      <input id="email" type="email" placeholder="Email" />
+      <h2>دخول المستأجر</h2>
+      <input id="email" type="email" placeholder="البريد الإلكتروني" />
       <br />
-      <input id="password" type="password" placeholder="Password" />
+      <input id="password" type="password" placeholder="كلمة المرور" />
       <br />
-      <button id="loginBtn" class="btn">Login</button>
+      <button id="loginBtn" class="btn">دخول</button>
       <div id="loginMessage" class="error"></div>
     </div>
 
     <div id="dashboard" class="hidden">
       <div class="card topbar">
         <div>
-          <h2 id="tenantName">Tenant Name</h2>
-          <div>Code: <span id="tenantCode"></span></div>
-          <div>Balance: <strong id="balance">0</strong></div>
+          <h2 id="tenantName">اسم المستأجر</h2>
+          <div>الرمز: <span id="tenantCode"></span></div>
+          <div>الرصيد الحالي: <strong id="balance">0</strong></div>
         </div>
-        <button id="logoutBtn" class="btn-secondary">Logout</button>
+        <button id="logoutBtn" class="btn-secondary">خروج</button>
       </div>
 
       <div class="grid">
         <div class="card">
-          <h3>Summary Chart</h3>
-          <canvas id="chart"></canvas>
+          <h3>الملخص المالي</h3>
+          <div class="summary-line">إجمالي المدين: <strong id="totalDebit">0</strong></div>
+          <div class="summary-line">إجمالي الدائن: <strong id="totalCredit">0</strong></div>
+          <div class="summary-line">الرصيد النهائي: <strong id="currentBalance">0</strong></div>
+          <div class="note">
+            للتفاصيل الكاملة أو كشف الحساب التفصيلي يرجى مراجعة الإدارة.
+          </div>
         </div>
 
         <div class="card">
-          <h3>Account Summary</h3>
-          <p>Total Debit: <strong id="totalDebit">0</strong></p>
-          <p>Total Credit: <strong id="totalCredit">0</strong></p>
-          <p>Current Balance: <strong id="currentBalance">0</strong></p>
+          <h3>الرسم البياني</h3>
+          <canvas id="chart"></canvas>
         </div>
-      </div>
-
-      <div class="card">
-        <h3>Transactions</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Debit</th>
-              <th>Credit</th>
-              <th>Receipt</th>
-            </tr>
-          </thead>
-          <tbody id="transactionsBody"></tbody>
-        </table>
       </div>
     </div>
 
@@ -169,7 +153,7 @@
       const password = document.getElementById('password').value;
 
       if (!email || !password) {
-        loginMessage.textContent = 'Enter email and password.';
+        loginMessage.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
         return;
       }
 
@@ -179,7 +163,7 @@
       });
 
       if (error) {
-        loginMessage.textContent = error.message;
+        loginMessage.textContent = 'بيانات الدخول غير صحيحة.';
         return;
       }
 
@@ -194,7 +178,7 @@
         .single();
 
       if (linkError || !userLink) {
-        loginMessage.textContent = 'No tenant linked to this email.';
+        loginMessage.textContent = 'لا يوجد مستأجر مرتبط بهذا البريد الإلكتروني.';
         return;
       }
 
@@ -207,7 +191,7 @@
         .single();
 
       if (tenantError || !tenant) {
-        loginMessage.textContent = 'Tenant record not found.';
+        loginMessage.textContent = 'لم يتم العثور على بيانات المستأجر.';
         return;
       }
 
@@ -218,18 +202,7 @@
         .single();
 
       if (balanceError || !balanceData) {
-        loginMessage.textContent = 'Balance data not found.';
-        return;
-      }
-
-      const { data: trx, error: trxError } = await supabase
-        .from('tenant_transactions')
-        .select('*')
-        .eq('tenant_code', tenantCode)
-        .order('trx_date', { ascending: true });
-
-      if (trxError) {
-        loginMessage.textContent = 'Could not load transactions.';
+        loginMessage.textContent = 'لم يتم العثور على بيانات الرصيد.';
         return;
       }
 
@@ -240,21 +213,6 @@
       document.getElementById('totalCredit').textContent = balanceData.total_credit ?? 0;
       document.getElementById('currentBalance').textContent = balanceData.balance ?? 0;
 
-      const tbody = document.getElementById('transactionsBody');
-      tbody.innerHTML = '';
-
-      for (const row of trx) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.trx_date ?? ''}</td>
-          <td>${row.description ?? ''}</td>
-          <td>${row.debit ?? 0}</td>
-          <td>${row.credit ?? 0}</td>
-          <td>${row.receipt_no ?? ''}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-
       const ctx = document.getElementById('chart');
 
       if (chartInstance) {
@@ -264,9 +222,9 @@
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Debit', 'Credit', 'Balance'],
+          labels: ['المدين', 'الدائن', 'الرصيد'],
           datasets: [{
-            label: 'Summary',
+            label: 'الملخص',
             data: [
               balanceData.total_debit ?? 0,
               balanceData.total_credit ?? 0,
