@@ -49,22 +49,13 @@
     }
 
     .header{
-      display:grid;
-      grid-template-columns:44px 1fr 44px;
-      align-items:center;
-      padding:14px 16px;
+      padding:22px 12px 18px;
       background:#fff;
-      border-bottom:1px solid var(--line);
+      text-align:center;
+      box-shadow:0 8px 25px rgba(0,0,0,0.05);
       position:sticky;
       top:0;
       z-index:10;
-    }
-
-    .header-left,
-    .header-right{
-      display:flex;
-      align-items:center;
-      justify-content:center;
     }
 
     .header-center{
@@ -72,39 +63,28 @@
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      text-align:center;
     }
 
     .header-logo{
-      width:68px;
-      height:68px;
+      width:130px;
+      height:130px;
       object-fit:contain;
       display:block;
-      margin:0 auto 8px;
+      margin:0 auto 10px;
     }
 
     .title{
-      font-size:22px;
+      font-size:28px;
       font-weight:900;
       line-height:1.1;
       margin:0;
     }
 
     .subtitle{
-      font-size:12px;
+      font-size:13px;
       color:var(--muted);
       margin-top:4px;
       font-weight:600;
-    }
-
-    .menu-btn{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      color:var(--text);
-      font-size:20px;
     }
 
     .section{
@@ -308,7 +288,7 @@
     }
 
     .mini-value{
-      font-size:24px;
+      font-size:28px;
       font-weight:900;
     }
 
@@ -376,17 +356,13 @@
         max-width:780px;
       }
 
-      .header{
-        grid-template-columns:60px 1fr 60px;
-      }
-
       .header-logo{
-        width:84px;
-        height:84px;
+        width:160px;
+        height:160px;
       }
 
       .title{
-        font-size:26px;
+        font-size:32px;
       }
 
       .grid{
@@ -414,16 +390,10 @@
   <div class="app">
 
     <div class="header">
-      <div class="header-left"></div>
-
       <div class="header-center">
         <img src="logo_complex.png" alt="Jabri Complex Logo" class="header-logo">
         <div class="title">Jabri Complex</div>
         <div class="subtitle">Tenant Portal</div>
-      </div>
-
-      <div class="header-right">
-        <button class="menu-btn" type="button">☰</button>
       </div>
     </div>
 
@@ -567,13 +537,11 @@
 
     function formatDateTime(dateValue) {
       const date = dateValue ? new Date(dateValue) : new Date()
-
       const datePart = date.toLocaleDateString('en-GB')
       const timePart = date.toLocaleTimeString('en-GB', {
         hour: '2-digit',
         minute: '2-digit'
       })
-
       return `آخر تحديث: ${datePart} - ${timePart}`
     }
 
@@ -667,7 +635,11 @@
 
       document.getElementById('debit').textContent = formatNumber(totalDebit)
       document.getElementById('credit').textContent = formatNumber(totalCredit)
-      document.getElementById('balance').textContent = formatNumber(balance)
+
+      const balanceEl = document.getElementById('balance')
+      balanceEl.textContent = formatNumber(balance)
+      balanceEl.style.color = balance > 0 ? '#e05252' : '#18a957'
+
       document.getElementById('rent').textContent = formatNumber(annualRent)
 
       document.getElementById('paidValue').textContent = formatNumber(paid)
@@ -680,11 +652,11 @@
 
       let noteText = ''
       if (remaining === 0 && paid > 0) {
-        noteText = 'الحساب مسدد بالكامل.'
+        noteText = '✅ حسابك مسدد بالكامل، شكراً لك'
       } else if (paid === 0 && remaining > 0) {
-        noteText = 'لا يوجد دفعات مسجلة حتى الآن.'
+        noteText = '⚠️ لا يوجد دفعات مسجلة حتى الآن'
       } else {
-        noteText = `تم سداد ${formatPercent(paidPercent)} من إجمالي المبلغ المطلوب.`
+        noteText = `📊 تم سداد ${formatPercent(paidPercent)} من إجمالي المبلغ`
       }
       document.getElementById('paymentNote').textContent = noteText
 
