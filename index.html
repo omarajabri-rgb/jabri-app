@@ -49,9 +49,9 @@
     }
 
     .header{
-      display:flex;
+      display:grid;
+      grid-template-columns:44px 1fr 44px;
       align-items:center;
-      justify-content:space-between;
       padding:14px 16px;
       background:#fff;
       border-bottom:1px solid var(--line);
@@ -60,32 +60,41 @@
       z-index:10;
     }
 
-    .logo-wrap{
+    .header-left,
+    .header-right{
       display:flex;
       align-items:center;
-      gap:10px;
+      justify-content:center;
     }
 
-    .logo-wrap img{
-      width:44px;
-      height:44px;
-      border-radius:12px;
+    .header-center{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .header-logo{
+      width:68px;
+      height:68px;
       object-fit:contain;
-      background:#fff;
-      padding:4px;
+      display:block;
+      margin:0 auto 8px;
     }
 
     .title{
-      font-size:18px;
-      font-weight:800;
-      margin:0;
+      font-size:22px;
+      font-weight:900;
       line-height:1.1;
+      margin:0;
     }
 
     .subtitle{
       font-size:12px;
       color:var(--muted);
-      margin-top:3px;
+      margin-top:4px;
+      font-weight:600;
     }
 
     .menu-btn{
@@ -116,6 +125,7 @@
       font-size:34px;
       line-height:1.08;
       font-weight:900;
+      text-align:center;
     }
 
     .hero p{
@@ -124,6 +134,7 @@
       line-height:1.7;
       font-size:15px;
       font-weight:600;
+      text-align:center;
     }
 
     .section-title{
@@ -220,6 +231,13 @@
       font-size:16px;
       color:var(--muted);
       font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .last-updated{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
     }
 
     .badge{
@@ -299,7 +317,7 @@
     }
 
     .remaining{
-      color:#e05252;
+      color:#8d3df2;
     }
 
     .chart-wrap{
@@ -358,6 +376,19 @@
         max-width:780px;
       }
 
+      .header{
+        grid-template-columns:60px 1fr 60px;
+      }
+
+      .header-logo{
+        width:84px;
+        height:84px;
+      }
+
+      .title{
+        font-size:26px;
+      }
+
       .grid{
         grid-template-columns:repeat(4,1fr);
       }
@@ -383,17 +414,20 @@
   <div class="app">
 
     <div class="header">
-      <div class="logo-wrap">
-        <img src="logo_complex.png" alt="Jabri Complex Logo">
-        <div>
-          <div class="title">Jabri Complex</div>
-          <div class="subtitle">Tenant Portal</div>
-        </div>
+      <div class="header-left"></div>
+
+      <div class="header-center">
+        <img src="logo_complex.png" alt="Jabri Complex Logo" class="header-logo">
+        <div class="title">Jabri Complex</div>
+        <div class="subtitle">Tenant Portal</div>
       </div>
-      <button class="menu-btn" type="button">☰</button>
+
+      <div class="header-right">
+        <button class="menu-btn" type="button">☰</button>
+      </div>
     </div>
 
-    <div class="section hero">
+    <div id="heroCard" class="section hero">
       <h1>أهلاً بكم</h1>
       <p>بوابة المستأجرين لمجمع جبري الصناعي التجاري. أدخل رمز المستأجر لعرض الحالة المالية بشكل واضح واحترافي.</p>
     </div>
@@ -413,6 +447,7 @@
         <div>
           <h2 id="name" class="tenant-name"></h2>
           <div id="codeText" class="tenant-code"></div>
+          <div id="lastUpdated" class="last-updated"></div>
         </div>
         <div class="badge">نشط</div>
       </div>
@@ -487,7 +522,7 @@
         </div>
 
         <div class="legend-item">
-          <div class="legend-title"><span class="legend-dot" style="background:#e05252"></span>المتبقي</div>
+          <div class="legend-title"><span class="legend-dot" style="background:#8d3df2"></span>المتبقي</div>
           <div id="legendRemaining" class="legend-value">0</div>
         </div>
       </div>
@@ -503,11 +538,13 @@
     const SUPABASE_URL = 'https://gzukfvxcpfblzqyjzkoz.supabase.co'
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
   </script>
+
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
+    const heroCard = document.getElementById('heroCard')
     const loginCard = document.getElementById('loginCard')
     const profileCard = document.getElementById('profileCard')
     const summaryCard = document.getElementById('summaryCard')
@@ -528,6 +565,18 @@
       return `${Number(n || 0).toFixed(0)}%`
     }
 
+    function formatDateTime(dateValue) {
+      const date = dateValue ? new Date(dateValue) : new Date()
+
+      const datePart = date.toLocaleDateString('en-GB')
+      const timePart = date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+
+      return `آخر تحديث: ${datePart} - ${timePart}`
+    }
+
     function showError(message) {
       errorEl.textContent = message
       errorEl.style.display = 'block'
@@ -538,6 +587,7 @@
     }
 
     function showDashboard() {
+      heroCard.style.display = 'none'
       loginCard.style.display = 'none'
       profileCard.style.display = 'block'
       summaryCard.style.display = 'block'
@@ -546,6 +596,7 @@
     }
 
     function showLogin() {
+      heroCard.style.display = 'block'
       loginCard.style.display = 'block'
       profileCard.style.display = 'none'
       summaryCard.style.display = 'none'
@@ -568,10 +619,13 @@
           labels: ['المدفوع', 'المتبقي'],
           datasets: [{
             data: [paid, remaining],
-            backgroundColor: ['#18a957', '#e05252'],
+            backgroundColor: [
+              'rgba(24,169,87,0.92)',
+              'rgba(141,61,242,0.92)'
+            ],
             borderColor: ['#ffffff', '#ffffff'],
             borderWidth: 4,
-            hoverOffset: 6
+            hoverOffset: 8
           }]
         },
         options: {
@@ -609,6 +663,7 @@
 
       document.getElementById('name').textContent = tenant.tenant_name || ''
       document.getElementById('codeText').textContent = tenant.tenant_code || ''
+      document.getElementById('lastUpdated').textContent = formatDateTime(summary.created_at)
 
       document.getElementById('debit').textContent = formatNumber(totalDebit)
       document.getElementById('credit').textContent = formatNumber(totalCredit)
