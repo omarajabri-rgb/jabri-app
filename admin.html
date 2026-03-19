@@ -196,7 +196,7 @@
 
     table{
       width:100%;
-      min-width:1120px;
+      min-width:1180px;
       border-collapse:collapse;
     }
 
@@ -262,6 +262,11 @@
     .notify-btn{
       background:var(--green-bg);
       color:var(--green-text);
+    }
+
+    .quick-btn{
+      background:var(--orange-bg);
+      color:var(--orange-text);
     }
 
     .modal-overlay{
@@ -383,7 +388,7 @@
 
   <div class="header">
     <div class="title">لوحة إدارة مجمع جبري</div>
-    <div class="subtitle">نسخة 3 — بحث، فلترة، رسوم بيانية، وفتح ملف / إرسال إشعار</div>
+    <div class="subtitle">نسخة 4 — فتح ملف مع السنة + إشعارات + تعبئة سريعة</div>
   </div>
 
   <div class="section">
@@ -526,6 +531,12 @@
     <input id="notificationTitle" class="app-input" placeholder="عنوان الإشعار" style="margin-bottom:12px;">
     <textarea id="notificationMessage" class="app-textarea" placeholder="اكتب نص الإشعار هنا"></textarea>
 
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <button id="quickDueBtn" class="action-btn quick-btn">تذكير استحقاق</button>
+      <button id="quickReceiptBtn" class="action-btn quick-btn">تأكيد دفعة</button>
+      <button id="quickReviewBtn" class="action-btn quick-btn">مراجعة الإدارة</button>
+    </div>
+
     <div id="successBox" class="success-box">تم إرسال الإشعار بنجاح</div>
     <div id="errorBox" class="error-box">حدث خطأ أثناء إرسال الإشعار</div>
 
@@ -590,6 +601,7 @@ function renderFilteredData(){
   const tableMeta = document.getElementById('tableMeta')
   const searchValue = document.getElementById('searchInput').value.trim().toLowerCase()
   const statusValue = document.getElementById('statusFilter').value
+  const currentYear = document.getElementById('yearSelect').value
 
   tbody.innerHTML = ''
 
@@ -624,7 +636,7 @@ function renderFilteredData(){
     document.getElementById('paidCount').innerText = '0'
     document.getElementById('partialCount').innerText = '0'
     document.getElementById('unpaidCount').innerText = '0'
-    tableMeta.innerText = '0 نتيجة'
+    tableMeta.innerText = `0 نتيجة - سنة ${currentYear}`
     emptyState.style.display = 'block'
     updateCharts(0, 0, 0, 0, 0, 0)
     return
@@ -662,7 +674,7 @@ function renderFilteredData(){
         <td>${formatNumber(rent)}</td>
         <td class="${status.cls}">${status.text}</td>
         <td>
-          <button class="action-btn open-btn" data-open="${tenantCode}">فتح ملف</button>
+          <button class="action-btn open-btn" data-open="${tenantCode}" data-year="${tenantYear}">فتح ملف</button>
           <button class="action-btn notify-btn" data-code="${tenantCode}" data-name="${tenantName}">إرسال إشعار</button>
         </td>
       </tr>
@@ -676,7 +688,7 @@ function renderFilteredData(){
   document.getElementById('paidCount').innerText = formatNumber(paidCount)
   document.getElementById('partialCount').innerText = formatNumber(partialCount)
   document.getElementById('unpaidCount').innerText = formatNumber(unpaidCount)
-  tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة`
+  tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة - سنة ${currentYear}`
 
   updateCharts(
     paidCount,
@@ -709,9 +721,7 @@ function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCre
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
   })
@@ -730,9 +740,7 @@ function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCre
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
@@ -752,7 +760,8 @@ function bindRowActions(){
   document.querySelectorAll('[data-open]').forEach(btn => {
     btn.addEventListener('click', function(){
       const code = this.getAttribute('data-open')
-      window.open(`/index.html?tenant=${encodeURIComponent(code)}`, '_blank')
+      const year = this.getAttribute('data-year')
+      window.open(`/index.html?tenant=${encodeURIComponent(code)}&year=${encodeURIComponent(year)}`, '_blank')
     })
   })
 
@@ -809,6 +818,23 @@ async function sendNotification(){
   document.getElementById('successBox').innerText = 'تم إرسال الإشعار بنجاح'
 }
 
+function setQuickNotification(type){
+  if(type === 'due'){
+    document.getElementById('notificationTitle').value = 'تذكير استحقاق'
+    document.getElementById('notificationMessage').value = 'نود تذكيركم بوجود مبلغ مستحق على حسابكم. يرجى مراجعة البوابة والقيام بالتسديد في أقرب وقت ممكن.'
+  }
+
+  if(type === 'receipt'){
+    document.getElementById('notificationTitle').value = 'تأكيد تسجيل دفعة'
+    document.getElementById('notificationMessage').value = 'نفيدكم بأنه تم تسجيل دفعة جديدة على حسابكم. يمكنكم مراجعة البوابة للاطلاع على التحديثات.'
+  }
+
+  if(type === 'review'){
+    document.getElementById('notificationTitle').value = 'يرجى مراجعة الإدارة'
+    document.getElementById('notificationMessage').value = 'يرجى مراجعة إدارة المجمع بخصوص حسابكم في أقرب وقت ممكن.'
+  }
+}
+
 document.getElementById('yearSelect').addEventListener('change', function(e){
   fetchYearData(e.target.value)
 })
@@ -823,6 +849,18 @@ document.getElementById('statusFilter').addEventListener('change', function(){
 
 document.getElementById('closeModalBtn').addEventListener('click', closeNotificationModal)
 document.getElementById('sendNotificationBtn').addEventListener('click', sendNotification)
+
+document.getElementById('quickDueBtn').addEventListener('click', function(){
+  setQuickNotification('due')
+})
+
+document.getElementById('quickReceiptBtn').addEventListener('click', function(){
+  setQuickNotification('receipt')
+})
+
+document.getElementById('quickReviewBtn').addEventListener('click', function(){
+  setQuickNotification('review')
+})
 
 document.getElementById('notificationModal').addEventListener('click', function(e){
   if(e.target.id === 'notificationModal'){
