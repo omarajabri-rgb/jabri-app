@@ -484,6 +484,18 @@
         </div>
         <div class="badge">نشط</div>
       </div>
+
+      <div style="margin-top:14px;">
+        <label for="yearSelect" style="display:block; margin-bottom:8px; font-size:14px; font-weight:800; color:#1d2940;">
+          اختر السنة
+        </label>
+        <select id="yearSelect" class="app-input" style="margin-bottom:0;">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+      </div>
     </div>
 
     <div class="section">
@@ -583,6 +595,8 @@ const supabase = createClient(
 )
 
 let chart
+let currentTenantCode = ''
+let selectedYear = 2026
 
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
@@ -600,47 +614,22 @@ function formatDateTime(dateValue){
   })
 }
 
-window.login = async function(){
-  const code = document.getElementById('code').value.trim().toUpperCase()
-
+async function loadTenantSummary(code, year){
   document.getElementById('error').style.display = 'none'
-
-  if(!code){
-    document.getElementById('error').innerText = 'يرجى إدخال رمز المستأجر'
-    document.getElementById('error').style.display = 'block'
-    return
-  }
-
-  const { data: tenant, error: tenantError } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('tenant_code', code)
-    .maybeSingle()
-
-  if(tenantError || !tenant){
-    document.getElementById('error').innerText = 'رمز المستأجر غير صحيح'
-    document.getElementById('error').style.display = 'block'
-    return
-  }
 
   const { data: summary, error: summaryError } = await supabase
     .from('tenant_summary')
     .select('*')
     .eq('رمز_المستأجر', code)
+    .eq('year', year)
     .maybeSingle()
 
   if(summaryError || !summary){
-    document.getElementById('error').innerText = 'لا يوجد ملخص مالي لهذا المستأجر'
+    document.getElementById('error').innerText = 'لا يوجد ملخص مالي لهذا المستأجر في هذه السنة'
     document.getElementById('error').style.display = 'block'
     return
   }
 
-  document.getElementById('loginCard').style.display = 'none'
-  document.getElementById('heroCard').style.display = 'none'
-  document.getElementById('dashboard').classList.remove('hidden')
-
-  document.getElementById('name').innerText = tenant.tenant_name || ''
-  document.getElementById('codeText').innerText = tenant.tenant_code || ''
   document.getElementById('lastUpdated').innerText = formatDateTime(summary.created_at)
 
   const debit = Number(summary["إجمالي_المدين"] || 0)
@@ -745,6 +734,42 @@ window.login = async function(){
     },
     plugins:[centerTextPlugin]
   })
+}
+
+window.login = async function(){
+  const code = document.getElementById('code').value.trim().toUpperCase()
+
+  document.getElementById('error').style.display = 'none'
+
+  if(!code){
+    document.getElementById('error').innerText = 'يرجى إدخال رمز المستأجر'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  const { data: tenant, error: tenantError } = await supabase
+    .from('tenants')
+    .select('*')
+    .eq('tenant_code', code)
+    .maybeSingle()
+
+  if(tenantError || !tenant){
+    document.getElementById('error').innerText = 'رمز المستأجر غير صحيح'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  currentTenantCode = code
+  selectedYear = Number(document.getElementById('yearSelect').value || 2026)
+
+  document.getElementById('loginCard').style.display = 'none'
+  document.getElementById('heroCard').style.display = 'none'
+  document.getElementById('dashboard').classList.remove('hidden')
+
+  document.getElementById('name').innerText = tenant.tenant_name || ''
+  document.getElementById('codeText').innerText = tenant.tenant_code || ''
+
+  await loadTenantSummary(code, selectedYear)
 
   localStorage.setItem('jabri_tenant_code', code)
 }
@@ -760,9 +785,18 @@ document.getElementById('code').addEventListener('keydown', function(e){
   if(e.key === 'Enter') login()
 })
 
+document.getElementById('yearSelect').addEventListener('change', async function(e){
+  selectedYear = Number(e.target.value)
+
+  if(currentTenantCode){
+    await loadTenantSummary(currentTenantCode, selectedYear)
+  }
+})
+
 const saved = localStorage.getItem('jabri_tenant_code')
 if(saved){
   document.getElementById('code').value = saved
+  document.getElementById('yearSelect').value = '2026'
   login()
 }
 </script>
