@@ -441,10 +441,6 @@
         grid-template-columns:1fr 1fr;
       }
 
-      .grid.status-cards{
-        grid-template-columns:repeat(3,1fr);
-      }
-
       .details-grid{
         grid-template-columns:repeat(4,1fr);
       }
@@ -497,7 +493,17 @@
     </div>
   </div>
 
-        <div class="box green">
+  <div class="section">
+    <h3 class="section-title">الملخص العام</h3>
+    <p class="section-subtitle">عرض سريع لأهم أرقام المجمع بعد الفلترة</p>
+
+    <div class="grid">
+      <div class="box blue">
+        <div class="label">إجمالي المدين</div>
+        <div id="totalDebit" class="big">0</div>
+      </div>
+
+      <div class="box green">
         <div class="label">إجمالي الدائن</div>
         <div id="totalCredit" class="big">0</div>
       </div>
@@ -510,28 +516,6 @@
       <div class="box red">
         <div class="label">عدد النتائج</div>
         <div id="totalTenants" class="big">0</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3 class="section-title">ملخص الحالات</h3>
-    <p class="section-subtitle">عدد المستأجرين حسب حالة السداد</p>
-
-    <div class="grid status-cards">
-      <div class="box green">
-        <div class="label">المسددين</div>
-        <div id="paidCount" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">الجزئي</div>
-        <div id="partialCount" class="big">0</div>
-      </div>
-
-      <div class="box red">
-        <div class="label">غير المسددين</div>
-        <div id="unpaidCount" class="big">0</div>
       </div>
     </div>
   </div>
@@ -792,9 +776,6 @@ function renderFilteredData(){
     document.getElementById('totalCredit').innerText = '0'
     document.getElementById('totalBalance').innerText = '0'
     document.getElementById('totalTenants').innerText = '0'
-    document.getElementById('paidCount').innerText = '0'
-    document.getElementById('partialCount').innerText = '0'
-    document.getElementById('unpaidCount').innerText = '0'
     tableMeta.innerText = `0 نتيجة - سنة ${currentYear}`
     emptyState.style.display = 'block'
     updateCharts(0, 0, 0, 0, 0, 0)
@@ -844,9 +825,6 @@ function renderFilteredData(){
   document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
   document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
   document.getElementById('totalTenants').innerText = formatNumber(filtered.length)
-  document.getElementById('paidCount').innerText = formatNumber(paidCount)
-  document.getElementById('partialCount').innerText = formatNumber(partialCount)
-  document.getElementById('unpaidCount').innerText = formatNumber(unpaidCount)
   tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة - سنة ${currentYear}`
 
   updateCharts(
