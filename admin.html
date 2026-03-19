@@ -3,204 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة إدارة مجمع جبري</title>
+<title>دخول الإدارة</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial;
   background:#f6f7fb;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-.header{
-  position:sticky;
-  top:0;
+.card{
   background:#fff;
-  padding:15px;
+  padding:30px;
+  border-radius:20px;
+  width:100%;
+  max-width:400px;
   text-align:center;
-  font-weight:bold;
-  border-bottom:1px solid #eee;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
 
-.section{
-  background:#fff;
-  margin:15px;
-  padding:15px;
-  border-radius:15px;
+h2{
+  margin-bottom:10px;
 }
 
-.filters{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+p{
+  color:#777;
+  margin-bottom:20px;
 }
 
-select{
+input{
+  width:100%;
   height:45px;
   border-radius:10px;
   border:1px solid #ddd;
-  padding:5px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
+  padding:0 10px;
+  font-size:16px;
+  margin-bottom:15px;
 }
 
 button{
-  padding:6px 10px;
+  width:100%;
+  height:45px;
   border:none;
-  border-radius:6px;
+  border-radius:10px;
   background:#1d2940;
   color:#fff;
+  font-size:16px;
+  font-weight:bold;
   cursor:pointer;
+}
+
+.error{
+  color:red;
+  margin-top:10px;
+  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-لوحة إدارة مجمع جبري
+<div class="card">
+  <h2>دخول الإدارة</h2>
+  <p>أدخل كلمة المرور</p>
+
+  <input type="password" id="password" placeholder="كلمة المرور">
+
+  <button onclick="login()">دخول</button>
+
+  <div id="error" class="error">كلمة المرور غير صحيحة</div>
 </div>
 
-<!-- FILTERS -->
-<div class="section">
-  <h3>الفلاتر</h3>
+<script>
 
-  <div class="filters">
+const ADMIN_PASSWORD = "123456"; // 🔥 غيرها فوراً
 
-    <select id="yearSelect">
-      <option value="2026">2026</option>
-      <option value="2025">2025</option>
-      <option value="2024">2024</option>
-      <option value="2023">2023</option>
-    </select>
+function login(){
+  const pass = document.getElementById('password').value
 
-    <select id="tenantFilter">
-      <option value="all">كل المستأجرين</option>
-    </select>
-
-  </div>
-</div>
-
-<!-- TABLE -->
-<div class="section">
-  <h3>المستأجرين</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>رمز المستأجر</th>
-        <th>اسم المستأجر</th>
-        <th>السنة</th>
-        <th>إجمالي المدين</th>
-        <th>إجمالي الدائن</th>
-        <th>الرصيد</th>
-        <th>فتح</th>
-      </tr>
-    </thead>
-
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
-
-<script type="module">
-
-// 🔐 حماية الدخول
-if(localStorage.getItem("adminAuth") !== "true"){
-  window.location.href = "/admin-login.html"
+  if(pass === ADMIN_PASSWORD){
+    localStorage.setItem("adminAuth", "true")
+    window.location.href = "/admin.html"
+  } else {
+    document.getElementById('error').style.display = 'block'
+  }
 }
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const supabase = createClient(
-  'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-)
-
-let allRows = []
-
-async function fetchData(year){
-
-  const { data } = await supabase
-    .from('tenant_summary')
-    .select('*')
-    .eq('year', year)
-
-  allRows = data || []
-
-  fillTenantDropdown()
-  renderTable()
-}
-
-function fillTenantDropdown(){
-
-  const select = document.getElementById('tenantFilter')
-
-  const names = [...new Set(allRows.map(x => x["اسم_المستأجر"]))]
-
-  select.innerHTML = '<option value="all">كل المستأجرين</option>'
-
-  names.forEach(name=>{
-    select.innerHTML += `<option value="${name}">${name}</option>`
-  })
-}
-
-function renderTable(){
-
-  const tbody = document.getElementById('tableBody')
-  const tenantName = document.getElementById('tenantFilter').value
-
-  tbody.innerHTML = ''
-
-  const filtered = allRows.filter(row=>{
-    if(tenantName === 'all') return true
-    return row["اسم_المستأجر"] === tenantName
-  })
-
-  filtered.forEach(row => {
-
-    const debit = row["إجمالي_المدين"] || 0
-    const credit = row["إجمالي_الدائن"] || 0
-    const balance = row["الرصيد"] || 0
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${row["رمز_المستأجر"]}</td>
-        <td>${row["اسم_المستأجر"]}</td>
-        <td>${row["year"]}</td>
-        <td>${debit}</td>
-        <td>${credit}</td>
-        <td>${balance}</td>
-
-        <td>
-          <button onclick="openTenant('${row["رمز_المستأجر"]}')">فتح</button>
-        </td>
-      </tr>
-    `
-  })
-}
-
-window.openTenant = function(code){
-  window.location.href = "/index.html?tenant=" + code
-}
-
-document.getElementById('yearSelect').addEventListener('change', e=>{
-  fetchData(e.target.value)
-})
-
-document.getElementById('tenantFilter').addEventListener('change', ()=>{
-  renderTable()
-})
-
-fetchData(2026)
 
 </script>
 
