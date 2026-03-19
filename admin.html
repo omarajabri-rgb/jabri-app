@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة إدارة مجمع جبري</title>
+  <title>مجمع جبري</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
       --bg:#f6f7fb;
       --card:#ffffff;
+      --primary:#1d2940;
       --text:#1a2238;
       --muted:#7b8497;
       --line:#e8edf4;
+      --green:#18a957;
+      --red:#e05252;
       --blue-bg:#eef4ff;
-      --green-bg:#edf8f1;
-      --orange-bg:#fff6ea;
-      --red-bg:#fff1f1;
-      --purple-bg:#f5eefc;
       --blue-text:#2f6fed;
+      --green-bg:#edf8f1;
       --green-text:#18a957;
-      --orange-text:#d68a1d;
-      --red-text:#e05252;
+      --purple-bg:#f5eefc;
       --purple-text:#8d3df2;
-      --dark:#1d2940;
+      --orange-bg:#fff6ea;
+      --orange-text:#d68a1d;
     }
 
     *{
@@ -39,10 +39,9 @@
     }
 
     .app{
-      max-width:1320px;
+      max-width:430px;
       margin:auto;
       min-height:100vh;
-      padding-bottom:30px;
     }
 
     .header{
@@ -58,18 +57,47 @@
       box-shadow:0 6px 20px rgba(0,0,0,0.04);
     }
 
+    .header-inner{
+      position:relative;
+    }
+
+    .header-logo{
+      width:100px;
+      height:100px;
+      object-fit:contain;
+      margin-bottom:8px;
+    }
+
     .title{
-      font-size:28px;
+      font-size:24px;
       font-weight:900;
       margin:0;
       line-height:1.1;
     }
 
     .subtitle{
-      font-size:13px;
+      font-size:12px;
       color:var(--muted);
-      margin-top:6px;
-      font-weight:700;
+      margin-top:4px;
+      font-weight:600;
+    }
+
+    .header-notify{
+      position:absolute;
+      left:8px;
+      top:6px;
+      min-width:30px;
+      height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      background:#e05252;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 4px 12px rgba(224,82,82,0.22);
     }
 
     .section{
@@ -81,275 +109,89 @@
       box-shadow:0 8px 24px rgba(16,24,40,0.05);
     }
 
+    .hero{
+      background:linear-gradient(180deg,#f7f9fd 0%, #ffffff 100%);
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.08;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:15px;
+      font-weight:600;
+      text-align:center;
+    }
+
     .section-title{
       font-size:20px;
       font-weight:900;
-      color:var(--dark);
+      color:#1d2940;
       margin:0 0 10px;
     }
 
     .section-subtitle{
       font-size:14px;
-      color:var(--muted);
+      color:#7b8497;
       margin:0 0 15px;
       line-height:1.6;
     }
 
-    .top-bar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .filters{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(180px,1fr));
-      gap:12px;
+    .app-input{
       width:100%;
-    }
-
-    .app-input, .app-textarea{
-      width:100%;
-      height:48px;
-      border-radius:14px;
+      height:50px;
+      border-radius:15px;
       border:1px solid #d7deea;
       padding:0 14px;
       font-size:16px;
       outline:none;
+      margin-bottom:10px;
       background:#fff;
       color:var(--text);
     }
 
-    .app-textarea{
-      height:120px;
-      padding:14px;
-      resize:vertical;
-      font-family:inherit;
-    }
-
-    .app-input:focus, .app-textarea:focus{
+    .app-input:focus{
       border-color:#b9c5d7;
       box-shadow:0 0 0 4px rgba(29,41,64,0.05);
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:12px;
-    }
-
-    .box{
-      padding:18px;
-      border-radius:16px;
-      text-align:center;
-      min-height:110px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-    }
-
-    .blue{ background:var(--blue-bg); color:var(--blue-text); }
-    .green{ background:var(--green-bg); color:var(--green-text); }
-    .orange{ background:var(--orange-bg); color:var(--orange-text); }
-    .red{ background:var(--red-bg); color:var(--red-text); }
-    .purple{ background:var(--purple-bg); color:var(--purple-text); }
-
-    .label{
-      font-size:14px;
-      opacity:.85;
-      margin-bottom:10px;
-      font-weight:700;
-    }
-
-    .big{
-      font-size:30px;
-      font-weight:900;
-      line-height:1;
-    }
-
-    .charts-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-
-    .chart-card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .chart-wrap{
-      position:relative;
+    .app-btn{
       width:100%;
-      height:320px;
-    }
-
-    .table-wrap{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    table{
-      width:100%;
-      min-width:1180px;
-      border-collapse:collapse;
-    }
-
-    th, td{
-      padding:12px 10px;
-      border-bottom:1px solid var(--line);
-      text-align:center;
-      font-size:14px;
-      white-space:nowrap;
-    }
-
-    th{
-      background:#f8fafc;
-      color:var(--dark);
-      font-weight:900;
-    }
-
-    .paid{
-      color:var(--green-text);
-      font-weight:800;
-    }
-
-    .partial{
-      color:var(--orange-text);
-      font-weight:800;
-    }
-
-    .unpaid{
-      color:var(--red-text);
-      font-weight:800;
-    }
-
-    .empty-state{
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-      padding:20px 0 5px;
-      font-weight:700;
-      display:none;
-    }
-
-    .meta{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .action-btn{
+      height:50px;
+      border-radius:15px;
       border:none;
-      border-radius:10px;
-      padding:8px 12px;
-      font-size:13px;
-      font-weight:800;
-      cursor:pointer;
-      margin:2px;
-    }
-
-    .open-btn{
-      background:var(--blue-bg);
-      color:var(--blue-text);
-    }
-
-    .notify-btn{
-      background:var(--green-bg);
-      color:var(--green-text);
-    }
-
-    .quick-btn{
-      background:var(--orange-bg);
-      color:var(--orange-text);
-    }
-
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:2000;
-      padding:16px;
-    }
-
-    .modal{
-      width:100%;
-      max-width:560px;
-      background:#fff;
-      border-radius:22px;
-      padding:20px;
-      border:1px solid var(--line);
-      box-shadow:0 20px 50px rgba(0,0,0,0.18);
-    }
-
-    .modal-title{
-      font-size:20px;
-      font-weight:900;
-      margin:0 0 8px;
-      color:var(--dark);
-    }
-
-    .modal-subtitle{
-      font-size:14px;
-      color:var(--muted);
-      margin:0 0 16px;
-      line-height:1.6;
-    }
-
-    .modal-actions{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .btn{
-      height:44px;
-      border:none;
-      border-radius:12px;
-      padding:0 16px;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .btn-primary{
       background:#1d2940;
       color:#fff;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      margin-top:10px;
     }
 
-    .btn-secondary{
+    .soft-btn{
+      width:100%;
+      height:44px;
+      border-radius:12px;
+      border:1px solid var(--line);
       background:#f3f4f6;
       color:#111827;
-      border:1px solid var(--line);
-    }
-
-    .success-box{
-      display:none;
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      background:#edf8f1;
-      color:#16924a;
-      border:1px solid #cfeeda;
       font-size:14px;
-      font-weight:700;
+      font-weight:800;
+      cursor:pointer;
     }
 
-    .error-box{
+    .error{
       display:none;
       margin-top:12px;
       padding:12px 14px;
-      border-radius:14px;
+      border-radius:16px;
       background:#fff1f1;
       color:#c62828;
       border:1px solid #ffd8d8;
@@ -357,27 +199,372 @@
       font-weight:700;
     }
 
+    .hidden{
+      display:none;
+    }
+
+    .tenant-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .tenant-name{
+      margin:0 0 8px;
+      font-size:28px;
+      line-height:1.15;
+      font-weight:900;
+      word-break:break-word;
+    }
+
+    .tenant-code{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    .last-updated{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .badge{
+      white-space:nowrap;
+      padding:10px 14px;
+      border-radius:999px;
+      background:#e9f7ee;
+      color:#16924a;
+      border:1px solid #cfeeda;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .box{
+      padding:15px;
+      border-radius:15px;
+      text-align:center;
+      min-height:120px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .blue{ background:#eef4ff; color:#2f6fed; }
+    .green{ background:#edf8f1; color:#18a957; }
+    .purple{ background:#f5eefc; color:#8d3df2; }
+    .orange{ background:#fff6ea; color:#d68a1d; }
+
+    .label{
+      font-size:14px;
+      opacity:.8;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .big{
+      font-size:32px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    .status-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .mini-card{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .mini-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .mini-value{
+      font-size:28px;
+      font-weight:900;
+    }
+
+    .paid{
+      color:#18a957;
+    }
+
+    .remaining{
+      color:#e05252;
+    }
+
+    .status-grid .mini-card:nth-child(1){
+      background:var(--blue-bg);
+      color:var(--blue-text);
+      border:none;
+    }
+
+    .status-grid .mini-card:nth-child(1) .mini-label,
+    .status-grid .mini-card:nth-child(1) .mini-value{
+      color:var(--blue-text);
+    }
+
+    .status-grid .mini-card:nth-child(2){
+      background:var(--orange-bg);
+      color:var(--orange-text);
+      border:none;
+    }
+
+    .status-grid .mini-card:nth-child(2) .mini-label,
+    .status-grid .mini-card:nth-child(2) .mini-value{
+      color:var(--orange-text);
+    }
+
+    .status-grid .mini-card:nth-child(3){
+      background:var(--green-bg);
+      color:var(--green-text);
+      border:none;
+    }
+
+    .status-grid .mini-card:nth-child(3) .mini-label,
+    .status-grid .mini-card:nth-child(3) .mini-value{
+      color:var(--green-text);
+    }
+
+    .status-grid .mini-card:nth-child(4){
+      background:var(--purple-bg);
+      color:var(--purple-text);
+      border:none;
+    }
+
+    .status-grid .mini-card:nth-child(4) .mini-label,
+    .status-grid .mini-card:nth-child(4) .mini-value{
+      color:var(--purple-text);
+    }
+
+    .advice-card{
+      background:linear-gradient(180deg,#f7f9fd 0%, #ffffff 100%);
+      border:1px solid var(--line);
+    }
+
+    .advice-title{
+      font-size:18px;
+      font-weight:900;
+      color:#1d2940;
+      margin:0 0 10px;
+    }
+
+    .advice-text{
+      font-size:16px;
+      line-height:1.9;
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .advice-amount{
+      color:var(--blue-text);
+      font-size:28px;
+      font-weight:900;
+    }
+
+    .advice-sub{
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.7;
+      font-weight:600;
+    }
+
+    .chart-wrap{
+      max-width:280px;
+      margin:auto;
+    }
+
+    .line-chart-wrap{
+      width:100%;
+      margin:auto;
+      min-height:260px;
+    }
+
+    .chart-legend{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .legend-item{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      text-align:center;
+    }
+
+    .legend-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      display:inline-block;
+      margin-left:6px;
+    }
+
+    .legend-title{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .legend-value{
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .note{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      font-weight:600;
+    }
+
+    .trend-note{
+      margin-top:12px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      font-weight:600;
+    }
+
+    .notify-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .notify-badge{
+      min-width:30px;
+      height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      background:var(--red-bg);
+      color:var(--red-text);
+      border:1px solid #ffd8d8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .notification-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .notification-item{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .notification-unread{
+      border:2px solid #e05252;
+      background:#fff5f5;
+    }
+
+    .notification-read{
+      opacity:0.78;
+    }
+
+    .notification-title{
+      font-size:15px;
+      font-weight:900;
+      color:#1d2940;
+      margin-bottom:6px;
+    }
+
+    .notification-message{
+      font-size:14px;
+      color:var(--text);
+      line-height:1.7;
+      margin-bottom:8px;
+    }
+
+    .notification-date{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .notification-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .empty-notifications{
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      padding:10px 0 0;
+      font-weight:700;
+    }
+
     @media (min-width:768px){
+      .app{
+        max-width:780px;
+      }
+
+      .header-logo{
+        width:110px;
+        height:110px;
+      }
+
+      .title{
+        font-size:28px;
+      }
+
       .grid{
         grid-template-columns:repeat(4,1fr);
       }
 
-      .charts-grid{
-        grid-template-columns:1fr 1fr;
+      .status-grid{
+        grid-template-columns:repeat(4,1fr);
       }
 
-      .grid.status-cards{
-        grid-template-columns:repeat(3,1fr);
-      }
-    }
-
-    @media (max-width:767px){
-      .filters{
-        grid-template-columns:1fr;
+      .chart-legend{
+        max-width:420px;
+        margin-left:auto;
+        margin-right:auto;
       }
 
-      .chart-wrap{
-        height:260px;
+      .hero h1{
+        font-size:40px;
+      }
+
+      .line-chart-wrap{
+        max-width:680px;
       }
     }
   </style>
@@ -387,163 +574,169 @@
 <div class="app">
 
   <div class="header">
-    <div class="title">لوحة إدارة مجمع جبري</div>
-    <div class="subtitle">نسخة 4 — فتح ملف مع السنة + إشعارات + تعبئة سريعة</div>
-  </div>
-
-  <div class="section">
-    <div class="top-bar">
-      <div>
-        <h3 class="section-title">الفلاتر</h3>
-        <p class="section-subtitle">اختر السنة وابحث أو فلتر حسب الحالة</p>
-      </div>
-    </div>
-
-    <div class="filters">
-      <select id="yearSelect" class="app-input">
-        <option value="2026" selected>2026</option>
-        <option value="2025">2025</option>
-        <option value="2024">2024</option>
-        <option value="2023">2023</option>
-      </select>
-
-      <input id="searchInput" class="app-input" placeholder="ابحث برمز أو اسم المستأجر">
-
-      <select id="statusFilter" class="app-input">
-        <option value="all">كل الحالات</option>
-        <option value="paid">مسدد</option>
-        <option value="partial">جزئي</option>
-        <option value="unpaid">غير مسدد</option>
-      </select>
+    <div class="header-inner">
+      <div id="headerNotifyBadge" class="header-notify">0</div>
+      <img src="logo_complex.png" class="header-logo" alt="شعار مجمع جبري">
+      <div class="title">مجمع جبري</div>
+      <div class="subtitle">بوابة المستأجرين</div>
     </div>
   </div>
 
-  <div class="section">
-    <h3 class="section-title">الملخص العام</h3>
-    <p class="section-subtitle">عرض سريع لأهم أرقام المجمع بعد الفلترة</p>
-
-    <div class="grid">
-      <div class="box blue">
-        <div class="label">إجمالي المدين</div>
-        <div id="totalDebit" class="big">0</div>
-      </div>
-
-      <div class="box green">
-        <div class="label">إجمالي الدائن</div>
-        <div id="totalCredit" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">إجمالي الرصيد</div>
-        <div id="totalBalance" class="big">0</div>
-      </div>
-
-      <div class="box red">
-        <div class="label">عدد النتائج</div>
-        <div id="totalTenants" class="big">0</div>
-      </div>
-    </div>
+  <div id="heroCard" class="section hero">
+    <h1>أهلاً بكم</h1>
+    <p>بوابة المستأجرين لمجمع جبري الصناعي التجاري. أدخل رمز المستأجر لعرض الحالة المالية بشكل واضح واحترافي.</p>
   </div>
 
-  <div class="section">
-    <h3 class="section-title">ملخص الحالات</h3>
-    <p class="section-subtitle">عدد المستأجرين حسب حالة السداد</p>
-
-    <div class="grid status-cards">
-      <div class="box green">
-        <div class="label">المسددين</div>
-        <div id="paidCount" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">الجزئي</div>
-        <div id="partialCount" class="big">0</div>
-      </div>
-
-      <div class="box red">
-        <div class="label">غير المسددين</div>
-        <div id="unpaidCount" class="big">0</div>
-      </div>
-    </div>
+  <div id="loginCard" class="section">
+    <h3 class="section-title">تسجيل الدخول</h3>
+    <p class="section-subtitle">أدخل رمز المستأجر مثل JC-01</p>
+    <input id="code" class="app-input" placeholder="JC-01">
+    <button id="loginBtn" class="app-btn" type="button">دخول</button>
+    <div id="error" class="error">رمز المستأجر غير صحيح</div>
   </div>
 
-  <div class="section">
-    <h3 class="section-title">الرسوم البيانية</h3>
-    <p class="section-subtitle">تحليل سريع لحالات المستأجرين والمجاميع</p>
+  <div id="dashboard" class="hidden">
 
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">توزيع الحالات</h4>
-        <div class="chart-wrap">
-          <canvas id="statusChart"></canvas>
+    <div class="section">
+      <div class="tenant-head">
+        <div>
+          <h2 id="name" class="tenant-name"></h2>
+          <div id="codeText" class="tenant-code"></div>
+          <div id="lastUpdated" class="last-updated"></div>
         </div>
+        <div class="badge">نشط</div>
       </div>
 
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">المجاميع المالية</h4>
-        <div class="chart-wrap">
-          <canvas id="summaryChart"></canvas>
+      <div style="margin-top:14px;">
+        <label for="yearSelect" style="display:block; margin-bottom:8px; font-size:14px; font-weight:800; color:#1d2940;">
+          اختر السنة
+        </label>
+        <select id="yearSelect" class="app-input" style="margin-bottom:0;">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">الملخص المالي</h3>
+      <p class="section-subtitle">عرض سريع لأهم أرقام الحساب</p>
+
+      <div class="grid">
+        <div class="box blue">
+          <div class="label">إجمالي المدين</div>
+          <div id="debit" class="big">0</div>
+        </div>
+
+        <div class="box green">
+          <div class="label">إجمالي الدائن</div>
+          <div id="credit" class="big">0</div>
+        </div>
+
+        <div class="box purple">
+          <div class="label">الرصيد</div>
+          <div id="balance" class="big">0</div>
+        </div>
+
+        <div class="box orange">
+          <div class="label">الإيجار</div>
+          <div id="rent" class="big">0</div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="section">
-    <div class="top-bar">
-      <div>
-        <h3 class="section-title">جدول المستأجرين</h3>
-        <p class="section-subtitle">فتح ملف المستأجر أو إرسال إشعار مباشر له</p>
+    <div class="section">
+      <h3 class="section-title">حالة السداد</h3>
+      <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
+
+      <div class="status-grid">
+        <div class="mini-card">
+          <div class="mini-label">المدفوع</div>
+          <div id="paidValue" class="mini-value paid">0</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">المتبقي</div>
+          <div id="remainingValue" class="mini-value remaining">0</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">نسبة السداد</div>
+          <div id="paidPercent" class="mini-value">0%</div>
+        </div>
+
+        <div class="mini-card">
+          <div class="mini-label">نسبة المتبقي</div>
+          <div id="remainingPercent" class="mini-value">0%</div>
+        </div>
       </div>
-      <div id="tableMeta" class="meta"></div>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>رمز المستأجر</th>
-            <th>اسم المستأجر</th>
-            <th>السنة</th>
-            <th>إجمالي المدين</th>
-            <th>إجمالي الدائن</th>
-            <th>الرصيد</th>
-            <th>إيجار السنة</th>
-            <th>الحالة</th>
-            <th>الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+    <div class="section advice-card">
+      <h3 class="advice-title">نصيحة محاسبية</h3>
+      <div id="monthlyAdvice" class="advice-text">-</div>
+      <div id="monthlyAdviceSub" class="advice-sub"></div>
     </div>
 
-    <div id="emptyState" class="empty-state">
-      لا توجد بيانات مطابقة للفلاتر الحالية
-    </div>
-  </div>
+    <div class="section">
+      <div class="notify-head">
+        <div>
+          <h3 class="section-title" style="margin-bottom:4px;">الإشعارات</h3>
+          <p class="section-subtitle" style="margin-bottom:0;">آخر التنبيهات والرسائل من الإدارة</p>
+        </div>
+        <div id="notifyBadge" class="notify-badge">0</div>
+      </div>
 
-</div>
+      <div id="notificationList" class="notification-list"></div>
 
-<div id="notificationModal" class="modal-overlay">
-  <div class="modal">
-    <h3 class="modal-title">إرسال إشعار</h3>
-    <p id="modalSubtitle" class="modal-subtitle"></p>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button id="toggleNotificationsBtn" class="soft-btn">عرض الكل</button>
+        <button id="markAllReadBtn" class="soft-btn">تحديد الكل كمقروء</button>
+      </div>
 
-    <input id="notificationTitle" class="app-input" placeholder="عنوان الإشعار" style="margin-bottom:12px;">
-    <textarea id="notificationMessage" class="app-textarea" placeholder="اكتب نص الإشعار هنا"></textarea>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-      <button id="quickDueBtn" class="action-btn quick-btn">تذكير استحقاق</button>
-      <button id="quickReceiptBtn" class="action-btn quick-btn">تأكيد دفعة</button>
-      <button id="quickReviewBtn" class="action-btn quick-btn">مراجعة الإدارة</button>
+      <div id="emptyNotifications" class="empty-notifications hidden">لا توجد إشعارات حالياً</div>
     </div>
 
-    <div id="successBox" class="success-box">تم إرسال الإشعار بنجاح</div>
-    <div id="errorBox" class="error-box">حدث خطأ أثناء إرسال الإشعار</div>
+    <div class="section">
+      <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
+      <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
 
-    <div class="modal-actions">
-      <button id="closeModalBtn" class="btn btn-secondary">إلغاء</button>
-      <button id="sendNotificationBtn" class="btn btn-primary">إرسال الإشعار</button>
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-title"><span class="legend-dot" style="background:#18a957"></span>المدفوع</div>
+          <div id="legendPaid" class="legend-value">0</div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-title"><span class="legend-dot" style="background:#e05252"></span>المتبقي</div>
+          <div id="legendRemaining" class="legend-value">0</div>
+        </div>
+      </div>
+
+      <div id="paymentNote" class="note"></div>
     </div>
+
+    <div id="trendSection" class="section hidden">
+      <h3 class="section-title">تطور إجمالي الدائن من 2023 إلى 2026</h3>
+      <p class="section-subtitle">يعرض نمو إجمالي الدائن للمستأجر عبر السنوات حتى سنة 2026</p>
+
+      <div class="line-chart-wrap">
+        <canvas id="creditTrendChart"></canvas>
+      </div>
+
+      <div id="trendNote" class="trend-note"></div>
+    </div>
+
+    <div class="section">
+      <button onclick="logout()" class="soft-btn" style="height:50px;">تسجيل خروج</button>
+    </div>
+
   </div>
 </div>
 
@@ -555,192 +748,190 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-let allRows = []
-let statusChart
-let summaryChart
-let selectedTenantCode = ''
-let selectedTenantName = ''
+let chart
+let creditTrendChart
+let currentTenantCode = ''
+let selectedYear = 2026
+let showAllNotifications = false
 
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
 
-function getStatus(balance, credit){
-  const safeBalance = Number(balance || 0)
-  const safeCredit = Number(credit || 0)
-
-  if(safeBalance === 0){
-    return { text:'مسدد', cls:'paid', key:'paid' }
-  } else if(safeCredit > 0){
-    return { text:'جزئي', cls:'partial', key:'partial' }
-  } else {
-    return { text:'غير مسدد', cls:'unpaid', key:'unpaid' }
-  }
+function formatPercent(n){
+  return `${Number(n || 0).toFixed(0)}%`
 }
 
-async function fetchYearData(year){
-  const { data, error } = await supabase
-    .from('tenant_summary')
-    .select('*')
-    .eq('year', Number(year))
-    .order('رمز_المستأجر', { ascending: true })
-
-  if(error || !data){
-    allRows = []
-    renderFilteredData()
-    return
-  }
-
-  allRows = data
-  renderFilteredData()
-}
-
-function renderFilteredData(){
-  const tbody = document.getElementById('tableBody')
-  const emptyState = document.getElementById('emptyState')
-  const tableMeta = document.getElementById('tableMeta')
-  const searchValue = document.getElementById('searchInput').value.trim().toLowerCase()
-  const statusValue = document.getElementById('statusFilter').value
-  const currentYear = document.getElementById('yearSelect').value
-
-  tbody.innerHTML = ''
-
-  const filtered = allRows.filter(row => {
-    const tenantCode = String(row["رمز_المستأجر"] || '').toLowerCase()
-    const tenantName = String(row["اسم_المستأجر"] || '').toLowerCase()
-    const status = getStatus(row["الرصيد"], row["إجمالي_الدائن"])
-
-    const matchesSearch =
-      tenantCode.includes(searchValue) ||
-      tenantName.includes(searchValue)
-
-    const matchesStatus =
-      statusValue === 'all' || status.key === statusValue
-
-    return matchesSearch && matchesStatus
+function formatDateTime(dateValue){
+  const date = dateValue ? new Date(dateValue) : new Date()
+  return 'آخر تحديث: ' + date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
   })
+}
 
-  let totalDebit = 0
-  let totalCredit = 0
-  let totalBalance = 0
+function formatNotificationDate(dateValue){
+  const date = new Date(dateValue)
+  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
-  let paidCount = 0
-  let partialCount = 0
-  let unpaidCount = 0
+async function markOneRead(id){
+  await supabase
+    .from('tenant_notifications')
+    .update({ is_read: true })
+    .eq('id', id)
 
-  if(filtered.length === 0){
-    document.getElementById('totalDebit').innerText = '0'
-    document.getElementById('totalCredit').innerText = '0'
-    document.getElementById('totalBalance').innerText = '0'
-    document.getElementById('totalTenants').innerText = '0'
-    document.getElementById('paidCount').innerText = '0'
-    document.getElementById('partialCount').innerText = '0'
-    document.getElementById('unpaidCount').innerText = '0'
-    tableMeta.innerText = `0 نتيجة - سنة ${currentYear}`
-    emptyState.style.display = 'block'
-    updateCharts(0, 0, 0, 0, 0, 0)
+  await loadNotifications(currentTenantCode)
+}
+
+async function markAllRead(){
+  if(!currentTenantCode) return
+
+  await supabase
+    .from('tenant_notifications')
+    .update({ is_read: true })
+    .eq('tenant_code', currentTenantCode)
+
+  await loadNotifications(currentTenantCode)
+}
+
+function toggleNotifications(){
+  showAllNotifications = !showAllNotifications
+  const btn = document.getElementById('toggleNotificationsBtn')
+  btn.innerText = showAllNotifications ? 'إخفاء' : 'عرض الكل'
+  loadNotifications(currentTenantCode)
+}
+
+async function loadNotifications(code){
+  const list = document.getElementById('notificationList')
+  const empty = document.getElementById('emptyNotifications')
+  const badge = document.getElementById('notifyBadge')
+  const headerBadge = document.getElementById('headerNotifyBadge')
+
+  list.innerHTML = ''
+
+  const { data, error } = await supabase
+    .from('tenant_notifications')
+    .select('*')
+    .eq('tenant_code', code)
+    .order('created_at', { ascending: false })
+
+  if(error || !data || data.length === 0){
+    empty.classList.remove('hidden')
+    badge.innerText = '0'
+    headerBadge.innerText = '0'
     return
   }
 
-  emptyState.style.display = 'none'
+  empty.classList.add('hidden')
 
-  filtered.forEach(row => {
-    const debit = Number(row["إجمالي_المدين"] || 0)
-    const credit = Number(row["إجمالي_الدائن"] || 0)
-    const balance = Number(row["الرصيد"] || 0)
-    const rent = Number(row["إيجار_السنة"] || 0)
+  const unread = data.filter(x => !x.is_read).length
+  badge.innerText = unread
+  headerBadge.innerText = unread
 
-    totalDebit += debit
-    totalCredit += credit
-    totalBalance += balance
+  const visible = showAllNotifications ? data : data.slice(0, 3)
 
-    const status = getStatus(balance, credit)
-    if(status.key === 'paid') paidCount++
-    if(status.key === 'partial') partialCount++
-    if(status.key === 'unpaid') unpaidCount++
-
-    const tenantName = row["اسم_المستأجر"] || '-'
-    const tenantCode = row["رمز_المستأجر"] || '-'
-    const tenantYear = row["year"] || '-'
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${tenantCode}</td>
-        <td>${tenantName}</td>
-        <td>${tenantYear}</td>
-        <td>${formatNumber(debit)}</td>
-        <td>${formatNumber(credit)}</td>
-        <td>${formatNumber(balance)}</td>
-        <td>${formatNumber(rent)}</td>
-        <td class="${status.cls}">${status.text}</td>
-        <td>
-          <button class="action-btn open-btn" data-open="${tenantCode}" data-year="${tenantYear}">فتح ملف</button>
-          <button class="action-btn notify-btn" data-code="${tenantCode}" data-name="${tenantName}">إرسال إشعار</button>
-        </td>
-      </tr>
+  visible.forEach(item => {
+    list.innerHTML += `
+      <div class="notification-item ${item.is_read ? 'notification-read' : 'notification-unread'}">
+        <div class="notification-title">${item.title || ''}</div>
+        <div class="notification-message">${item.message || ''}</div>
+        <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
+        <div class="notification-actions">
+          ${!item.is_read ? `<button class="soft-btn mark-one-btn" data-id="${item.id}">تحديد كمقروء</button>` : ''}
+        </div>
+      </div>
     `
   })
 
-  document.getElementById('totalDebit').innerText = formatNumber(totalDebit)
-  document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
-  document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
-  document.getElementById('totalTenants').innerText = formatNumber(filtered.length)
-  document.getElementById('paidCount').innerText = formatNumber(paidCount)
-  document.getElementById('partialCount').innerText = formatNumber(partialCount)
-  document.getElementById('unpaidCount').innerText = formatNumber(unpaidCount)
-  tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة - سنة ${currentYear}`
-
-  updateCharts(
-    paidCount,
-    partialCount,
-    unpaidCount,
-    totalDebit,
-    totalCredit,
-    totalBalance
-  )
-
-  bindRowActions()
+  document.querySelectorAll('.mark-one-btn').forEach(btn => {
+    btn.addEventListener('click', async function(){
+      const id = this.getAttribute('data-id')
+      await markOneRead(id)
+    })
+  })
 }
 
-function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCredit, totalBalance){
-  if(statusChart) statusChart.destroy()
-  if(summaryChart) summaryChart.destroy()
+async function loadCreditTrend(code){
+  const trendSection = document.getElementById('trendSection')
+  const trendNote = document.getElementById('trendNote')
 
-  statusChart = new Chart(document.getElementById('statusChart'), {
-    type: 'pie',
-    data: {
-      labels: ['مسدد', 'جزئي', 'غير مسدد'],
-      datasets: [{
-        data: [paidCount, partialCount, unpaidCount],
-        backgroundColor: ['#18a957', '#d68a1d', '#e05252'],
-        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-        borderWidth: 3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' }
-      }
+  if(selectedYear !== 2026){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart) {
+      creditTrendChart.destroy()
+      creditTrendChart = null
     }
+    trendNote.innerText = ''
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('tenant_summary')
+    .select('year, إجمالي_الدائن')
+    .eq('رمز_المستأجر', code)
+    .in('year', [2023, 2024, 2025, 2026])
+    .order('year', { ascending: true })
+
+  if(error || !data || data.length === 0){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart) {
+      creditTrendChart.destroy()
+      creditTrendChart = null
+    }
+    trendNote.innerText = ''
+    return
+  }
+
+  const years = [2023, 2024, 2025, 2026]
+  const creditMap = {}
+  data.forEach(row => {
+    creditMap[Number(row.year)] = Number(row["إجمالي_الدائن"] || 0)
   })
 
-  summaryChart = new Chart(document.getElementById('summaryChart'), {
-    type: 'bar',
+  const values = years.map(year => creditMap[year] ?? 0)
+  const firstValue = values[0] || 0
+  const lastValue = values[values.length - 1] || 0
+  const diff = lastValue - firstValue
+
+  trendSection.classList.remove('hidden')
+
+  if(creditTrendChart) {
+    creditTrendChart.destroy()
+  }
+
+  creditTrendChart = new Chart(document.getElementById('creditTrendChart'), {
+    type: 'line',
     data: {
-      labels: ['إجمالي المدين', 'إجمالي الدائن', 'إجمالي الرصيد'],
+      labels: years.map(String),
       datasets: [{
-        data: [totalDebit, totalCredit, totalBalance],
-        backgroundColor: ['#2f6fed', '#18a957', '#d68a1d'],
-        borderRadius: 8
+        label: 'إجمالي الدائن',
+        data: values,
+        borderColor: '#18a957',
+        backgroundColor: 'rgba(24,169,87,0.10)',
+        borderWidth: 3,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#18a957'
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context){
+              return 'إجمالي الدائن: ' + formatNumber(context.raw) + ' د.أ'
+            }
+          }
+        }
       },
       scales: {
         y: {
@@ -754,121 +945,204 @@ function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCre
       }
     }
   })
+
+  if(diff > 0){
+    trendNote.innerText = `ازداد إجمالي الدائن بمقدار ${formatNumber(diff)} د.أ من سنة 2023 إلى سنة 2026.`
+  } else if(diff < 0){
+    trendNote.innerText = `انخفض إجمالي الدائن بمقدار ${formatNumber(Math.abs(diff))} د.أ من سنة 2023 إلى سنة 2026.`
+  } else {
+    trendNote.innerText = 'إجمالي الدائن ثابت بين سنة 2023 وسنة 2026.'
+  }
 }
 
-function bindRowActions(){
-  document.querySelectorAll('[data-open]').forEach(btn => {
-    btn.addEventListener('click', function(){
-      const code = this.getAttribute('data-open')
-      const year = this.getAttribute('data-year')
-      window.open(`/index.html?tenant=${encodeURIComponent(code)}&year=${encodeURIComponent(year)}`, '_blank')
-    })
-  })
+async function loadTenantSummary(code, year){
+  document.getElementById('error').style.display = 'none'
 
-  document.querySelectorAll('[data-code]').forEach(btn => {
-    btn.addEventListener('click', function(){
-      selectedTenantCode = this.getAttribute('data-code') || ''
-      selectedTenantName = this.getAttribute('data-name') || ''
-      openNotificationModal()
-    })
-  })
-}
+  const { data: summary, error: summaryError } = await supabase
+    .from('tenant_summary')
+    .select('*')
+    .eq('رمز_المستأجر', code)
+    .eq('year', year)
+    .maybeSingle()
 
-function openNotificationModal(){
-  document.getElementById('notificationModal').style.display = 'flex'
-  document.getElementById('modalSubtitle').innerText = `إرسال إشعار إلى ${selectedTenantName} (${selectedTenantCode})`
-  document.getElementById('notificationTitle').value = ''
-  document.getElementById('notificationMessage').value = ''
-  document.getElementById('successBox').style.display = 'none'
-  document.getElementById('errorBox').style.display = 'none'
-}
-
-function closeNotificationModal(){
-  document.getElementById('notificationModal').style.display = 'none'
-}
-
-async function sendNotification(){
-  const title = document.getElementById('notificationTitle').value.trim()
-  const message = document.getElementById('notificationMessage').value.trim()
-
-  document.getElementById('successBox').style.display = 'none'
-  document.getElementById('errorBox').style.display = 'none'
-
-  if(!selectedTenantCode || !title || !message){
-    document.getElementById('errorBox').innerText = 'يرجى تعبئة عنوان الإشعار ونص الرسالة'
-    document.getElementById('errorBox').style.display = 'block'
+  if(summaryError || !summary){
+    document.getElementById('error').innerText = 'لا يوجد ملخص مالي لهذا المستأجر في هذه السنة'
+    document.getElementById('error').style.display = 'block'
     return
   }
 
-  const { error } = await supabase
-    .from('tenant_notifications')
-    .insert([{
-      tenant_code: selectedTenantCode,
-      title,
-      message
-    }])
+  document.getElementById('lastUpdated').innerText = formatDateTime(summary.created_at)
 
-  if(error){
-    document.getElementById('errorBox').innerText = 'حدث خطأ أثناء إرسال الإشعار'
-    document.getElementById('errorBox').style.display = 'block'
+  const debit = Number(summary["إجمالي_المدين"] || 0)
+  const credit = Number(summary["إجمالي_الدائن"] || 0)
+  const balance = Number(summary["الرصيد"] || 0)
+  const rent = Number(summary["إيجار_السنة"] || 0)
+
+  document.getElementById('debit').innerText = formatNumber(debit)
+  document.getElementById('credit').innerText = formatNumber(credit)
+  document.getElementById('rent').innerText = formatNumber(rent)
+
+  const balanceEl = document.getElementById('balance')
+  balanceEl.innerText = formatNumber(balance)
+  balanceEl.style.color = balance > 0 ? '#e05252' : '#18a957'
+
+  const paid = Math.max(credit, 0)
+  const remaining = Math.max(balance, 0)
+  const total = paid + remaining
+
+  const paidPercent = total > 0 ? (paid / total) * 100 : 0
+  const remainingPercent = total > 0 ? (remaining / total) * 100 : 0
+
+  document.getElementById('paidValue').innerText = formatNumber(paid)
+  document.getElementById('remainingValue').innerText = formatNumber(remaining)
+  document.getElementById('paidPercent').innerText = formatPercent(paidPercent)
+  document.getElementById('remainingPercent').innerText = formatPercent(remainingPercent)
+
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const monthsLeft = Math.max(12 - currentMonth + 1, 1)
+  const suggestedMonthly = remaining > 0 ? remaining / monthsLeft : 0
+  const roundedMonthly = Math.ceil(suggestedMonthly)
+
+  let adviceText = ''
+  let adviceSub = ''
+
+  if (remaining <= 0) {
+    adviceText = '✅ لا يوجد رصيد متبقٍ حالياً، ولا حاجة لدفعات شهرية إضافية'
+    adviceSub = 'الحساب مسدد أو لا يوجد مبلغ مستحق حتى هذه اللحظة.'
+  } else {
+    adviceText = `لإغلاق الرصيد حتى نهاية السنة، يُنصح بدفع <span class="advice-amount">${formatNumber(roundedMonthly)} د.أ</span> شهرياً`
+    adviceSub = `تم احتسابها على أساس الرصيد المتبقي ${formatNumber(remaining)} د.أ موزعاً على ${monthsLeft} شهر/أشهر متبقية من السنة.`
+  }
+
+  document.getElementById('monthlyAdvice').innerHTML = adviceText
+  document.getElementById('monthlyAdviceSub').innerText = adviceSub
+
+  document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
+  document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
+
+  let noteText = ''
+  if (remaining === 0 && paid > 0) {
+    noteText = '✅ حسابك مسدد بالكامل، شكراً لك'
+  } else if (paid === 0 && remaining > 0) {
+    noteText = '⚠️ لا يوجد دفعات مسجلة حتى الآن'
+  } else {
+    noteText = `📊 تم سداد ${formatPercent(paidPercent)} من إجمالي المبلغ`
+  }
+  document.getElementById('paymentNote').innerText = noteText
+
+  if(chart) chart.destroy()
+
+  chart = new Chart(document.getElementById('chart'), {
+    type:'pie',
+    data:{
+      labels:['مدفوع','متبقي'],
+      datasets:[{
+        data:[paid, remaining],
+        backgroundColor:['#18a957','#e05252'],
+        borderColor:['#ffffff','#ffffff'],
+        borderWidth:4,
+        hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:true,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: function(context){
+              return `${context.label}: ${formatNumber(context.raw)} د.أ`
+            }
+          }
+        }
+      }
+    }
+  })
+
+  await loadCreditTrend(code)
+  await loadNotifications(code)
+}
+
+window.login = async function(){
+  const code = document.getElementById('code').value.trim().toUpperCase()
+
+  document.getElementById('error').style.display = 'none'
+
+  if(!code){
+    document.getElementById('error').innerText = 'يرجى إدخال رمز المستأجر'
+    document.getElementById('error').style.display = 'block'
     return
   }
 
-  document.getElementById('successBox').style.display = 'block'
-  document.getElementById('successBox').innerText = 'تم إرسال الإشعار بنجاح'
+  const { data: tenant, error: tenantError } = await supabase
+    .from('tenants')
+    .select('*')
+    .eq('tenant_code', code)
+    .maybeSingle()
+
+  if(tenantError || !tenant){
+    document.getElementById('error').innerText = 'رمز المستأجر غير صحيح'
+    document.getElementById('error').style.display = 'block'
+    return
+  }
+
+  currentTenantCode = code
+  selectedYear = Number(document.getElementById('yearSelect').value || 2026)
+
+  document.getElementById('loginCard').style.display = 'none'
+  document.getElementById('heroCard').style.display = 'none'
+  document.getElementById('dashboard').classList.remove('hidden')
+
+  document.getElementById('name').innerText = tenant.tenant_name || ''
+  document.getElementById('codeText').innerText = tenant.tenant_code || ''
+
+  await loadTenantSummary(code, selectedYear)
+
+  localStorage.setItem('jabri_tenant_code', code)
 }
 
-function setQuickNotification(type){
-  if(type === 'due'){
-    document.getElementById('notificationTitle').value = 'تذكير استحقاق'
-    document.getElementById('notificationMessage').value = 'نود تذكيركم بوجود مبلغ مستحق على حسابكم. يرجى مراجعة البوابة والقيام بالتسديد في أقرب وقت ممكن.'
-  }
-
-  if(type === 'receipt'){
-    document.getElementById('notificationTitle').value = 'تأكيد تسجيل دفعة'
-    document.getElementById('notificationMessage').value = 'نفيدكم بأنه تم تسجيل دفعة جديدة على حسابكم. يمكنكم مراجعة البوابة للاطلاع على التحديثات.'
-  }
-
-  if(type === 'review'){
-    document.getElementById('notificationTitle').value = 'يرجى مراجعة الإدارة'
-    document.getElementById('notificationMessage').value = 'يرجى مراجعة إدارة المجمع بخصوص حسابكم في أقرب وقت ممكن.'
-  }
+window.logout = function(){
+  localStorage.removeItem('jabri_tenant_code')
+  location.reload()
 }
 
-document.getElementById('yearSelect').addEventListener('change', function(e){
-  fetchYearData(e.target.value)
+document.getElementById('loginBtn').addEventListener('click', login)
+
+document.getElementById('code').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') login()
 })
 
-document.getElementById('searchInput').addEventListener('input', function(){
-  renderFilteredData()
-})
+document.getElementById('yearSelect').addEventListener('change', async function(e){
+  selectedYear = Number(e.target.value)
 
-document.getElementById('statusFilter').addEventListener('change', function(){
-  renderFilteredData()
-})
-
-document.getElementById('closeModalBtn').addEventListener('click', closeNotificationModal)
-document.getElementById('sendNotificationBtn').addEventListener('click', sendNotification)
-
-document.getElementById('quickDueBtn').addEventListener('click', function(){
-  setQuickNotification('due')
-})
-
-document.getElementById('quickReceiptBtn').addEventListener('click', function(){
-  setQuickNotification('receipt')
-})
-
-document.getElementById('quickReviewBtn').addEventListener('click', function(){
-  setQuickNotification('review')
-})
-
-document.getElementById('notificationModal').addEventListener('click', function(e){
-  if(e.target.id === 'notificationModal'){
-    closeNotificationModal()
+  if(currentTenantCode){
+    await loadTenantSummary(currentTenantCode, selectedYear)
   }
 })
 
-fetchYearData(2026)
+document.getElementById('toggleNotificationsBtn').addEventListener('click', toggleNotifications)
+document.getElementById('markAllReadBtn').addEventListener('click', markAllRead)
+
+const saved = localStorage.getItem('jabri_tenant_code')
+const urlParams = new URLSearchParams(window.location.search)
+const tenantFromUrl = (urlParams.get('tenant') || '').trim().toUpperCase()
+const yearFromUrl = Number(urlParams.get('year') || 2026)
+
+if(tenantFromUrl){
+  document.getElementById('code').value = tenantFromUrl
+  if([2023, 2024, 2025, 2026].includes(yearFromUrl)){
+    document.getElementById('yearSelect').value = String(yearFromUrl)
+  } else {
+    document.getElementById('yearSelect').value = '2026'
+  }
+  login()
+} else if(saved){
+  document.getElementById('code').value = saved
+  document.getElementById('yearSelect').value = '2026'
+  login()
+}
 </script>
 
 </body>
