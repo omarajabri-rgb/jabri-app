@@ -113,6 +113,11 @@ button{
 
 <script type="module">
 
+// 🔐 حماية الدخول
+if(localStorage.getItem("adminAuth") !== "true"){
+  window.location.href = "/admin-login.html"
+}
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
