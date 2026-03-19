@@ -1,723 +1,118 @@
-if(localStorage.getItem("adminAuth") !== "true"){
-  window.location.href = "/admin-login.html"
-}
-<button onclick="logout()">تسجيل خروج</button>
-
-<script>
-function logout(){
-  localStorage.removeItem("adminAuth")
-  window.location.href = "/admin-login.html"
-}
-</script>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة إدارة مجمع جبري</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة إدارة مجمع جبري</title>
 
-  <style>
-    :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --text:#1a2238;
-      --muted:#7b8497;
-      --line:#e8edf4;
-      --blue-bg:#eef4ff;
-      --green-bg:#edf8f1;
-      --orange-bg:#fff6ea;
-      --red-bg:#fff1f1;
-      --purple-bg:#f5eefc;
-      --blue-text:#2f6fed;
-      --green-text:#18a957;
-      --orange-text:#d68a1d;
-      --red-text:#e05252;
-      --purple-text:#8d3df2;
-      --dark:#1d2940;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f6f7fb;
+}
 
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
+.header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:1px solid #eee;
+}
 
-    body{
-      margin:0;
-      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+.section{
+  background:#fff;
+  margin:15px;
+  padding:15px;
+  border-radius:15px;
+}
 
-    .app{
-      max-width:1320px;
-      margin:auto;
-      min-height:100vh;
-      padding-bottom:30px;
-    }
+.filters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
 
-    .header{
-      position:sticky;
-      top:0;
-      z-index:1000;
-      background:rgba(255,255,255,0.96);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      text-align:center;
-      padding:18px 10px 12px;
-      border-bottom:1px solid var(--line);
-      box-shadow:0 6px 20px rgba(0,0,0,0.04);
-    }
+select{
+  height:45px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  padding:5px;
+}
 
-    .title{
-      font-size:28px;
-      font-weight:900;
-      margin:0;
-      line-height:1.1;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+}
 
-    .subtitle{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:6px;
-      font-weight:700;
-    }
+th, td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
 
-    .section{
-      background:#fff;
-      margin:16px;
-      padding:20px;
-      border-radius:20px;
-      border:1px solid var(--line);
-      box-shadow:0 8px 24px rgba(16,24,40,0.05);
-    }
-
-    .section-title{
-      font-size:20px;
-      font-weight:900;
-      color:var(--dark);
-      margin:0 0 10px;
-    }
-
-    .section-subtitle{
-      font-size:14px;
-      color:var(--muted);
-      margin:0 0 15px;
-      line-height:1.6;
-    }
-
-    .top-bar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .filters{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(180px,1fr));
-      gap:12px;
-      width:100%;
-    }
-
-    .app-input,
-    .app-textarea{
-      width:100%;
-      height:48px;
-      border-radius:14px;
-      border:1px solid #d7deea;
-      padding:0 14px;
-      font-size:16px;
-      outline:none;
-      background:#fff;
-      color:var(--text);
-    }
-
-    .app-textarea{
-      height:120px;
-      padding:14px;
-      resize:vertical;
-      font-family:inherit;
-    }
-
-    .app-input:focus,
-    .app-textarea:focus{
-      border-color:#b9c5d7;
-      box-shadow:0 0 0 4px rgba(29,41,64,0.05);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:12px;
-    }
-
-    .box{
-      padding:18px;
-      border-radius:16px;
-      text-align:center;
-      min-height:110px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-    }
-
-    .blue{ background:var(--blue-bg); color:var(--blue-text); }
-    .green{ background:var(--green-bg); color:var(--green-text); }
-    .orange{ background:var(--orange-bg); color:var(--orange-text); }
-    .red{ background:var(--red-bg); color:var(--red-text); }
-    .purple{ background:var(--purple-bg); color:var(--purple-text); }
-
-    .label{
-      font-size:14px;
-      opacity:.85;
-      margin-bottom:10px;
-      font-weight:700;
-    }
-
-    .big{
-      font-size:30px;
-      font-weight:900;
-      line-height:1;
-    }
-
-    .charts-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-
-    .chart-card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .chart-wrap{
-      position:relative;
-      width:100%;
-      height:320px;
-    }
-
-    .table-wrap{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    table{
-      width:100%;
-      min-width:1180px;
-      border-collapse:collapse;
-    }
-
-    th, td{
-      padding:12px 10px;
-      border-bottom:1px solid var(--line);
-      text-align:center;
-      font-size:14px;
-      white-space:nowrap;
-    }
-
-    th{
-      background:#f8fafc;
-      color:var(--dark);
-      font-weight:900;
-    }
-
-    .paid{
-      color:var(--green-text);
-      font-weight:800;
-    }
-
-    .partial{
-      color:var(--orange-text);
-      font-weight:800;
-    }
-
-    .unpaid{
-      color:var(--red-text);
-      font-weight:800;
-    }
-
-    .empty-state{
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-      padding:20px 0 5px;
-      font-weight:700;
-      display:none;
-    }
-
-    .meta{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .action-btn{
-      border:none;
-      border-radius:10px;
-      padding:8px 12px;
-      font-size:13px;
-      font-weight:800;
-      cursor:pointer;
-      margin:2px;
-    }
-
-    .open-btn{
-      background:var(--blue-bg);
-      color:var(--blue-text);
-    }
-
-    .notify-btn{
-      background:var(--green-bg);
-      color:var(--green-text);
-    }
-
-    .quick-btn{
-      background:var(--orange-bg);
-      color:var(--orange-text);
-    }
-
-    .close-details-btn{
-      background:#f3f4f6;
-      color:#111827;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 14px;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .details-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .details-name{
-      font-size:28px;
-      font-weight:900;
-      color:var(--dark);
-      margin:0 0 8px;
-    }
-
-    .details-code{
-      font-size:16px;
-      color:var(--muted);
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    .details-meta{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .details-grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:12px;
-      margin-top:16px;
-    }
-
-    .notification-card{
-      background:#fafbfc;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      margin-bottom:10px;
-    }
-
-    .notification-title{
-      font-size:15px;
-      font-weight:900;
-      color:var(--dark);
-      margin-bottom:6px;
-    }
-
-    .notification-message{
-      font-size:14px;
-      line-height:1.7;
-      margin-bottom:8px;
-    }
-
-    .notification-date{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:2000;
-      padding:16px;
-    }
-
-    .modal{
-      width:100%;
-      max-width:560px;
-      background:#fff;
-      border-radius:22px;
-      padding:20px;
-      border:1px solid var(--line);
-      box-shadow:0 20px 50px rgba(0,0,0,0.18);
-    }
-
-    .modal-title{
-      font-size:20px;
-      font-weight:900;
-      margin:0 0 8px;
-      color:var(--dark);
-    }
-
-    .modal-subtitle{
-      font-size:14px;
-      color:var(--muted);
-      margin:0 0 16px;
-      line-height:1.6;
-    }
-
-    .modal-actions{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .btn{
-      height:44px;
-      border:none;
-      border-radius:12px;
-      padding:0 16px;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .btn-primary{
-      background:#1d2940;
-      color:#fff;
-    }
-
-    .btn-secondary{
-      background:#f3f4f6;
-      color:#111827;
-      border:1px solid var(--line);
-    }
-
-    .success-box{
-      display:none;
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      background:#edf8f1;
-      color:#16924a;
-      border:1px solid #cfeeda;
-      font-size:14px;
-      font-weight:700;
-    }
-
-    .error-box{
-      display:none;
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      background:#fff1f1;
-      color:#c62828;
-      border:1px solid #ffd8d8;
-      font-size:14px;
-      font-weight:700;
-    }
-
-    @media (min-width:768px){
-      .grid{
-        grid-template-columns:repeat(4,1fr);
-      }
-
-      .charts-grid{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .grid.status-cards{
-        grid-template-columns:repeat(3,1fr);
-      }
-
-      .details-grid{
-        grid-template-columns:repeat(4,1fr);
-      }
-    }
-
-    @media (max-width:767px){
-      .filters{
-        grid-template-columns:1fr;
-      }
-
-      .chart-wrap{
-        height:260px;
-      }
-    }
-  </style>
+button{
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  background:#1d2940;
+  color:#fff;
+  cursor:pointer;
+}
+</style>
 </head>
+
 <body>
 
-<div class="app">
-
-  <div class="header">
-    <div class="title">لوحة إدارة مجمع جبري</div>
-    <div class="subtitle">نسخة 5 — ملف مستأجر داخل الإدارة + إشعارات + رسوم</div>
-  </div>
-
-  <div class="section">
-    <div class="top-bar">
-      <div>
-        <h3 class="section-title">الفلاتر</h3>
-        <p class="section-subtitle">اختر السنة وابحث أو فلتر حسب الحالة</p>
-      </div>
-    </div>
-
-    <div class="filters">
-      <select id="yearSelect" class="app-input">
-        <option value="2026" selected>2026</option>
-        <option value="2025">2025</option>
-        <option value="2024">2024</option>
-        <option value="2023">2023</option>
-      </select>
-
-      <input id="searchInput" class="app-input" placeholder="ابحث برمز أو اسم المستأجر">
-
-      <select id="statusFilter" class="app-input">
-        <option value="all">كل الحالات</option>
-        <option value="paid">مسدد</option>
-        <option value="partial">جزئي</option>
-        <option value="unpaid">غير مسدد</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3 class="section-title">الملخص العام</h3>
-    <p class="section-subtitle">عرض سريع لأهم أرقام المجمع بعد الفلترة</p>
-
-    <div class="grid">
-      <div class="box blue">
-        <div class="label">إجمالي المدين</div>
-        <div id="totalDebit" class="big">0</div>
-      </div>
-
-      <div class="box green">
-        <div class="label">إجمالي الدائن</div>
-        <div id="totalCredit" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">إجمالي الرصيد</div>
-        <div id="totalBalance" class="big">0</div>
-      </div>
-
-      <div class="box red">
-        <div class="label">عدد النتائج</div>
-        <div id="totalTenants" class="big">0</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3 class="section-title">ملخص الحالات</h3>
-    <p class="section-subtitle">عدد المستأجرين حسب حالة السداد</p>
-
-    <div class="grid status-cards">
-      <div class="box green">
-        <div class="label">المسددين</div>
-        <div id="paidCount" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">الجزئي</div>
-        <div id="partialCount" class="big">0</div>
-      </div>
-
-      <div class="box red">
-        <div class="label">غير المسددين</div>
-        <div id="unpaidCount" class="big">0</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3 class="section-title">الرسوم البيانية</h3>
-    <p class="section-subtitle">تحليل سريع لحالات المستأجرين والمجاميع</p>
-
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">توزيع الحالات</h4>
-        <div class="chart-wrap">
-          <canvas id="statusChart"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">المجاميع المالية</h4>
-        <div class="chart-wrap">
-          <canvas id="summaryChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="top-bar">
-      <div>
-        <h3 class="section-title">جدول المستأجرين</h3>
-        <p class="section-subtitle">افتح ملف المستأجر داخل لوحة الإدارة أو أرسل إشعارًا مباشرًا</p>
-      </div>
-      <div id="tableMeta" class="meta"></div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>رمز المستأجر</th>
-            <th>اسم المستأجر</th>
-            <th>السنة</th>
-            <th>إجمالي المدين</th>
-            <th>إجمالي الدائن</th>
-            <th>الرصيد</th>
-            <th>إيجار السنة</th>
-            <th>الحالة</th>
-            <th>الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-
-    <div id="emptyState" class="empty-state">
-      لا توجد بيانات مطابقة للفلاتر الحالية
-    </div>
-  </div>
-
-  <div id="tenantDetailsSection" class="section" style="display:none;">
-    <div class="details-head">
-      <div>
-        <h2 id="detailsName" class="details-name">-</h2>
-        <div id="detailsCode" class="details-code">-</div>
-        <div id="detailsMeta" class="details-meta">-</div>
-      </div>
-
-      <button id="closeDetailsBtn" class="close-details-btn">إغلاق ملف المستأجر</button>
-    </div>
-
-    <div class="details-grid">
-      <div class="box blue">
-        <div class="label">عدد السنوات</div>
-        <div id="detailsYearsCount" class="big">0</div>
-      </div>
-
-      <div class="box green">
-        <div class="label">إجمالي الدائن</div>
-        <div id="detailsTotalCredit" class="big">0</div>
-      </div>
-
-      <div class="box orange">
-        <div class="label">إجمالي الرصيد</div>
-        <div id="detailsTotalBalance" class="big">0</div>
-      </div>
-
-      <div class="box purple">
-        <div class="label">عدد الإشعارات</div>
-        <div id="detailsNotificationsCount" class="big">0</div>
-      </div>
-    </div>
-
-    <div class="section" style="margin:16px 0 0;">
-      <h3 class="section-title">ملخص السنوات</h3>
-      <p class="section-subtitle">كل السنوات الخاصة بهذا المستأجر</p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>السنة</th>
-              <th>إجمالي المدين</th>
-              <th>إجمالي الدائن</th>
-              <th>الرصيد</th>
-              <th>إيجار السنة</th>
-              <th>الحالة</th>
-            </tr>
-          </thead>
-          <tbody id="detailsTableBody"></tbody>
-        </table>
-      </div>
-
-      <div id="detailsEmptyState" class="empty-state">لا توجد بيانات لهذا المستأجر</div>
-    </div>
-
-    <div class="charts-grid" style="margin-top:16px;">
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">تطور إجمالي الدائن</h4>
-        <div class="chart-wrap">
-          <canvas id="detailsCreditChart"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <h4 style="margin:0 0 12px;font-size:16px;">تطور الرصيد</h4>
-        <div class="chart-wrap">
-          <canvas id="detailsBalanceChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="section" style="margin:16px 0 0;">
-      <h3 class="section-title">إشعارات المستأجر</h3>
-      <p class="section-subtitle">آخر الرسائل المرسلة لهذا المستأجر</p>
-      <div id="detailsNotificationsList"></div>
-      <div id="detailsNotificationsEmpty" class="empty-state">لا توجد إشعارات لهذا المستأجر</div>
-    </div>
-  </div>
-
+<div class="header">
+لوحة إدارة مجمع جبري
 </div>
 
-<div id="notificationModal" class="modal-overlay">
-  <div class="modal">
-    <h3 class="modal-title">إرسال إشعار</h3>
-    <p id="modalSubtitle" class="modal-subtitle"></p>
+<!-- FILTERS -->
+<div class="section">
+  <h3>الفلاتر</h3>
 
-    <input id="notificationTitle" class="app-input" placeholder="عنوان الإشعار" style="margin-bottom:12px;">
-    <textarea id="notificationMessage" class="app-textarea" placeholder="اكتب نص الإشعار هنا"></textarea>
+  <div class="filters">
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-      <button id="quickDueBtn" class="action-btn quick-btn">تذكير استحقاق</button>
-      <button id="quickReceiptBtn" class="action-btn quick-btn">تأكيد دفعة</button>
-      <button id="quickReviewBtn" class="action-btn quick-btn">مراجعة الإدارة</button>
-    </div>
+    <select id="yearSelect">
+      <option value="2026">2026</option>
+      <option value="2025">2025</option>
+      <option value="2024">2024</option>
+      <option value="2023">2023</option>
+    </select>
 
-    <div id="successBox" class="success-box">تم إرسال الإشعار بنجاح</div>
-    <div id="errorBox" class="error-box">حدث خطأ أثناء إرسال الإشعار</div>
+    <select id="tenantFilter">
+      <option value="all">كل المستأجرين</option>
+    </select>
 
-    <div class="modal-actions">
-      <button id="closeModalBtn" class="btn btn-secondary">إلغاء</button>
-      <button id="sendNotificationBtn" class="btn btn-primary">إرسال الإشعار</button>
-    </div>
   </div>
+</div>
+
+<!-- TABLE -->
+<div class="section">
+  <h3>المستأجرين</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>رمز المستأجر</th>
+        <th>اسم المستأجر</th>
+        <th>السنة</th>
+        <th>إجمالي المدين</th>
+        <th>إجمالي الدائن</th>
+        <th>الرصيد</th>
+        <th>فتح</th>
+      </tr>
+    </thead>
+
+    <tbody id="tableBody"></tbody>
+  </table>
 </div>
 
 <script type="module">
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
@@ -726,503 +121,82 @@ const supabase = createClient(
 )
 
 let allRows = []
-let statusChart
-let summaryChart
-let detailsCreditChart
-let detailsBalanceChart
-let selectedTenantCode = ''
-let selectedTenantName = ''
 
-function formatNumber(n){
-  return Number(n || 0).toLocaleString('en-US')
+async function fetchData(year){
+
+  const { data } = await supabase
+    .from('tenant_summary')
+    .select('*')
+    .eq('year', year)
+
+  allRows = data || []
+
+  fillTenantDropdown()
+  renderTable()
 }
 
-function formatNotificationDate(dateValue){
-  const date = new Date(dateValue)
-  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit'
+function fillTenantDropdown(){
+
+  const select = document.getElementById('tenantFilter')
+
+  const names = [...new Set(allRows.map(x => x["اسم_المستأجر"]))]
+
+  select.innerHTML = '<option value="all">كل المستأجرين</option>'
+
+  names.forEach(name=>{
+    select.innerHTML += `<option value="${name}">${name}</option>`
   })
 }
 
-function getStatus(balance, credit){
-  const safeBalance = Number(balance || 0)
-  const safeCredit = Number(credit || 0)
+function renderTable(){
 
-  if(safeBalance === 0){
-    return { text:'مسدد', cls:'paid', key:'paid' }
-  } else if(safeCredit > 0){
-    return { text:'جزئي', cls:'partial', key:'partial' }
-  } else {
-    return { text:'غير مسدد', cls:'unpaid', key:'unpaid' }
-  }
-}
-
-async function fetchYearData(year){
-  const { data, error } = await supabase
-    .from('tenant_summary')
-    .select('*')
-    .eq('year', Number(year))
-    .order('رمز_المستأجر', { ascending: true })
-
-  if(error || !data){
-    allRows = []
-    renderFilteredData()
-    return
-  }
-
-  allRows = data
-  renderFilteredData()
-}
-
-function renderFilteredData(){
   const tbody = document.getElementById('tableBody')
-  const emptyState = document.getElementById('emptyState')
-  const tableMeta = document.getElementById('tableMeta')
-  const searchValue = document.getElementById('searchInput').value.trim().toLowerCase()
-  const statusValue = document.getElementById('statusFilter').value
-  const currentYear = document.getElementById('yearSelect').value
+  const tenantName = document.getElementById('tenantFilter').value
 
   tbody.innerHTML = ''
 
-  const filtered = allRows.filter(row => {
-    const tenantCode = String(row["رمز_المستأجر"] || '').toLowerCase()
-    const tenantName = String(row["اسم_المستأجر"] || '').toLowerCase()
-    const status = getStatus(row["الرصيد"], row["إجمالي_الدائن"])
-
-    const matchesSearch =
-      tenantCode.includes(searchValue) ||
-      tenantName.includes(searchValue)
-
-    const matchesStatus =
-      statusValue === 'all' || status.key === statusValue
-
-    return matchesSearch && matchesStatus
+  const filtered = allRows.filter(row=>{
+    if(tenantName === 'all') return true
+    return row["اسم_المستأجر"] === tenantName
   })
 
-  let totalDebit = 0
-  let totalCredit = 0
-  let totalBalance = 0
-
-  let paidCount = 0
-  let partialCount = 0
-  let unpaidCount = 0
-
-  if(filtered.length === 0){
-    document.getElementById('totalDebit').innerText = '0'
-    document.getElementById('totalCredit').innerText = '0'
-    document.getElementById('totalBalance').innerText = '0'
-    document.getElementById('totalTenants').innerText = '0'
-    document.getElementById('paidCount').innerText = '0'
-    document.getElementById('partialCount').innerText = '0'
-    document.getElementById('unpaidCount').innerText = '0'
-    tableMeta.innerText = `0 نتيجة - سنة ${currentYear}`
-    emptyState.style.display = 'block'
-    updateCharts(0, 0, 0, 0, 0, 0)
-    return
-  }
-
-  emptyState.style.display = 'none'
-
   filtered.forEach(row => {
-    const debit = Number(row["إجمالي_المدين"] || 0)
-    const credit = Number(row["إجمالي_الدائن"] || 0)
-    const balance = Number(row["الرصيد"] || 0)
-    const rent = Number(row["إيجار_السنة"] || 0)
 
-    totalDebit += debit
-    totalCredit += credit
-    totalBalance += balance
-
-    const status = getStatus(balance, credit)
-    if(status.key === 'paid') paidCount++
-    if(status.key === 'partial') partialCount++
-    if(status.key === 'unpaid') unpaidCount++
-
-    const tenantName = row["اسم_المستأجر"] || '-'
-    const tenantCode = row["رمز_المستأجر"] || '-'
-    const tenantYear = row["year"] || '-'
+    const debit = row["إجمالي_المدين"] || 0
+    const credit = row["إجمالي_الدائن"] || 0
+    const balance = row["الرصيد"] || 0
 
     tbody.innerHTML += `
       <tr>
-        <td>${tenantCode}</td>
-        <td>${tenantName}</td>
-        <td>${tenantYear}</td>
-        <td>${formatNumber(debit)}</td>
-        <td>${formatNumber(credit)}</td>
-        <td>${formatNumber(balance)}</td>
-        <td>${formatNumber(rent)}</td>
-        <td class="${status.cls}">${status.text}</td>
+        <td>${row["رمز_المستأجر"]}</td>
+        <td>${row["اسم_المستأجر"]}</td>
+        <td>${row["year"]}</td>
+        <td>${debit}</td>
+        <td>${credit}</td>
+        <td>${balance}</td>
+
         <td>
-          <button class="action-btn open-btn" data-open="${tenantCode}" data-name="${tenantName}">فتح ملف</button>
-          <button class="action-btn notify-btn" data-code="${tenantCode}" data-name="${tenantName}">إرسال إشعار</button>
+          <button onclick="openTenant('${row["رمز_المستأجر"]}')">فتح</button>
         </td>
       </tr>
     `
   })
-
-  document.getElementById('totalDebit').innerText = formatNumber(totalDebit)
-  document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
-  document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
-  document.getElementById('totalTenants').innerText = formatNumber(filtered.length)
-  document.getElementById('paidCount').innerText = formatNumber(paidCount)
-  document.getElementById('partialCount').innerText = formatNumber(partialCount)
-  document.getElementById('unpaidCount').innerText = formatNumber(unpaidCount)
-  tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة - سنة ${currentYear}`
-
-  updateCharts(
-    paidCount,
-    partialCount,
-    unpaidCount,
-    totalDebit,
-    totalCredit,
-    totalBalance
-  )
-
-  bindRowActions()
 }
 
-function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCredit, totalBalance){
-  if(statusChart) statusChart.destroy()
-  if(summaryChart) summaryChart.destroy()
-
-  statusChart = new Chart(document.getElementById('statusChart'), {
-    type: 'pie',
-    data: {
-      labels: ['مسدد', 'جزئي', 'غير مسدد'],
-      datasets: [{
-        data: [paidCount, partialCount, unpaidCount],
-        backgroundColor: ['#18a957', '#d68a1d', '#e05252'],
-        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-        borderWidth: 3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' }
-      }
-    }
-  })
-
-  summaryChart = new Chart(document.getElementById('summaryChart'), {
-    type: 'bar',
-    data: {
-      labels: ['إجمالي المدين', 'إجمالي الدائن', 'إجمالي الرصيد'],
-      datasets: [{
-        data: [totalDebit, totalCredit, totalBalance],
-        backgroundColor: ['#2f6fed', '#18a957', '#d68a1d'],
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value){
-              return formatNumber(value)
-            }
-          }
-        }
-      }
-    }
-  })
+window.openTenant = function(code){
+  window.location.href = "/index.html?tenant=" + code
 }
 
-function bindRowActions(){
-  document.querySelectorAll('[data-open]').forEach(btn => {
-    btn.addEventListener('click', async function(){
-      const code = this.getAttribute('data-open') || ''
-      const name = this.getAttribute('data-name') || ''
-      await openTenantDetails(code, name)
-    })
-  })
-
-  document.querySelectorAll('[data-code]').forEach(btn => {
-    btn.addEventListener('click', function(){
-      selectedTenantCode = this.getAttribute('data-code') || ''
-      selectedTenantName = this.getAttribute('data-name') || ''
-      openNotificationModal()
-    })
-  })
-}
-
-async function openTenantDetails(code, name){
-  const detailsSection = document.getElementById('tenantDetailsSection')
-  const detailsTableBody = document.getElementById('detailsTableBody')
-  const detailsEmptyState = document.getElementById('detailsEmptyState')
-  const detailsNotificationsList = document.getElementById('detailsNotificationsList')
-  const detailsNotificationsEmpty = document.getElementById('detailsNotificationsEmpty')
-
-  document.getElementById('detailsName').innerText = name || 'ملف المستأجر'
-  document.getElementById('detailsCode').innerText = code || '-'
-  document.getElementById('detailsMeta').innerText = 'جاري تحميل البيانات...'
-
-  detailsTableBody.innerHTML = ''
-  detailsNotificationsList.innerHTML = ''
-  detailsSection.style.display = 'block'
-
-  const { data: summaryRows, error: summaryError } = await supabase
-    .from('tenant_summary')
-    .select('*')
-    .eq('رمز_المستأجر', code)
-    .order('year', { ascending: true })
-
-  const { data: notificationsRows, error: notificationsError } = await supabase
-    .from('tenant_notifications')
-    .select('*')
-    .eq('tenant_code', code)
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if(summaryError || !summaryRows || summaryRows.length === 0){
-    detailsEmptyState.style.display = 'block'
-    document.getElementById('detailsMeta').innerText = 'لا توجد بيانات لهذا المستأجر'
-    document.getElementById('detailsYearsCount').innerText = '0'
-    document.getElementById('detailsTotalCredit').innerText = '0'
-    document.getElementById('detailsTotalBalance').innerText = '0'
-    document.getElementById('detailsNotificationsCount').innerText = '0'
-    detailsNotificationsEmpty.style.display = 'block'
-    if(detailsCreditChart) detailsCreditChart.destroy()
-    if(detailsBalanceChart) detailsBalanceChart.destroy()
-    detailsSection.scrollIntoView({ behavior:'smooth', block:'start' })
-    return
-  }
-
-  detailsEmptyState.style.display = 'none'
-
-  let totalCredit = 0
-  let totalBalance = 0
-  const years = []
-  const credits = []
-  const balances = []
-
-  summaryRows.forEach(row => {
-    const debit = Number(row["إجمالي_المدين"] || 0)
-    const credit = Number(row["إجمالي_الدائن"] || 0)
-    const balance = Number(row["الرصيد"] || 0)
-    const rent = Number(row["إيجار_السنة"] || 0)
-    const year = row["year"] || '-'
-    const status = getStatus(balance, credit)
-
-    totalCredit += credit
-    totalBalance += balance
-    years.push(String(year))
-    credits.push(credit)
-    balances.push(balance)
-
-    detailsTableBody.innerHTML += `
-      <tr>
-        <td>${year}</td>
-        <td>${formatNumber(debit)}</td>
-        <td>${formatNumber(credit)}</td>
-        <td>${formatNumber(balance)}</td>
-        <td>${formatNumber(rent)}</td>
-        <td class="${status.cls}">${status.text}</td>
-      </tr>
-    `
-  })
-
-  document.getElementById('detailsMeta').innerText = `${summaryRows.length} سنة مسجلة لهذا المستأجر`
-  document.getElementById('detailsYearsCount').innerText = formatNumber(summaryRows.length)
-  document.getElementById('detailsTotalCredit').innerText = formatNumber(totalCredit)
-  document.getElementById('detailsTotalBalance').innerText = formatNumber(totalBalance)
-
-  const notificationsCount = notificationsRows && !notificationsError ? notificationsRows.length : 0
-  document.getElementById('detailsNotificationsCount').innerText = formatNumber(notificationsCount)
-
-  if(!notificationsRows || notificationsRows.length === 0){
-    detailsNotificationsEmpty.style.display = 'block'
-  } else {
-    detailsNotificationsEmpty.style.display = 'none'
-    notificationsRows.forEach(item => {
-      detailsNotificationsList.innerHTML += `
-        <div class="notification-card">
-          <div class="notification-title">${item.title || ''}</div>
-          <div class="notification-message">${item.message || ''}</div>
-          <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
-        </div>
-      `
-    })
-  }
-
-  if(detailsCreditChart) detailsCreditChart.destroy()
-  if(detailsBalanceChart) detailsBalanceChart.destroy()
-
-  detailsCreditChart = new Chart(document.getElementById('detailsCreditChart'), {
-    type: 'line',
-    data: {
-      labels: years,
-      datasets: [{
-        label: 'إجمالي الدائن',
-        data: credits,
-        borderColor: '#18a957',
-        backgroundColor: 'rgba(24,169,87,0.10)',
-        borderWidth: 3,
-        tension: 0.35,
-        fill: true,
-        pointRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value){
-              return formatNumber(value)
-            }
-          }
-        }
-      }
-    }
-  })
-
-  detailsBalanceChart = new Chart(document.getElementById('detailsBalanceChart'), {
-    type: 'bar',
-    data: {
-      labels: years,
-      datasets: [{
-        label: 'الرصيد',
-        data: balances,
-        backgroundColor: '#d68a1d',
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value){
-              return formatNumber(value)
-            }
-          }
-        }
-      }
-    }
-  })
-
-  detailsSection.scrollIntoView({ behavior:'smooth', block:'start' })
-}
-
-function closeTenantDetails(){
-  document.getElementById('tenantDetailsSection').style.display = 'none'
-}
-
-function openNotificationModal(){
-  document.getElementById('notificationModal').style.display = 'flex'
-  document.getElementById('modalSubtitle').innerText = `إرسال إشعار إلى ${selectedTenantName} (${selectedTenantCode})`
-  document.getElementById('notificationTitle').value = ''
-  document.getElementById('notificationMessage').value = ''
-  document.getElementById('successBox').style.display = 'none'
-  document.getElementById('errorBox').style.display = 'none'
-}
-
-function closeNotificationModal(){
-  document.getElementById('notificationModal').style.display = 'none'
-}
-
-async function sendNotification(){
-  const title = document.getElementById('notificationTitle').value.trim()
-  const message = document.getElementById('notificationMessage').value.trim()
-
-  document.getElementById('successBox').style.display = 'none'
-  document.getElementById('errorBox').style.display = 'none'
-
-  if(!selectedTenantCode || !title || !message){
-    document.getElementById('errorBox').innerText = 'يرجى تعبئة عنوان الإشعار ونص الرسالة'
-    document.getElementById('errorBox').style.display = 'block'
-    return
-  }
-
-  const { error } = await supabase
-    .from('tenant_notifications')
-    .insert([{
-      tenant_code: selectedTenantCode,
-      title,
-      message
-    }])
-
-  if(error){
-    document.getElementById('errorBox').innerText = 'حدث خطأ أثناء إرسال الإشعار'
-    document.getElementById('errorBox').style.display = 'block'
-    return
-  }
-
-  document.getElementById('successBox').style.display = 'block'
-  document.getElementById('successBox').innerText = 'تم إرسال الإشعار بنجاح'
-}
-
-function setQuickNotification(type){
-  if(type === 'due'){
-    document.getElementById('notificationTitle').value = 'تذكير استحقاق'
-    document.getElementById('notificationMessage').value = 'نود تذكيركم بوجود مبلغ مستحق على حسابكم. يرجى مراجعة البوابة والقيام بالتسديد في أقرب وقت ممكن.'
-  }
-
-  if(type === 'receipt'){
-    document.getElementById('notificationTitle').value = 'تأكيد تسجيل دفعة'
-    document.getElementById('notificationMessage').value = 'نفيدكم بأنه تم تسجيل دفعة جديدة على حسابكم. يمكنكم مراجعة البوابة للاطلاع على التحديثات.'
-  }
-
-  if(type === 'review'){
-    document.getElementById('notificationTitle').value = 'يرجى مراجعة الإدارة'
-    document.getElementById('notificationMessage').value = 'يرجى مراجعة إدارة المجمع بخصوص حسابكم في أقرب وقت ممكن.'
-  }
-}
-
-document.getElementById('yearSelect').addEventListener('change', function(e){
-  fetchYearData(e.target.value)
+document.getElementById('yearSelect').addEventListener('change', e=>{
+  fetchData(e.target.value)
 })
 
-document.getElementById('searchInput').addEventListener('input', function(){
-  renderFilteredData()
+document.getElementById('tenantFilter').addEventListener('change', ()=>{
+  renderTable()
 })
 
-document.getElementById('statusFilter').addEventListener('change', function(){
-  renderFilteredData()
-})
+fetchData(2026)
 
-document.getElementById('closeModalBtn').addEventListener('click', closeNotificationModal)
-document.getElementById('sendNotificationBtn').addEventListener('click', sendNotification)
-document.getElementById('closeDetailsBtn').addEventListener('click', closeTenantDetails)
-
-document.getElementById('quickDueBtn').addEventListener('click', function(){
-  setQuickNotification('due')
-})
-
-document.getElementById('quickReceiptBtn').addEventListener('click', function(){
-  setQuickNotification('receipt')
-})
-
-document.getElementById('quickReviewBtn').addEventListener('click', function(){
-  setQuickNotification('review')
-})
-
-document.getElementById('notificationModal').addEventListener('click', function(e){
-  if(e.target.id === 'notificationModal'){
-    closeNotificationModal()
-  }
-})
-
-fetchYearData(2026)
 </script>
 
 </body>
