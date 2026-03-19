@@ -431,6 +431,69 @@
       font-weight:600;
     }
 
+    .notify-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .notify-badge{
+      min-width:30px;
+      height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      background:var(--red-bg);
+      color:var(--red-text);
+      border:1px solid #ffd8d8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .notification-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .notification-item{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .notification-title{
+      font-size:15px;
+      font-weight:900;
+      color:#1d2940;
+      margin-bottom:6px;
+    }
+
+    .notification-message{
+      font-size:14px;
+      color:var(--text);
+      line-height:1.7;
+      margin-bottom:8px;
+    }
+
+    .notification-date{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .empty-notifications{
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      padding:10px 0 0;
+      font-weight:700;
+    }
+
     @media (min-width:768px){
       .app{
         max-width:780px;
@@ -578,6 +641,19 @@
     </div>
 
     <div class="section">
+      <div class="notify-head">
+        <div>
+          <h3 class="section-title" style="margin-bottom:4px;">الإشعارات</h3>
+          <p class="section-subtitle" style="margin-bottom:0;">آخر التنبيهات والرسائل من الإدارة</p>
+        </div>
+        <div id="notifyBadge" class="notify-badge">0</div>
+      </div>
+
+      <div id="notificationList" class="notification-list"></div>
+      <div id="emptyNotifications" class="empty-notifications hidden">لا توجد إشعارات حالياً</div>
+    </div>
+
+    <div class="section">
       <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
       <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
 
@@ -645,6 +721,60 @@ function formatDateTime(dateValue){
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function formatNotificationDate(dateValue){
+  const date = new Date(dateValue)
+  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+async function loadNotifications(code){
+  const notificationList = document.getElementById('notificationList')
+  const emptyNotifications = document.getElementById('emptyNotifications')
+  const notifyBadge = document.getElementById('notifyBadge')
+
+  notificationList.innerHTML = ''
+
+  const { data, error } = await supabase
+    .from('tenant_notifications')
+    .select('*')
+    .eq('tenant_code', code)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if(error || !data || data.length === 0){
+    notifyBadge.innerText = '0'
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
+  emptyNotifications.classList.add('hidden')
+
+  const unreadCount = data.filter(item => !item.is_read).length
+  notifyBadge.innerText = unreadCount
+
+  data.forEach(item => {
+    notificationList.innerHTML += `
+      <div class="notification-item">
+        <div class="notification-title">${item.title || ''}</div>
+        <div class="notification-message">${item.message || ''}</div>
+        <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
+      </div>
+    `
+  })
+
+  const unreadIds = data.filter(item => !item.is_read).map(item => item.id)
+  if(unreadIds.length > 0){
+    await supabase
+      .from('tenant_notifications')
+      .update({ is_read: true })
+      .in('id', unreadIds)
+
+    notifyBadge.innerText = '0'
+  }
 }
 
 async function loadCreditTrend(code){
@@ -716,9 +846,7 @@ async function loadCreditTrend(code){
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: function(context){
@@ -856,6 +984,7 @@ async function loadTenantSummary(code, year){
   })
 
   await loadCreditTrend(code)
+  await loadNotifications(code)
 }
 
 window.login = async function(){
@@ -916,7 +1045,19 @@ document.getElementById('yearSelect').addEventListener('change', async function(
 })
 
 const saved = localStorage.getItem('jabri_tenant_code')
-if(saved){
+const urlParams = new URLSearchParams(window.location.search)
+const tenantFromUrl = (urlParams.get('tenant') || '').trim().toUpperCase()
+const yearFromUrl = Number(urlParams.get('year') || 2026)
+
+if(tenantFromUrl){
+  document.getElementById('code').value = tenantFromUrl
+  if([2023, 2024, 2025, 2026].includes(yearFromUrl)){
+    document.getElementById('yearSelect').value = String(yearFromUrl)
+  } else {
+    document.getElementById('yearSelect').value = '2026'
+  }
+  login()
+} else if(saved){
   document.getElementById('code').value = saved
   document.getElementById('yearSelect').value = '2026'
   login()
