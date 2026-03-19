@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لوحة إدارة مجمع جبري</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
@@ -35,7 +36,7 @@
     }
 
     .app{
-      max-width:1200px;
+      max-width:1280px;
       margin:auto;
       min-height:100vh;
       padding-bottom:30px;
@@ -91,9 +92,23 @@
       line-height:1.6;
     }
 
+    .top-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(180px,1fr));
+      gap:12px;
+      width:100%;
+    }
+
     .app-input{
       width:100%;
-      max-width:220px;
       height:48px;
       border-radius:14px;
       border:1px solid #d7deea;
@@ -144,6 +159,25 @@
       line-height:1;
     }
 
+    .charts-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+
+    .chart-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .chart-wrap{
+      position:relative;
+      width:100%;
+      height:320px;
+    }
+
     .table-wrap{
       overflow-x:auto;
       -webkit-overflow-scrolling:touch;
@@ -151,7 +185,7 @@
 
     table{
       width:100%;
-      min-width:760px;
+      min-width:900px;
       border-collapse:collapse;
     }
 
@@ -167,8 +201,6 @@
       background:#f8fafc;
       color:#1d2940;
       font-weight:900;
-      position:sticky;
-      top:0;
     }
 
     .paid{
@@ -192,14 +224,7 @@
       font-size:14px;
       padding:20px 0 5px;
       font-weight:700;
-    }
-
-    .top-bar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      display:none;
     }
 
     .meta{
@@ -212,6 +237,20 @@
       .grid{
         grid-template-columns:repeat(4,1fr);
       }
+
+      .charts-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width:767px){
+      .filters{
+        grid-template-columns:1fr;
+      }
+
+      .chart-wrap{
+        height:260px;
+      }
     }
   </style>
 </head>
@@ -221,28 +260,39 @@
 
   <div class="header">
     <div class="title">لوحة إدارة مجمع جبري</div>
-    <div class="subtitle">متابعة الملخص المالي للمستأجرين حسب السنة</div>
+    <div class="subtitle">نسخة 2 — فلترة، بحث، ورسوم بيانية</div>
   </div>
 
   <div class="section">
     <div class="top-bar">
       <div>
-        <h3 class="section-title">اختيار السنة</h3>
-        <p class="section-subtitle">اختر السنة لعرض ملخص المستأجرين</p>
+        <h3 class="section-title">الفلاتر</h3>
+        <p class="section-subtitle">اختر السنة وابحث أو فلتر حسب الحالة</p>
       </div>
+    </div>
 
+    <div class="filters">
       <select id="yearSelect" class="app-input">
         <option value="2026" selected>2026</option>
         <option value="2025">2025</option>
         <option value="2024">2024</option>
         <option value="2023">2023</option>
       </select>
+
+      <input id="searchInput" class="app-input" placeholder="ابحث برمز أو اسم المستأجر">
+
+      <select id="statusFilter" class="app-input">
+        <option value="all">كل الحالات</option>
+        <option value="paid">مسدد</option>
+        <option value="partial">جزئي</option>
+        <option value="unpaid">غير مسدد</option>
+      </select>
     </div>
   </div>
 
   <div class="section">
     <h3 class="section-title">الملخص العام</h3>
-    <p class="section-subtitle">عرض سريع لأهم أرقام المجمع في السنة المختارة</p>
+    <p class="section-subtitle">عرض سريع لأهم أرقام المجمع بعد الفلترة</p>
 
     <div class="grid">
       <div class="box blue">
@@ -261,8 +311,29 @@
       </div>
 
       <div class="box red">
-        <div class="label">عدد المستأجرين</div>
+        <div class="label">عدد النتائج</div>
         <div id="totalTenants" class="big">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3 class="section-title">الرسوم البيانية</h3>
+    <p class="section-subtitle">تحليل سريع لحالات المستأجرين والمجاميع</p>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h4 style="margin:0 0 12px;font-size:16px;">توزيع الحالات</h4>
+        <div class="chart-wrap">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h4 style="margin:0 0 12px;font-size:16px;">المجاميع المالية</h4>
+        <div class="chart-wrap">
+          <canvas id="summaryChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -271,7 +342,7 @@
     <div class="top-bar">
       <div>
         <h3 class="section-title">جدول المستأجرين</h3>
-        <p class="section-subtitle">عرض حالة كل مستأجر في السنة المختارة</p>
+        <p class="section-subtitle">عرض حالة كل مستأجر في السنة المختارة بعد الفلترة</p>
       </div>
       <div id="tableMeta" class="meta"></div>
     </div>
@@ -294,8 +365,8 @@
       </table>
     </div>
 
-    <div id="emptyState" class="empty-state" style="display:none;">
-      لا توجد بيانات لهذه السنة
+    <div id="emptyState" class="empty-state">
+      لا توجد بيانات مطابقة للفلاتر الحالية
     </div>
   </div>
 
@@ -309,6 +380,10 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
+let allRows = []
+let statusChart
+let summaryChart
+
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
@@ -318,44 +393,77 @@ function getStatus(balance, credit){
   const safeCredit = Number(credit || 0)
 
   if(safeBalance === 0){
-    return { text:'مسدد', cls:'paid' }
+    return { text:'مسدد', cls:'paid', key:'paid' }
   } else if(safeCredit > 0){
-    return { text:'جزئي', cls:'partial' }
+    return { text:'جزئي', cls:'partial', key:'partial' }
   } else {
-    return { text:'غير مسدد', cls:'unpaid' }
+    return { text:'غير مسدد', cls:'unpaid', key:'unpaid' }
   }
 }
 
-async function loadData(year){
+async function fetchYearData(year){
   const { data, error } = await supabase
     .from('tenant_summary')
     .select('*')
     .eq('year', Number(year))
     .order('رمز_المستأجر', { ascending: true })
 
-  const tbody = document.getElementById('tableBody')
-  const emptyState = document.getElementById('emptyState')
-  const tableMeta = document.getElementById('tableMeta')
-
-  tbody.innerHTML = ''
-
-  if(error || !data || data.length === 0){
-    document.getElementById('totalDebit').innerText = '0'
-    document.getElementById('totalCredit').innerText = '0'
-    document.getElementById('totalBalance').innerText = '0'
-    document.getElementById('totalTenants').innerText = '0'
-    tableMeta.innerText = '0 مستأجر'
-    emptyState.style.display = 'block'
+  if(error || !data){
+    allRows = []
+    renderFilteredData()
     return
   }
 
-  emptyState.style.display = 'none'
+  allRows = data
+  renderFilteredData()
+}
+
+function renderFilteredData(){
+  const tbody = document.getElementById('tableBody')
+  const emptyState = document.getElementById('emptyState')
+  const tableMeta = document.getElementById('tableMeta')
+  const searchValue = document.getElementById('searchInput').value.trim().toLowerCase()
+  const statusValue = document.getElementById('statusFilter').value
+
+  tbody.innerHTML = ''
+
+  let filtered = allRows.filter(row => {
+    const tenantCode = String(row["رمز_المستأجر"] || '').toLowerCase()
+    const tenantName = String(row["اسم_المستأجر"] || '').toLowerCase()
+    const status = getStatus(row["الرصيد"], row["إجمالي_الدائن"])
+
+    const matchesSearch =
+      tenantCode.includes(searchValue) ||
+      tenantName.includes(searchValue)
+
+    const matchesStatus =
+      statusValue === 'all' || status.key === statusValue
+
+    return matchesSearch && matchesStatus
+  })
 
   let totalDebit = 0
   let totalCredit = 0
   let totalBalance = 0
 
-  data.forEach(row => {
+  let paidCount = 0
+  let partialCount = 0
+  let unpaidCount = 0
+
+  if(filtered.length === 0){
+    document.getElementById('totalDebit').innerText = '0'
+    document.getElementById('totalCredit').innerText = '0'
+    document.getElementById('totalBalance').innerText = '0'
+    document.getElementById('totalTenants').innerText = '0'
+    tableMeta.innerText = '0 نتيجة'
+    emptyState.style.display = 'block'
+    updateCharts(0, 0, 0, 0, 0, 0)
+    return
+  }
+
+  emptyState.style.display = 'none'
+
+  filtered.forEach(row => {
     const debit = Number(row["إجمالي_المدين"] || 0)
     const credit = Number(row["إجمالي_الدائن"] || 0)
     const balance = Number(row["الرصيد"] || 0)
@@ -366,6 +474,10 @@ async function loadData(year){
     totalBalance += balance
 
     const status = getStatus(balance, credit)
+    if(status.key === 'paid') paidCount++
+    if(status.key === 'partial') partialCount++
+    if(status.key === 'unpaid') unpaidCount++
+
     const tenantName = row["اسم_المستأجر"] || '-'
     const tenantCode = row["رمز_المستأجر"] || '-'
     const tenantYear = row["year"] || '-'
@@ -387,15 +499,90 @@ async function loadData(year){
   document.getElementById('totalDebit').innerText = formatNumber(totalDebit)
   document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
   document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
-  document.getElementById('totalTenants').innerText = formatNumber(data.length)
-  tableMeta.innerText = `${formatNumber(data.length)} مستأجر`
+  document.getElementById('totalTenants').innerText = formatNumber(filtered.length)
+  tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة`
+
+  updateCharts(
+    paidCount,
+    partialCount,
+    unpaidCount,
+    totalDebit,
+    totalCredit,
+    totalBalance
+  )
+}
+
+function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCredit, totalBalance){
+  if(statusChart) statusChart.destroy()
+  if(summaryChart) summaryChart.destroy()
+
+  statusChart = new Chart(document.getElementById('statusChart'), {
+    type: 'pie',
+    data: {
+      labels: ['مسدد', 'جزئي', 'غير مسدد'],
+      datasets: [{
+        data: [paidCount, partialCount, unpaidCount],
+        backgroundColor: ['#18a957', '#d68a1d', '#e05252'],
+        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  })
+
+  summaryChart = new Chart(document.getElementById('summaryChart'), {
+    type: 'bar',
+    data: {
+      labels: ['إجمالي المدين', 'إجمالي الدائن', 'إجمالي الرصيد'],
+      datasets: [{
+        data: [totalDebit, totalCredit, totalBalance],
+        backgroundColor: ['#2f6fed', '#18a957', '#d68a1d'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value){
+              return formatNumber(value)
+            }
+          }
+        }
+      }
+    }
+  })
 }
 
 document.getElementById('yearSelect').addEventListener('change', function(e){
-  loadData(e.target.value)
+  fetchYearData(e.target.value)
 })
 
-loadData(2026)
+document.getElementById('searchInput').addEventListener('input', function(){
+  renderFilteredData()
+})
+
+document.getElementById('statusFilter').addEventListener('change', function(){
+  renderFilteredData()
+})
+
+fetchYearData(2026)
 </script>
 
 </body>
