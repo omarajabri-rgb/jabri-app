@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f6f7fb;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:1px solid #eee;
+}
+
+.section{
+  background:#fff;
+  margin:15px;
+  padding:15px;
+  border-radius:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.box{
+  padding:15px;
+  border-radius:10px;
+  text-align:center;
+}
+
+.blue{background:#eef4ff}
+.green{background:#edf8f1}
+.red{background:#fff1f1}
+.orange{background:#fff6ea}
+
+.big{
+  font-size:22px;
+  font-weight:bold;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+
+.paid{color:green}
+.partial{color:orange}
+.unpaid{color:red}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  لوحة إدارة مجمع جبري
+</div>
+
+<div class="section">
+  <select id="yearSelect">
+    <option value="2026">2026</option>
+    <option value="2025">2025</option>
+    <option value="2024">2024</option>
+    <option value="2023">2023</option>
+  </select>
+</div>
+
+<div class="section grid">
+  <div class="box blue">
+    <div>إجمالي المدين</div>
+    <div id="totalDebit" class="big">0</div>
+  </div>
+
+  <div class="box green">
+    <div>إجمالي الدائن</div>
+    <div id="totalCredit" class="big">0</div>
+  </div>
+
+  <div class="box orange">
+    <div>إجمالي الرصيد</div>
+    <div id="totalBalance" class="big">0</div>
+  </div>
+
+  <div class="box red">
+    <div>عدد المستأجرين</div>
+    <div id="totalTenants" class="big">0</div>
+  </div>
+</div>
+
+<div class="section">
+  <table>
+    <thead>
+      <tr>
+        <th>المستأجر</th>
+        <th>المدين</th>
+        <th>الدائن</th>
+        <th>الرصيد</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script type="module">
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+  'PUT_YOUR_SUPABASE_KEY_HERE'
+)
+
+async function loadData(year){
+
+  const { data } = await supabase
+    .from('tenant_summary')
+    .select('*')
+    .eq('year', year)
+
+  let totalDebit = 0
+  let totalCredit = 0
+  let totalBalance = 0
+
+  const tbody = document.getElementById('tableBody')
+  tbody.innerHTML = ''
+
+  data.forEach(row => {
+
+    const debit = Number(row["إجمالي_المدين"] || 0)
+    const credit = Number(row["إجمالي_الدائن"] || 0)
+    const balance = Number(row["الرصيد"] || 0)
+
+    totalDebit += debit
+    totalCredit += credit
+    totalBalance += balance
+
+    let status = ''
+    let cls = ''
+
+    if(balance === 0){
+      status = 'مسدد'
+      cls = 'paid'
+    } else if(credit > 0){
+      status = 'جزئي'
+      cls = 'partial'
+    } else {
+      status = 'غير مسدد'
+      cls = 'unpaid'
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${row["رمز_المستأجر"]}</td>
+        <td>${debit}</td>
+        <td>${credit}</td>
+        <td>${balance}</td>
+        <td class="${cls}">${status}</td>
+      </tr>
+    `
+  })
+
+  document.getElementById('totalDebit').innerText = totalDebit
+  document.getElementById('totalCredit').innerText = totalCredit
+  document.getElementById('totalBalance').innerText = totalBalance
+  document.getElementById('totalTenants').innerText = data.length
+}
+
+document.getElementById('yearSelect').addEventListener('change', e=>{
+  loadData(e.target.value)
+})
+
+loadData(2026)
+
+</script>
+
+</body>
+</html>
