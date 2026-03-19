@@ -17,10 +17,13 @@
       --green-bg:#edf8f1;
       --orange-bg:#fff6ea;
       --red-bg:#fff1f1;
+      --purple-bg:#f5eefc;
       --blue-text:#2f6fed;
       --green-text:#18a957;
       --orange-text:#d68a1d;
       --red-text:#e05252;
+      --purple-text:#8d3df2;
+      --dark:#1d2940;
     }
 
     *{
@@ -36,7 +39,7 @@
     }
 
     .app{
-      max-width:1280px;
+      max-width:1320px;
       margin:auto;
       min-height:100vh;
       padding-bottom:30px;
@@ -81,7 +84,7 @@
     .section-title{
       font-size:20px;
       font-weight:900;
-      color:#1d2940;
+      color:var(--dark);
       margin:0 0 10px;
     }
 
@@ -107,7 +110,7 @@
       width:100%;
     }
 
-    .app-input{
+    .app-input, .app-textarea{
       width:100%;
       height:48px;
       border-radius:14px;
@@ -119,7 +122,14 @@
       color:var(--text);
     }
 
-    .app-input:focus{
+    .app-textarea{
+      height:120px;
+      padding:14px;
+      resize:vertical;
+      font-family:inherit;
+    }
+
+    .app-input:focus, .app-textarea:focus{
       border-color:#b9c5d7;
       box-shadow:0 0 0 4px rgba(29,41,64,0.05);
     }
@@ -145,6 +155,7 @@
     .green{ background:var(--green-bg); color:var(--green-text); }
     .orange{ background:var(--orange-bg); color:var(--orange-text); }
     .red{ background:var(--red-bg); color:var(--red-text); }
+    .purple{ background:var(--purple-bg); color:var(--purple-text); }
 
     .label{
       font-size:14px;
@@ -185,7 +196,7 @@
 
     table{
       width:100%;
-      min-width:900px;
+      min-width:1120px;
       border-collapse:collapse;
     }
 
@@ -199,7 +210,7 @@
 
     th{
       background:#f8fafc;
-      color:#1d2940;
+      color:var(--dark);
       font-weight:900;
     }
 
@@ -233,6 +244,114 @@
       font-weight:700;
     }
 
+    .action-btn{
+      border:none;
+      border-radius:10px;
+      padding:8px 12px;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      margin:2px;
+    }
+
+    .open-btn{
+      background:var(--blue-bg);
+      color:var(--blue-text);
+    }
+
+    .notify-btn{
+      background:var(--green-bg);
+      color:var(--green-text);
+    }
+
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:2000;
+      padding:16px;
+    }
+
+    .modal{
+      width:100%;
+      max-width:560px;
+      background:#fff;
+      border-radius:22px;
+      padding:20px;
+      border:1px solid var(--line);
+      box-shadow:0 20px 50px rgba(0,0,0,0.18);
+    }
+
+    .modal-title{
+      font-size:20px;
+      font-weight:900;
+      margin:0 0 8px;
+      color:var(--dark);
+    }
+
+    .modal-subtitle{
+      font-size:14px;
+      color:var(--muted);
+      margin:0 0 16px;
+      line-height:1.6;
+    }
+
+    .modal-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .btn{
+      height:44px;
+      border:none;
+      border-radius:12px;
+      padding:0 16px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:#1d2940;
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#f3f4f6;
+      color:#111827;
+      border:1px solid var(--line);
+    }
+
+    .success-box{
+      display:none;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#edf8f1;
+      color:#16924a;
+      border:1px solid #cfeeda;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .error-box{
+      display:none;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:#fff1f1;
+      color:#c62828;
+      border:1px solid #ffd8d8;
+      font-size:14px;
+      font-weight:700;
+    }
+
     @media (min-width:768px){
       .grid{
         grid-template-columns:repeat(4,1fr);
@@ -240,6 +359,10 @@
 
       .charts-grid{
         grid-template-columns:1fr 1fr;
+      }
+
+      .grid.status-cards{
+        grid-template-columns:repeat(3,1fr);
       }
     }
 
@@ -260,7 +383,7 @@
 
   <div class="header">
     <div class="title">لوحة إدارة مجمع جبري</div>
-    <div class="subtitle">نسخة 2 — فلترة، بحث، ورسوم بيانية</div>
+    <div class="subtitle">نسخة 3 — بحث، فلترة، رسوم بيانية، وفتح ملف / إرسال إشعار</div>
   </div>
 
   <div class="section">
@@ -318,6 +441,28 @@
   </div>
 
   <div class="section">
+    <h3 class="section-title">ملخص الحالات</h3>
+    <p class="section-subtitle">عدد المستأجرين حسب حالة السداد</p>
+
+    <div class="grid status-cards">
+      <div class="box green">
+        <div class="label">المسددين</div>
+        <div id="paidCount" class="big">0</div>
+      </div>
+
+      <div class="box orange">
+        <div class="label">الجزئي</div>
+        <div id="partialCount" class="big">0</div>
+      </div>
+
+      <div class="box red">
+        <div class="label">غير المسددين</div>
+        <div id="unpaidCount" class="big">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
     <h3 class="section-title">الرسوم البيانية</h3>
     <p class="section-subtitle">تحليل سريع لحالات المستأجرين والمجاميع</p>
 
@@ -342,7 +487,7 @@
     <div class="top-bar">
       <div>
         <h3 class="section-title">جدول المستأجرين</h3>
-        <p class="section-subtitle">عرض حالة كل مستأجر في السنة المختارة بعد الفلترة</p>
+        <p class="section-subtitle">فتح ملف المستأجر أو إرسال إشعار مباشر له</p>
       </div>
       <div id="tableMeta" class="meta"></div>
     </div>
@@ -359,6 +504,7 @@
             <th>الرصيد</th>
             <th>إيجار السنة</th>
             <th>الحالة</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -372,6 +518,24 @@
 
 </div>
 
+<div id="notificationModal" class="modal-overlay">
+  <div class="modal">
+    <h3 class="modal-title">إرسال إشعار</h3>
+    <p id="modalSubtitle" class="modal-subtitle"></p>
+
+    <input id="notificationTitle" class="app-input" placeholder="عنوان الإشعار" style="margin-bottom:12px;">
+    <textarea id="notificationMessage" class="app-textarea" placeholder="اكتب نص الإشعار هنا"></textarea>
+
+    <div id="successBox" class="success-box">تم إرسال الإشعار بنجاح</div>
+    <div id="errorBox" class="error-box">حدث خطأ أثناء إرسال الإشعار</div>
+
+    <div class="modal-actions">
+      <button id="closeModalBtn" class="btn btn-secondary">إلغاء</button>
+      <button id="sendNotificationBtn" class="btn btn-primary">إرسال الإشعار</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -383,6 +547,8 @@ const supabase = createClient(
 let allRows = []
 let statusChart
 let summaryChart
+let selectedTenantCode = ''
+let selectedTenantName = ''
 
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
@@ -427,7 +593,7 @@ function renderFilteredData(){
 
   tbody.innerHTML = ''
 
-  let filtered = allRows.filter(row => {
+  const filtered = allRows.filter(row => {
     const tenantCode = String(row["رمز_المستأجر"] || '').toLowerCase()
     const tenantName = String(row["اسم_المستأجر"] || '').toLowerCase()
     const status = getStatus(row["الرصيد"], row["إجمالي_الدائن"])
@@ -455,6 +621,9 @@ function renderFilteredData(){
     document.getElementById('totalCredit').innerText = '0'
     document.getElementById('totalBalance').innerText = '0'
     document.getElementById('totalTenants').innerText = '0'
+    document.getElementById('paidCount').innerText = '0'
+    document.getElementById('partialCount').innerText = '0'
+    document.getElementById('unpaidCount').innerText = '0'
     tableMeta.innerText = '0 نتيجة'
     emptyState.style.display = 'block'
     updateCharts(0, 0, 0, 0, 0, 0)
@@ -492,6 +661,10 @@ function renderFilteredData(){
         <td>${formatNumber(balance)}</td>
         <td>${formatNumber(rent)}</td>
         <td class="${status.cls}">${status.text}</td>
+        <td>
+          <button class="action-btn open-btn" data-open="${tenantCode}">فتح ملف</button>
+          <button class="action-btn notify-btn" data-code="${tenantCode}" data-name="${tenantName}">إرسال إشعار</button>
+        </td>
       </tr>
     `
   })
@@ -500,6 +673,9 @@ function renderFilteredData(){
   document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
   document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
   document.getElementById('totalTenants').innerText = formatNumber(filtered.length)
+  document.getElementById('paidCount').innerText = formatNumber(paidCount)
+  document.getElementById('partialCount').innerText = formatNumber(partialCount)
+  document.getElementById('unpaidCount').innerText = formatNumber(unpaidCount)
   tableMeta.innerText = `${formatNumber(filtered.length)} نتيجة`
 
   updateCharts(
@@ -510,6 +686,8 @@ function renderFilteredData(){
     totalCredit,
     totalBalance
   )
+
+  bindRowActions()
 }
 
 function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCredit, totalBalance){
@@ -570,6 +748,67 @@ function updateCharts(paidCount, partialCount, unpaidCount, totalDebit, totalCre
   })
 }
 
+function bindRowActions(){
+  document.querySelectorAll('[data-open]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const code = this.getAttribute('data-open')
+      window.open(`/index.html?tenant=${encodeURIComponent(code)}`, '_blank')
+    })
+  })
+
+  document.querySelectorAll('[data-code]').forEach(btn => {
+    btn.addEventListener('click', function(){
+      selectedTenantCode = this.getAttribute('data-code') || ''
+      selectedTenantName = this.getAttribute('data-name') || ''
+      openNotificationModal()
+    })
+  })
+}
+
+function openNotificationModal(){
+  document.getElementById('notificationModal').style.display = 'flex'
+  document.getElementById('modalSubtitle').innerText = `إرسال إشعار إلى ${selectedTenantName} (${selectedTenantCode})`
+  document.getElementById('notificationTitle').value = ''
+  document.getElementById('notificationMessage').value = ''
+  document.getElementById('successBox').style.display = 'none'
+  document.getElementById('errorBox').style.display = 'none'
+}
+
+function closeNotificationModal(){
+  document.getElementById('notificationModal').style.display = 'none'
+}
+
+async function sendNotification(){
+  const title = document.getElementById('notificationTitle').value.trim()
+  const message = document.getElementById('notificationMessage').value.trim()
+
+  document.getElementById('successBox').style.display = 'none'
+  document.getElementById('errorBox').style.display = 'none'
+
+  if(!selectedTenantCode || !title || !message){
+    document.getElementById('errorBox').innerText = 'يرجى تعبئة عنوان الإشعار ونص الرسالة'
+    document.getElementById('errorBox').style.display = 'block'
+    return
+  }
+
+  const { error } = await supabase
+    .from('tenant_notifications')
+    .insert([{
+      tenant_code: selectedTenantCode,
+      title,
+      message
+    }])
+
+  if(error){
+    document.getElementById('errorBox').innerText = 'حدث خطأ أثناء إرسال الإشعار'
+    document.getElementById('errorBox').style.display = 'block'
+    return
+  }
+
+  document.getElementById('successBox').style.display = 'block'
+  document.getElementById('successBox').innerText = 'تم إرسال الإشعار بنجاح'
+}
+
 document.getElementById('yearSelect').addEventListener('change', function(e){
   fetchYearData(e.target.value)
 })
@@ -580,6 +819,15 @@ document.getElementById('searchInput').addEventListener('input', function(){
 
 document.getElementById('statusFilter').addEventListener('change', function(){
   renderFilteredData()
+})
+
+document.getElementById('closeModalBtn').addEventListener('click', closeNotificationModal)
+document.getElementById('sendNotificationBtn').addEventListener('click', sendNotification)
+
+document.getElementById('notificationModal').addEventListener('click', function(e){
+  if(e.target.id === 'notificationModal'){
+    closeNotificationModal()
+  }
 })
 
 fetchYearData(2026)
