@@ -1,6 +1,14 @@
 if(localStorage.getItem("adminAuth") !== "true"){
   window.location.href = "/admin-login.html"
 }
+<button onclick="logout()">تسجيل خروج</button>
+
+<script>
+function logout(){
+  localStorage.removeItem("adminAuth")
+  window.location.href = "/admin-login.html"
+}
+</script>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
