@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jabri Complex</title>
+  <title>مجمع جبري</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -368,8 +368,14 @@
     }
 
     .chart-wrap{
-      max-width:250px;
+      max-width:280px;
       margin:auto;
+    }
+
+    .line-chart-wrap{
+      width:100%;
+      margin:auto;
+      min-height:260px;
     }
 
     .chart-legend{
@@ -416,6 +422,15 @@
       font-weight:600;
     }
 
+    .trend-note{
+      margin-top:12px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      font-weight:600;
+    }
+
     @media (min-width:768px){
       .app{
         max-width:780px;
@@ -447,6 +462,10 @@
       .hero h1{
         font-size:40px;
       }
+
+      .line-chart-wrap{
+        max-width:680px;
+      }
     }
   </style>
 </head>
@@ -455,9 +474,9 @@
 <div class="app">
 
   <div class="header">
-    <img src="logo_complex.png" class="header-logo" alt="Jabri Complex Logo">
-    <div class="title">Jabri Complex</div>
-    <div class="subtitle">Tenant Portal</div>
+    <img src="logo_complex.png" class="header-logo" alt="شعار مجمع جبري">
+    <div class="title">مجمع جبري</div>
+    <div class="subtitle">بوابة المستأجرين</div>
   </div>
 
   <div id="heroCard" class="section hero">
@@ -579,7 +598,20 @@
       </div>
 
       <div id="paymentNote" class="note"></div>
+    </div>
 
+    <div id="trendSection" class="section hidden">
+      <h3 class="section-title">تطور إجمالي الدائن من 2023 إلى 2026</h3>
+      <p class="section-subtitle">يعرض نمو إجمالي الدائن للمستأجر عبر السنوات حتى سنة 2026</p>
+
+      <div class="line-chart-wrap">
+        <canvas id="creditTrendChart"></canvas>
+      </div>
+
+      <div id="trendNote" class="trend-note"></div>
+    </div>
+
+    <div class="section">
       <button onclick="logout()" class="soft-btn">تسجيل خروج</button>
     </div>
 
@@ -595,6 +627,7 @@ const supabase = createClient(
 )
 
 let chart
+let creditTrendChart
 let currentTenantCode = ''
 let selectedYear = 2026
 
@@ -612,6 +645,108 @@ function formatDateTime(dateValue){
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+async function loadCreditTrend(code){
+  const trendSection = document.getElementById('trendSection')
+  const trendNote = document.getElementById('trendNote')
+
+  if(selectedYear !== 2026){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart) {
+      creditTrendChart.destroy()
+      creditTrendChart = null
+    }
+    trendNote.innerText = ''
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('tenant_summary')
+    .select('year, إجمالي_الدائن')
+    .eq('رمز_المستأجر', code)
+    .in('year', [2023, 2024, 2025, 2026])
+    .order('year', { ascending: true })
+
+  if(error || !data || data.length === 0){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart) {
+      creditTrendChart.destroy()
+      creditTrendChart = null
+    }
+    trendNote.innerText = ''
+    return
+  }
+
+  const years = [2023, 2024, 2025, 2026]
+  const creditMap = {}
+  data.forEach(row => {
+    creditMap[Number(row.year)] = Number(row["إجمالي_الدائن"] || 0)
+  })
+
+  const values = years.map(year => creditMap[year] ?? 0)
+  const firstValue = values[0] || 0
+  const lastValue = values[values.length - 1] || 0
+  const diff = lastValue - firstValue
+
+  trendSection.classList.remove('hidden')
+
+  if(creditTrendChart) {
+    creditTrendChart.destroy()
+  }
+
+  creditTrendChart = new Chart(document.getElementById('creditTrendChart'), {
+    type: 'line',
+    data: {
+      labels: years.map(String),
+      datasets: [{
+        label: 'إجمالي الدائن',
+        data: values,
+        borderColor: '#18a957',
+        backgroundColor: 'rgba(24,169,87,0.10)',
+        borderWidth: 3,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#18a957'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context){
+              return 'إجمالي الدائن: ' + formatNumber(context.raw) + ' د.أ'
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value){
+              return formatNumber(value)
+            }
+          }
+        }
+      }
+    }
+  })
+
+  if(diff > 0){
+    trendNote.innerText = `ازداد إجمالي الدائن بمقدار ${formatNumber(diff)} د.أ من سنة 2023 إلى سنة 2026.`
+  } else if(diff < 0){
+    trendNote.innerText = `انخفض إجمالي الدائن بمقدار ${formatNumber(Math.abs(diff))} د.أ من سنة 2023 إلى سنة 2026.`
+  } else {
+    trendNote.innerText = 'إجمالي الدائن ثابت بين سنة 2023 وسنة 2026.'
+  }
 }
 
 async function loadTenantSummary(code, year){
@@ -692,28 +827,8 @@ async function loadTenantSummary(code, year){
 
   if(chart) chart.destroy()
 
-  const centerTextPlugin = {
-    id: 'centerText',
-    beforeDraw(chartInstance) {
-      const {width, height, ctx} = chartInstance
-      ctx.restore()
-
-      ctx.font = 'bold 26px Arial'
-      ctx.fillStyle = '#1d2940'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(Math.round(paidPercent) + '%', width / 2, height / 2 - 10)
-
-      ctx.font = '14px Arial'
-      ctx.fillStyle = '#7b8497'
-      ctx.fillText('مدفوع', width / 2, height / 2 + 18)
-
-      ctx.save()
-    }
-  }
-
   chart = new Chart(document.getElementById('chart'), {
-    type:'doughnut',
+    type:'pie',
     data:{
       labels:['مدفوع','متبقي'],
       datasets:[{
@@ -721,19 +836,26 @@ async function loadTenantSummary(code, year){
         backgroundColor:['#18a957','#e05252'],
         borderColor:['#ffffff','#ffffff'],
         borderWidth:4,
-        hoverOffset:8,
-        cutout:'70%'
+        hoverOffset:8
       }]
     },
     options:{
       responsive:true,
       maintainAspectRatio:true,
       plugins:{
-        legend:{ display:false }
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: function(context){
+              return `${context.label}: ${formatNumber(context.raw)} د.أ`
+            }
+          }
+        }
       }
-    },
-    plugins:[centerTextPlugin]
+    }
   })
+
+  await loadCreditTrend(code)
 }
 
 window.login = async function(){
