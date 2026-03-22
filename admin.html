@@ -184,6 +184,7 @@
       gap:10px;
       margin-top:10px;
       flex-wrap:wrap;
+      flex-direction:row-reverse;
     }
 
     .tenant-select{
@@ -232,6 +233,14 @@
       text-align:center;
       border:1px solid var(--line);
       box-shadow:none;
+      opacity:0;
+      transform:translateY(8px);
+      transition:opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .card-box.show{
+      opacity:1;
+      transform:translateY(0);
     }
 
     .blue{
@@ -639,6 +648,52 @@
     }
   }
 
+  function animateValue(elementId, endValue, duration = 900){
+    const element = document.getElementById(elementId)
+    const finalValue = Number(endValue || 0)
+
+    if (!element) return
+
+    if (finalValue === 0){
+      element.innerText = '0'
+      return
+    }
+
+    const startValue = 0
+    const startTime = performance.now()
+
+    function update(currentTime){
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const currentValue = Math.round(startValue + (finalValue - startValue) * eased)
+
+      element.innerText = formatNumber(currentValue)
+
+      if(progress < 1){
+        requestAnimationFrame(update)
+      }
+    }
+
+    requestAnimationFrame(update)
+  }
+
+  function fadeCards(){
+    const cards = document.querySelectorAll('.card-box')
+
+    cards.forEach(card => {
+      card.classList.remove('show')
+    })
+
+    requestAnimationFrame(() => {
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add('show')
+        }, index * 120)
+      })
+    })
+  }
+
   function showBox(id){
     const el = document.getElementById(id)
     el.style.display = 'block'
@@ -726,9 +781,10 @@
       totalBalance += Number(row["الرصيد"] || 0)
     })
 
-    document.getElementById('totalDebit').innerText = formatNumber(totalDebit)
-    document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
-    document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
+    animateValue('totalDebit', totalDebit)
+    animateValue('totalCredit', totalCredit)
+    animateValue('totalBalance', totalBalance)
+    fadeCards()
 
     renderPieChart(totalDebit, totalCredit)
   }
