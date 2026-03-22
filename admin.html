@@ -47,9 +47,15 @@
     .top-nav{
       display:flex;
       align-items:flex-start;
-      justify-content:space-between;
+      gap:12px;
       margin-bottom:18px;
       position:relative;
+    }
+
+    .menu-wrap{
+      position:relative;
+      flex-shrink:0;
+      order:1;
     }
 
     .header{
@@ -60,6 +66,7 @@
       box-shadow:var(--shadow);
       flex:1;
       min-height:92px;
+      order:2;
     }
 
     .title{
@@ -74,12 +81,6 @@
       color:var(--muted);
       font-size:14px;
       font-weight:700;
-    }
-
-    .menu-wrap{
-      position:relative;
-      margin-right:12px;
-      flex-shrink:0;
     }
 
     .menu-btn{
@@ -171,6 +172,56 @@
       color:var(--muted);
       line-height:1.7;
       font-weight:700;
+    }
+
+    .dashboard-top{
+      margin-bottom:18px;
+    }
+
+    .tenant-toolbar{
+      display:flex;
+      align-items:end;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .tenant-select-wrap{
+      width:260px;
+      max-width:100%;
+    }
+
+    .tenant-select{
+      width:260px;
+      max-width:100%;
+      height:48px;
+    }
+
+    .mini-card{
+      background:#fafbfc;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px 16px;
+      min-width:180px;
+      max-width:240px;
+      min-height:86px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .mini-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:800;
+    }
+
+    .mini-value{
+      font-size:15px;
+      color:var(--dark);
+      font-weight:900;
+      line-height:1.6;
+      word-break:break-word;
     }
 
     .cards{
@@ -356,9 +407,16 @@
         grid-template-columns:1fr;
       }
 
-      .top-nav{
+      .tenant-toolbar{
         flex-direction:row;
-        align-items:flex-start;
+        align-items:stretch;
+      }
+
+      .tenant-select-wrap,
+      .tenant-select,
+      .mini-card{
+        width:100%;
+        max-width:100%;
       }
 
       .title{
@@ -368,6 +426,15 @@
       .chart-wrap{
         height:260px;
       }
+
+      .menu-btn{
+        width:50px;
+        height:50px;
+      }
+
+      .menu-dropdown{
+        width:190px;
+      }
     }
   </style>
 </head>
@@ -376,11 +443,6 @@
 <div class="app">
 
   <div class="top-nav">
-    <div class="header">
-      <h1 class="title">لوحة إدارة مجمع جبري</h1>
-      <div class="subtitle">إدارة سريعة وبسيطة لبيانات المستأجرين</div>
-    </div>
-
     <div class="menu-wrap">
       <button id="menuBtn" class="menu-btn" aria-label="القائمة">
         <span></span>
@@ -394,13 +456,34 @@
         <button class="menu-item" data-page="notificationPage">إرسال تنبيه</button>
       </div>
     </div>
+
+    <div class="header">
+      <h1 class="title">لوحة إدارة مجمع جبري</h1>
+      <div class="subtitle">إدارة سريعة وبسيطة لبيانات المستأجرين</div>
+    </div>
   </div>
 
   <!-- Dashboard -->
   <div id="dashboardPage" class="page active">
     <div class="section">
-      <h3 class="section-title">ملخص سنة 2026</h3>
-      <p class="section-subtitle">عرض سريع لحالة الحساب لسنة 2026 من جدول tenant_summary</p>
+      <h3 id="dashboardTitle" class="section-title">ملخص سنة 2026</h3>
+      <p class="section-subtitle">اختر اسم المستأجر من القائمة لعرض كشفه داخل لوحة التحكم</p>
+
+      <div class="dashboard-top">
+        <div class="tenant-toolbar">
+          <div class="tenant-select-wrap">
+            <label class="field-label" for="dashboardTenant">اسم المستأجر</label>
+            <select id="dashboardTenant" class="app-select tenant-select">
+              <option value="ALL">كل المستأجرين</option>
+            </select>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-label">آخر ظهور</div>
+            <div id="lastSeenValue" class="mini-value">—</div>
+          </div>
+        </div>
+      </div>
 
       <div class="cards">
         <div class="card-box blue">
@@ -533,7 +616,6 @@
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  // حماية بسيطة مؤقتة
   if(localStorage.getItem('adminAuth') !== 'true'){
     window.location.href = '/admin-login.html'
   }
@@ -545,11 +627,26 @@
 
   const YEAR = 2026
   let allRows2026 = []
+  let tenantsMap = {}
   let debitCreditChart
   let balanceLineChart
 
   function formatNumber(value){
     return Number(value || 0).toLocaleString('en-US')
+  }
+
+  function formatDateTime(value){
+    if(!value) return '—'
+    try{
+      const d = new Date(value)
+      if(isNaN(d.getTime())) return value
+      return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }catch{
+      return value
+    }
   }
 
   function showBox(id){
@@ -583,10 +680,26 @@
     document.getElementById('menuDropdown').classList.remove('show')
   }
 
+  async function loadTenantsMeta(){
+    const { data } = await supabase
+      .from('tenants')
+      .select('*')
+
+    tenantsMap = {}
+    ;(data || []).forEach(row => {
+      const code = row.tenant_code || row["رمز_المستأجر"]
+      if(code){
+        tenantsMap[String(code)] = row
+      }
+    })
+  }
+
   function renderTenantDropdowns(rows){
+    const dashboardTenant = document.getElementById('dashboardTenant')
     const paymentTenant = document.getElementById('paymentTenant')
     const notifyTenant = document.getElementById('notifyTenant')
 
+    dashboardTenant.innerHTML = '<option value="ALL">كل المستأجرين</option>'
     paymentTenant.innerHTML = '<option value="">اختر اسم المستأجر</option>'
     notifyTenant.innerHTML = '<option value="">اختر اسم المستأجر</option>'
 
@@ -594,6 +707,11 @@
       const tenantName = row["اسم_المستأجر"] || ''
       const tenantCode = row["رمز_المستأجر"] || ''
       if(!tenantName || !tenantCode) return
+
+      const option0 = document.createElement('option')
+      option0.value = tenantCode
+      option0.textContent = tenantName
+      dashboardTenant.appendChild(option0)
 
       const option1 = document.createElement('option')
       option1.value = tenantCode
@@ -623,6 +741,37 @@
     document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
 
     renderCharts(totalDebit, totalCredit, totalBalance)
+  }
+
+  function renderSelectedTenantDashboard(){
+    const tenantCode = document.getElementById('dashboardTenant').value
+
+    if(tenantCode === 'ALL'){
+      document.getElementById('dashboardTitle').innerText = 'ملخص سنة 2026'
+      document.getElementById('lastSeenValue').innerText = '—'
+      renderDashboard(allRows2026)
+      return
+    }
+
+    const selectedRows = allRows2026.filter(row =>
+      String(row["رمز_المستأجر"]) === String(tenantCode)
+    )
+
+    const tenantRow = selectedRows[0]
+    const tenantMeta = tenantsMap[String(tenantCode)] || {}
+
+    document.getElementById('dashboardTitle').innerText =
+      tenantRow?.["اسم_المستأجر"]
+        ? `كشف حساب ${tenantRow["اسم_المستأجر"]}`
+        : 'كشف الحساب'
+
+    document.getElementById('lastSeenValue').innerText = formatDateTime(
+      tenantMeta.last_seen ||
+      tenantMeta["آخر_ظهور"] ||
+      tenantRow?.last_seen
+    )
+
+    renderDashboard(selectedRows)
   }
 
   function renderCharts(totalDebit, totalCredit, totalBalance){
@@ -699,8 +848,9 @@
     }
 
     allRows2026 = data
-    renderDashboard(allRows2026)
     renderTenantDropdowns(allRows2026)
+    document.getElementById('dashboardTenant').value = 'ALL'
+    renderSelectedTenantDashboard()
   }
 
   async function savePayment(){
@@ -748,6 +898,9 @@
 
     showBox('paymentSuccess')
     await loadDashboard()
+
+    document.getElementById('dashboardTenant').value = tenantCode
+    renderSelectedTenantDashboard()
   }
 
   async function saveNotification(){
@@ -805,6 +958,7 @@
 
   document.getElementById('savePaymentBtn').addEventListener('click', savePayment)
   document.getElementById('sendNotificationBtn').addEventListener('click', saveNotification)
+  document.getElementById('dashboardTenant').addEventListener('change', renderSelectedTenantDashboard)
 
   document.getElementById('notifyType').addEventListener('change', function(){
     document.getElementById('notifyMessage').value = getNotificationTemplate(this.value)
@@ -818,9 +972,9 @@
     })
   })
 
-  // تاريخ اليوم افتراضي
   document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0]
 
+  await loadTenantsMeta()
   loadDashboard()
 </script>
 
