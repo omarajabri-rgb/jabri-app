@@ -235,11 +235,11 @@
       margin-bottom:18px;
     }
 
-    /* Drop list يمين + آخر ظهور يأخذ مساحة */
+    /* Drop list يمين + آخر ظهور قريب ومرتب */
     .tenant-row{
       display:flex;
       align-items:center;
-      justify-content:space-between;
+      justify-content:flex-start;
       gap:10px;
       margin-top:10px;
       flex-wrap:nowrap;
@@ -280,13 +280,8 @@
       font-size:13px;
       color:#7b8497;
       font-weight:700;
-      flex:1;
-      min-width:0;
-      text-align:left;
+      text-align:right;
       white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      opacity:.92;
     }
 
     .cards{
@@ -572,10 +567,6 @@
 
       .menu-dropdown{
         width:190px;
-      }
-
-      .tenant-row{
-        gap:8px;
       }
 
       .tenant-select{
