@@ -898,6 +898,7 @@ async function loadCreditTrend(code){
 
   const years = [2023, 2024, 2025, 2026]
   const creditMap = {}
+
   data.forEach(row => {
     creditMap[Number(row.year)] = Number(row["إجمالي_الدائن"] || 0)
   })
@@ -913,7 +914,9 @@ async function loadCreditTrend(code){
     creditTrendChart.destroy()
   }
 
-  creditTrendChart = new Chart(document.getElementById('creditTrendChart'), {
+  const ctx = document.getElementById('creditTrendChart')
+
+  creditTrendChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: years.map(String),
@@ -927,12 +930,22 @@ async function loadCreditTrend(code){
         fill: true,
         pointRadius: 6,
         pointHoverRadius: 8,
-        pointBackgroundColor: '#18a957'
+        pointBackgroundColor: '#18a957',
+        pointBorderWidth: 3,
+        pointBorderColor: '#ffffff'
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 8,
+          right: 6,
+          bottom: 0,
+          left: 6
+        }
+      },
       animation: {
         duration: 1400,
         easing: 'easeOutQuart'
@@ -948,11 +961,31 @@ async function loadCreditTrend(code){
         }
       },
       scales: {
+        x: {
+          offset: false,
+          grid: {
+            color: 'rgba(123,132,151,0.12)'
+          },
+          ticks: {
+            font: {
+              size: 12,
+              weight: '700'
+            }
+          }
+        },
         y: {
           beginAtZero: true,
+          grid: {
+            color: 'rgba(123,132,151,0.12)'
+          },
           ticks: {
+            stepSize: 200,
             callback: function(value){
               return formatNumber(value)
+            },
+            font: {
+              size: 12,
+              weight: '700'
             }
           }
         }
