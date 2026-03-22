@@ -178,25 +178,22 @@
       margin-bottom:18px;
     }
 
-    .tenant-inline{
+    .tenant-row{
       display:flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
+      margin-top:10px;
       flex-wrap:wrap;
-      font-size:14px;
-      font-weight:700;
-      color:var(--dark);
     }
 
     .tenant-select{
+      width:160px;
       height:38px;
-      min-width:170px;
-      max-width:220px;
-      padding:0 10px;
       border-radius:10px;
       border:1px solid #d7deea;
-      background:#fff;
       font-size:14px;
+      padding:0 10px;
+      background:#fff;
       font-weight:700;
       color:var(--text);
       outline:none;
@@ -207,15 +204,15 @@
       box-shadow:0 0 0 4px rgba(29,41,64,0.05);
     }
 
-    .separator{
-      color:#c5cbd6;
-      font-weight:700;
+    .divider{
+      color:#bbb;
+      font-weight:bold;
     }
 
     .last-seen-inline{
-      color:var(--muted);
+      font-size:13px;
+      color:#7b8497;
       font-weight:700;
-      font-size:14px;
     }
 
     .cards{
@@ -225,29 +222,42 @@
     }
 
     .card-box{
-      border-radius:18px;
-      padding:20px;
-      min-height:120px;
+      border-radius:14px;
+      padding:14px;
+      min-height:90px;
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
       text-align:center;
+      border:1px solid var(--line);
+      box-shadow:none;
     }
 
-    .blue{ background:var(--blue-bg); color:var(--blue-text); }
-    .green{ background:var(--green-bg); color:var(--green-text); }
-    .orange{ background:var(--orange-bg); color:var(--orange-text); }
+    .blue{
+      background:#f4f8ff;
+      color:#2f6fed;
+    }
+
+    .green{
+      background:#f3fbf6;
+      color:#18a957;
+    }
+
+    .orange{
+      background:#fff8f1;
+      color:#d68a1d;
+    }
 
     .card-label{
-      font-size:14px;
-      font-weight:800;
-      margin-bottom:10px;
-      opacity:.9;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+      opacity:.8;
     }
 
     .card-value{
-      font-size:34px;
+      font-size:28px;
       font-weight:900;
       line-height:1;
     }
@@ -401,15 +411,6 @@
         grid-template-columns:1fr;
       }
 
-      .tenant-inline{
-        align-items:flex-start;
-      }
-
-      .tenant-select{
-        min-width:150px;
-        max-width:180px;
-      }
-
       .title{
         font-size:24px;
       }
@@ -461,14 +462,16 @@
       <p class="section-subtitle">اختر اسم المستأجر من القائمة لعرض كشفه داخل لوحة التحكم</p>
 
       <div class="dashboard-top">
-        <div class="tenant-inline">
+        <div class="tenant-row">
           <select id="dashboardTenant" class="tenant-select">
             <option value="ALL">كل المستأجرين</option>
           </select>
 
-          <span class="separator">|</span>
+          <span class="divider">|</span>
 
-          <span id="lastSeenInline" class="last-seen-inline">آخر ظهور: —</span>
+          <span class="last-seen-inline">
+            آخر ظهور: <span id="lastSeenInline">—</span>
+          </span>
         </div>
       </div>
 
@@ -727,7 +730,7 @@
     document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
     document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
 
-    renderCharts(totalDebit, totalCredit)
+    renderPieChart(totalDebit, totalCredit)
   }
 
   function buildAnnualLineData(tenantCode){
@@ -767,7 +770,7 @@
 
     if(tenantCode === 'ALL'){
       document.getElementById('dashboardTitle').innerText = 'ملخص سنة 2026'
-      document.getElementById('lastSeenInline').innerText = 'آخر ظهور: —'
+      document.getElementById('lastSeenInline').innerText = '—'
       renderDashboard(allRows2026)
       renderAnnualLineChart('ALL')
       return
@@ -786,7 +789,7 @@
         : 'كشف الحساب'
 
     document.getElementById('lastSeenInline').innerText =
-      'آخر ظهور: ' + formatDateTime(
+      formatDateTime(
         tenantMeta.last_seen ||
         tenantMeta["آخر_ظهور"] ||
         tenantRow?.last_seen
@@ -796,7 +799,7 @@
     renderAnnualLineChart(tenantCode)
   }
 
-  function renderCharts(totalDebit, totalCredit){
+  function renderPieChart(totalDebit, totalCredit){
     if(debitCreditChart) debitCreditChart.destroy()
 
     debitCreditChart = new Chart(document.getElementById('debitCreditChart'), {
