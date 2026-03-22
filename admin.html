@@ -178,50 +178,44 @@
       margin-bottom:18px;
     }
 
-    .tenant-toolbar{
+    .tenant-inline{
       display:flex;
-      align-items:end;
-      gap:12px;
+      align-items:center;
+      gap:8px;
       flex-wrap:wrap;
-    }
-
-    .tenant-select-wrap{
-      width:260px;
-      max-width:100%;
+      font-size:14px;
+      font-weight:700;
+      color:var(--dark);
     }
 
     .tenant-select{
-      width:260px;
-      max-width:100%;
-      height:48px;
+      height:38px;
+      min-width:170px;
+      max-width:220px;
+      padding:0 10px;
+      border-radius:10px;
+      border:1px solid #d7deea;
+      background:#fff;
+      font-size:14px;
+      font-weight:700;
+      color:var(--text);
+      outline:none;
     }
 
-    .mini-card{
-      background:#fafbfc;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px 16px;
-      min-width:180px;
-      max-width:240px;
-      min-height:86px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
+    .tenant-select:focus{
+      border-color:#b9c5d7;
+      box-shadow:0 0 0 4px rgba(29,41,64,0.05);
     }
 
-    .mini-label{
-      font-size:13px;
+    .separator{
+      color:#c5cbd6;
+      font-weight:700;
+    }
+
+    .last-seen-inline{
       color:var(--muted);
-      margin-bottom:8px;
-      font-weight:800;
-    }
-
-    .mini-value{
-      font-size:15px;
-      color:var(--dark);
-      font-weight:900;
-      line-height:1.6;
-      word-break:break-word;
+      font-weight:700;
+      font-size:14px;
     }
 
     .cards{
@@ -407,16 +401,13 @@
         grid-template-columns:1fr;
       }
 
-      .tenant-toolbar{
-        flex-direction:row;
-        align-items:stretch;
+      .tenant-inline{
+        align-items:flex-start;
       }
 
-      .tenant-select-wrap,
-      .tenant-select,
-      .mini-card{
-        width:100%;
-        max-width:100%;
+      .tenant-select{
+        min-width:150px;
+        max-width:180px;
       }
 
       .title{
@@ -470,18 +461,14 @@
       <p class="section-subtitle">اختر اسم المستأجر من القائمة لعرض كشفه داخل لوحة التحكم</p>
 
       <div class="dashboard-top">
-        <div class="tenant-toolbar">
-          <div class="tenant-select-wrap">
-            <label class="field-label" for="dashboardTenant">اسم المستأجر</label>
-            <select id="dashboardTenant" class="app-select tenant-select">
-              <option value="ALL">كل المستأجرين</option>
-            </select>
-          </div>
+        <div class="tenant-inline">
+          <select id="dashboardTenant" class="tenant-select">
+            <option value="ALL">كل المستأجرين</option>
+          </select>
 
-          <div class="mini-card">
-            <div class="mini-label">آخر ظهور</div>
-            <div id="lastSeenValue" class="mini-value">—</div>
-          </div>
+          <span class="separator">|</span>
+
+          <span id="lastSeenInline" class="last-seen-inline">آخر ظهور: —</span>
         </div>
       </div>
 
@@ -512,13 +499,12 @@
       </div>
 
       <div class="chart-card">
-        <h4 class="chart-title">Line Chart — الرصيد السنوي 2026</h4>
+        <h4 class="chart-title">Line Chart — الرصيد السنوي</h4>
         <div class="chart-wrap">
           <canvas id="balanceLineChart"></canvas>
         </div>
-        <p class="chart-note">
-          هذا الرسم جاهز، لكن البيانات الشهرية غير موجودة داخل tenant_summary حاليًا.
-          عند إضافة مصدر شهري لاحقًا سيتحوّل مباشرة إلى خط سنوي فعلي من يناير إلى ديسمبر.
+        <p class="chart-note" id="lineChartNote">
+          يعرض تطور الرصيد بشكل سنوي.
         </p>
       </div>
     </div>
@@ -627,6 +613,7 @@
 
   const YEAR = 2026
   let allRows2026 = []
+  let allRowsAllYears = []
   let tenantsMap = {}
   let debitCreditChart
   let balanceLineChart
@@ -740,7 +727,39 @@
     document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
     document.getElementById('totalBalance').innerText = formatNumber(totalBalance)
 
-    renderCharts(totalDebit, totalCredit, totalBalance)
+    renderCharts(totalDebit, totalCredit)
+  }
+
+  function buildAnnualLineData(tenantCode){
+    if(tenantCode === 'ALL'){
+      const grouped = {}
+
+      allRowsAllYears.forEach(row => {
+        const year = Number(row.year || 0)
+        if(!year) return
+        if(!grouped[year]) grouped[year] = 0
+        grouped[year] += Number(row["الرصيد"] || 0)
+      })
+
+      const years = Object.keys(grouped).map(Number).sort((a, b) => a - b)
+      const values = years.map(year => grouped[year])
+
+      return {
+        labels: years,
+        values,
+        note: 'يعرض تطور الرصيد السنوي للمجمع كاملاً.'
+      }
+    }
+
+    const filtered = allRowsAllYears
+      .filter(row => String(row["رمز_المستأجر"]) === String(tenantCode))
+      .sort((a, b) => Number(a.year || 0) - Number(b.year || 0))
+
+    return {
+      labels: filtered.map(row => row.year),
+      values: filtered.map(row => Number(row["الرصيد"] || 0)),
+      note: 'يعرض تطور الرصيد السنوي للمستأجر المختار.'
+    }
   }
 
   function renderSelectedTenantDashboard(){
@@ -748,8 +767,9 @@
 
     if(tenantCode === 'ALL'){
       document.getElementById('dashboardTitle').innerText = 'ملخص سنة 2026'
-      document.getElementById('lastSeenValue').innerText = '—'
+      document.getElementById('lastSeenInline').innerText = 'آخر ظهور: —'
       renderDashboard(allRows2026)
+      renderAnnualLineChart('ALL')
       return
     }
 
@@ -765,18 +785,19 @@
         ? `كشف حساب ${tenantRow["اسم_المستأجر"]}`
         : 'كشف الحساب'
 
-    document.getElementById('lastSeenValue').innerText = formatDateTime(
-      tenantMeta.last_seen ||
-      tenantMeta["آخر_ظهور"] ||
-      tenantRow?.last_seen
-    )
+    document.getElementById('lastSeenInline').innerText =
+      'آخر ظهور: ' + formatDateTime(
+        tenantMeta.last_seen ||
+        tenantMeta["آخر_ظهور"] ||
+        tenantRow?.last_seen
+      )
 
     renderDashboard(selectedRows)
+    renderAnnualLineChart(tenantCode)
   }
 
-  function renderCharts(totalDebit, totalCredit, totalBalance){
+  function renderCharts(totalDebit, totalCredit){
     if(debitCreditChart) debitCreditChart.destroy()
-    if(balanceLineChart) balanceLineChart.destroy()
 
     debitCreditChart = new Chart(document.getElementById('debitCreditChart'), {
       type: 'pie',
@@ -797,14 +818,21 @@
         }
       }
     })
+  }
+
+  function renderAnnualLineChart(tenantCode){
+    if(balanceLineChart) balanceLineChart.destroy()
+
+    const annualData = buildAnnualLineData(tenantCode)
+    document.getElementById('lineChartNote').innerText = annualData.note
 
     balanceLineChart = new Chart(document.getElementById('balanceLineChart'), {
       type: 'line',
       data: {
-        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        labels: annualData.labels,
         datasets: [{
           label: 'الرصيد',
-          data: [null, null, null, null, null, null, null, null, null, null, null, null],
+          data: annualData.values,
           borderColor: '#d68a1d',
           backgroundColor: 'rgba(214,138,29,0.12)',
           borderWidth: 3,
@@ -853,6 +881,15 @@
     renderSelectedTenantDashboard()
   }
 
+  async function loadAllYearsSummary(){
+    const { data } = await supabase
+      .from('tenant_summary')
+      .select('*')
+      .order('year', { ascending: true })
+
+    allRowsAllYears = data || []
+  }
+
   async function savePayment(){
     hideBox('paymentSuccess')
     hideBox('paymentError')
@@ -897,6 +934,7 @@
     document.getElementById('paymentDate').value = ''
 
     showBox('paymentSuccess')
+    await loadAllYearsSummary()
     await loadDashboard()
 
     document.getElementById('dashboardTenant').value = tenantCode
@@ -975,7 +1013,8 @@
   document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0]
 
   await loadTenantsMeta()
-  loadDashboard()
+  await loadAllYearsSummary()
+  await loadDashboard()
 </script>
 
 </body>
