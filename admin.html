@@ -968,7 +968,7 @@
 
     const filtered = allRowsAllYears
       .filter(row => String(row["رمز_المستأجر"]) === String(tenantCode))
-      .sort((a,b) => Number(row.year || 0) - Number(row.year || 0))
+      .sort((a,b) => Number(a.year || 0) - Number(b.year || 0))
 
     return {
       labels: filtered.map(row => row.year),
@@ -1053,9 +1053,15 @@
 
     document.getElementById('profileTenantName').innerText = row["اسم_المستأجر"] || tenantCode
     document.getElementById('profileTenantCode').innerText = tenantCode
-    document.getElementById('profileLastSeen').innerText = formatDateTime(
-      meta.last_seen || meta["آخر_ظهور"] || row.last_seen
-    )
+
+    const lastSeenValue =
+      meta.last_seen ||
+      meta["آخر_ظهور"] ||
+      row.last_seen ||
+      ''
+
+    document.getElementById('profileLastSeen').innerText =
+      lastSeenValue ? formatDateTime(lastSeenValue) : 'لم يسجل دخول بعد'
 
     animateValue('profileDebit', Number(row["إجمالي_المدين"] || 0))
     animateValue('profileCredit', Number(row["إجمالي_الدائن"] || 0))
@@ -1091,12 +1097,14 @@
         ? `كشف ${tenantRow["اسم_المستأجر"]}`
         : `كشف ${tenantCode}`
 
+    const lastSeenValue =
+      tenantMeta.last_seen ||
+      tenantMeta["آخر_ظهور"] ||
+      tenantRow?.last_seen ||
+      ''
+
     document.getElementById('lastSeenInline').innerText =
-      formatDateTime(
-        tenantMeta.last_seen ||
-        tenantMeta["آخر_ظهور"] ||
-        tenantRow?.last_seen
-      )
+      lastSeenValue ? formatDateTime(lastSeenValue) : 'لم يسجل دخول بعد'
 
     renderDashboard(selectedRows)
     renderAnnualLineChart(tenantCode)
