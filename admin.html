@@ -4,17 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لوحة إدارة مجمع جبري</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js">
-function openStatement(){
-  const tenant = document.getElementById("paymentTenant").value
-  if(!tenant){
-    alert("اختر مستأجر أولاً")
-    return
-  }
-  window.open(`statement.html?tenant=${tenant}`, "_blank")
-}
-
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
@@ -32,7 +22,6 @@ function openStatement(){
       --red-text:#e05252;
       --dark:#1d2940;
 
-      /* Final polish glass */
       --glass:rgba(255,255,255,0.48);
       --glass-strong:rgba(255,255,255,0.64);
       --glass-border:rgba(255,255,255,0.58);
@@ -145,7 +134,6 @@ function openStatement(){
       height:2.8px;
       background:#1d2940;
       border-radius:4px;
-      transition:.2s ease;
     }
 
     .menu-dropdown{
@@ -199,28 +187,6 @@ function openStatement(){
       transform:translateX(-2px);
     }
 
-    .page{
-      display:none;
-      opacity:0;
-      transform:translateY(12px);
-    }
-
-    .page.active{
-      display:block;
-      animation:pageFade .35s ease forwards;
-    }
-
-    @keyframes pageFade{
-      from{
-        opacity:0;
-        transform:translateY(12px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
-    }
-
     .section{
       background:var(--glass);
       border:1px solid var(--glass-border);
@@ -253,7 +219,6 @@ function openStatement(){
       margin-bottom:20px;
     }
 
-    /* Drop list يمين + آخر ظهور قريب */
     .tenant-row{
       display:flex;
       align-items:center;
@@ -266,7 +231,7 @@ function openStatement(){
     }
 
     .tenant-select{
-      width:180px;
+      width:220px;
       height:42px;
       border-radius:14px;
       border:1px solid rgba(185,197,215,0.92);
@@ -428,6 +393,76 @@ function openStatement(){
       justify-content:center;
     }
 
+    .profile-section{
+      display:none;
+    }
+
+    .profile-section.show{
+      display:block;
+      animation:pageFade .35s ease forwards;
+    }
+
+    @keyframes pageFade{
+      from{
+        opacity:0;
+        transform:translateY(12px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .tenant-profile-grid{
+      display:grid;
+      grid-template-columns:1.05fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .profile-mini-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:14px;
+      margin-bottom:14px;
+    }
+
+    .profile-box{
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+      border:1px solid rgba(255,255,255,0.54);
+      box-shadow:var(--soft-shadow);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .profile-box .card-label{
+      margin-bottom:6px;
+    }
+
+    .profile-box .card-value{
+      font-size:24px;
+    }
+
+    .profile-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .profile-actions .btn{
+      min-width:180px;
+      flex:1;
+    }
+
+    .stack{
+      display:grid;
+      gap:16px;
+    }
+
     .form-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -507,28 +542,9 @@ function openStatement(){
       color:#fff;
     }
 
-    .quick-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .quick-btn{
-      border:none;
-      border-radius:10px;
-      padding:10px 12px;
-      font-size:13px;
-      font-weight:800;
-      cursor:pointer;
-      background:var(--orange-bg);
-      color:var(--orange-text);
-      transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
-    }
-
-    .quick-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 10px 24px rgba(214,138,29,0.15);
+    .btn-green{
+      background:#18a957;
+      color:#fff;
     }
 
     .message-box{
@@ -575,6 +591,8 @@ function openStatement(){
     @media (max-width:900px){
       .cards,
       .charts-grid,
+      .tenant-profile-grid,
+      .profile-mini-grid,
       .form-grid{
         grid-template-columns:1fr;
       }
@@ -642,9 +660,8 @@ function openStatement(){
       </button>
 
       <div id="menuDropdown" class="menu-dropdown">
-        <button class="menu-item" data-page="dashboardPage">لوحة التحكم</button>
-        <button class="menu-item" data-page="paymentPage">إدخال دفعة</button>
-        <button class="menu-item" data-page="notificationPage">إرسال تنبيه</button>
+        <button class="menu-item" data-scroll="dashboardMainSection">لوحة التحكم</button>
+        <button class="menu-item" data-scroll="tenantProfileSection">ملف المستأجر</button>
       </div>
     </div>
 
@@ -654,149 +671,159 @@ function openStatement(){
     </div>
   </div>
 
-  <!-- Dashboard -->
-  <div id="dashboardPage" class="page active">
-    <div class="section">
-      <h3 id="dashboardTitle" class="section-title">ملخص سنة 2026</h3>
-      <p class="section-subtitle">اختر اسم المستأجر من القائمة لعرض كشفه داخل لوحة التحكم</p>
+  <div id="dashboardMainSection" class="section">
+    <h3 id="dashboardTitle" class="section-title">ملخص سنة 2026</h3>
+    <p class="section-subtitle">اختر اسم المستأجر من القائمة لعرض ملفه داخل لوحة التحكم</p>
 
-      <div class="dashboard-top">
-        <div class="tenant-row">
-          <select id="dashboardTenant" class="tenant-select">
-            <option value="ALL">كل المستأجرين</option>
-          </select>
+    <div class="dashboard-top">
+      <div class="tenant-row">
+        <select id="dashboardTenant" class="tenant-select">
+          <option value="ALL">كل المستأجرين</option>
+        </select>
 
-          <span class="divider"></span>
+        <span class="divider"></span>
 
-          <span class="last-seen-inline">
-            آخر ظهور: <span id="lastSeenInline">—</span>
-          </span>
-        </div>
-      </div>
-
-      <div class="cards">
-        <div class="card-box blue">
-          <div class="card-label">إجمالي المدين</div>
-          <div id="totalDebit" class="card-value">0</div>
-        </div>
-
-        <div class="card-box green">
-          <div class="card-label">إجمالي الدائن</div>
-          <div id="totalCredit" class="card-value">0</div>
-        </div>
-
-        <div class="card-box orange">
-          <div class="card-label">الرصيد</div>
-          <div id="totalBalance" class="card-value">0</div>
-        </div>
+        <span class="last-seen-inline">
+          آخر ظهور: <span id="lastSeenInline">—</span>
+        </span>
       </div>
     </div>
 
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h4 class="chart-title">Pie Chart — المدين مقابل الدائن</h4>
-        <div class="chart-wrap">
-          <canvas id="debitCreditChart"></canvas>
-        </div>
+    <div class="cards">
+      <div class="card-box blue">
+        <div class="card-label">إجمالي المدين</div>
+        <div id="totalDebit" class="card-value">0</div>
       </div>
 
-      <div class="chart-card">
-        <h4 class="chart-title">Line Chart — الرصيد السنوي</h4>
-        <div class="chart-wrap">
-          <canvas id="balanceLineChart"></canvas>
-        </div>
-        <p class="chart-note" id="lineChartNote">
-          يعرض تطور الرصيد بشكل سنوي.
-        </p>
+      <div class="card-box green">
+        <div class="card-label">إجمالي الدائن</div>
+        <div id="totalCredit" class="card-value">0</div>
+      </div>
+
+      <div class="card-box orange">
+        <div class="card-label">الرصيد</div>
+        <div id="totalBalance" class="card-value">0</div>
       </div>
     </div>
   </div>
 
-  <!-- Payment -->
-  <div id="paymentPage" class="page">
-    <div class="section">
-      <h3 class="section-title">إدخال دفعة</h3>
-      <p class="section-subtitle">تسجيل دفعة مباشرة على حساب المستأجر لسنة 2026</p>
-
-      <div class="form-grid">
-        <div class="full">
-          <label class="field-label" for="paymentTenant">اسم المستأجر</label>
-          <select id="paymentTenant" class="app-select">
-            <option value="">اختر اسم المستأجر</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="field-label" for="paymentAmount">المبلغ</label>
-          <input id="paymentAmount" class="app-input" type="number" min="0" step="0.01" placeholder="أدخل المبلغ">
-        </div>
-
-        <div>
-          <label class="field-label" for="paymentDate">التاريخ</label>
-          <input id="paymentDate" class="app-input" type="date">
-        </div>
-
-        <div class="full">
-          <button id="savePaymentBtn" class="btn btn-primary">حفظ الدفعة</button>
-<button onclick="openStatement()" class="btn btn-primary" style="margin-top:10px;background:#18a957;">عرض كشف الحساب</button>
-        </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h4 class="chart-title">Pie Chart — المدين مقابل الدائن</h4>
+      <div class="chart-wrap">
+        <canvas id="debitCreditChart"></canvas>
       </div>
+    </div>
 
-      <div id="paymentSuccess" class="message-box message-success">تم حفظ الدفعة</div>
-      <div id="paymentError" class="message-box message-error">حدث خطأ أثناء حفظ الدفعة</div>
-
-      <div class="mini-note">
-        يتم تحديث إجمالي الدائن والرصد مباشرة داخل tenant_summary لسنة 2026.
+    <div class="chart-card">
+      <h4 class="chart-title">Line Chart — الرصيد السنوي</h4>
+      <div class="chart-wrap">
+        <canvas id="balanceLineChart"></canvas>
       </div>
+      <p class="chart-note" id="lineChartNote">يعرض تطور الرصيد بشكل سنوي.</p>
     </div>
   </div>
 
-  <!-- Notifications -->
-  <div id="notificationPage" class="page">
-    <div class="section">
-      <h3 class="section-title">إرسال تنبيه</h3>
-      <p class="section-subtitle">إرسال تنبيه محفوظ إلى المستأجر</p>
+  <div id="tenantProfileSection" class="section profile-section">
+    <h3 class="section-title">ملف المستأجر</h3>
+    <p class="section-subtitle">دفعات + تنبيهات + كشف الحساب لنفس المستأجر داخل نفس الواجهة</p>
 
-      <div class="form-grid">
-        <div class="full">
-          <label class="field-label" for="notifyTenant">اسم المستأجر</label>
-          <select id="notifyTenant" class="app-select">
-            <option value="">اختر اسم المستأجر</option>
-          </select>
-        </div>
+    <div class="tenant-profile-grid">
+      <div>
+        <div class="section" style="margin-bottom:0;">
+          <h3 id="profileTenantName" class="section-title" style="margin-bottom:6px;">—</h3>
+          <div class="section-subtitle" style="margin-bottom:10px;">
+            رمز المستأجر: <span id="profileTenantCode">—</span>
+          </div>
 
-        <div class="full">
-          <label class="field-label" for="notifyType">نوع التنبيه</label>
-          <select id="notifyType" class="app-select">
-            <option value="">اختر نوع التنبيه</option>
-            <option value="general">تنبيه عام</option>
-            <option value="late">تأخر دفع</option>
-            <option value="5days">ادفع خلال 5 أيام</option>
-            <option value="10days">ادفع خلال 10 أيام</option>
-            <option value="urgent">مراجعة عاجلة</option>
-          </select>
-        </div>
+          <div class="profile-mini-grid">
+            <div class="profile-box blue">
+              <div class="card-label">إجمالي المدين</div>
+              <div id="profileDebit" class="card-value">0</div>
+            </div>
 
-        <div class="full">
-          <label class="field-label" for="notifyMessage">نص التنبيه</label>
-          <textarea id="notifyMessage" class="app-textarea" placeholder="سيظهر النص هنا تلقائيًا"></textarea>
-        </div>
+            <div class="profile-box green">
+              <div class="card-label">إجمالي الدائن</div>
+              <div id="profileCredit" class="card-value">0</div>
+            </div>
 
-        <div class="full quick-actions">
-          <button class="quick-btn" data-template="general">تنبيه عام</button>
-          <button class="quick-btn" data-template="late">تأخر دفع</button>
-          <button class="quick-btn" data-template="5days">5 أيام</button>
-          <button class="quick-btn" data-template="10days">10 أيام</button>
-          <button class="quick-btn" data-template="urgent">مراجعة عاجلة</button>
-        </div>
+            <div class="profile-box orange">
+              <div class="card-label">الرصيد الحالي</div>
+              <div id="profileBalance" class="card-value">0</div>
+            </div>
+          </div>
 
-        <div class="full">
-          <button id="sendNotificationBtn" class="btn btn-primary">إرسال تنبيه</button>
+          <div class="mini-note">
+            آخر ظهور: <span id="profileLastSeen">—</span>
+          </div>
+
+          <div class="profile-actions">
+            <button id="openStatementBtn" class="btn btn-green" type="button">كشف الحساب</button>
+          </div>
         </div>
       </div>
 
-      <div id="notificationSuccess" class="message-box message-success">تم إرسال التنبيه بنجاح</div>
-      <div id="notificationError" class="message-box message-error">حدث خطأ أثناء إرسال التنبيه</div>
+      <div class="stack">
+        <div class="section" style="margin-bottom:0;">
+          <h3 class="section-title">إدخال دفعة</h3>
+          <p class="section-subtitle">أي دفعة تسجل هنا ستذهب لنفس ملف المستأجر مباشرة</p>
+
+          <div class="form-grid">
+            <div>
+              <label class="field-label" for="profilePaymentAmount">المبلغ</label>
+              <input id="profilePaymentAmount" class="app-input" type="number" min="0" step="0.01" placeholder="أدخل المبلغ">
+            </div>
+
+            <div>
+              <label class="field-label" for="profilePaymentReceipt">رقم السند</label>
+              <input id="profilePaymentReceipt" class="app-input" type="text" placeholder="أدخل رقم السند">
+            </div>
+
+            <div class="full">
+              <label class="field-label" for="profilePaymentDate">التاريخ</label>
+              <input id="profilePaymentDate" class="app-input" type="date">
+            </div>
+
+            <div class="full">
+              <button id="saveProfilePaymentBtn" class="btn btn-primary" type="button">حفظ الدفعة</button>
+            </div>
+          </div>
+
+          <div id="profilePaymentSuccess" class="message-box message-success">تم حفظ الدفعة</div>
+          <div id="profilePaymentError" class="message-box message-error">حدث خطأ أثناء حفظ الدفعة</div>
+        </div>
+
+        <div class="section" style="margin-bottom:0;">
+          <h3 class="section-title">إرسال تنبيه</h3>
+          <p class="section-subtitle">إرسال تنبيه مباشر لنفس ملف المستأجر</p>
+
+          <div class="form-grid">
+            <div class="full">
+              <label class="field-label" for="profileNotifyType">نوع التنبيه</label>
+              <select id="profileNotifyType" class="app-select">
+                <option value="">اختر نوع التنبيه</option>
+                <option value="general">تنبيه عام</option>
+                <option value="late">تأخر دفع</option>
+                <option value="5days">ادفع خلال 5 أيام</option>
+                <option value="10days">ادفع خلال 10 أيام</option>
+                <option value="urgent">مراجعة عاجلة</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label class="field-label" for="profileNotifyMessage">نص التنبيه</label>
+              <textarea id="profileNotifyMessage" class="app-textarea" placeholder="سيظهر النص هنا تلقائيًا"></textarea>
+            </div>
+
+            <div class="full">
+              <button id="sendProfileNotificationBtn" class="btn btn-primary" type="button">إرسال تنبيه</button>
+            </div>
+          </div>
+
+          <div id="profileNotificationSuccess" class="message-box message-success">تم إرسال التنبيه</div>
+          <div id="profileNotificationError" class="message-box message-error">حدث خطأ أثناء إرسال التنبيه</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -820,6 +847,7 @@ function openStatement(){
   let tenantsMap = {}
   let debitCreditChart
   let balanceLineChart
+  let selectedTenantCode = 'ALL'
 
   function formatNumber(value){
     return Number(value || 0).toLocaleString('en-US')
@@ -831,8 +859,8 @@ function openStatement(){
       const d = new Date(value)
       if(isNaN(d.getTime())) return value
       return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit'
+        hour:'2-digit',
+        minute:'2-digit'
       })
     }catch{
       return value
@@ -849,26 +877,22 @@ function openStatement(){
 
   function animateValue(elementId, endValue, duration = 900){
     const element = document.getElementById(elementId)
-    const finalValue = Number(endValue || 0)
-
     if(!element) return
 
+    const finalValue = Number(endValue || 0)
     if(finalValue === 0){
       element.innerText = '0'
       return
     }
 
-    const startValue = 0
     const startTime = performance.now()
 
     function update(currentTime){
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
-      const currentValue = Math.round(startValue + (finalValue - startValue) * eased)
-
+      const currentValue = Math.round(finalValue * eased)
       element.innerText = formatNumber(currentValue)
-
       if(progress < 1){
         requestAnimationFrame(update)
       }
@@ -879,22 +903,17 @@ function openStatement(){
 
   function fadeCards(){
     const cards = document.querySelectorAll('.card-box')
-
-    cards.forEach(card => {
-      card.classList.remove('show')
-    })
-
+    cards.forEach(card => card.classList.remove('show'))
     requestAnimationFrame(() => {
       cards.forEach((card, index) => {
-        setTimeout(() => {
-          card.classList.add('show')
-        }, index * 120)
+        setTimeout(() => card.classList.add('show'), index * 120)
       })
     })
   }
 
   function showBox(id){
     const el = document.getElementById(id)
+    if(!el) return
     el.style.display = 'block'
     setTimeout(() => {
       el.style.display = 'none'
@@ -902,70 +921,118 @@ function openStatement(){
   }
 
   function hideBox(id){
-    document.getElementById(id).style.display = 'none'
+    const el = document.getElementById(id)
+    if(el) el.style.display = 'none'
   }
 
   function getNotificationTemplate(type){
     const templates = {
-      general: 'يرجى مراجعة إدارة المجمع.',
-      late: 'نود تنبيهكم إلى وجود تأخير، يرجى مراجعة الإدارة بأقرب وقت.',
-      '5days': 'يرجى تسديد المستحقات خلال 5 أيام.',
-      '10days': 'يرجى تسديد المستحقات خلال 10 أيام لتجنب أي إجراء لاحق.',
-      urgent: 'يرجى مراجعة إدارة المجمع بشكل عاجل.'
+      general:'يرجى مراجعة إدارة المجمع.',
+      late:'نود تنبيهكم إلى وجود تأخير، يرجى مراجعة الإدارة بأقرب وقت.',
+      '5days':'يرجى تسديد المستحقات خلال 5 أيام.',
+      '10days':'يرجى تسديد المستحقات خلال 10 أيام لتجنب أي إجراء لاحق.',
+      urgent:'يرجى مراجعة إدارة المجمع بشكل عاجل.'
     }
     return templates[type] || ''
   }
 
-  function setActivePage(pageId){
-    document.querySelectorAll('.page').forEach(page => {
-      page.classList.remove('active')
-    })
-    document.getElementById(pageId).classList.add('active')
-    document.getElementById('menuDropdown').classList.remove('show')
-  }
+  function renderPieChart(totalDebit, totalCredit){
+    if(debitCreditChart) debitCreditChart.destroy()
 
-  async function loadTenantsMeta(){
-    const { data } = await supabase
-      .from('tenants')
-      .select('*')
-
-    tenantsMap = {}
-    ;(data || []).forEach(row => {
-      const code = row.tenant_code || row["رمز_المستأجر"]
-      if(code){
-        tenantsMap[String(code)] = row
+    debitCreditChart = new Chart(document.getElementById('debitCreditChart'), {
+      type:'pie',
+      data:{
+        labels:['إجمالي المدين', 'إجمالي الدائن'],
+        datasets:[{
+          data:[totalDebit, totalCredit],
+          backgroundColor:['#2f6fed','#18a957'],
+          borderColor:['#ffffff','#ffffff'],
+          borderWidth:3,
+          hoverOffset:10
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{ duration:1200, easing:'easeOutQuart' },
+        plugins:{
+          legend:{
+            position:'bottom',
+            labels:{
+              font:{ size:13, weight:'bold' },
+              padding:16
+            }
+          }
+        }
       }
     })
   }
 
-  function renderTenantDropdowns(rows){
-    const dashboardTenant = document.getElementById('dashboardTenant')
-    const paymentTenant = document.getElementById('paymentTenant')
-    const notifyTenant = document.getElementById('notifyTenant')
+  function buildAnnualLineData(tenantCode){
+    if(tenantCode === 'ALL'){
+      const grouped = {}
+      allRowsAllYears.forEach(row => {
+        const year = Number(row.year || 0)
+        if(!year) return
+        if(!grouped[year]) grouped[year] = 0
+        grouped[year] += Number(row["الرصيد"] || 0)
+      })
+      const years = Object.keys(grouped).map(Number).sort((a,b) => a - b)
+      return {
+        labels: years,
+        values: years.map(year => grouped[year]),
+        note: 'يعرض تطور الرصيد السنوي للمجمع كاملاً.'
+      }
+    }
 
-    dashboardTenant.innerHTML = '<option value="ALL">كل المستأجرين</option>'
-    paymentTenant.innerHTML = '<option value="">اختر اسم المستأجر</option>'
-    notifyTenant.innerHTML = '<option value="">اختر اسم المستأجر</option>'
+    const filtered = allRowsAllYears
+      .filter(row => String(row["رمز_المستأجر"]) === String(tenantCode))
+      .sort((a,b) => Number(a.year || 0) - Number(b.year || 0))
 
-    rows.forEach(row => {
-      const tenantName = row["اسم_المستأجر"] || ''
-      const tenantCode = row["رمز_المستأجر"] || ''
-      if(!tenantName || !tenantCode) return
+    return {
+      labels: filtered.map(row => row.year),
+      values: filtered.map(row => Number(row["الرصيد"] || 0)),
+      note: 'يعرض تطور الرصيد السنوي للمستأجر المختار.'
+    }
+  }
 
-      const option0 = document.createElement('option')
-      option0.value = tenantCode
-      option0.textContent = tenantName
-      dashboardTenant.appendChild(option0)
+  function renderAnnualLineChart(tenantCode){
+    if(balanceLineChart) balanceLineChart.destroy()
 
-      const option1 = document.createElement('option')
-      option1.value = tenantCode
-      option1.textContent = tenantName
-      paymentTenant.appendChild(option1)
+    const annualData = buildAnnualLineData(tenantCode)
+    document.getElementById('lineChartNote').innerText = annualData.note
 
-      const option2 = document.createElement('option')
-      option2.value = tenantCode
-      option2.textContent = tenantName
-      notifyTenant.appendChild(option2)
+    balanceLineChart = new Chart(document.getElementById('balanceLineChart'), {
+      type:'line',
+      data:{
+        labels:annualData.labels,
+        datasets:[{
+          label:'الرصيد',
+          data:annualData.values,
+          borderColor:'#d68a1d',
+          backgroundColor:'rgba(214,138,29,0.12)',
+          borderWidth:3,
+          tension:0.35,
+          fill:true,
+          pointRadius:4,
+          pointHoverRadius:6,
+          spanGaps:false
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{ duration:1400, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false } },
+        scales:{
+          y:{
+            beginAtZero:true,
+            ticks:{
+              callback:function(value){ return formatNumber(value) }
+            }
+          }
+        }
+      }
     })
   }
 
@@ -984,50 +1051,50 @@ function openStatement(){
     animateValue('totalCredit', totalCredit)
     animateValue('totalBalance', totalBalance)
     fadeCards()
-
     renderPieChart(totalDebit, totalCredit)
   }
 
-  function buildAnnualLineData(tenantCode){
+  function renderProfile(tenantCode){
+    const section = document.getElementById('tenantProfileSection')
+
     if(tenantCode === 'ALL'){
-      const grouped = {}
-
-      allRowsAllYears.forEach(row => {
-        const year = Number(row.year || 0)
-        if(!year) return
-        if(!grouped[year]) grouped[year] = 0
-        grouped[year] += Number(row["الرصيد"] || 0)
-      })
-
-      const years = Object.keys(grouped).map(Number).sort((a, b) => a - b)
-      const values = years.map(year => grouped[year])
-
-      return {
-        labels: years,
-        values,
-        note: 'يعرض تطور الرصيد السنوي للمجمع كاملاً.'
-      }
+      section.classList.remove('show')
+      return
     }
 
-    const filtered = allRowsAllYears
-      .filter(row => String(row["رمز_المستأجر"]) === String(tenantCode))
-      .sort((a, b) => Number(a.year || 0) - Number(b.year || 0))
+    const row = allRows2026.find(item => String(item["رمز_المستأجر"]) === String(tenantCode))
+    const meta = tenantsMap[String(tenantCode)] || {}
 
-    return {
-      labels: filtered.map(row => row.year),
-      values: filtered.map(row => Number(row["الرصيد"] || 0)),
-      note: 'يعرض تطور الرصيد السنوي للمستأجر المختار.'
+    if(!row){
+      section.classList.remove('show')
+      return
     }
+
+    document.getElementById('profileTenantName').innerText = row["اسم_المستأجر"] || '—'
+    document.getElementById('profileTenantCode').innerText = tenantCode
+    document.getElementById('profileLastSeen').innerText = formatDateTime(
+      meta.last_seen || meta["آخر_ظهور"] || row.last_seen
+    )
+
+    animateValue('profileDebit', Number(row["إجمالي_المدين"] || 0))
+    animateValue('profileCredit', Number(row["إجمالي_الدائن"] || 0))
+    animateValue('profileBalance', Number(row["الرصيد"] || 0))
+
+    document.getElementById('profileNotifyType').value = ''
+    document.getElementById('profileNotifyMessage').value = ''
+    section.classList.add('show')
   }
 
   function renderSelectedTenantDashboard(){
     const tenantCode = document.getElementById('dashboardTenant').value
+    selectedTenantCode = tenantCode
 
     if(tenantCode === 'ALL'){
       document.getElementById('dashboardTitle').innerText = 'ملخص سنة 2026'
       document.getElementById('lastSeenInline').innerText = '—'
       renderDashboard(allRows2026)
       renderAnnualLineChart('ALL')
+      renderProfile('ALL')
       return
     }
 
@@ -1040,7 +1107,7 @@ function openStatement(){
 
     document.getElementById('dashboardTitle').innerText =
       tenantRow?.["اسم_المستأجر"]
-        ? `كشف حساب ${tenantRow["اسم_المستأجر"]}`
+        ? `كشف ${tenantRow["اسم_المستأجر"]}`
         : 'كشف الحساب'
 
     document.getElementById('lastSeenInline').innerText =
@@ -1052,90 +1119,36 @@ function openStatement(){
 
     renderDashboard(selectedRows)
     renderAnnualLineChart(tenantCode)
+    renderProfile(tenantCode)
   }
 
-  function renderPieChart(totalDebit, totalCredit){
-    if(debitCreditChart) debitCreditChart.destroy()
+  async function loadTenantsMeta(){
+    const { data } = await supabase
+      .from('tenants')
+      .select('*')
 
-    debitCreditChart = new Chart(document.getElementById('debitCreditChart'), {
-      type: 'pie',
-      data: {
-        labels: ['إجمالي المدين', 'إجمالي الدائن'],
-        datasets: [{
-          data: [totalDebit, totalCredit],
-          backgroundColor: ['#2f6fed', '#18a957'],
-          borderColor: ['#ffffff', '#ffffff'],
-          borderWidth: 3,
-          hoverOffset: 10
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 1200,
-          easing: 'easeOutQuart'
-        },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              font: {
-                size: 13,
-                weight: 'bold'
-              },
-              padding: 16
-            }
-          }
-        }
+    tenantsMap = {}
+    ;(data || []).forEach(row => {
+      const code = row.tenant_code || row["رمز_المستأجر"]
+      if(code){
+        tenantsMap[String(code)] = row
       }
     })
   }
 
-  function renderAnnualLineChart(tenantCode){
-    if(balanceLineChart) balanceLineChart.destroy()
+  function renderTenantDropdowns(rows){
+    const dashboardTenant = document.getElementById('dashboardTenant')
+    dashboardTenant.innerHTML = '<option value="ALL">كل المستأجرين</option>'
 
-    const annualData = buildAnnualLineData(tenantCode)
-    document.getElementById('lineChartNote').innerText = annualData.note
+    rows.forEach(row => {
+      const tenantName = row["اسم_المستأجر"] || ''
+      const tenantCode = row["رمز_المستأجر"] || ''
+      if(!tenantName || !tenantCode) return
 
-    balanceLineChart = new Chart(document.getElementById('balanceLineChart'), {
-      type: 'line',
-      data: {
-        labels: annualData.labels,
-        datasets: [{
-          label: 'الرصيد',
-          data: annualData.values,
-          borderColor: '#d68a1d',
-          backgroundColor: 'rgba(214,138,29,0.12)',
-          borderWidth: 3,
-          tension: 0.35,
-          fill: true,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          spanGaps: false
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 1400,
-          easing: 'easeOutQuart'
-        },
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value){
-                return formatNumber(value)
-              }
-            }
-          }
-        }
-      }
+      const option = document.createElement('option')
+      option.value = tenantCode
+      option.textContent = tenantName
+      dashboardTenant.appendChild(option)
     })
   }
 
@@ -1144,7 +1157,7 @@ function openStatement(){
       .from('tenant_summary')
       .select('*')
       .eq('year', YEAR)
-      .order('اسم_المستأجر', { ascending: true })
+      .order('اسم_المستأجر', { ascending:true })
 
     if(error || !data){
       allRows2026 = []
@@ -1162,77 +1175,126 @@ function openStatement(){
     const { data } = await supabase
       .from('tenant_summary')
       .select('*')
-      .order('year', { ascending: true })
+      .order('year', { ascending:true })
 
     allRowsAllYears = data || []
   }
 
-  async function savePayment(){
-    hideBox('paymentSuccess')
-    hideBox('paymentError')
+  async function saveProfilePayment(){
+    hideBox('profilePaymentSuccess')
+    hideBox('profilePaymentError')
 
-    const tenantCode = document.getElementById('paymentTenant').value
-    const amount = Number(document.getElementById('paymentAmount').value)
-    const paymentDate = document.getElementById('paymentDate').value
-
-    if(!tenantCode || !amount || amount <= 0 || !paymentDate){
-      showBox('paymentError')
-      document.getElementById('paymentError').innerText = 'يرجى تعبئة اسم المستأجر والمبلغ والتاريخ بشكل صحيح'
+    if(selectedTenantCode === 'ALL'){
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'اختر مستأجر أولاً'
       return
     }
 
-    const currentRow = allRows2026.find(row => String(row["رمز_المستأجر"]) === String(tenantCode))
+    const amount = Number(document.getElementById('profilePaymentAmount').value || 0)
+    const receiptNo = document.getElementById('profilePaymentReceipt').value.trim()
+    const paymentDate = document.getElementById('profilePaymentDate').value
+    const currentRow = allRows2026.find(row => String(row["رمز_المستأجر"]) === String(selectedTenantCode))
+
+    if(!amount || amount <= 0 || !receiptNo || !paymentDate){
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'يرجى تعبئة المبلغ ورقم السند والتاريخ'
+      return
+    }
 
     if(!currentRow){
-      showBox('paymentError')
-      document.getElementById('paymentError').innerText = 'لم يتم العثور على بيانات المستأجر'
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'لم يتم العثور على بيانات المستأجر'
       return
     }
 
     showLoading()
 
+    const { data: duplicateReceipt, error: duplicateError } = await supabase
+      .from('tenant_transactions')
+      .select('id')
+      .eq('receipt_no', receiptNo)
+      .maybeSingle()
+
+    if(duplicateError){
+      hideLoading()
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'حدث خطأ أثناء فحص رقم السند'
+      return
+    }
+
+    if(duplicateReceipt){
+      hideLoading()
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'رقم السند مكرر، الرجاء إدخال رقم مختلف'
+      return
+    }
+
+    const { error: insertError } = await supabase
+      .from('tenant_transactions')
+      .insert([{
+        tenant_code: selectedTenantCode,
+        date: paymentDate,
+        description: 'دفعة',
+        debit: 0,
+        credit: amount,
+        receipt_no: receiptNo
+      }])
+
+    if(insertError){
+      hideLoading()
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'حدث خطأ أثناء حفظ الدفعة'
+      return
+    }
+
     const newCredit = Number(currentRow["إجمالي_الدائن"] || 0) + amount
     const newBalance = Number(currentRow["الرصيد"] || 0) - amount
 
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from('tenant_summary')
       .update({
         "إجمالي_الدائن": newCredit,
         "الرصيد": newBalance
       })
-      .eq('رمز_المستأجر', tenantCode)
+      .eq('رمز_المستأجر', selectedTenantCode)
       .eq('year', YEAR)
 
     hideLoading()
 
-    if(error){
-      showBox('paymentError')
-      document.getElementById('paymentError').innerText = 'حدث خطأ أثناء حفظ الدفعة'
+    if(updateError){
+      showBox('profilePaymentError')
+      document.getElementById('profilePaymentError').innerText = 'تم حفظ الدفعة لكن تعذر تحديث الملخص'
       return
     }
 
-    document.getElementById('paymentAmount').value = ''
-    document.getElementById('paymentDate').value = ''
+    document.getElementById('profilePaymentAmount').value = ''
+    document.getElementById('profilePaymentReceipt').value = ''
+    document.getElementById('profilePaymentDate').value = new Date().toISOString().split('T')[0]
 
-    showBox('paymentSuccess')
+    showBox('profilePaymentSuccess')
     await loadAllYearsSummary()
     await loadDashboard()
 
-    document.getElementById('dashboardTenant').value = tenantCode
+    document.getElementById('dashboardTenant').value = selectedTenantCode
     renderSelectedTenantDashboard()
   }
 
-  async function saveNotification(){
-    hideBox('notificationSuccess')
-    hideBox('notificationError')
+  async function saveProfileNotification(){
+    hideBox('profileNotificationSuccess')
+    hideBox('profileNotificationError')
 
-    const tenantCode = document.getElementById('notifyTenant').value
-    const notifyType = document.getElementById('notifyType').value
-    const message = document.getElementById('notifyMessage').value.trim()
+    if(selectedTenantCode === 'ALL'){
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'اختر مستأجر أولاً'
+      return
+    }
 
-    if(!tenantCode || !notifyType || !message){
-      showBox('notificationError')
-      document.getElementById('notificationError').innerText = 'يرجى اختيار المستأجر ونوع التنبيه ووجود النص'
+    const notifyType = document.getElementById('profileNotifyType').value
+    const message = document.getElementById('profileNotifyMessage').value.trim()
+
+    if(!notifyType || !message){
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'يرجى اختيار نوع التنبيه وكتابة النص'
       return
     }
 
@@ -1241,7 +1303,7 @@ function openStatement(){
     const { error } = await supabase
       .from('tenant_notifications')
       .insert([{
-        tenant_code: tenantCode,
+        tenant_code: selectedTenantCode,
         title: notifyType,
         message: message
       }])
@@ -1249,15 +1311,22 @@ function openStatement(){
     hideLoading()
 
     if(error){
-      showBox('notificationError')
-      document.getElementById('notificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
       return
     }
 
-    document.getElementById('notifyType').value = ''
-    document.getElementById('notifyMessage').value = ''
+    document.getElementById('profileNotifyType').value = ''
+    document.getElementById('profileNotifyMessage').value = ''
+    showBox('profileNotificationSuccess')
+  }
 
-    showBox('notificationSuccess')
+  function openStatementForSelected(){
+    if(selectedTenantCode === 'ALL'){
+      alert('اختر مستأجر أولاً')
+      return
+    }
+    window.open(`statement.html?tenant=${selectedTenantCode}`, '_blank')
   }
 
   document.getElementById('menuBtn').addEventListener('click', function(e){
@@ -1275,47 +1344,35 @@ function openStatement(){
 
   document.querySelectorAll('.menu-item').forEach(btn => {
     btn.addEventListener('click', function(){
-      setActivePage(this.dataset.page)
+      const targetId = this.dataset.scroll
+      const targetEl = document.getElementById(targetId)
+      document.getElementById('menuDropdown').classList.remove('show')
+      if(targetEl){
+        targetEl.scrollIntoView({ behavior:'smooth', block:'start' })
+      }
     })
   })
 
-  document.getElementById('savePaymentBtn').addEventListener('click', savePayment)
-  document.getElementById('sendNotificationBtn').addEventListener('click', saveNotification)
-
   document.getElementById('dashboardTenant').addEventListener('change', async function(){
     showLoading()
-    await new Promise(r => setTimeout(r, 260))
+    await new Promise(r => setTimeout(r, 200))
     renderSelectedTenantDashboard()
     hideLoading()
   })
 
-  document.getElementById('notifyType').addEventListener('change', function(){
-    document.getElementById('notifyMessage').value = getNotificationTemplate(this.value)
+  document.getElementById('profileNotifyType').addEventListener('change', function(){
+    document.getElementById('profileNotifyMessage').value = getNotificationTemplate(this.value)
   })
 
-  document.querySelectorAll('[data-template]').forEach(btn => {
-    btn.addEventListener('click', function(){
-      const type = this.dataset.template
-      document.getElementById('notifyType').value = type
-      document.getElementById('notifyMessage').value = getNotificationTemplate(type)
-    })
-  })
+  document.getElementById('saveProfilePaymentBtn').addEventListener('click', saveProfilePayment)
+  document.getElementById('sendProfileNotificationBtn').addEventListener('click', saveProfileNotification)
+  document.getElementById('openStatementBtn').addEventListener('click', openStatementForSelected)
 
-  document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0]
+  document.getElementById('profilePaymentDate').value = new Date().toISOString().split('T')[0]
 
   await loadTenantsMeta()
   await loadAllYearsSummary()
   await loadDashboard()
-
-function openStatement(){
-  const tenant = document.getElementById("paymentTenant").value
-  if(!tenant){
-    alert("اختر مستأجر أولاً")
-    return
-  }
-  window.open(`statement.html?tenant=${tenant}`, "_blank")
-}
-
 </script>
 
 </body>
