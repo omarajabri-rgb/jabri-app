@@ -21,7 +21,6 @@
       --orange-text:#d68a1d;
       --red-text:#e05252;
       --dark:#1d2940;
-
       --glass:rgba(255,255,255,0.48);
       --glass-strong:rgba(255,255,255,0.64);
       --glass-border:rgba(255,255,255,0.58);
@@ -158,14 +157,8 @@
     }
 
     @keyframes fadeMenu{
-      from{
-        opacity:0;
-        transform:translateY(-8px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
+      from{ opacity:0; transform:translateY(-8px); }
+      to{ opacity:1; transform:translateY(0); }
     }
 
     .menu-item{
@@ -403,14 +396,8 @@
     }
 
     @keyframes pageFade{
-      from{
-        opacity:0;
-        transform:translateY(12px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
+      from{ opacity:0; transform:translateY(12px); }
+      to{ opacity:1; transform:translateY(0); }
     }
 
     .tenant-profile-grid{
@@ -558,14 +545,8 @@
     }
 
     @keyframes fadeNotice{
-      from{
-        opacity:0;
-        transform:translateY(6px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
+      from{ opacity:0; transform:translateY(6px); }
+      to{ opacity:1; transform:translateY(0); }
     }
 
     .message-success{
@@ -987,7 +968,7 @@
 
     const filtered = allRowsAllYears
       .filter(row => String(row["رمز_المستأجر"]) === String(tenantCode))
-      .sort((a,b) => Number(a.year || 0) - Number(b.year || 0))
+      .sort((a,b) => Number(row.year || 0) - Number(row.year || 0))
 
     return {
       labels: filtered.map(row => row.year),
@@ -1070,7 +1051,7 @@
       return
     }
 
-    document.getElementById('profileTenantName').innerText = row["اسم_المستأجر"] || '—'
+    document.getElementById('profileTenantName').innerText = row["اسم_المستأجر"] || tenantCode
     document.getElementById('profileTenantCode').innerText = tenantCode
     document.getElementById('profileLastSeen').innerText = formatDateTime(
       meta.last_seen || meta["آخر_ظهور"] || row.last_seen
@@ -1108,7 +1089,7 @@
     document.getElementById('dashboardTitle').innerText =
       tenantRow?.["اسم_المستأجر"]
         ? `كشف ${tenantRow["اسم_المستأجر"]}`
-        : 'كشف الحساب'
+        : `كشف ${tenantCode}`
 
     document.getElementById('lastSeenInline').innerText =
       formatDateTime(
@@ -1137,57 +1118,51 @@
   }
 
   function renderTenantDropdownsFromTenants(rows){
-  const dashboardTenant = document.getElementById('dashboardTenant')
+    const dashboardTenant = document.getElementById('dashboardTenant')
+    dashboardTenant.innerHTML = '<option value="ALL">كل المستأجرين</option>'
 
-  dashboardTenant.innerHTML = '<option value="ALL">كل المستأجرين</option>'
+    rows.forEach(row => {
+      const tenantCode = row.tenant_code || row["رمز_المستأجر"] || ''
+      const tenantName = row.tenant_name || row["اسم_المستأجر"] || tenantCode
 
-  rows.forEach(row => {
-    const tenantCode = row.tenant_code || row["رمز_المستأجر"] || ''
-    const tenantName = row.tenant_name ||
+      if(!tenantCode) return
+
+      const option = document.createElement('option')
+      option.value = tenantCode
+      option.textContent = tenantName
+      dashboardTenant.appendChild(option)
+    })
+  }
 
   async function loadDashboard(){
+    const { data: summaryData, error: summaryError } = await supabase
+      .from('tenant_summary')
+      .select('*')
+      .eq('year', YEAR)
 
-  // تحميل الأرقام
-  const { data: summaryData, error: summaryError } = await supabase
-    .from('tenant_summary')
-    .select('*')
-    .eq('year', YEAR)
-
-  if(summaryError || !summaryData){
-    console.log("خطأ summary", summaryError)
-    allRows2026 = []
-    renderDashboard([])
-    return
-  }
-
-  allRows2026 = summaryData
-
-  // تحميل أسماء المستأجرين
-  const { data: tenantsData, error: tenantsError } = await supabase
-    .from('tenants')
-    .select('*')
-    .order('tenant_code', { ascending: true })
-
-  if(tenantsError || !tenantsData){
-    console.log("خطأ tenants", tenantsError)
-    return
-  }
-
-  // تعبئة القائمة
-  renderTenantDropdownsFromTenants(tenantsData)
-
-  document.getElementById('dashboardTenant').value = 'ALL'
-  renderSelectedTenantDashboard()
-}
-
-    if(error || !data){
+    if(summaryError || !summaryData){
+      console.log('خطأ summary', summaryError)
       allRows2026 = []
       renderDashboard([])
       return
     }
 
-    allRows2026 = data
-    renderTenantDropdowns(allRows2026)
+    allRows2026 = summaryData
+    renderDashboard(allRows2026)
+
+    const { data: tenantsData, error: tenantsError } = await supabase
+      .from('tenants')
+      .select('*')
+
+    if(tenantsError || !tenantsData){
+      console.log('خطأ tenants', tenantsError)
+      document.getElementById('dashboardTenant').innerHTML = '<option value="ALL">كل المستأجرين</option>'
+      document.getElementById('dashboardTenant').value = 'ALL'
+      renderSelectedTenantDashboard()
+      return
+    }
+
+    renderTenantDropdownsFromTenants(tenantsData)
     document.getElementById('dashboardTenant').value = 'ALL'
     renderSelectedTenantDashboard()
   }
@@ -1295,7 +1270,6 @@
     showBox('profilePaymentSuccess')
     await loadAllYearsSummary()
     await loadDashboard()
-
     document.getElementById('dashboardTenant').value = selectedTenantCode
     renderSelectedTenantDashboard()
   }
