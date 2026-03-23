@@ -1,121 +1,217 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>كشف الحساب</title>
 
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f6f7fb;
-}
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
-}
-
-.card{
-  background:#fff;
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.08);
-}
-
-h2{
-  margin:0 0 10px;
-}
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-.table th, .table td{
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-  font-size:14px;
-}
-
-.table th{
-  background:#f1f3f7;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<div class="card">
-<h2>كشف الحساب</h2>
-<div id="tenant"></div>
-</div>
-
-<div id="tableContainer"></div>
-
-</div>
-
-<script>
+// ✅ جاهز عندك
+const supabase = createClient(
+  'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24i'
+)
 
 const params = new URLSearchParams(window.location.search)
 const tenant = params.get("tenant")
 
-document.getElementById("tenant").innerText = tenant || "—"
+document.addEventListener("DOMContentLoaded", async () => {
 
-const data = [
-  {date:"2025-01-01", desc:"رصيد سابق", debit:1172, credit:0, receipt:"-"},
-  {date:"2025-07-01", desc:"إيجار 2025", debit:1836, credit:0, receipt:"-"},
-  {date:"2025-11-11", desc:"دفعة", debit:0, credit:400, receipt:"1766"},
-  {date:"2026-01-01", desc:"إيجار 2026", debit:1836, credit:0, receipt:"-"}
-]
+  if(!tenant){
+    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
+    return
+  }
 
-let balance = 0
+  document.getElementById("tenantName").innerText = tenant
 
-const rows = data.map(r=>{
-  balance += (r.debit||0)-(r.credit||0)
-  return {...r, balance}
+  const { data, error } = await supabase
+    .from('tenant_transactions')
+    .select('*')
+    .eq('tenant_code', tenant)
+    .order('date', { ascending: true })
+
+  if(error){
+    document.getElementById("container").innerHTML = "خطأ في تحميل البيانات"
+    return
+  }
+
+  if(!data || data.length === 0){
+    document.getElementById("container").innerHTML = "لا يوجد بيانات"
+    return
+  }
+
+  let balance = 0
+  const grouped = {}
+
+  data.forEach(r=>{
+    const year = new Date(r.date).getFullYear()
+    if(!grouped[year]) grouped[year] = []
+
+    balance += (r.debit || 0) - (r.credit || 0)
+
+    grouped[year].push({
+      ...r,
+      balance
+    })
+  })
+
+  let html = ""
+
+  Object.keys(grouped).forEach((year, index) => {
+
+    html += `
+    <div class="year-card" style="animation-delay:${index * 0.1}s">
+      <div class="year-header">
+        <span class="year-title">${year}</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>البيان</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>الرصيد</th>
+            <th>السند</th>
+          </tr>
+        </thead>
+        <tbody>
+    `
+
+    grouped[year].forEach(r=>{
+      html += `
+      <tr>
+        <td>${r.date}</td>
+        <td>${r.description || "-"}</td>
+        <td class="debit">${r.debit || "-"}</td>
+        <td class="credit">${r.credit || "-"}</td>
+        <td class="balance">${r.balance}</td>
+        <td class="receipt">${r.receipt_no || "-"}</td>
+      </tr>
+      `
+    })
+
+    html += `</tbody></table></div>`
+  })
+
+  document.getElementById("container").innerHTML = html
+
 })
-
-let html = `
-<div class="card">
-<table class="table">
-<thead>
-<tr>
-<th>التاريخ</th>
-<th>البيان</th>
-<th>مدين</th>
-<th>دائن</th>
-<th>الرصيد</th>
-<th>السند</th>
-</tr>
-</thead>
-<tbody>
-`
-
-rows.forEach(r=>{
-  html += `
-  <tr>
-  <td>${r.date}</td>
-  <td>${r.desc}</td>
-  <td>${r.debit||"-"}</td>
-  <td>${r.credit||"-"}</td>
-  <td>${r.balance}</td>
-  <td>${r.receipt}</td>
-  </tr>
-  `
-})
-
-html += `</tbody></table></div>`
-
-document.getElementById("tableContainer").innerHTML = html
-
 </script>
+
+<style>
+
+body{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont;
+  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
+}
+
+.app{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+  opacity:0;
+  transform:translateY(15px);
+  animation:pageEnter .6s ease forwards;
+}
+
+@keyframes pageEnter{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Glass */
+.card{
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(14px);
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Year */
+.year-card{
+  background:rgba(255,255,255,0.5);
+  backdrop-filter:blur(14px);
+  border-radius:22px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.06);
+  animation:fadeIn .6s ease forwards;
+  opacity:0;
+}
+
+@keyframes fadeIn{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Header */
+.year-title{
+  background:#1d2940;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+/* Table */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:10px;
+  font-size:13px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
+
+th{
+  background:#f1f3f7;
+}
+
+.debit{ color:red; font-weight:bold; }
+.credit{ color:green; font-weight:bold; }
+.balance{ font-weight:bold; }
+
+.receipt{
+  background:#eef4ff;
+  padding:4px 8px;
+  border-radius:10px;
+}
+
+/* Title */
+h2{
+  margin:0 0 10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="card">
+<h2>كشف الحساب</h2>
+<div id="tenantName"></div>
+</div>
+
+<div id="container"></div>
+
+</div>
 
 </body>
 </html>
