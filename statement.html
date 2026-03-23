@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>كشف الحساب</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f6f7fb;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.08);
+}
+
+h2{
+  margin:0 0 10px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.table th, .table td{
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+  font-size:14px;
+}
+
+.table th{
+  background:#f1f3f7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+<h2>كشف الحساب</h2>
+<div id="tenant"></div>
+</div>
+
+<div id="tableContainer"></div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+const tenant = params.get("tenant")
+
+document.getElementById("tenant").innerText = tenant || "—"
+
+const data = [
+  {date:"2025-01-01", desc:"رصيد سابق", debit:1172, credit:0, receipt:"-"},
+  {date:"2025-07-01", desc:"إيجار 2025", debit:1836, credit:0, receipt:"-"},
+  {date:"2025-11-11", desc:"دفعة", debit:0, credit:400, receipt:"1766"},
+  {date:"2026-01-01", desc:"إيجار 2026", debit:1836, credit:0, receipt:"-"}
+]
+
+let balance = 0
+
+const rows = data.map(r=>{
+  balance += (r.debit||0)-(r.credit||0)
+  return {...r, balance}
+})
+
+let html = `
+<div class="card">
+<table class="table">
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>البيان</th>
+<th>مدين</th>
+<th>دائن</th>
+<th>الرصيد</th>
+<th>السند</th>
+</tr>
+</thead>
+<tbody>
+`
+
+rows.forEach(r=>{
+  html += `
+  <tr>
+  <td>${r.date}</td>
+  <td>${r.desc}</td>
+  <td>${r.debit||"-"}</td>
+  <td>${r.credit||"-"}</td>
+  <td>${r.balance}</td>
+  <td>${r.receipt}</td>
+  </tr>
+  `
+})
+
+html += `</tbody></table></div>`
+
+document.getElementById("tableContainer").innerHTML = html
+
+</script>
+
+</body>
+</html>
