@@ -6,219 +6,116 @@
 <title>كشف الحساب</title>
 
 <style>
-  :root{
-    --bg:#f6f7fb;
-    --card:rgba(255,255,255,0.62);
-    --text:#1a2238;
-    --muted:#7b8497;
-    --primary:#1d2940;
-    --green:#18a957;
-    --orange:#d68a1d;
-    --red:#e05252;
-    --blue:#2f6fed;
-    --shadow:0 10px 26px rgba(16,24,40,0.08);
-    --radius-xl:24px;
-    --radius-lg:20px;
-  }
+body{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont;
+  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
+}
 
-  *{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-  }
+.app{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
+}
 
-  body{
-    margin:0;
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    background:
-      radial-gradient(circle at top right, rgba(47,111,237,0.10), transparent 25%),
-      radial-gradient(circle at top left, rgba(24,169,87,0.08), transparent 22%),
-      linear-gradient(135deg,#edf2f7 0%, #eef2f7 45%, #f7f9fc 100%);
-    color:var(--text);
-  }
+/* Header */
+.card{
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(14px);
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
+}
 
-  .app{
-    max-width:430px;
-    margin:auto;
-    min-height:100vh;
-    padding:14px 14px 24px;
-  }
+/* Year Card */
+.year-card{
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
+}
 
-  .card{
-    background:var(--card);
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,0.65);
-    border-radius:var(--radius-xl);
-    padding:16px;
-    margin-bottom:12px;
-    box-shadow:var(--shadow);
-  }
+/* Colors */
+.green{ background:#edf8f1; }
+.orange{ background:#fff6ea; }
+.red{ background:#fff1f1; }
 
-  .top-actions{
-    display:flex;
-    gap:10px;
-    margin-bottom:12px;
-  }
+/* Header */
+.year-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
 
-  .btn{
-    flex:1;
-    height:46px;
-    border:none;
-    border-radius:14px;
-    cursor:pointer;
-    font-size:15px;
-    font-weight:900;
-  }
+.year-title{
+  background:#1d2940;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-weight:bold;
+}
 
-  .btn-primary{
-    background:var(--primary);
-    color:#fff;
-  }
+/* Summary */
+.summary{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  font-size:13px;
+  font-weight:bold;
+}
 
-  .btn-light{
-    background:rgba(255,255,255,0.9);
-    color:var(--primary);
-    border:1px solid #dbe3ef;
-  }
+/* Table */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
 
-  .page-title{
-    margin:0 0 8px;
-    font-size:26px;
-    font-weight:900;
-    color:var(--primary);
-  }
+th, td{
+  padding:8px;
+  font-size:12px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
 
-  .tenant-name{
-    font-size:18px;
-    font-weight:900;
-    margin-bottom:6px;
-  }
+th{
+  background:#f1f3f7;
+}
 
-  .tenant-sub{
-    font-size:13px;
-    color:var(--muted);
-    font-weight:800;
-  }
+.debit{ color:red; font-weight:bold; }
+.credit{ color:green; font-weight:bold; }
+.balance{ font-weight:bold; }
 
-  .year-card{
-    border-radius:22px;
-    padding:14px;
-    margin-bottom:14px;
-    box-shadow:0 10px 24px rgba(16,24,40,0.06);
-    border:1px solid rgba(255,255,255,0.7);
-  }
+.receipt{
+  background:#eef4ff;
+  padding:4px 8px;
+  border-radius:10px;
+}
 
-  .year-green{
-    background:rgba(237,248,241,0.95);
-  }
-
-  .year-orange{
-    background:rgba(255,246,234,0.95);
-  }
-
-  .year-red{
-    background:rgba(255,241,241,0.95);
-  }
-
-  .year-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:12px;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  .year-title{
-    background:var(--primary);
-    color:#fff;
-    padding:7px 14px;
-    border-radius:999px;
-    font-size:14px;
-    font-weight:900;
-  }
-
-  .year-status{
-    font-size:13px;
-    font-weight:900;
-  }
-
-  .table-wrap{
-    overflow-x:auto;
-    border-radius:16px;
-  }
-
-  table{
-    width:100%;
-    min-width:640px;
-    border-collapse:collapse;
-    background:rgba(255,255,255,0.82);
-    border-radius:16px;
-    overflow:hidden;
-  }
-
-  th, td{
-    padding:11px 10px;
-    font-size:13px;
-    text-align:center;
-    border-bottom:1px solid #eef2f7;
-    white-space:nowrap;
-  }
-
-  th{
-    background:#f1f4f8;
-    color:var(--primary);
-    font-weight:900;
-  }
-
-  .debit{ color:var(--red); font-weight:900; }
-  .credit{ color:var(--green); font-weight:900; }
-  .balance{ color:var(--primary); font-weight:900; }
-
-  .receipt-badge{
-    display:inline-block;
-    min-width:48px;
-    padding:5px 9px;
-    border-radius:999px;
-    background:#eef4ff;
-    color:var(--blue);
-    font-weight:900;
-  }
-
-  .empty,
-  .error-box,
-  .loading-box{
-    text-align:center;
-    padding:20px;
-    font-size:15px;
-    font-weight:800;
-    color:var(--muted);
-  }
-
-  .error-box{
-    color:#c62828;
-    background:#fff1f1;
-    border:1px solid #ffd8d8;
-    border-radius:18px;
-  }
+.btn{
+  width:100%;
+  height:45px;
+  border:none;
+  border-radius:15px;
+  background:#1d2940;
+  color:#fff;
+  font-weight:bold;
+  margin-bottom:10px;
+}
 </style>
+
 </head>
+
 <body>
 
 <div class="app">
 
-  <div class="top-actions">
-    <button class="btn btn-primary" onclick="goBack()">رجوع</button>
-    <button class="btn btn-light" onclick="goHome()">الرئيسية</button>
-  </div>
+<button class="btn" onclick="goBack()">رجوع</button>
 
-  <div class="card">
-    <h1 class="page-title">كشف الحساب</h1>
-    <div id="tenantName" class="tenant-name">...</div>
-    <div id="tenantSub" class="tenant-sub">...</div>
-  </div>
+<div class="card">
+<h2>كشف الحساب</h2>
+<div id="tenantName"></div>
+</div>
 
-  <div id="container" class="loading-box">جاري تحميل كشف الحساب...</div>
+<div id="container"></div>
 
 </div>
 
@@ -230,58 +127,25 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
+// ✅ حل مشكلة السنة
 const params = new URLSearchParams(window.location.search)
-const tenant = (params.get('tenant') || localStorage.getItem('jabri_tenant_code') || '').trim().toUpperCase()
-const yearParam = params.get('year') || localStorage.getItem('jabri_selected_year') || 'all'
-
-function formatNumber(n){
-  return Number(n || 0).toLocaleString('en-US')
-}
-
-function formatDate(dateStr){
-  if(!dateStr) return '-'
-  const d = new Date(dateStr)
-  if(Number.isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-GB')
-}
-
-function getYearState(yearRows){
-  const yearDebit = yearRows.reduce((sum, r) => sum + Number(r.debit || 0), 0)
-  const yearCredit = yearRows.reduce((sum, r) => sum + Number(r.credit || 0), 0)
-  const yearBalance = yearDebit - yearCredit
-
-  if(yearBalance <= 0 && yearCredit > 0){
-    return { cls:'year-green', label:'مسدد', color:'#18a957' }
-  }
-
-  if(yearCredit > 0 && yearBalance > 0){
-    return { cls:'year-orange', label:'جزئي', color:'#d68a1d' }
-  }
-
-  return { cls:'year-red', label:'غير مسدد', color:'#e05252' }
-}
+const tenant = params.get("tenant")
+const yearParam = 'all'
 
 window.goBack = function(){
   window.history.back()
 }
 
-window.goHome = function(){
-  window.location.href = 'index.html'
-}
+document.addEventListener("DOMContentLoaded", load)
 
-document.addEventListener('DOMContentLoaded', loadStatement)
-
-async function loadStatement(){
-  const container = document.getElementById('container')
+async function load(){
 
   if(!tenant){
-    container.innerHTML = '<div class="error-box">لا يوجد مستأجر</div>'
+    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
     return
   }
 
-  document.getElementById('tenantName').innerText = tenant
-  document.getElementById('tenantSub').innerText =
-    yearParam === 'all' ? 'عرض جميع السنوات' : `السنة المختارة: ${yearParam}`
+  document.getElementById("tenantName").innerText = tenant
 
   const { data, error } = await supabase
     .from('tenant_transactions')
@@ -289,97 +153,100 @@ async function loadStatement(){
     .eq('tenant_code', tenant)
     .order('date', { ascending: true })
 
-  if(error){
-    container.innerHTML = '<div class="error-box">خطأ في تحميل البيانات</div>'
+  if(error || !data){
+    document.getElementById("container").innerHTML = "خطأ"
     return
   }
 
-  if(!data || data.length === 0){
-    container.innerHTML = '<div class="empty">لا يوجد بيانات</div>'
-    return
-  }
-
-  let runningBalance = 0
+  let balance = 0
   const grouped = {}
 
-  data.forEach(row => {
-    const debit = Number(row.debit || 0)
-    const credit = Number(row.credit || 0)
-    const year = new Date(row.date).getFullYear()
-
-    runningBalance += debit - credit
+  data.forEach(r=>{
+    const year = new Date(r.date).getFullYear()
 
     if(!grouped[year]) grouped[year] = []
 
+    balance += (r.debit || 0) - (r.credit || 0)
+
     grouped[year].push({
-      ...row,
-      debit,
-      credit,
-      balance: runningBalance
+      ...r,
+      balance
     })
   })
 
-  let years = Object.keys(grouped).map(Number).sort((a,b) => a - b)
+  let html = ""
 
-  if(yearParam !== 'all'){
-    years = years.filter(y => String(y) === String(yearParam))
-  }
+  Object.keys(grouped).forEach(year=>{
 
-  if(years.length === 0){
-    container.innerHTML = '<div class="empty">لا يوجد بيانات لهذه السنة</div>'
-    return
-  }
-
-  let html = ''
-
-  years.forEach(year => {
     const rows = grouped[year]
-    const yearState = getYearState(rows)
+
+    let totalDebit = 0
+    let totalCredit = 0
+
+    rows.forEach(r=>{
+      totalDebit += Number(r.debit || 0)
+      totalCredit += Number(r.credit || 0)
+    })
+
+    const yearBalance = totalDebit - totalCredit
+
+    let color = 'red'
+    let status = 'غير مسدد'
+
+    if(yearBalance <= 0 && totalCredit > 0){
+      color = 'green'
+      status = 'مسدد'
+    }
+    else if(totalCredit > 0){
+      color = 'orange'
+      status = 'جزئي'
+    }
 
     html += `
-      <div class="year-card ${yearState.cls}">
-        <div class="year-header">
-          <span class="year-title">${year}</span>
-          <span class="year-status" style="color:${yearState.color}">${yearState.label}</span>
-        </div>
+    <div class="year-card ${color}">
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>البيان</th>
-                <th>مدين</th>
-                <th>دائن</th>
-                <th>الرصيد</th>
-                <th>السند</th>
-              </tr>
-            </thead>
-            <tbody>
+      <div class="year-header">
+        <span class="year-title">${year}</span>
+        <span>${status}</span>
+      </div>
+
+      <div class="summary">
+        <div>مدين: ${totalDebit}</div>
+        <div>دائن: ${totalCredit}</div>
+        <div>رصيد: ${yearBalance}</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>البيان</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>الرصيد</th>
+            <th>السند</th>
+          </tr>
+        </thead>
+        <tbody>
     `
 
-    rows.forEach(r => {
+    rows.forEach(r=>{
       html += `
-        <tr>
-          <td>${formatDate(r.date)}</td>
-          <td>${r.description || '-'}</td>
-          <td class="debit">${r.debit ? formatNumber(r.debit) : '-'}</td>
-          <td class="credit">${r.credit ? formatNumber(r.credit) : '-'}</td>
-          <td class="balance">${formatNumber(r.balance)}</td>
-          <td>${r.receipt_no ? `<span class="receipt-badge">${r.receipt_no}</span>` : '-'}</td>
-        </tr>
+      <tr>
+        <td>${r.date}</td>
+        <td>${r.description || "-"}</td>
+        <td class="debit">${r.debit || "-"}</td>
+        <td class="credit">${r.credit || "-"}</td>
+        <td class="balance">${r.balance}</td>
+        <td class="receipt">${r.receipt_no || "-"}</td>
+      </tr>
       `
     })
 
-    html += `
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `
+    html += `</tbody></table></div>`
   })
 
-  container.innerHTML = html
+  document.getElementById("container").innerHTML = html
 }
 </script>
 
