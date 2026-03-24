@@ -45,7 +45,6 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:10px;
-  gap:10px;
 }
 
 .year-title{
@@ -54,20 +53,6 @@ body{
   padding:6px 14px;
   border-radius:20px;
   font-weight:bold;
-}
-
-/* Summary */
-.summary{
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-  font-size:13px;
-  font-weight:bold;
-  gap:10px;
-  flex-wrap:wrap;
-  background:rgba(255,255,255,0.75);
-  padding:10px 12px;
-  border-radius:14px;
 }
 
 /* Table */
@@ -90,9 +75,12 @@ th{
   background:#f1f3f7;
 }
 
-.debit{ color:red; font-weight:bold; }
-.credit{ color:green; font-weight:bold; }
+.debit{ color:#e05252; font-weight:bold; }
+.credit{ color:#18a957; font-weight:bold; }
 .balance{ font-weight:bold; }
+
+.balance-positive{ color:#e05252; }
+.balance-zero{ color:#18a957; }
 
 .receipt{
   background:#eef4ff;
@@ -101,6 +89,56 @@ th{
   display:inline-block;
 }
 
+/* Glass Summary */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.summary-card{
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.7);
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+  border-radius:16px;
+  padding:12px 10px;
+  text-align:center;
+  animation:summaryFade .5s ease forwards;
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.summary-card:nth-child(1){ animation-delay:.05s; }
+.summary-card:nth-child(2){ animation-delay:.12s; }
+.summary-card:nth-child(3){ animation-delay:.2s; }
+
+.summary-label{
+  font-size:12px;
+  font-weight:800;
+  color:#555;
+  margin-bottom:6px;
+}
+
+.summary-value{
+  font-size:22px;
+  font-weight:900;
+}
+
+.summary-debit .summary-value{ color:#e05252; }
+.summary-credit .summary-value{ color:#18a957; }
+.summary-balance .summary-value{ color:#1d2940; }
+
+@keyframes summaryFade{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Button */
 .btn{
   width:100%;
   height:45px;
@@ -147,7 +185,7 @@ window.goBack = function(){
 }
 
 function format(n){
-  return Number(n || 0).toLocaleString('en-US')
+  return Number(n || 0)
 }
 
 function formatDate(dateStr){
@@ -158,13 +196,11 @@ function formatDate(dateStr){
 }
 
 function getRowOrder(desc){
-  const text = String(desc || '').trim()
-
+  const text = String(desc || '')
   if(text.includes('ايجار')) return 1
   if(text.includes('معارف')) return 2
   if(text.includes('رصيد سابق')) return 3
   if(text.includes('دفعة')) return 4
-
   return 9
 }
 
@@ -195,7 +231,6 @@ async function load(){
 
   data.forEach(r=>{
     const year = new Date(r.date).getFullYear()
-
     if(!grouped[year]) grouped[year] = []
 
     balance += Number(r.debit || 0) - Number(r.credit || 0)
@@ -208,88 +243,98 @@ async function load(){
 
   let html = ""
 
-  Object.keys(grouped)
-    .sort((a,b) => a - b)
-    .forEach(year => {
+  Object.keys(grouped).sort((a,b) => a - b).forEach(year => {
 
-      const rows = grouped[year]
+    const rows = grouped[year]
 
-      rows.sort((a, b) => {
-        const dateDiff = new Date(a.date) - new Date(b.date)
-        if(dateDiff !== 0) return dateDiff
-        return getRowOrder(a.description) - getRowOrder(b.description)
-      })
+    rows.sort((a,b)=>{
+      const d = new Date(a.date) - new Date(b.date)
+      if(d !== 0) return d
+      return getRowOrder(a.description) - getRowOrder(b.description)
+    })
 
-      let totalDebit = 0
-      let totalCredit = 0
+    let totalDebit = 0
+    let totalCredit = 0
 
-      rows.forEach(r=>{
-        totalDebit += Number(r.debit || 0)
-        totalCredit += Number(r.credit || 0)
-      })
+    rows.forEach(r=>{
+      totalDebit += Number(r.debit || 0)
+      totalCredit += Number(r.credit || 0)
+    })
 
-      const yearBalance = totalDebit - totalCredit
-      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
+    const endYearBalance = rows[rows.length - 1]?.balance || 0
 
-      let color = 'red'
-      let status = 'غير مسدد'
+    let color = 'red'
+    let status = 'غير مسدد'
 
-      if(yearBalance <= 0 && totalCredit > 0){
-        color = 'green'
-        status = 'مسدد'
-      } else if(totalCredit > 0){
-        color = 'orange'
-        status = 'جزئي'
-      }
+    if(endYearBalance <= 0) {
+      color = 'green'
+      status = 'مسدد'
+    } else if(totalCredit > 0){
+      color = 'orange'
+      status = 'جزئي'
+    }
 
-      html += `
-      <div class="year-card ${color}">
+    html += `
+    <div class="year-card ${color}">
 
-        <div class="year-header">
-          <span class="year-title">${year}</span>
-          <span>${status}</span>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>مدين</th>
-              <th>دائن</th>
-              <th>الرصيد</th>
-              <th>البيان</th>
-              <th>السند</th>
-            </tr>
-          </thead>
-          <tbody>
-      `
-
-      rows.forEach(r=>{
-        html += `
-        <tr>
-          <td>${formatDate(r.date)}</td>
-          <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
-          <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
-          <td class="balance">${format(r.balance)}</td>
-          <td>${r.description || "-"}</td>
-          <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-        </tr>
-        `
-      })
-
-      html += `
-          </tbody>
-        </table>
-
-        <div class="summary">
-          <div>مدين السنة: ${format(totalDebit)}</div>
-          <div>دائن السنة: ${format(totalCredit)}</div>
-          <div>رصيد آخر السنة: ${format(endYearBalance)}</div>
-        </div>
-
+      <div class="year-header">
+        <span class="year-title">${year}</span>
+        <span>${status}</span>
       </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>الرصيد</th>
+            <th>البيان</th>
+            <th>السند</th>
+          </tr>
+        </thead>
+        <tbody>
+    `
+
+    rows.forEach(r=>{
+      let balanceClass = r.balance > 0 ? 'balance-positive' : 'balance-zero'
+
+      html += `
+      <tr>
+        <td>${formatDate(r.date)}</td>
+        <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
+        <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
+        <td class="balance ${balanceClass}">${format(r.balance)}</td>
+        <td>${r.description || "-"}</td>
+        <td><span class="receipt">${r.receipt_no || "-"}</span></td>
+      </tr>
       `
     })
+
+    html += `
+      </tbody>
+      </table>
+
+      <div class="summary">
+        <div class="summary-card summary-debit">
+          <div class="summary-label">مدين السنة</div>
+          <div class="summary-value">${format(totalDebit)}</div>
+        </div>
+
+        <div class="summary-card summary-credit">
+          <div class="summary-label">دائن السنة</div>
+          <div class="summary-value">${format(totalCredit)}</div>
+        </div>
+
+        <div class="summary-card summary-balance">
+          <div class="summary-label">رصيد آخر السنة</div>
+          <div class="summary-value">${format(endYearBalance)}</div>
+        </div>
+      </div>
+
+    </div>
+    `
+  })
 
   document.getElementById("container").innerHTML = html
 }
