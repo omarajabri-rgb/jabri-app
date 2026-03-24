@@ -43,7 +43,9 @@ body{
 .year-header{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   margin-bottom:10px;
+  gap:10px;
 }
 
 .year-title{
@@ -58,17 +60,23 @@ body{
 .summary{
   display:flex;
   justify-content:space-between;
-  margin-bottom:10px;
+  margin-top:10px;
   font-size:13px;
   font-weight:bold;
   gap:10px;
   flex-wrap:wrap;
+  background:rgba(255,255,255,0.75);
+  padding:10px 12px;
+  border-radius:14px;
 }
 
 /* Table */
 table{
   width:100%;
   border-collapse:collapse;
+  background:rgba(255,255,255,0.7);
+  border-radius:14px;
+  overflow:hidden;
 }
 
 th, td{
@@ -90,6 +98,7 @@ th{
   background:#eef4ff;
   padding:4px 8px;
   border-radius:10px;
+  display:inline-block;
 }
 
 .btn{
@@ -241,12 +250,6 @@ async function load(){
           <span>${status}</span>
         </div>
 
-        <div class="summary">
-          <div>مدين السنة: ${format(totalDebit)}</div>
-          <div>دائن السنة: ${format(totalCredit)}</div>
-          <div>رصيد آخر السنة: ${format(endYearBalance)}</div>
-        </div>
-
         <table>
           <thead>
             <tr>
@@ -274,7 +277,18 @@ async function load(){
         `
       })
 
-      html += `</tbody></table></div>`
+      html += `
+          </tbody>
+        </table>
+
+        <div class="summary">
+          <div>مدين السنة: ${format(totalDebit)}</div>
+          <div>دائن السنة: ${format(totalCredit)}</div>
+          <div>رصيد آخر السنة: ${format(endYearBalance)}</div>
+        </div>
+
+      </div>
+      `
     })
 
   document.getElementById("container").innerHTML = html
