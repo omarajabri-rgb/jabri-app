@@ -529,6 +529,21 @@
       transition:transform .2s ease, box-shadow .2s ease;
     }
 
+    .notification-blue{
+      background:rgba(238,244,255,0.92);
+      border:1px solid rgba(214,226,255,0.95);
+    }
+
+    .notification-orange{
+      background:rgba(255,246,234,0.92);
+      border:1px solid rgba(255,229,195,0.95);
+    }
+
+    .notification-red{
+      background:rgba(255,241,241,0.92);
+      border:1px solid rgba(255,216,216,0.95);
+    }
+
     .notification-title{
       font-size:15px;
       font-weight:900;
@@ -917,6 +932,36 @@ function applySmartUI(paid, remaining, paidPercent, remainingPercent){
   setDotColor('remainingDot', accountState)
 }
 
+function getNotificationStorageKey(code){
+  return `jabri_notification_read_${code}`
+}
+
+function getNotificationTypeClass(item){
+  const raw = String(item.type || item.title || '').toLowerCase()
+
+  if(
+    raw.includes('urgent') ||
+    raw.includes('late') ||
+    raw.includes('alert') ||
+    raw.includes('عاجل') ||
+    raw.includes('تأخر')
+  ){
+    return 'notification-red'
+  }
+
+  if(
+    raw.includes('5days') ||
+    raw.includes('10days') ||
+    raw.includes('reminder') ||
+    raw.includes('تذكير') ||
+    raw.includes('خلال')
+  ){
+    return 'notification-orange'
+  }
+
+  return 'notification-blue'
+}
+
 async function loadNotifications(code){
   const notificationList = document.getElementById('notificationList')
   const emptyNotifications = document.getElementById('emptyNotifications')
@@ -937,14 +982,33 @@ async function loadNotifications(code){
     return
   }
 
+  const storageKey = getNotificationStorageKey(code)
+  const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
+  const nowMs = Date.now()
+  const tenMinutesMs = 10 * 60 * 1000
+
+  const visibleNotifications = data.filter(item => {
+    const readAt = storedReadMap[item.id]
+    if(!readAt) return true
+    return (nowMs - readAt) < tenMinutesMs
+  })
+
+  if(visibleNotifications.length === 0){
+    notifyBadge.innerText = '0'
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
   emptyNotifications.classList.add('hidden')
 
-  const unreadCount = data.filter(item => !item.is_read).length
+  const unreadCount = visibleNotifications.filter(item => !item.is_read).length
   notifyBadge.innerText = unreadCount
 
-  data.forEach(item => {
+  visibleNotifications.forEach(item => {
+    const typeClass = getNotificationTypeClass(item)
+
     notificationList.innerHTML += `
-      <div class="notification-item">
+      <div class="notification-item ${typeClass}">
         <div class="notification-title">${item.title || ''}</div>
         <div class="notification-message">${item.message || ''}</div>
         <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
@@ -952,8 +1016,17 @@ async function loadNotifications(code){
     `
   })
 
-  const unreadIds = data.filter(item => !item.is_read).map(item => item.id)
-  if(unreadIds.length > 0){
+  const unreadItems = visibleNotifications.filter(item => !item.is_read)
+
+  if(unreadItems.length > 0){
+    unreadItems.forEach(item => {
+      storedReadMap[item.id] = nowMs
+    })
+
+    localStorage.setItem(storageKey, JSON.stringify(storedReadMap))
+
+    const unreadIds = unreadItems.map(item => item.id)
+
     await supabase
       .from('tenant_notifications')
       .update({ is_read: true })
