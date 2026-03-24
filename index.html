@@ -734,7 +734,19 @@ async function loadNotifications(code){
   let html = ''
   let visibleCount = 0
 
-  data.forEach(item => {
+  const sortedData = [...data].sort((a,b)=>{
+  const priority = {
+    legal_final:1,
+    legal:2,
+    third:3,
+    second:4,
+    first:5,
+    general:6
+  }
+  return (priority[a.type]||99) - (priority[b.type]||99)
+})
+
+sortedData.forEach(item => {
     const type = item.type || 'general'
     const days = getDaysDiff(item.created_at)
     const expiry = getExpiryDays(type)
