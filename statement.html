@@ -5,213 +5,484 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>كشف الحساب</title>
 
+<style>
+  :root{
+    --bg:#f6f7fb;
+    --card:rgba(255,255,255,0.62);
+    --card-strong:rgba(255,255,255,0.78);
+    --text:#1a2238;
+    --muted:#7b8497;
+    --primary:#1d2940;
+    --line:#e8edf4;
+    --green:#18a957;
+    --red:#e05252;
+    --blue:#2f6fed;
+    --shadow:0 10px 26px rgba(16,24,40,0.08);
+    --radius-xl:24px;
+    --radius-lg:20px;
+    --radius-md:16px;
+  }
+
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  body{
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background:
+      radial-gradient(circle at top right, rgba(47,111,237,0.10), transparent 25%),
+      radial-gradient(circle at top left, rgba(24,169,87,0.08), transparent 22%),
+      linear-gradient(135deg,#edf2f7 0%, #eef2f7 45%, #f7f9fc 100%);
+    color:var(--text);
+  }
+
+  .app{
+    max-width:430px;
+    margin:auto;
+    min-height:100vh;
+    padding:14px 14px 24px;
+    opacity:0;
+    transform:translateY(12px);
+    animation:pageEnter .5s ease forwards;
+  }
+
+  @keyframes pageEnter{
+    to{
+      opacity:1;
+      transform:translateY(0);
+    }
+  }
+
+  .card{
+    background:var(--card);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.62);
+    border-radius:var(--radius-xl);
+    padding:16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow);
+  }
+
+  .top-actions{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  .back-btn,
+  .home-btn{
+    flex:1;
+    height:46px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:900;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+
+  .back-btn{
+    background:var(--primary);
+    color:#fff;
+  }
+
+  .home-btn{
+    background:rgba(255,255,255,0.84);
+    color:var(--primary);
+    border:1px solid #dbe3ef;
+  }
+
+  .back-btn:hover,
+  .home-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(16,24,40,0.10);
+  }
+
+  .page-title{
+    margin:0 0 8px;
+    font-size:26px;
+    font-weight:900;
+    color:var(--primary);
+  }
+
+  .tenant-name{
+    font-size:18px;
+    font-weight:900;
+    margin-bottom:6px;
+  }
+
+  .tenant-sub{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:800;
+  }
+
+  .summary-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .summary-box{
+    background:var(--card-strong);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(16,24,40,0.05);
+  }
+
+  .summary-label{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:800;
+    margin-bottom:8px;
+  }
+
+  .summary-value{
+    font-size:24px;
+    font-weight:900;
+  }
+
+  .green{ color:var(--green); }
+  .red{ color:var(--red); }
+  .blue{ color:var(--blue); }
+
+  .year-card{
+    background:rgba(255,255,255,0.56);
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,0.62);
+    border-radius:22px;
+    padding:14px;
+    margin-bottom:14px;
+    box-shadow:0 10px 24px rgba(16,24,40,0.06);
+    animation:fadeIn .45s ease forwards;
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  @keyframes fadeIn{
+    to{
+      opacity:1;
+      transform:translateY(0);
+    }
+  }
+
+  .year-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .year-title{
+    background:var(--primary);
+    color:#fff;
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:900;
+  }
+
+  .year-total{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:800;
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+    border-radius:16px;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:640px;
+    background:rgba(255,255,255,0.72);
+    border-radius:16px;
+    overflow:hidden;
+  }
+
+  th, td{
+    padding:11px 10px;
+    font-size:13px;
+    text-align:center;
+    border-bottom:1px solid #eef2f7;
+    white-space:nowrap;
+  }
+
+  th{
+    background:#f1f4f8;
+    color:var(--primary);
+    font-weight:900;
+  }
+
+  tr:hover td{
+    background:rgba(245,248,252,0.9);
+  }
+
+  .debit{
+    color:var(--red);
+    font-weight:900;
+  }
+
+  .credit{
+    color:var(--green);
+    font-weight:900;
+  }
+
+  .balance{
+    color:var(--primary);
+    font-weight:900;
+  }
+
+  .receipt-badge{
+    display:inline-block;
+    min-width:48px;
+    padding:5px 9px;
+    border-radius:999px;
+    background:#eef4ff;
+    color:var(--blue);
+    font-weight:900;
+  }
+
+  .empty,
+  .error-box,
+  .loading-box{
+    text-align:center;
+    padding:20px;
+    font-size:15px;
+    font-weight:800;
+    color:var(--muted);
+  }
+
+  .error-box{
+    color:#c62828;
+    background:#fff1f1;
+    border:1px solid #ffd8d8;
+    border-radius:18px;
+  }
+
+  @media (min-width:768px){
+    .app{
+      max-width:780px;
+    }
+
+    .summary-grid{
+      grid-template-columns:repeat(4,1fr);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="top-actions">
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+    <button class="home-btn" onclick="goHome()">الرئيسية</button>
+  </div>
+
+  <div class="card">
+    <h1 class="page-title">كشف الحساب</h1>
+    <div id="tenantName" class="tenant-name">...</div>
+    <div id="tenantSub" class="tenant-sub">...</div>
+  </div>
+
+  <div class="card">
+    <div class="summary-grid">
+      <div class="summary-box">
+        <div class="summary-label">إجمالي المدين</div>
+        <div id="totalDebit" class="summary-value red">0</div>
+      </div>
+      <div class="summary-box">
+        <div class="summary-label">إجمالي الدائن</div>
+        <div id="totalCredit" class="summary-value green">0</div>
+      </div>
+      <div class="summary-box">
+        <div class="summary-label">الرصيد النهائي</div>
+        <div id="finalBalance" class="summary-value blue">0</div>
+      </div>
+      <div class="summary-box">
+        <div class="summary-label">عدد الحركات</div>
+        <div id="rowCount" class="summary-value">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="container" class="loading-box">جاري تحميل كشف الحساب...</div>
+
+</div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// ✅ جاهز عندك
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24i'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
-const tenant = params.get("tenant")
+const tenant = (params.get('tenant') || localStorage.getItem('jabri_tenant_code') || '').trim().toUpperCase()
+const yearParam = Number(params.get('year') || localStorage.getItem('jabri_selected_year') || 0)
 
-document.addEventListener("DOMContentLoaded", async () => {
+function formatNumber(n){
+  return Number(n || 0).toLocaleString('en-US')
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return '-'
+  const d = new Date(dateStr)
+  if(Number.isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('en-GB')
+}
+
+function goBack(){
+  window.history.back()
+}
+
+function goHome(){
+  window.location.href = 'index.html'
+}
+
+window.goBack = goBack
+window.goHome = goHome
+
+document.addEventListener('DOMContentLoaded', loadStatement)
+
+async function loadStatement(){
+  const container = document.getElementById('container')
 
   if(!tenant){
-    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
+    container.innerHTML = `<div class="error-box">لا يوجد مستأجر</div>`
+    document.getElementById('tenantName').innerText = 'غير محدد'
+    document.getElementById('tenantSub').innerText = ''
     return
   }
 
-  document.getElementById("tenantName").innerText = tenant
+  document.getElementById('tenantName').innerText = tenant
+  document.getElementById('tenantSub').innerText =
+    yearParam ? `السنة المختارة: ${yearParam}` : 'عرض جميع السنوات'
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('tenant_transactions')
     .select('*')
     .eq('tenant_code', tenant)
     .order('date', { ascending: true })
 
+  const { data, error } = await query
+
   if(error){
-    document.getElementById("container").innerHTML = "خطأ في تحميل البيانات"
+    container.innerHTML = `<div class="error-box">خطأ في تحميل البيانات</div>`
     return
   }
 
   if(!data || data.length === 0){
-    document.getElementById("container").innerHTML = "لا يوجد بيانات"
+    container.innerHTML = `<div class="empty">لا يوجد بيانات</div>`
     return
   }
 
-  let balance = 0
+  let runningBalance = 0
+  let totalDebit = 0
+  let totalCredit = 0
+
   const grouped = {}
 
-  data.forEach(r=>{
-    const year = new Date(r.date).getFullYear()
-    if(!grouped[year]) grouped[year] = []
+  data.forEach(row => {
+    const debit = Number(row.debit || 0)
+    const credit = Number(row.credit || 0)
+    const dateYear = new Date(row.date).getFullYear()
 
-    balance += (r.debit || 0) - (r.credit || 0)
+    runningBalance += debit - credit
+    totalDebit += debit
+    totalCredit += credit
 
-    grouped[year].push({
-      ...r,
-      balance
+    if(!grouped[dateYear]) grouped[dateYear] = []
+
+    grouped[dateYear].push({
+      ...row,
+      debit,
+      credit,
+      balance: runningBalance
     })
   })
 
-  let html = ""
+  document.getElementById('totalDebit').innerText = formatNumber(totalDebit)
+  document.getElementById('totalCredit').innerText = formatNumber(totalCredit)
+  document.getElementById('finalBalance').innerText = formatNumber(runningBalance)
+  document.getElementById('rowCount').innerText = formatNumber(data.length)
 
-  Object.keys(grouped).forEach((year, index) => {
+  const years = Object.keys(grouped)
+    .map(Number)
+    .sort((a, b) => a - b)
+
+  const visibleYears = yearParam ? years.filter(y => y === yearParam) : years
+
+  if(visibleYears.length === 0){
+    container.innerHTML = `<div class="empty">لا يوجد بيانات لهذه السنة</div>`
+    return
+  }
+
+  let html = ''
+
+  visibleYears.forEach((year, index) => {
+    const rows = grouped[year]
+    const yearDebit = rows.reduce((sum, r) => sum + r.debit, 0)
+    const yearCredit = rows.reduce((sum, r) => sum + r.credit, 0)
 
     html += `
-    <div class="year-card" style="animation-delay:${index * 0.1}s">
-      <div class="year-header">
-        <span class="year-title">${year}</span>
-      </div>
+      <div class="year-card" style="animation-delay:${index * 0.08}s">
+        <div class="year-header">
+          <span class="year-title">${year}</span>
+          <span class="year-total">مدين ${formatNumber(yearDebit)} | دائن ${formatNumber(yearCredit)}</span>
+        </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>التاريخ</th>
-            <th>البيان</th>
-            <th>مدين</th>
-            <th>دائن</th>
-            <th>الرصيد</th>
-            <th>السند</th>
-          </tr>
-        </thead>
-        <tbody>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>البيان</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+                <th>السند</th>
+              </tr>
+            </thead>
+            <tbody>
     `
 
-    grouped[year].forEach(r=>{
+    rows.forEach(r => {
       html += `
-      <tr>
-        <td>${r.date}</td>
-        <td>${r.description || "-"}</td>
-        <td class="debit">${r.debit || "-"}</td>
-        <td class="credit">${r.credit || "-"}</td>
-        <td class="balance">${r.balance}</td>
-        <td class="receipt">${r.receipt_no || "-"}</td>
-      </tr>
+        <tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${r.description || '-'}</td>
+          <td class="debit">${r.debit ? formatNumber(r.debit) : '-'}</td>
+          <td class="credit">${r.credit ? formatNumber(r.credit) : '-'}</td>
+          <td class="balance">${formatNumber(r.balance)}</td>
+          <td>${r.receipt_no ? `<span class="receipt-badge">${r.receipt_no}</span>` : '-'}</td>
+        </tr>
       `
     })
 
-    html += `</tbody></table></div>`
+    html += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `
   })
 
-  document.getElementById("container").innerHTML = html
-
-})
+  container.innerHTML = html
+}
 </script>
-
-<style>
-
-body{
-  margin:0;
-  font-family:-apple-system, BlinkMacSystemFont;
-  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
-}
-
-.app{
-  max-width:420px;
-  margin:auto;
-  padding:15px;
-  opacity:0;
-  transform:translateY(15px);
-  animation:pageEnter .6s ease forwards;
-}
-
-@keyframes pageEnter{
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-/* Glass */
-.card{
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(14px);
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-/* Year */
-.year-card{
-  background:rgba(255,255,255,0.5);
-  backdrop-filter:blur(14px);
-  border-radius:22px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.06);
-  animation:fadeIn .6s ease forwards;
-  opacity:0;
-}
-
-@keyframes fadeIn{
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-/* Header */
-.year-title{
-  background:#1d2940;
-  color:#fff;
-  padding:6px 14px;
-  border-radius:20px;
-  font-weight:bold;
-}
-
-/* Table */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td{
-  padding:10px;
-  font-size:13px;
-  text-align:center;
-  border-bottom:1px solid #eee;
-}
-
-th{
-  background:#f1f3f7;
-}
-
-.debit{ color:red; font-weight:bold; }
-.credit{ color:green; font-weight:bold; }
-.balance{ font-weight:bold; }
-
-.receipt{
-  background:#eef4ff;
-  padding:4px 8px;
-  border-radius:10px;
-}
-
-/* Title */
-h2{
-  margin:0 0 10px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="app">
-
-<div class="card">
-<h2>كشف الحساب</h2>
-<div id="tenantName"></div>
-</div>
-
-<div id="container"></div>
-
-</div>
 
 </body>
 </html>
