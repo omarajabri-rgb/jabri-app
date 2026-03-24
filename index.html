@@ -414,36 +414,59 @@
     }
 
     .line-chart-wrap{
-  width:100%;
-  height:280px;
-  margin:0 auto;
-  position:relative;
-}
+      width:100%;
+      height:280px;
+      margin:0 auto;
+      position:relative;
+    }
 
-#creditTrendChart{
-  width:100% !important;
-  height:100% !important;
-  display:block;
-}
-}
-}
-}
+    #creditTrendChart{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
 
     .chart-legend{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:16px;
+      gap:12px;
+      margin-top:18px;
     }
 
     .legend-item{
-      background:rgba(255,255,255,0.70);
-      border:1px solid rgba(255,255,255,0.45);
-      box-shadow:var(--soft-shadow);
-      border-radius:16px;
-      padding:14px;
+      border-radius:18px;
+      padding:16px 14px;
       text-align:center;
-      transition:transform .2s ease, box-shadow .2s ease;
+      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
+      border:1px solid rgba(255,255,255,0.55);
+      box-shadow:0 10px 24px rgba(16,24,40,0.06);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .legend-item:hover{
+      transform:translateY(-3px);
+      box-shadow:0 14px 28px rgba(16,24,40,0.10);
+    }
+
+    .legend-paid{
+      background:rgba(237,248,241,0.95);
+      color:#18a957;
+    }
+
+    .legend-remaining-green{
+      background:rgba(237,248,241,0.95);
+      color:#18a957;
+    }
+
+    .legend-remaining-orange{
+      background:rgba(255,246,234,0.95);
+      color:#d68a1d;
+    }
+
+    .legend-remaining-red{
+      background:rgba(255,241,241,0.95);
+      color:#e05252;
     }
 
     .legend-dot{
@@ -456,7 +479,7 @@
 
     .legend-title{
       font-size:13px;
-      color:var(--muted);
+      color:inherit;
       margin-bottom:6px;
       font-weight:800;
     }
@@ -720,13 +743,19 @@
       </div>
 
       <div class="chart-legend">
-        <div class="legend-item">
-          <div class="legend-title"><span class="legend-dot" style="background:#18a957"></span>المدفوع</div>
+        <div id="legendPaidCard" class="legend-item legend-paid">
+          <div class="legend-title">
+            <span class="legend-dot" style="background:#18a957"></span>
+            المدفوع
+          </div>
           <div id="legendPaid" class="legend-value">0</div>
         </div>
 
-        <div class="legend-item">
-          <div class="legend-title"><span class="legend-dot" style="background:#e05252"></span>المتبقي</div>
+        <div id="legendRemainingCard" class="legend-item legend-remaining-red">
+          <div class="legend-title">
+            <span id="remainingDot" class="legend-dot" style="background:#e05252"></span>
+            المتبقي
+          </div>
           <div id="legendRemaining" class="legend-value">0</div>
         </div>
       </div>
@@ -776,7 +805,7 @@ function formatPercent(n){
 
 function formatDateTime(dateValue){
   const date = dateValue ? new Date(dateValue) : new Date()
-  return 'آخر تحديث: ' + date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit'
   })
@@ -1084,6 +1113,26 @@ async function loadTenantSummary(code, year){
 
   document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
   document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
+
+  const legendRemainingCard = document.getElementById('legendRemainingCard')
+  const remainingDot = document.getElementById('remainingDot')
+
+  legendRemainingCard.classList.remove(
+    'legend-remaining-green',
+    'legend-remaining-orange',
+    'legend-remaining-red'
+  )
+
+  if(remaining === 0 && paid > 0){
+    legendRemainingCard.classList.add('legend-remaining-green')
+    remainingDot.style.background = '#18a957'
+  } else if(paid > 0 && remaining > 0){
+    legendRemainingCard.classList.add('legend-remaining-orange')
+    remainingDot.style.background = '#d68a1d'
+  } else {
+    legendRemainingCard.classList.add('legend-remaining-red')
+    remainingDot.style.background = '#e05252'
+  }
 
   let noteText = ''
   if(remaining === 0 && paid > 0){
