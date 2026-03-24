@@ -323,69 +323,24 @@
       align-items:start;
     }
 
-    .profile-mini-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:16px;
-      margin-top:18px;
-      margin-bottom:18px;
-    }
-
-    .profile-box{
-      border-radius:22px;
-      padding:18px;
-      text-align:center;
-      border:1px solid rgba(255,255,255,0.6);
-      box-shadow:0 10px 28px rgba(16,24,40,0.06);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      transition:transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
-    }
-
-    .profile-box:hover{
-      transform:translateY(-4px);
-      box-shadow:0 14px 32px rgba(16,24,40,0.1);
-    }
-
-    .profile-box.blue{
-      background:rgba(238,244,255,0.75);
-    }
-
-    .profile-box.green{
-      background:rgba(237,248,241,0.75);
-    }
-
-    .profile-box.orange{
-      background:rgba(255,246,234,0.75);
-    }
-
-    .profile-box.red{
-      background:rgba(255,241,241,0.75);
-    }
-
-    .profile-box .card-label{
-      font-size:14px;
-      font-weight:800;
-      color:#7b8497;
-      margin-bottom:6px;
-    }
-
-    .profile-box .card-value{
-      font-size:26px;
-      font-weight:900;
-      color:#1d2940;
-    }
-
     .profile-actions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      margin-top:10px;
+      margin-top:14px;
     }
 
     .profile-actions .btn{
       min-width:180px;
       flex:1;
+    }
+
+    .profile-meta{
+      margin-top:14px;
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.8;
+      font-weight:800;
     }
 
     .stack{
@@ -516,7 +471,6 @@
       .cards,
       .charts-grid,
       .tenant-profile-grid,
-      .profile-mini-grid,
       .form-grid{
         grid-template-columns:1fr;
       }
@@ -638,24 +592,7 @@
             رمز المستأجر: <span id="profileTenantCode">—</span>
           </div>
 
-          <div class="profile-mini-grid">
-            <div class="profile-box blue">
-              <div class="card-label">إجمالي المدين</div>
-              <div id="profileDebit" class="card-value">0</div>
-            </div>
-
-            <div class="profile-box green">
-              <div class="card-label">إجمالي الدائن</div>
-              <div id="profileCredit" class="card-value">0</div>
-            </div>
-
-            <div class="profile-box orange">
-              <div class="card-label">الرصيد الحالي</div>
-              <div id="profileBalance" class="card-value">0</div>
-            </div>
-          </div>
-
-          <div class="mini-note">
+          <div class="profile-meta">
             آخر ظهور: <span id="profileLastSeen">—</span>
           </div>
 
@@ -987,33 +924,6 @@
     document.getElementById('profileLastSeen').innerText =
       lastSeenValue ? formatDateTime(lastSeenValue) : 'لم يسجل دخول بعد'
 
-    const debit = Number(row["إجمالي_المدين"] || 0)
-    const credit = Number(row["إجمالي_الدائن"] || 0)
-    const balance = Number(row["الرصيد"] || 0)
-
-    animateValue('profileDebit', debit)
-    animateValue('profileCredit', credit)
-    animateValue('profileBalance', balance)
-
-    const debitBox = document.getElementById('profileDebit').parentElement
-    const creditBox = document.getElementById('profileCredit').parentElement
-    const balanceBox = document.getElementById('profileBalance').parentElement
-
-    debitBox.classList.remove('blue','green','orange','red')
-    creditBox.classList.remove('blue','green','orange','red')
-    balanceBox.classList.remove('blue','green','orange','red')
-
-    debitBox.classList.add('red')
-    creditBox.classList.add('green')
-
-    if(balance <= 0){
-      balanceBox.classList.add('green')
-    }else if(credit > 0){
-      balanceBox.classList.add('orange')
-    }else{
-      balanceBox.classList.add('red')
-    }
-
     document.getElementById('profileNotifyType').value = ''
     document.getElementById('profileNotifyMessage').value = ''
     section.classList.add('show')
@@ -1131,6 +1041,48 @@
     allRowsAllYears = data || []
   }
 
+  async function recalculateTenantSummaryForYear(tenantCode, year){
+    const startDate = `${year}-01-01`
+    const endDate = `${year}-12-31`
+
+    const { data: tx, error: txError } = await supabase
+      .from('tenant_transactions')
+      .select('*')
+      .eq('tenant_code', tenantCode)
+      .gte('date', startDate)
+      .lte('date', endDate)
+
+    if(txError){
+      return { ok:false, message:'تعذر قراءة الحركات لإعادة حساب الملخص' }
+    }
+
+    let totalDebit = 0
+    let totalCredit = 0
+
+    ;(tx || []).forEach(r => {
+      totalDebit += Number(r.debit || 0)
+      totalCredit += Number(r.credit || 0)
+    })
+
+    const newBalance = totalDebit - totalCredit
+
+    const { error: updateError } = await supabase
+      .from('tenant_summary')
+      .update({
+        "إجمالي_المدين": totalDebit,
+        "إجمالي_الدائن": totalCredit,
+        "الرصيد": newBalance
+      })
+      .eq('رمز_المستأجر', tenantCode)
+      .eq('year', year)
+
+    if(updateError){
+      return { ok:false, message:'تم حفظ الدفعة لكن تعذر تحديث الملخص' }
+    }
+
+    return { ok:true }
+  }
+
   async function saveProfilePayment(){
     hideBox('profilePaymentSuccess')
     hideBox('profilePaymentError')
@@ -1144,17 +1096,10 @@
     const amount = Number(document.getElementById('profilePaymentAmount').value || 0)
     const receiptNo = document.getElementById('profilePaymentReceipt').value.trim()
     const paymentDate = document.getElementById('profilePaymentDate').value
-    const currentRow = allRows2026.find(row => String(row["رمز_المستأجر"]) === String(selectedTenantCode))
 
     if(!amount || amount <= 0 || !receiptNo || !paymentDate){
       showBox('profilePaymentError')
       document.getElementById('profilePaymentError').innerText = 'يرجى تعبئة المبلغ ورقم السند والتاريخ'
-      return
-    }
-
-    if(!currentRow){
-      showBox('profilePaymentError')
-      document.getElementById('profilePaymentError').innerText = 'لم يتم العثور على بيانات المستأجر'
       return
     }
 
@@ -1185,7 +1130,7 @@
       .insert([{
         tenant_code: selectedTenantCode,
         date: paymentDate,
-        description: 'دفعة',
+        description: 'دفعة من الايجار',
         debit: 0,
         credit: amount,
         receipt_no: receiptNo
@@ -1198,23 +1143,14 @@
       return
     }
 
-    const newCredit = Number(currentRow["إجمالي_الدائن"] || 0) + amount
-    const newBalance = Number(currentRow["الرصيد"] || 0) - amount
-
-    const { error: updateError } = await supabase
-      .from('tenant_summary')
-      .update({
-        "إجمالي_الدائن": newCredit,
-        "الرصيد": newBalance
-      })
-      .eq('رمز_المستأجر', selectedTenantCode)
-      .eq('year', YEAR)
+    const paymentYear = new Date(paymentDate).getFullYear()
+    const recalcResult = await recalculateTenantSummaryForYear(selectedTenantCode, paymentYear)
 
     hideLoading()
 
-    if(updateError){
+    if(!recalcResult.ok){
       showBox('profilePaymentError')
-      document.getElementById('profilePaymentError').innerText = 'تم حفظ الدفعة لكن تعذر تحديث الملخص'
+      document.getElementById('profilePaymentError').innerText = recalcResult.message
       return
     }
 
