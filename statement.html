@@ -61,6 +61,8 @@ body{
   margin-bottom:10px;
   font-size:13px;
   font-weight:bold;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 /* Table */
@@ -99,6 +101,7 @@ th{
   color:#fff;
   font-weight:bold;
   margin-bottom:10px;
+  cursor:pointer;
 }
 </style>
 
@@ -111,8 +114,8 @@ th{
 <button class="btn" onclick="goBack()">رجوع</button>
 
 <div class="card">
-<h2>كشف الحساب</h2>
-<div id="tenantName"></div>
+  <h2>كشف الحساب</h2>
+  <div id="tenantName"></div>
 </div>
 
 <div id="container"></div>
@@ -127,13 +130,33 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-// ✅ حل مشكلة السنة
 const params = new URLSearchParams(window.location.search)
 const tenant = params.get("tenant")
-const yearParam = 'all'
 
 window.goBack = function(){
   window.history.back()
+}
+
+function format(n){
+  return Number(n || 0).toLocaleString('en-US')
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return "-"
+  const d = new Date(dateStr)
+  if(isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('en-GB')
+}
+
+function getRowOrder(desc){
+  const text = String(desc || '').trim()
+
+  if(text.includes('ايجار')) return 1
+  if(text.includes('معارف')) return 2
+  if(text.includes('رصيد سابق')) return 3
+  if(text.includes('دفعة')) return 4
+
+  return 9
 }
 
 document.addEventListener("DOMContentLoaded", load)
@@ -166,7 +189,7 @@ async function load(){
 
     if(!grouped[year]) grouped[year] = []
 
-    balance += (r.debit || 0) - (r.credit || 0)
+    balance += Number(r.debit || 0) - Number(r.credit || 0)
 
     grouped[year].push({
       ...r,
@@ -176,75 +199,83 @@ async function load(){
 
   let html = ""
 
-  Object.keys(grouped).forEach(year=>{
+  Object.keys(grouped)
+    .sort((a,b) => a - b)
+    .forEach(year => {
 
-    const rows = grouped[year]
+      const rows = grouped[year]
 
-    let totalDebit = 0
-    let totalCredit = 0
+      rows.sort((a, b) => {
+        const dateDiff = new Date(a.date) - new Date(b.date)
+        if(dateDiff !== 0) return dateDiff
+        return getRowOrder(a.description) - getRowOrder(b.description)
+      })
 
-    rows.forEach(r=>{
-      totalDebit += Number(r.debit || 0)
-      totalCredit += Number(r.credit || 0)
-    })
+      let totalDebit = 0
+      let totalCredit = 0
 
-    const yearBalance = totalDebit - totalCredit
+      rows.forEach(r=>{
+        totalDebit += Number(r.debit || 0)
+        totalCredit += Number(r.credit || 0)
+      })
 
-    let color = 'red'
-    let status = 'غير مسدد'
+      const yearBalance = totalDebit - totalCredit
+      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
 
-    if(yearBalance <= 0 && totalCredit > 0){
-      color = 'green'
-      status = 'مسدد'
-    }
-    else if(totalCredit > 0){
-      color = 'orange'
-      status = 'جزئي'
-    }
+      let color = 'red'
+      let status = 'غير مسدد'
 
-    html += `
-    <div class="year-card ${color}">
+      if(yearBalance <= 0 && totalCredit > 0){
+        color = 'green'
+        status = 'مسدد'
+      } else if(totalCredit > 0){
+        color = 'orange'
+        status = 'جزئي'
+      }
 
-      <div class="year-header">
-        <span class="year-title">${year}</span>
-        <span>${status}</span>
-      </div>
-
-      <div class="summary">
-        <div>مدين: ${totalDebit}</div>
-        <div>دائن: ${totalCredit}</div>
-        <div>رصيد: ${yearBalance}</div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>التاريخ</th>
-            <th>البيان</th>
-            <th>مدين</th>
-            <th>دائن</th>
-            <th>الرصيد</th>
-            <th>السند</th>
-          </tr>
-        </thead>
-        <tbody>
-    `
-
-    rows.forEach(r=>{
       html += `
-      <tr>
-        <td>${r.date}</td>
-        <td>${r.description || "-"}</td>
-        <td class="debit">${r.debit || "-"}</td>
-        <td class="credit">${r.credit || "-"}</td>
-        <td class="balance">${r.balance}</td>
-        <td class="receipt">${r.receipt_no || "-"}</td>
-      </tr>
-      `
-    })
+      <div class="year-card ${color}">
 
-    html += `</tbody></table></div>`
-  })
+        <div class="year-header">
+          <span class="year-title">${year}</span>
+          <span>${status}</span>
+        </div>
+
+        <div class="summary">
+          <div>مدين السنة: ${format(totalDebit)}</div>
+          <div>دائن السنة: ${format(totalCredit)}</div>
+          <div>رصيد آخر السنة: ${format(endYearBalance)}</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>مدين</th>
+              <th>دائن</th>
+              <th>الرصيد</th>
+              <th>البيان</th>
+              <th>السند</th>
+            </tr>
+          </thead>
+          <tbody>
+      `
+
+      rows.forEach(r=>{
+        html += `
+        <tr>
+          <td>${formatDate(r.date)}</td>
+          <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
+          <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
+          <td class="balance">${format(r.balance)}</td>
+          <td>${r.description || "-"}</td>
+          <td><span class="receipt">${r.receipt_no || "-"}</span></td>
+        </tr>
+        `
+      })
+
+      html += `</tbody></table></div>`
+    })
 
   document.getElementById("container").innerHTML = html
 }
