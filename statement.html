@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>كشف الحساب</title>
-
 <style>
 body{
   margin:0;
@@ -76,18 +69,35 @@ th{
   background:#f1f3f7;
 }
 
-.debit{ color:#e05252; font-weight:bold; }
-.credit{ color:#18a957; font-weight:bold; }
-.balance{ font-weight:bold; }
+/* ===== Premium Table ===== */
+tbody tr:nth-child(even){
+  background:rgba(0,0,0,0.015);
+}
+
+tbody tr:hover{
+  background:rgba(47,111,237,0.05);
+  transition:0.2s;
+}
+
+.debit{ color:#e05252; font-weight:bold; font-size:13px; }
+.credit{ color:#18a957; font-weight:bold; font-size:13px; }
+.balance{ font-weight:900; font-size:13px; }
 
 .balance-positive{ color:#e05252; }
 .balance-zero{ color:#18a957; }
 
 .receipt{
   background:#eef4ff;
-  padding:4px 8px;
-  border-radius:10px;
-  display:inline-block;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:900;
+  color:#2f6fed;
+}
+
+td:nth-child(5){
+  font-weight:700;
+  color:#1d2940;
 }
 
 /* Glass Summary */
@@ -157,9 +167,11 @@ th{
   color:#18a957;
 }
 
+/* ⭐ تعديل فقط هنا */
 .status-partial{
-  background:#fff6ea;
+  background:#ffffff;
   color:#d68a1d;
+  border:1px solid rgba(214,138,29,0.3);
 }
 
 .status-unpaid{
@@ -191,219 +203,3 @@ th{
   cursor:pointer;
 }
 </style>
-
-</head>
-
-<body>
-
-<div class="app">
-
-<div class="card">
-  <h2>كشف الحساب</h2>
-  <div id="tenantName"></div>
-</div>
-
-<div id="container"></div>
-
-</div>
-
-<div class="back-bottom">
-  <button onclick="goBack()">رجوع</button>
-</div>
-
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const supabase = createClient(
-  'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-)
-
-const params = new URLSearchParams(window.location.search)
-const tenant = params.get("tenant")
-const from = params.get("from")
-
-window.goBack = function(){
-  if(from === 'admin'){
-    window.location.href = 'admin.html'
-  } else if(document.referrer && document.referrer !== ''){
-    window.history.back()
-  } else {
-    window.location.href = 'index.html'
-  }
-}
-
-function format(n){
-  return Number(n || 0)
-}
-
-function formatDate(dateStr){
-  if(!dateStr) return "-"
-  const d = new Date(dateStr)
-  if(isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-GB')
-}
-
-function getRowOrder(desc){
-  const text = String(desc || '')
-  if(text.includes('ايجار')) return 1
-  if(text.includes('معارف')) return 2
-  if(text.includes('رصيد سابق')) return 3
-  if(text.includes('دفعة')) return 4
-  return 9
-}
-
-function isCarryRow(desc){
-  return String(desc || '').includes('رصيد سابق')
-}
-
-document.addEventListener("DOMContentLoaded", load)
-
-async function load(){
-
-  if(!tenant){
-    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
-    return
-  }
-
-  document.getElementById("tenantName").innerText = tenant
-
-  const { data, error } = await supabase
-    .from('tenant_transactions')
-    .select('*')
-    .eq('tenant_code', tenant)
-    .order('date', { ascending: true })
-
-  if(error || !data){
-    document.getElementById("container").innerHTML = "خطأ"
-    return
-  }
-
-  const grouped = {}
-
-  data.forEach(r=>{
-    const year = new Date(r.date).getFullYear()
-    if(!grouped[year]) grouped[year] = []
-
-    grouped[year].push({
-      ...r,
-      debit: Number(r.debit || 0),
-      credit: Number(r.credit || 0)
-    })
-  })
-
-  let html = ""
-  let runningBalance = 0
-
-  Object.keys(grouped).sort((a,b) => a - b).forEach(year => {
-
-    const rows = grouped[year]
-
-    rows.sort((a,b)=>{
-      const d = new Date(a.date) - new Date(b.date)
-      if(d !== 0) return d
-      return getRowOrder(a.description) - getRowOrder(b.description)
-    })
-
-    let totalDebit = 0
-    let totalCredit = 0
-
-    rows.forEach(r=>{
-      totalDebit += r.debit
-      totalCredit += r.credit
-
-      const carryRow = isCarryRow(r.description)
-
-      if(!carryRow){
-        runningBalance += r.debit - r.credit
-      }
-
-      r.balance = runningBalance
-    })
-
-    const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
-
-    let color = 'red'
-    let status = 'غير مسدد'
-    let statusClass = 'status-unpaid'
-
-    if(endYearBalance <= 0){
-      color = 'green'
-      status = 'مسدد'
-      statusClass = 'status-paid'
-    } else if(totalCredit > 0){
-      color = 'orange'
-      status = 'جزئي'
-      statusClass = 'status-partial'
-    }
-
-    const statusHTML = `<span class="status-box ${statusClass}">${status}</span>`
-
-    html += `
-    <div class="year-card ${color}">
-
-      <div class="year-header">
-        <span class="year-title">${year}</span>
-        ${statusHTML}
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>التاريخ</th>
-            <th>مدين</th>
-            <th>دائن</th>
-            <th>الرصيد</th>
-            <th>البيان</th>
-            <th>السند</th>
-          </tr>
-        </thead>
-        <tbody>
-    `
-
-    rows.forEach(r=>{
-      let balanceClass = r.balance > 0 ? 'balance-positive' : 'balance-zero'
-
-      html += `
-      <tr>
-        <td>${formatDate(r.date)}</td>
-        <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
-        <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
-        <td class="balance ${balanceClass}">${format(r.balance)}</td>
-        <td>${r.description || "-"}</td>
-        <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-      </tr>
-      `
-    })
-
-    html += `
-      </tbody>
-      </table>
-
-      <div class="summary">
-        <div class="summary-card summary-debit">
-          <div class="summary-label">مدين السنة</div>
-          <div class="summary-value">${format(totalDebit)}</div>
-        </div>
-
-        <div class="summary-card summary-credit">
-          <div class="summary-label">دائن السنة</div>
-          <div class="summary-value">${format(totalCredit)}</div>
-        </div>
-
-        <div class="summary-card summary-balance">
-          <div class="summary-label">رصيد آخر السنة</div>
-          <div class="summary-value">${format(endYearBalance)}</div>
-        </div>
-      </div>
-
-    </div>
-    `
-  })
-
-  document.getElementById("container").innerHTML = html
-}
-</script>
-
-</body>
-</html>
