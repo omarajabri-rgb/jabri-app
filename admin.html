@@ -705,10 +705,10 @@
               <select id="profileNotifyType" class="app-select">
                 <option value="">اختر نوع التنبيه</option>
                 <option value="general">تنبيه عام (تكتب بنفسك)</option>
-<option value="first">المطالبة الأولى</option>
-<option value="second">المطالبة الثانية</option>
-<option value="third">المطالبة الثالثة</option>
-<option value="legal">إنذار عدلي</option>
+                <option value="first">المطالبة الأولى</option>
+                <option value="second">المطالبة الثانية</option>
+                <option value="third">المطالبة الثالثة</option>
+                <option value="legal">إنذار عدلي</option>
               </select>
             </div>
 
@@ -827,21 +827,17 @@
     if(el) el.style.display = 'none'
   }
 
-function getNotificationTemplate(type){
-  const templates = {
-    general:'',
+  function getNotificationTemplate(type){
+    const templates = {
+      general:'',
+      first:'هذا إشعار أول: يرجى المبادرة بتسديد الإيجارات المتراكمة في أقرب وقت ممكن.',
+      second:'هذا إشعار ثانٍ: نرجو منكم المبادرة بتسديد الإيجارات المتراكمة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.',
+      third:'هذا إشعار نهائي: يرجى تسديد الإيجارات المتراكمة لتجنب اتخاذ الإجراءات القانونية اللازمة.',
+      legal:'إنذار عدلي: سيتم اتخاذ الإجراءات القانونية بحقكم ما لم يتم تسديد الإيجارات المتراكمة فوراً.'
+    }
 
-    first:'هذا إشعار أول: يرجى المبادرة بتسديد الإيجارات المتراكمة في أقرب وقت ممكن.',
-
-    second:'هذا إشعار ثانٍ: نرجو منكم المبادرة بتسديد الإيجارات المتراكمة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.',
-
-    third:'هذا إشعار نهائي: يرجى تسديد الإيجارات المتراكمة لتجنب اتخاذ الإجراءات القانونية اللازمة.',
-
-    legal:'إنذار عدلي: سيتم اتخاذ الإجراءات القانونية بحقكم ما لم يتم تسديد الإيجارات المتراكمة فوراً.'
+    return templates[type] || ''
   }
-
-  return templates[type] || ''
-}
 
   function renderPieChart(totalDebit, totalCredit){
     if(debitCreditChart) debitCreditChart.destroy()
@@ -1250,13 +1246,24 @@ function getNotificationTemplate(type){
       return
     }
 
+    const titleMap = {
+      general:'تنبيه عام',
+      first:'إشعار أول',
+      second:'إشعار ثانٍ',
+      third:'إشعار نهائي',
+      legal:'إنذار عدلي'
+    }
+
+    const notificationTitle = titleMap[notifyType] || 'تنبيه'
+
     showLoading()
 
     const { error } = await supabase
       .from('tenant_notifications')
       .insert([{
         tenant_code: selectedTenantCode,
-        title: notifyType,
+        type: notifyType,
+        title: notificationTitle,
         message: message
       }])
 
