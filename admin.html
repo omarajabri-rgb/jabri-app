@@ -700,22 +700,18 @@
           <p class="section-subtitle">إرسال تنبيه مباشر لنفس ملف المستأجر</p>
 
           <div class="form-grid">
-  <div class="full">
-  <label class="field-label" for="profileNotifyType">نوع التنبيه</label>
-  <select id="profileNotifyType" class="app-select">
-         <option value="">اختر نوع التنبيه</option>
-      <option value="general">تنبيه عام (تكتب بنفسك)</option>
-      <option value="first">المطالبة الأولى</option>
-      <option value="second">المطالبة الثانية</option>
-      <option value="third">المطالبة الثالثة</option>
-      <option value="legal">إنذار عدلي</option>
-
-      <!-- الجديد -->
-      <option value="legal_final">الإجراء القانوني النهائي</option>
-
-    </select>
-  </div>
-</div>
+            <div class="full">
+              <label class="field-label" for="profileNotifyType">نوع التنبيه</label>
+              <select id="profileNotifyType" class="app-select">
+                <option value="">اختر نوع التنبيه</option>
+                <option value="general">تنبيه عام (تكتب بنفسك)</option>
+                <option value="first">المطالبة الأولى</option>
+                <option value="second">المطالبة الثانية</option>
+                <option value="third">المطالبة الثالثة</option>
+                <option value="legal">إنذار عدلي</option>
+                <option value="legal_final">الإجراء القانوني النهائي</option>
+              </select>
+            </div>
 
             <div class="full">
               <label class="field-label" for="profileNotifyMessage">نص التنبيه</label>
@@ -833,22 +829,17 @@
   }
 
   function getNotificationTemplate(type){
-  const templates = {
-    general:'',
+    const templates = {
+      general:'',
+      first:'هذا إشعار أول: يرجى المبادرة بتسديد الإيجارات المتراكمة في أقرب وقت ممكن.',
+      second:'هذا إشعار ثانٍ: نرجو منكم المبادرة بتسديد الإيجارات المتراكمة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.',
+      third:'هذا إشعار نهائي: يرجى تسديد الإيجارات المتراكمة لتجنب اتخاذ الإجراءات القانونية اللازمة.',
+      legal:'إنذار عدلي: سيتم اتخاذ الإجراءات القانونية بحقكم ما لم يتم تسديد الإيجارات المتراكمة فوراً.',
+      legal_final:'إشعار الإجراء القانوني النهائي: تحذير: سيتم البدء بإجراءات الإخلاء والمطالبة القضائية لدى المحكمة المختصة لتحصيل كافة المستحقات والتعويضات.'
+    }
 
-    first:'هذا إشعار أول: يرجى المبادرة بتسديد الإيجارات المتراكمة في أقرب وقت ممكن.',
-
-    second:'هذا إشعار ثانٍ: نرجو منكم المبادرة بتسديد الإيجارات المتراكمة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.',
-
-    third:'هذا إشعار نهائي: يرجى تسديد الإيجارات المتراكمة لتجنب اتخاذ الإجراءات القانونية اللازمة.',
-
-    legal:'إنذار عدلي: سيتم اتخاذ الإجراءات القانونية بحقكم ما لم يتم تسديد الإيجارات المتراكمة فوراً.',
-
-    legal_final:'إشعار الإجراء القانوني النهائي: تحذير: سيتم البدء بإجراءات الإخلاء والمطالبة القضائية لدى المحكمة المختصة لتحصيل كافة المستحقات والتعويضات.'
+    return templates[type] || ''
   }
-
-  return templates[type] || ''
-}
 
   function renderPieChart(totalDebit, totalCredit){
     if(debitCreditChart) debitCreditChart.destroy()
@@ -1239,58 +1230,53 @@
   }
 
   async function saveProfileNotification(){
-  hideBox('profileNotificationSuccess')
-  hideBox('profileNotificationError')
+    hideBox('profileNotificationSuccess')
+    hideBox('profileNotificationError')
 
-  if(selectedTenantCode === 'ALL'){
-    showBox('profileNotificationError')
-    document.getElementById('profileNotificationError').innerText = 'اختر مستأجر أولاً'
-    return
-  }
+    if(selectedTenantCode === 'ALL'){
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'اختر مستأجر أولاً'
+      return
+    }
 
-  const notifyType = document.getElementById('profileNotifyType').value
-  const message = document.getElementById('profileNotifyMessage').value.trim()
+    const notifyType = document.getElementById('profileNotifyType').value
+    const message = document.getElementById('profileNotifyMessage').value.trim()
 
-  if(!notifyType || !message){
-    showBox('profileNotificationError')
-    document.getElementById('profileNotificationError').innerText = 'يرجى اختيار نوع التنبيه وكتابة النص'
-    return
-  }
+    if(!notifyType || !message){
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'يرجى اختيار نوع التنبيه وكتابة النص'
+      return
+    }
 
-  const titleMap = {
-    general:'تنبيه عام',
-    first:'إشعار أول',
-    second:'إشعار ثانٍ',
-    third:'إشعار نهائي',
-    legal:'إنذار عدلي',
-    legal_final:'إجراء قانوني نهائي'
-  }
+    const titleMap = {
+      general:'تنبيه عام',
+      first:'إشعار أول',
+      second:'إشعار ثانٍ',
+      third:'إشعار نهائي',
+      legal:'إنذار عدلي',
+      legal_final:'إجراء قانوني نهائي'
+    }
 
-  const notificationTitle = titleMap[notifyType] || 'تنبيه'
+    const notificationTitle = titleMap[notifyType] || 'تنبيه'
 
-  showLoading()
+    showLoading()
 
-  const { error } = await supabase
-    .from('tenant_notifications')
-    .insert([{
-      tenant_code: selectedTenantCode,
-      type: notifyType,
-      title: notificationTitle,
-      message: message
-    }])
+    const { error } = await supabase
+      .from('tenant_notifications')
+      .insert([{
+        tenant_code: selectedTenantCode,
+        type: notifyType,
+        title: notificationTitle,
+        message: message
+      }])
 
-  hideLoading()
+    hideLoading()
 
-  if(error){
-    showBox('profileNotificationError')
-    document.getElementById('profileNotificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
-    return
-  }
-
-  document.getElementById('profileNotifyType').value = ''
-  document.getElementById('profileNotifyMessage').value = ''
-  showBox('profileNotificationSuccess')
-}
+    if(error){
+      showBox('profileNotificationError')
+      document.getElementById('profileNotificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
+      return
+    }
 
     document.getElementById('profileNotifyType').value = ''
     document.getElementById('profileNotifyMessage').value = ''
