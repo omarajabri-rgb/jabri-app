@@ -86,16 +86,22 @@ tbody tr:hover{
   transition:0.2s;
 }
 
-/* Upgrade date */
-table td:nth-child(1){
-  color:#2f6fed;
-  font-weight:700;
-  background:rgba(47,111,237,0.05);
-}
-
+/* Upgrade date chip style */
 table th:nth-child(1){
   color:#2f6fed;
   font-weight:900;
+}
+
+.date-chip{
+  display:inline-block;
+  background:#eef4ff;
+  color:#2f6fed;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:900;
+  line-height:1.2;
+  min-width:74px;
 }
 
 .debit{
@@ -402,7 +408,7 @@ async function load(){
 
       html += `
       <tr>
-        <td>${formatDate(r.date)}</td>
+        <td><span class="date-chip">${formatDate(r.date)}</span></td>
         <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
         <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
         <td class="balance ${balanceClass}">${format(r.balance)}</td>
