@@ -1141,8 +1141,10 @@ async function loadTenantSummary(code, year){
   const remaining = Math.max(balance, 0)
   const total = paid + remaining
 
-  const paidPercent = total > 0 ? (paid / total) * 100 : 0
-  const remainingPercent = total > 0 ? (remaining / total) * 100 : 0
+  const remainingPercentRaw = total > 0 ? (remaining / total) * 100 : 0
+
+const paidPercent = Math.round(paidPercentRaw)
+const remainingPercent = 100 - paidPercent
 
   animateValue('paidValue', paid)
   animateValue('remainingValue', remaining)
