@@ -571,10 +571,13 @@ function formatDateTime(dateValue){
   })
 }
 
-function formatDateOnly(dateValue){
+function formatDateTimeFull(dateValue){
   const date = new Date(dateValue)
   if(isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString('en-GB')
+  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 function formatRelativeTime(dateValue){
@@ -592,6 +595,26 @@ function formatRelativeTime(dateValue){
   if(diffHours < 24) return `قبل ${diffHours} ساعة`
   if(diffDays < 30) return `قبل ${diffDays} يوم`
   return ''
+}
+
+function getDaysDiff(dateValue){
+  const date = new Date(dateValue)
+  if(isNaN(date.getTime())) return 9999
+
+  const now = new Date()
+  return Math.floor((now - date) / (1000 * 60 * 60 * 24))
+}
+
+function getExpiryDays(type){
+  const map = {
+    first:3,
+    second:3,
+    third:3,
+    legal:15,
+    legal_final:30,
+    general:7
+  }
+  return map[type] || 7
 }
 
 function removeSmartClasses(el){
@@ -675,16 +698,23 @@ async function loadNotifications(code){
     return
   }
 
-  notifyBadge.classList.remove('hidden')
-  notifyBadge.innerText = data.length
-
   let html = ''
+  let visibleCount = 0
 
   data.forEach(item => {
     const type = item.type || 'general'
+    const days = getDaysDiff(item.created_at)
+    const expiry = getExpiryDays(type)
+
+    if(days >= expiry){
+      return
+    }
+
+    visibleCount += 1
+
     const title = item.title || getNotificationTypeText(type)
     const message = item.message || ''
-    const dateText = item.created_at ? formatDateOnly(item.created_at) : '—'
+    const dateText = item.created_at ? formatDateTimeFull(item.created_at) : '—'
     const relativeText = item.created_at ? formatRelativeTime(item.created_at) : ''
 
     html += `
@@ -701,6 +731,13 @@ async function loadNotifications(code){
     `
   })
 
+  if(visibleCount === 0){
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
+  notifyBadge.classList.remove('hidden')
+  notifyBadge.innerText = visibleCount
   notificationList.innerHTML = html
 }
 
