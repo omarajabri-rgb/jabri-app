@@ -226,25 +226,28 @@ async function load(){
     return
   }
 
-  let balance = 0
+  // 1) Group first without balance
   const grouped = {}
 
   data.forEach(r=>{
     const year = new Date(r.date).getFullYear()
     if(!grouped[year]) grouped[year] = []
 
-    balance += Number(r.debit || 0) - Number(r.credit || 0)
-
     grouped[year].push({
       ...r,
-      balance
+      debit: Number(r.debit || 0),
+      credit: Number(r.credit || 0)
     })
   })
 
+  // 2) Sort years
+  const years = Object.keys(grouped).sort((a,b) => a - b)
+
+  // 3) Calculate running balance AFTER sorting
+  let runningBalance = 0
   let html = ""
 
-  Object.keys(grouped).sort((a,b) => a - b).forEach(year => {
-
+  years.forEach(year => {
     const rows = grouped[year]
 
     rows.sort((a,b)=>{
@@ -257,16 +260,19 @@ async function load(){
     let totalCredit = 0
 
     rows.forEach(r=>{
-      totalDebit += Number(r.debit || 0)
-      totalCredit += Number(r.credit || 0)
+      totalDebit += r.debit
+      totalCredit += r.credit
+
+      runningBalance += r.debit - r.credit
+      r.balance = runningBalance
     })
 
-    const endYearBalance = rows[rows.length - 1]?.balance || 0
+    const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
 
     let color = 'red'
     let status = 'غير مسدد'
 
-    if(endYearBalance <= 0) {
+    if(endYearBalance <= 0){
       color = 'green'
       status = 'مسدد'
     } else if(totalCredit > 0){
