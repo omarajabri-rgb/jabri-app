@@ -704,11 +704,11 @@
               <label class="field-label" for="profileNotifyType">نوع التنبيه</label>
               <select id="profileNotifyType" class="app-select">
                 <option value="">اختر نوع التنبيه</option>
-                <option value="general">تنبيه عام</option>
-                <option value="late">تأخر دفع</option>
-                <option value="5days">ادفع خلال 5 أيام</option>
-                <option value="10days">ادفع خلال 10 أيام</option>
-                <option value="urgent">مراجعة عاجلة</option>
+                <option value="general">تنبيه عام (تكتب بنفسك)</option>
+<option value="first">المطالبة الأولى</option>
+<option value="second">المطالبة الثانية</option>
+<option value="third">المطالبة الثالثة</option>
+<option value="legal">إنذار عدلي</option>
               </select>
             </div>
 
@@ -828,15 +828,20 @@
   }
 
   function getNotificationTemplate(type){
-    const templates = {
-      general:'يرجى مراجعة إدارة المجمع.',
-      late:'نود تنبيهكم إلى وجود تأخير، يرجى مراجعة الإدارة بأقرب وقت.',
-      '5days':'يرجى تسديد المستحقات خلال 5 أيام.',
-      '10days':'يرجى تسديد المستحقات خلال 10 أيام لتجنب أي إجراء لاحق.',
-      urgent:'يرجى مراجعة إدارة المجمع بشكل عاجل.'
-    }
-    return templates[type] || ''
+  const templates = {
+    general:'', // تكتب بنفسك
+
+    first:'يرجى تسديد القسط الإيجاري المستحق.',
+
+    second:'يرجى تسديد المستحقات المتأخرة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.',
+
+    third:'إشعار نهائي: يرجى تسديد المستحقات المترتبة عليكم لتجنب اتخاذ الإجراءات القانونية اللازمة.',
+
+    legal:'تحذير: سيتم توجيه إنذار عدلي بحقكم ما لم يتم تسديد المستحقات فوراً.'
   }
+
+  return templates[type] || ''
+}
 
   function renderPieChart(totalDebit, totalCredit){
     if(debitCreditChart) debitCreditChart.destroy()
