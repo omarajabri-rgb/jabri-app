@@ -14,25 +14,21 @@
       --text:#1a2238;
       --muted:#7b8497;
       --line:#e8edf4;
+
       --green:#18a957;
+      --orange:#d68a1d;
       --red:#e05252;
+      --blue:#2f6fed;
 
-      --blue-bg:#eef4ff;
-      --blue-text:#2f6fed;
       --green-bg:#edf8f1;
-      --green-text:#18a957;
-      --purple-bg:#f5eefc;
-      --purple-text:#8d3df2;
       --orange-bg:#fff6ea;
-      --orange-text:#d68a1d;
       --red-bg:#fff1f1;
-      --red-text:#e05252;
+      --blue-bg:#eef4ff;
 
-      --glass:rgba(255,255,255,0.58);
-      --glass-strong:rgba(255,255,255,0.72);
-      --glass-border:rgba(255,255,255,0.62);
-      --glass-shadow:0 10px 28px rgba(16,24,40,0.07);
-      --soft-shadow:0 8px 22px rgba(16,24,40,0.05);
+      --glass:rgba(255,255,255,0.60);
+      --glass-border:rgba(255,255,255,0.65);
+      --glass-shadow:0 10px 28px rgba(16,24,40,0.08);
+
       --radius-xl:24px;
       --radius-lg:20px;
       --radius-md:16px;
@@ -41,10 +37,6 @@
     *{
       box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
-    }
-
-    html{
-      scroll-behavior:smooth;
     }
 
     body{
@@ -65,33 +57,29 @@
     }
 
     .header{
-      background:transparent;
       text-align:center;
-      padding:10px 10px 6px;
+      padding:12px 10px 8px;
     }
 
     .header-logo{
-      width:80px;
-      height:80px;
+      width:82px;
+      height:82px;
       object-fit:contain;
-      margin-bottom:2px;
+      margin-bottom:4px;
     }
 
     .title{
       font-size:24px;
       font-weight:900;
-      margin:0;
-      line-height:1.1;
       color:var(--primary);
-      letter-spacing:-0.2px;
+      margin:0;
     }
 
     .subtitle{
       font-size:12px;
       color:var(--muted);
       margin-top:4px;
-      font-weight:700;
-      opacity:.9;
+      font-weight:800;
     }
 
     .section{
@@ -105,43 +93,36 @@
       -webkit-backdrop-filter:blur(16px);
     }
 
-    .hero{
-      background:linear-gradient(180deg, rgba(247,249,253,0.78) 0%, rgba(255,255,255,0.58) 100%);
-    }
-
     .hero h1{
       margin:0 0 6px;
-      font-size:30px;
-      line-height:1.08;
-      font-weight:900;
+      font-size:28px;
       text-align:center;
-      letter-spacing:-0.3px;
+      color:var(--primary);
+      font-weight:900;
     }
 
     .hero p{
       margin:0;
+      text-align:center;
       color:var(--muted);
-      line-height:1.7;
+      line-height:1.8;
       font-size:14px;
       font-weight:700;
-      text-align:center;
     }
 
     .section-title{
-      font-size:20px;
-      font-weight:900;
-      color:#1d2940;
       margin:0 0 8px;
-      letter-spacing:-0.2px;
+      font-size:20px;
+      color:var(--primary);
+      font-weight:900;
     }
 
     .section-subtitle{
+      margin:0 0 12px;
+      color:var(--muted);
       font-size:14px;
-      color:#7b8497;
-      margin:0 0 13px;
       line-height:1.7;
       font-weight:700;
-      opacity:.92;
     }
 
     .app-input{
@@ -153,57 +134,33 @@
       font-size:16px;
       outline:none;
       margin-bottom:10px;
-      background:rgba(255,255,255,0.92);
+      background:rgba(255,255,255,0.94);
       color:var(--text);
-      box-shadow:0 2px 8px rgba(16,24,40,0.02);
-      transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-    }
-
-    .app-input:hover{
-      transform:translateY(-1px);
-    }
-
-    .app-input:focus{
-      border-color:#b9c5d7;
-      box-shadow:0 0 0 4px rgba(29,41,64,0.05);
     }
 
     .app-btn{
       width:100%;
       height:50px;
-      border-radius:15px;
       border:none;
-      background:#1d2940;
+      border-radius:15px;
+      background:var(--primary);
       color:#fff;
       font-size:16px;
       font-weight:900;
       cursor:pointer;
-      margin-top:8px;
-      transition:transform .2s ease, box-shadow .2s ease;
-    }
-
-    .app-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 12px 24px rgba(29,41,64,0.16);
     }
 
     .soft-btn{
       width:100%;
       height:50px;
+      margin-top:8px;
       border-radius:15px;
-      border:1px solid rgba(215,222,234,0.9);
-      background:rgba(255,255,255,0.82);
-      color:#111827;
+      border:1px solid #d7deea;
+      background:rgba(255,255,255,0.90);
+      color:var(--primary);
       font-size:15px;
       font-weight:900;
       cursor:pointer;
-      margin-top:4px;
-      transition:transform .2s ease, box-shadow .2s ease;
-    }
-
-    .soft-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 10px 22px rgba(16,24,40,0.08);
     }
 
     .error{
@@ -222,28 +179,21 @@
       display:none;
     }
 
-    .tenant-head{
-      display:block;
-    }
-
     .tenant-name{
       margin:0 0 8px;
       font-size:28px;
-      line-height:1.15;
       font-weight:900;
-      word-break:break-word;
-      letter-spacing:-0.4px;
+      color:var(--primary);
     }
 
     .tenant-code{
-      font-size:16px;
+      font-size:15px;
       color:var(--muted);
       font-weight:900;
       margin-bottom:6px;
     }
 
     .last-updated{
-      margin-top:6px;
       font-size:13px;
       color:var(--muted);
       font-weight:800;
@@ -258,15 +208,12 @@
       margin-bottom:8px;
       font-size:14px;
       font-weight:900;
-      color:#1d2940;
+      color:var(--primary);
     }
 
     .year-select{
-      width:100%;
-      max-width:150px;
-      height:42px;
-      margin-bottom:0;
-      padding:0 12px;
+      max-width:160px;
+      height:44px;
       font-size:15px;
       font-weight:900;
       border-radius:14px;
@@ -282,53 +229,38 @@
       padding:14px;
       border-radius:18px;
       text-align:center;
-      min-height:112px;
+      min-height:110px;
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
       border:1px solid rgba(255,255,255,0.45);
-      box-shadow:var(--soft-shadow);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
-    }
-
-    .box:hover,
-    .mini-card:hover,
-    .legend-item:hover,
-    .notification-item:hover{
-      transform:translateY(-3px);
-      box-shadow:0 12px 26px rgba(16,24,40,0.09);
-    }
-
-    .blue{ background:rgba(238,244,255,0.92); color:#2f6fed; }
-    .green{ background:rgba(237,248,241,0.92); color:#18a957; }
-    .purple{ background:rgba(245,238,252,0.92); color:#8d3df2; }
-    .orange{ background:rgba(255,246,234,0.92); color:#d68a1d; }
-
-    .smart-green{
-      background:rgba(237,248,241,0.95) !important;
-      color:#18a957 !important;
-      border:1px solid rgba(207,238,218,0.9) !important;
-    }
-
-    .smart-orange{
-      background:rgba(255,246,234,0.95) !important;
-      color:#d68a1d !important;
-      border:1px solid rgba(255,229,195,0.9) !important;
-    }
-
-    .smart-red{
-      background:rgba(255,241,241,0.95) !important;
-      color:#e05252 !important;
-      border:1px solid rgba(255,216,216,0.95) !important;
+      box-shadow:0 8px 20px rgba(16,24,40,0.05);
+      background:rgba(255,255,255,0.74);
     }
 
     .smart-blue{
-      background:rgba(238,244,255,0.95) !important;
-      color:#2f6fed !important;
-      border:1px solid rgba(214,226,255,0.95) !important;
+      background:rgba(238,244,255,0.95);
+      color:var(--blue);
+      border-color:rgba(214,226,255,0.95);
+    }
+
+    .smart-green{
+      background:rgba(237,248,241,0.95);
+      color:var(--green);
+      border-color:rgba(207,238,218,0.95);
+    }
+
+    .smart-orange{
+      background:rgba(255,246,234,0.95);
+      color:var(--orange);
+      border-color:rgba(255,229,195,0.95);
+    }
+
+    .smart-red{
+      background:rgba(255,241,241,0.95);
+      color:var(--red);
+      border-color:rgba(255,216,216,0.95);
     }
 
     .label{
@@ -339,71 +271,9 @@
     }
 
     .big{
-      font-size:32px;
-      font-weight:900;
-      line-height:1;
-      letter-spacing:0.3px;
-    }
-
-    .status-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .mini-card{
-      border-radius:18px;
-      padding:15px;
-      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
-      box-shadow:var(--soft-shadow);
-      border:1px solid rgba(255,255,255,0.45);
-      background:rgba(255,255,255,0.72);
-    }
-
-    .mini-label{
-      font-size:13px;
-      margin-bottom:8px;
-      font-weight:800;
-      color:inherit;
-    }
-
-    .mini-value{
-      font-size:28px;
-      font-weight:900;
-      line-height:1;
-      color:inherit;
-    }
-
-    .advice-card{
-      background:linear-gradient(180deg, rgba(247,249,253,0.86) 0%, rgba(255,255,255,0.70) 100%);
-    }
-
-    .advice-title{
-      font-size:19px;
-      font-weight:900;
-      color:#1d2940;
-      margin:0 0 10px;
-    }
-
-    .advice-text{
-      font-size:16px;
-      line-height:1.95;
-      color:var(--text);
-      font-weight:800;
-    }
-
-    .advice-amount{
-      color:var(--blue-text);
       font-size:30px;
       font-weight:900;
-    }
-
-    .advice-sub{
-      margin-top:10px;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.8;
-      font-weight:700;
+      line-height:1;
     }
 
     .chart-wrap{
@@ -411,70 +281,7 @@
       margin:auto;
     }
 
-    .line-chart-wrap{
-      width:100%;
-      height:280px;
-      margin:0 auto;
-      position:relative;
-    }
-
-    #creditTrendChart{
-      width:100% !important;
-      height:100% !important;
-      display:block;
-    }
-
-    .chart-legend{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:18px;
-    }
-
-    .legend-item{
-      border-radius:18px;
-      padding:16px 14px;
-      text-align:center;
-      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
-      border:1px solid rgba(255,255,255,0.55);
-      box-shadow:0 10px 24px rgba(16,24,40,0.06);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-      background:rgba(255,255,255,0.70);
-      color:var(--text);
-    }
-
-    .legend-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      display:inline-block;
-      margin-left:6px;
-    }
-
-    .legend-title{
-      font-size:13px;
-      color:inherit;
-      margin-bottom:6px;
-      font-weight:800;
-    }
-
-    .legend-value{
-      font-size:20px;
-      font-weight:900;
-      color:inherit;
-    }
-
     .note{
-      margin-top:14px;
-      text-align:center;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.7;
-      font-weight:700;
-    }
-
-    .trend-note{
       margin-top:12px;
       text-align:center;
       color:var(--muted);
@@ -483,175 +290,13 @@
       font-weight:700;
     }
 
-    .notify-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
-    .notify-badge{
-      min-width:30px;
-      height:30px;
-      padding:0 10px;
-      border-radius:999px;
-      background:rgba(255,241,241,0.92);
-      color:#e05252;
-      border:1px solid #ffd8d8;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:13px;
-      font-weight:900;
-      box-shadow:0 3px 10px rgba(224,82,82,0.10);
-    }
-
-    .notification-list{
-      display:grid;
-      gap:10px;
-    }
-
-    .notification-item{
-      position:relative;
-      background:rgba(255,255,255,0.72);
-      border:1px solid rgba(255,255,255,0.5);
-      border-radius:16px;
-      padding:14px;
-      box-shadow:var(--soft-shadow);
-      transition:transform .2s ease, box-shadow .2s ease;
-      overflow:hidden;
-    }
-
-    .notification-topbar{
-      display:none;
-    }
-
-    .notification-blue{
-      background:rgba(245,249,255,0.96);
-      border:1px solid rgba(210,224,248,0.95);
-    }
-
-    .notification-orange{
-      background:rgba(255,249,240,0.96);
-      border:1px solid rgba(245,220,182,0.95);
-    }
-
-    .notification-red{
-      background:rgba(255,245,245,0.96);
-      border:1px solid rgba(244,205,205,0.95);
-    }
-
-    .notification-headline{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-top:4px;
-      margin-bottom:8px;
-    }
-
-    .notification-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:5px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      background:rgba(255,255,255,0.75);
-      color:#1d2940;
-      border:1px solid rgba(255,255,255,0.7);
-      white-space:nowrap;
-    }
-
-    .notification-icon{
-      font-size:14px;
-      line-height:1;
-    }
-
-    .notification-title{
-      font-size:15px;
-      font-weight:900;
-      color:#1d2940;
-      margin-bottom:6px;
-    }
-
-    .notification-message{
-      font-size:14px;
-      color:var(--text);
-      line-height:1.8;
-      margin-bottom:8px;
-      font-weight:700;
-    }
-
-    .notification-meta{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .notification-date{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-    }
-
-    .notification-expiry{
-      font-size:12px;
-      font-weight:900;
-      color:#1d2940;
-      opacity:.85;
-    }
-
-    .empty-notifications{
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-      padding:10px 0 0;
-      font-weight:800;
-    }
-
     @media (min-width:768px){
       .app{
         max-width:780px;
       }
 
-      .header-logo{
-        width:92px;
-        height:92px;
-      }
-
-      .title{
-        font-size:28px;
-      }
-
       .grid{
         grid-template-columns:repeat(4,1fr);
-      }
-
-      .status-grid{
-        grid-template-columns:repeat(4,1fr);
-      }
-
-      .chart-legend{
-        max-width:420px;
-        margin-left:auto;
-        margin-right:auto;
-      }
-
-      .hero h1{
-        font-size:38px;
-      }
-
-      .line-chart-wrap{
-        max-width:680px;
-      }
-
-      .tenant-name{
-        font-size:32px;
       }
     }
   </style>
@@ -672,7 +317,7 @@
   </div>
 
   <div id="loginCard" class="section">
-    <h3 class="section-title">تسجيل الدخول</h3>
+    <h3 class="section-title">دخول المستأجر</h3>
     <p class="section-subtitle">أدخل رمز المستأجر مثل JC-01</p>
     <input id="code" class="app-input" placeholder="JC-01">
     <button id="loginBtn" class="app-btn" type="button">دخول</button>
@@ -682,21 +327,18 @@
   <div id="dashboard" class="hidden">
 
     <div class="section">
-      <div class="tenant-head">
-        <div>
-          <h2 id="name" class="tenant-name"></h2>
-          <div id="codeText" class="tenant-code"></div>
-          <div id="lastUpdated" class="last-updated"></div>
-        </div>
-      </div>
+      <h2 id="name" class="tenant-name"></h2>
+      <div id="codeText" class="tenant-code"></div>
+      <div id="lastUpdated" class="last-updated"></div>
 
       <div class="year-wrap">
         <label for="yearSelect" class="year-label">اختر السنة</label>
         <select id="yearSelect" class="app-input year-select">
-          <option value="2026" selected>2026</option>
+          <option value="2026">2026</option>
           <option value="2025">2025</option>
           <option value="2024">2024</option>
           <option value="2023">2023</option>
+          <option value="all">كل السنوات</option>
         </select>
       </div>
     </div>
@@ -721,57 +363,11 @@
           <div id="balance" class="big">0</div>
         </div>
 
-        <div id="rentBox" class="box smart-blue">
-          <div class="label">الإيجار</div>
-          <div id="rent" class="big">0</div>
+        <div id="rowsBox" class="box smart-blue">
+          <div class="label">عدد الحركات</div>
+          <div id="rowsCount" class="big">0</div>
         </div>
       </div>
-    </div>
-
-    <div class="section">
-      <h3 class="section-title">حالة السداد</h3>
-      <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
-
-      <div class="status-grid">
-        <div id="paidCard" class="mini-card smart-blue">
-          <div class="mini-label">المدفوع</div>
-          <div id="paidValue" class="mini-value">0</div>
-        </div>
-
-        <div id="remainingCard" class="mini-card smart-blue">
-          <div class="mini-label">المتبقي</div>
-          <div id="remainingValue" class="mini-value">0</div>
-        </div>
-
-        <div id="paidPercentCard" class="mini-card smart-blue">
-          <div class="mini-label">نسبة السداد</div>
-          <div id="paidPercent" class="mini-value">0%</div>
-        </div>
-
-        <div id="remainingPercentCard" class="mini-card smart-blue">
-          <div class="mini-label">نسبة المتبقي</div>
-          <div id="remainingPercent" class="mini-value">0%</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section advice-card">
-      <h3 class="advice-title">نصيحة محاسبية</h3>
-      <div id="monthlyAdvice" class="advice-text">-</div>
-      <div id="monthlyAdviceSub" class="advice-sub"></div>
-    </div>
-
-    <div class="section">
-      <div class="notify-head">
-        <div>
-          <h3 class="section-title" style="margin-bottom:4px;">الإشعارات</h3>
-          <p class="section-subtitle" style="margin-bottom:0;">آخر التنبيهات والرسائل من الإدارة</p>
-        </div>
-        <div id="notifyBadge" class="notify-badge">0</div>
-      </div>
-
-      <div id="notificationList" class="notification-list"></div>
-      <div id="emptyNotifications" class="empty-notifications hidden">لا توجد إشعارات حالياً</div>
     </div>
 
     <div class="section">
@@ -782,36 +378,7 @@
         <canvas id="chart"></canvas>
       </div>
 
-      <div class="chart-legend">
-        <div id="legendPaidCard" class="legend-item smart-blue">
-          <div class="legend-title">
-            <span id="paidDot" class="legend-dot" style="background:#2f6fed"></span>
-            المدفوع
-          </div>
-          <div id="legendPaid" class="legend-value">0</div>
-        </div>
-
-        <div id="legendRemainingCard" class="legend-item smart-blue">
-          <div class="legend-title">
-            <span id="remainingDot" class="legend-dot" style="background:#2f6fed"></span>
-            المتبقي
-          </div>
-          <div id="legendRemaining" class="legend-value">0</div>
-        </div>
-      </div>
-
       <div id="paymentNote" class="note"></div>
-    </div>
-
-    <div id="trendSection" class="section hidden">
-      <h3 class="section-title">تطور إجمالي الدائن من 2023 إلى 2026</h3>
-      <p class="section-subtitle">يعرض نمو إجمالي الدائن للمستأجر عبر السنوات حتى سنة 2026</p>
-
-      <div class="line-chart-wrap">
-        <canvas id="creditTrendChart"></canvas>
-      </div>
-
-      <div id="trendNote" class="trend-note"></div>
     </div>
 
     <div class="section">
@@ -827,74 +394,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-let chart
-let creditTrendChart
+let chart = null
 let currentTenantCode = ''
-let selectedYear = 2026
+let selectedYear = '2026'
 
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
 
-function formatPercent(n){
-  return `${Number(n || 0).toFixed(0)}%`
-}
-
 function formatDateTime(dateValue){
-  const date = dateValue ? new Date(dateValue) : new Date()
-  return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-function formatNotificationDate(dateValue){
   const date = new Date(dateValue)
   return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit'
   })
-}
-
-function animateValue(elementId, endValue, duration = 700, suffix = '', decimals = 0){
-  const element = document.getElementById(elementId)
-  if(!element) return
-
-  const finalValue = Number(endValue || 0)
-
-  if(finalValue === 0){
-    element.innerText = decimals > 0 ? (0).toFixed(decimals) + suffix : '0' + suffix
-    return
-  }
-
-  const startTime = performance.now()
-
-  function update(currentTime){
-    const progress = Math.min((currentTime - startTime) / duration, 1)
-    const eased = 1 - Math.pow(1 - progress, 3)
-    const currentValue = finalValue * eased
-
-    if(decimals > 0){
-      element.innerText = currentValue.toFixed(decimals) + suffix
-    } else {
-      element.innerText = formatNumber(Math.round(currentValue)) + suffix
-    }
-
-    if(progress < 1){
-      requestAnimationFrame(update)
-    } else {
-      if(decimals > 0){
-        element.innerText = finalValue.toFixed(decimals) + suffix
-      } else {
-        element.innerText = formatNumber(finalValue) + suffix
-      }
-    }
-  }
-
-  requestAnimationFrame(update)
 }
 
 function removeSmartClasses(el){
@@ -906,459 +422,68 @@ function applySmartClass(el, state){
   if(!el) return
   removeSmartClasses(el)
 
-  if(state === 'green'){
-    el.classList.add('smart-green')
-  }else if(state === 'orange'){
-    el.classList.add('smart-orange')
-  }else if(state === 'red'){
-    el.classList.add('smart-red')
-  }else{
-    el.classList.add('smart-blue')
-  }
+  if(state === 'green') el.classList.add('smart-green')
+  else if(state === 'orange') el.classList.add('smart-orange')
+  else if(state === 'red') el.classList.add('smart-red')
+  else el.classList.add('smart-blue')
 }
 
 function getAccountState(paid, remaining){
-  if(remaining === 0 && paid > 0) return 'green'
+  if(remaining <= 0 && paid > 0) return 'green'
   if(paid > 0 && remaining > 0) return 'orange'
   return 'red'
-}
-
-function setDotColor(dotId, state){
-  const dot = document.getElementById(dotId)
-  if(!dot) return
-
-  if(state === 'green'){
-    dot.style.background = '#18a957'
-  }else if(state === 'orange'){
-    dot.style.background = '#d68a1d'
-  }else if(state === 'red'){
-    dot.style.background = '#e05252'
-  }else{
-    dot.style.background = '#2f6fed'
-  }
-}
-
-function applySmartUI(paid, remaining, paidPercent, remainingPercent){
-  const accountState = getAccountState(paid, remaining)
-
-  applySmartClass(document.getElementById('debitBox'), accountState)
-  applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
-  applySmartClass(document.getElementById('balanceBox'), accountState)
-  applySmartClass(document.getElementById('rentBox'), accountState)
-
-  applySmartClass(document.getElementById('paidCard'), paid > 0 ? 'green' : 'red')
-  applySmartClass(document.getElementById('remainingCard'), accountState)
-
-  let paidPercentState = 'red'
-  if(paidPercent >= 100){
-    paidPercentState = 'green'
-  }else if(paidPercent > 0){
-    paidPercentState = 'orange'
-  }
-
-  let remainingPercentState = 'red'
-  if(remainingPercent === 0 && paid > 0){
-    remainingPercentState = 'green'
-  }else if(remaining > 0 && paid > 0){
-    remainingPercentState = 'orange'
-  }
-
-  applySmartClass(document.getElementById('paidPercentCard'), paidPercentState)
-  applySmartClass(document.getElementById('remainingPercentCard'), remainingPercentState)
-
-  applySmartClass(document.getElementById('legendPaidCard'), paid > 0 ? 'green' : 'red')
-  applySmartClass(document.getElementById('legendRemainingCard'), accountState)
-
-  setDotColor('paidDot', paid > 0 ? 'green' : 'red')
-  setDotColor('remainingDot', accountState)
-}
-
-function getNotificationStorageKey(code){
-  return `jabri_notification_read_${code}`
-}
-
-function getNotificationTypeClass(item){
-  const type = String(item.type || '').toLowerCase()
-  const raw = String(item.title || '').toLowerCase()
-
-  if(type === 'legal_final') return 'notification-red'
-  if(type === 'legal') return 'notification-red'
-  if(type === 'third' || raw.includes('نهائي')) return 'notification-red'
-  if(type === 'second' || raw.includes('ثان')) return 'notification-orange'
-  if(type === 'first' || raw.includes('أول')) return 'notification-blue'
-  return 'notification-blue'
-}
-
-function getNotificationPriority(item){
-  const type = String(item.type || '').toLowerCase()
-  const raw = String(item.title || '').toLowerCase()
-
-  if(type === 'legal_final') return 0
-  if(type === 'legal' || raw.includes('إنذار')) return 1
-  if(type === 'third' || raw.includes('نهائي')) return 2
-  if(type === 'second' || raw.includes('ثان')) return 3
-  if(type === 'first' || raw.includes('أول')) return 4
-  return 5
-}
-
-function getNotificationIcon(item){
-  const type = String(item.type || '').toLowerCase()
-  const raw = String(item.title || '').toLowerCase()
-
-  if(type === 'legal_final') return '🚨'
-  if(type === 'legal' || raw.includes('إنذار')) return '🚫'
-  if(type === 'third' || raw.includes('نهائي')) return '⚠️'
-  if(type === 'second' || raw.includes('ثان')) return '⏰'
-  if(type === 'first' || raw.includes('أول')) return '🔔'
-  return '📩'
-}
-
-function getNotificationBadgeLabel(item){
-  const type = String(item.type || '').toLowerCase()
-  const raw = String(item.title || '').toLowerCase()
-
-  if(type === 'legal_final') return 'إجراء قانوني نهائي'
-  if(type === 'legal' || raw.includes('إنذار')) return 'إنذار عدلي'
-  if(type === 'third' || raw.includes('نهائي')) return 'إشعار نهائي'
-  if(type === 'second' || raw.includes('ثان')) return 'إشعار ثانٍ'
-  if(type === 'first' || raw.includes('أول')) return 'إشعار أول'
-  return 'تنبيه'
-}
-
-function getNotificationLifetimeMs(item){
-  const type = String(item.type || '').toLowerCase()
-  const raw = String(item.title || '').toLowerCase()
-
-  if(type === 'first' || raw.includes('أول')) return 10 * 60 * 1000
-  if(type === 'second' || raw.includes('ثان')) return 24 * 60 * 60 * 1000
-  if(type === 'third' || raw.includes('نهائي')) return 24 * 60 * 60 * 1000
-  if(type === 'legal' || raw.includes('إنذار')) return 30 * 24 * 60 * 60 * 1000
-  if(type === 'legal_final') return 30 * 24 * 60 * 60 * 1000
-
-  return 10 * 60 * 1000
-}
-
-function formatRemainingTime(ms){
-  const minutes = Math.ceil(ms / (1000 * 60))
-  const hours = Math.ceil(ms / (1000 * 60 * 60))
-  const days = Math.ceil(ms / (1000 * 60 * 60 * 24))
-
-  if(minutes < 60) return `ينتهي خلال ${minutes} دقيقة`
-  if(hours < 24) return `ينتهي خلال ${hours} ساعة`
-  return `ينتهي خلال ${days} يوم`
-}
-
-async function loadNotifications(code){
-  const notificationList = document.getElementById('notificationList')
-  const emptyNotifications = document.getElementById('emptyNotifications')
-  const notifyBadge = document.getElementById('notifyBadge')
-
-  notificationList.innerHTML = ''
-
-  const { data, error } = await supabase
-    .from('tenant_notifications')
-    .select('*')
-    .eq('tenant_code', code)
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if(error || !data || data.length === 0){
-    notifyBadge.innerText = '0'
-    emptyNotifications.classList.remove('hidden')
-    return
-  }
-
-  const storageKey = getNotificationStorageKey(code)
-  const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
-  const nowMs = Date.now()
-  const maxAgeMs = 30 * 24 * 60 * 60 * 1000
-
-  const visibleNotifications = data
-    .filter(item => {
-      const createdAtMs = new Date(item.created_at).getTime()
-      if((nowMs - createdAtMs) > maxAgeMs) return false
-
-      const readAt = storedReadMap[item.id]
-      const lifetimeMs = getNotificationLifetimeMs(item)
-
-      if(readAt && (nowMs - readAt) >= lifetimeMs){
-        return false
-      }
-
-      return true
-    })
-    .sort((a, b) => {
-      const prioDiff = getNotificationPriority(a) - getNotificationPriority(b)
-      if(prioDiff !== 0) return prioDiff
-      return new Date(b.created_at) - new Date(a.created_at)
-    })
-
-  if(visibleNotifications.length === 0){
-    notifyBadge.innerText = '0'
-    emptyNotifications.classList.remove('hidden')
-    return
-  }
-
-  emptyNotifications.classList.add('hidden')
-
-  const unreadItems = visibleNotifications.filter(item => !item.is_read)
-  notifyBadge.innerText = unreadItems.length
-
-  visibleNotifications.forEach(item => {
-    const typeClass = getNotificationTypeClass(item)
-    const icon = getNotificationIcon(item)
-    const badge = getNotificationBadgeLabel(item)
-    const readAt = storedReadMap[item.id]
-    const lifetimeMs = getNotificationLifetimeMs(item)
-
-    let expiryText = 'مستمر حالياً'
-    if(readAt){
-      const remainingMs = lifetimeMs - (nowMs - readAt)
-      expiryText = remainingMs > 0 ? formatRemainingTime(remainingMs) : 'انتهت مدة العرض'
-    }
-
-    notificationList.innerHTML += `
-      <div class="notification-item ${typeClass}">
-        <div class="notification-topbar"></div>
-        <div class="notification-headline">
-          <div class="notification-badge">
-            <span class="notification-icon">${icon}</span>
-            <span>${badge}</span>
-          </div>
-        </div>
-        <div class="notification-title">${item.title || ''}</div>
-        <div class="notification-message">${item.message || ''}</div>
-        <div class="notification-meta">
-          <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
-          <div class="notification-expiry">${expiryText}</div>
-        </div>
-      </div>
-    `
-  })
-
-  if(unreadItems.length > 0){
-    unreadItems.forEach(item => {
-      storedReadMap[item.id] = nowMs
-    })
-
-    localStorage.setItem(storageKey, JSON.stringify(storedReadMap))
-
-    const unreadIds = unreadItems.map(item => item.id)
-
-    await supabase
-      .from('tenant_notifications')
-      .update({ is_read: true })
-      .in('id', unreadIds)
-
-    notifyBadge.innerText = '0'
-  }
-}
-
-async function loadCreditTrend(code){
-  const trendSection = document.getElementById('trendSection')
-  const trendNote = document.getElementById('trendNote')
-
-  if(selectedYear !== 2026){
-    trendSection.classList.add('hidden')
-    if(creditTrendChart){
-      creditTrendChart.destroy()
-      creditTrendChart = null
-    }
-    trendNote.innerText = ''
-    return
-  }
-
-  const { data, error } = await supabase
-    .from('tenant_summary')
-    .select('year, إجمالي_الدائن')
-    .eq('رمز_المستأجر', code)
-    .in('year', [2023, 2024, 2025, 2026])
-    .order('year', { ascending: true })
-
-  if(error || !data || data.length === 0){
-    trendSection.classList.add('hidden')
-    if(creditTrendChart){
-      creditTrendChart.destroy()
-      creditTrendChart = null
-    }
-    trendNote.innerText = ''
-    return
-  }
-
-  const years = [2023, 2024, 2025, 2026]
-  const creditMap = {}
-
-  data.forEach(row => {
-    creditMap[Number(row.year)] = Number(row["إجمالي_الدائن"] || 0)
-  })
-
-  const values = years.map(year => creditMap[year] ?? 0)
-  const firstValue = values[0] || 0
-  const lastValue = values[values.length - 1] || 0
-  const diff = lastValue - firstValue
-
-  trendSection.classList.remove('hidden')
-
-  if(creditTrendChart){
-    creditTrendChart.destroy()
-  }
-
-  const ctx = document.getElementById('creditTrendChart')
-
-  creditTrendChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: years.map(String),
-      datasets: [{
-        label: 'إجمالي الدائن',
-        data: values,
-        borderColor: '#18a957',
-        backgroundColor: 'rgba(24,169,87,0.10)',
-        borderWidth: 5,
-        tension: 0.45,
-        fill: true,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        pointBackgroundColor: '#18a957',
-        pointBorderWidth: 3,
-        pointBorderColor: '#ffffff'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: { top: 0, right: 4, bottom: 0, left: 4 }
-      },
-      animation: {
-        duration: 1400,
-        easing: 'easeOutQuart'
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(context){
-              return 'إجمالي الدائن: ' + formatNumber(context.raw) + ' د.أ'
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          offset: false,
-          grid: { color: 'rgba(123,132,151,0.12)' },
-          ticks: {
-            font: { size: 12, weight: '700' }
-          }
-        },
-        y: {
-          beginAtZero: false,
-          grid: { color: 'rgba(123,132,151,0.12)' },
-          ticks: {
-            stepSize: 200,
-            callback: function(value){
-              return formatNumber(value)
-            },
-            font: { size: 12, weight: '700' }
-          }
-        }
-      }
-    }
-  })
-
-  if(diff > 0){
-    trendNote.innerText = `ازداد إجمالي الدائن بمقدار ${formatNumber(diff)} د.أ من سنة 2023 إلى سنة 2026.`
-  } else if(diff < 0){
-    trendNote.innerText = `انخفض إجمالي الدائن بمقدار ${formatNumber(Math.abs(diff))} د.أ من سنة 2023 إلى سنة 2026.`
-  } else {
-    trendNote.innerText = 'إجمالي الدائن ثابت بين سنة 2023 وسنة 2026.'
-  }
 }
 
 async function loadTenantSummary(code, year){
   document.getElementById('error').style.display = 'none'
 
-  const { data: summary, error: summaryError } = await supabase
-    .from('tenant_summary')
+  let query = supabase
+    .from('tenant_transactions')
     .select('*')
-    .eq('رمز_المستأجر', code)
-    .eq('year', year)
-    .maybeSingle()
+    .eq('tenant_code', code)
+    .order('date', { ascending: true })
 
-  if(summaryError || !summary){
-    document.getElementById('error').innerText = 'لا يوجد ملخص مالي لهذا المستأجر في هذه السنة'
+  const { data, error } = await query
+
+  if(error || !data || data.length === 0){
+    document.getElementById('error').innerText = 'لا يوجد بيانات لهذا المستأجر'
     document.getElementById('error').style.display = 'block'
     return
   }
 
-  const { data: tenantMeta } = await supabase
-    .from('tenants')
-    .select('last_seen')
-    .eq('tenant_code', code)
-    .maybeSingle()
+  let filtered = data
 
-  const tenantLastSeen = tenantMeta?.last_seen || localStorage.getItem('last_seen_' + code)
-  document.getElementById('lastUpdated').innerText =
-    tenantLastSeen ? 'آخر ظهور: ' + formatDateTime(tenantLastSeen) : 'لم يسجل دخول بعد'
+  if(year !== 'all'){
+    filtered = data.filter(row => String(new Date(row.date).getFullYear()) === String(year))
+  }
 
-  const debit = Number(summary["إجمالي_المدين"] || 0)
-  const credit = Number(summary["إجمالي_الدائن"] || 0)
-  const balance = Number(summary["الرصيد"] || 0)
-  const rent = Number(summary["إيجار_السنة"] || 0)
+  let debit = 0
+  let credit = 0
 
-  animateValue('debit', debit)
-  animateValue('credit', credit)
-  animateValue('rent', rent)
-  animateValue('balance', balance)
+  filtered.forEach(row => {
+    debit += Number(row.debit || 0)
+    credit += Number(row.credit || 0)
+  })
 
+  const balance = debit - credit
+  const rowCount = filtered.length
   const paid = Math.max(credit, 0)
   const remaining = Math.max(balance, 0)
+  const state = getAccountState(paid, remaining)
+
+  document.getElementById('debit').innerText = formatNumber(debit)
+  document.getElementById('credit').innerText = formatNumber(credit)
+  document.getElementById('balance').innerText = formatNumber(balance)
+  document.getElementById('rowsCount').innerText = formatNumber(rowCount)
+
+  applySmartClass(document.getElementById('debitBox'), state)
+  applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
+  applySmartClass(document.getElementById('balanceBox'), state)
+  applySmartClass(document.getElementById('rowsBox'), 'blue')
+
   const total = paid + remaining
-
-  const paidPercentRaw = total > 0 ? (paid / total) * 100 : 0
-  const paidPercent = Math.round(paidPercentRaw)
-  const remainingPercent = 100 - paidPercent
-
-  animateValue('paidValue', paid)
-  animateValue('remainingValue', remaining)
-  animateValue('paidPercent', paidPercent, 700, '%', 0)
-  animateValue('remainingPercent', remainingPercent, 700, '%', 0)
-
-  applySmartUI(paid, remaining, paidPercent, remainingPercent)
-
-  const now = new Date()
-  const currentMonth = now.getMonth() + 1
-  const monthsLeft = Math.max(12 - currentMonth + 1, 1)
-  const suggestedMonthly = remaining > 0 ? remaining / monthsLeft : 0
-  const roundedMonthly = Math.ceil(suggestedMonthly)
-
-  let adviceText = ''
-  let adviceSub = ''
-
-  if(remaining <= 0){
-    adviceText = '✅ لا يوجد رصيد متبقٍ حالياً، ولا حاجة لدفعات شهرية إضافية'
-    adviceSub = 'الحساب مسدد أو لا يوجد مبلغ مستحق حتى هذه اللحظة.'
-  } else {
-    adviceText = `لإغلاق الرصيد حتى نهاية السنة، يُنصح بدفع <span class="advice-amount">${formatNumber(roundedMonthly)} د.أ</span> شهرياً`
-    adviceSub = `تم احتسابها على أساس الرصيد المتبقي ${formatNumber(remaining)} د.أ موزعاً على ${monthsLeft} شهر/أشهر متبقية من السنة.`
-  }
-
-  document.getElementById('monthlyAdvice').innerHTML = adviceText
-  document.getElementById('monthlyAdviceSub').innerText = adviceSub
-
-  document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
-  document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
-
-  let noteText = ''
-  if(remaining === 0 && paid > 0){
-    noteText = '✅ حسابك مسدد بالكامل، شكراً لك'
-  } else if(paid === 0 && remaining > 0){
-    noteText = '⚠️ لا يوجد دفعات مسجلة حتى الآن'
-  } else {
-    noteText = `📊 تم سداد ${formatPercent(paidPercent)} من إجمالي المبلغ`
-  }
-  document.getElementById('paymentNote').innerText = noteText
+  const paidAmount = total > 0 ? paid : 0
+  const remainingAmount = total > 0 ? remaining : 0
 
   if(chart) chart.destroy()
 
@@ -1367,7 +492,7 @@ async function loadTenantSummary(code, year){
     data:{
       labels:['مدفوع','متبقي'],
       datasets:[{
-        data:[paid, remaining],
+        data:[paidAmount, remainingAmount],
         backgroundColor:['#18a957','#e05252'],
         borderColor:['#ffffff','#ffffff'],
         borderWidth:4,
@@ -1377,10 +502,6 @@ async function loadTenantSummary(code, year){
     options:{
       responsive:true,
       maintainAspectRatio:true,
-      animation: {
-        duration: 1200,
-        easing: 'easeOutQuart'
-      },
       plugins:{
         legend:{ display:false },
         tooltip:{
@@ -1394,34 +515,48 @@ async function loadTenantSummary(code, year){
     }
   })
 
-  await loadCreditTrend(code)
-  await loadNotifications(code)
+  let noteText = ''
+  if(remaining <= 0 && paid > 0){
+    noteText = '✅ الحساب مسدد بالكامل'
+  } else if(paid > 0 && remaining > 0){
+    noteText = '⚠️ يوجد جزء مدفوع وجزء متبقٍ'
+  } else {
+    noteText = '🚫 لا يوجد دفعات كافية حتى الآن'
+  }
+
+  document.getElementById('paymentNote').innerText = noteText
 }
 
 window.login = async function(){
   const code = document.getElementById('code').value.trim().toUpperCase()
-
-  document.getElementById('error').style.display = 'none'
+  const errorBox = document.getElementById('error')
+  errorBox.style.display = 'none'
 
   if(!code){
-    document.getElementById('error').innerText = 'يرجى إدخال رمز المستأجر'
-    document.getElementById('error').style.display = 'block'
+    errorBox.innerText = 'يرجى إدخال رمز المستأجر'
+    errorBox.style.display = 'block'
     return
   }
 
-  const { data: tenant, error: tenantError } = await supabase
+  const { data: tenant, error } = await supabase
     .from('tenants')
     .select('*')
     .eq('tenant_code', code)
     .maybeSingle()
 
-  if(tenantError || !tenant){
-    document.getElementById('error').innerText = 'رمز المستأجر غير صحيح'
-    document.getElementById('error').style.display = 'block'
+  if(error || !tenant){
+    errorBox.innerText = 'رمز المستأجر غير صحيح'
+    errorBox.style.display = 'block'
     return
   }
 
+  currentTenantCode = code
+  selectedYear = document.getElementById('yearSelect').value || '2026'
+
   const nowIso = new Date().toISOString()
+
+  localStorage.setItem('jabri_tenant_code', code)
+  localStorage.setItem('jabri_selected_year', selectedYear)
   localStorage.setItem('last_seen_' + code, nowIso)
 
   await supabase
@@ -1429,18 +564,13 @@ window.login = async function(){
     .update({ last_seen: nowIso })
     .eq('tenant_code', code)
 
-  currentTenantCode = code
-  selectedYear = Number(document.getElementById('yearSelect').value || 2026)
-
   document.getElementById('loginCard').style.display = 'none'
   document.getElementById('heroCard').style.display = 'none'
   document.getElementById('dashboard').classList.remove('hidden')
 
-  document.getElementById('name').innerText = tenant.tenant_name || ''
-  document.getElementById('codeText').innerText = tenant.tenant_code || ''
-
-  localStorage.setItem('jabri_tenant_code', code)
-  localStorage.setItem('jabri_selected_year', String(selectedYear))
+  document.getElementById('name').innerText = tenant.tenant_name || tenant.tenant_code || code
+  document.getElementById('codeText').innerText = tenant.tenant_code || code
+  document.getElementById('lastUpdated').innerText = 'آخر ظهور: ' + formatDateTime(nowIso)
 
   await loadTenantSummary(code, selectedYear)
 }
@@ -1449,7 +579,7 @@ window.openStatement = function(){
   if(!currentTenantCode) return
 
   localStorage.setItem('jabri_tenant_code', currentTenantCode)
-  localStorage.setItem('jabri_selected_year', String(selectedYear))
+  localStorage.setItem('jabri_selected_year', selectedYear)
 
   window.location.href = `statement.html?tenant=${encodeURIComponent(currentTenantCode)}&year=${encodeURIComponent(selectedYear)}`
 }
@@ -1467,37 +597,21 @@ document.getElementById('code').addEventListener('keydown', function(e){
 })
 
 document.getElementById('yearSelect').addEventListener('change', async function(e){
-  selectedYear = Number(e.target.value)
-  localStorage.setItem('jabri_selected_year', String(selectedYear))
+  selectedYear = e.target.value
+  localStorage.setItem('jabri_selected_year', selectedYear)
 
   if(currentTenantCode){
     await loadTenantSummary(currentTenantCode, selectedYear)
   }
 })
 
-setInterval(async () => {
-  if(currentTenantCode){
-    await loadNotifications(currentTenantCode)
-  }
-}, 60000)
+const savedCode = localStorage.getItem('jabri_tenant_code')
+const savedYear = localStorage.getItem('jabri_selected_year') || '2026'
 
-const saved = localStorage.getItem('jabri_tenant_code')
-const savedYear = Number(localStorage.getItem('jabri_selected_year') || 2026)
-const urlParams = new URLSearchParams(window.location.search)
-const tenantFromUrl = (urlParams.get('tenant') || '').trim().toUpperCase()
-const yearFromUrl = Number(urlParams.get('year') || savedYear || 2026)
+document.getElementById('yearSelect').value = savedYear
 
-if([2023, 2024, 2025, 2026].includes(yearFromUrl)){
-  document.getElementById('yearSelect').value = String(yearFromUrl)
-} else {
-  document.getElementById('yearSelect').value = '2026'
-}
-
-if(tenantFromUrl){
-  document.getElementById('code').value = tenantFromUrl
-  login()
-} else if(saved){
-  document.getElementById('code').value = saved
+if(savedCode){
+  document.getElementById('code').value = savedCode
   login()
 }
 </script>
