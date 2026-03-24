@@ -344,38 +344,6 @@
       font-weight:800;
     }
 
-    .prediction-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .prediction-card{
-      background:rgba(255,255,255,0.72);
-      border:1px solid rgba(255,255,255,0.7);
-      box-shadow:0 8px 20px rgba(16,24,40,0.05);
-      border-radius:18px;
-      padding:14px;
-      text-align:center;
-    }
-
-    .prediction-label{
-      font-size:13px;
-      font-weight:800;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
-    .prediction-value{
-      font-size:28px;
-      font-weight:900;
-      color:var(--primary);
-    }
-
-    .prediction-green .prediction-value{ color:var(--green); }
-    .prediction-orange .prediction-value{ color:var(--orange); }
-    .prediction-blue .prediction-value{ color:var(--blue); }
-
     .notifications{
       display:grid;
       gap:10px;
@@ -408,6 +376,7 @@
       color:var(--muted);
       font-weight:800;
       white-space:nowrap;
+      text-align:left;
     }
 
     .notify-message{
@@ -540,17 +509,17 @@
 
     <div id="predictionSection" class="section hidden">
       <h3 class="section-title">توقع السنة القادمة</h3>
-      <p class="section-subtitle">تقدير مبني على أداء السنوات السابقة</p>
+      <p class="section-subtitle">تقدير ذكي مبني على أداء السنوات السابقة</p>
 
-      <div class="prediction-grid">
-        <div class="prediction-card prediction-blue">
-          <div class="prediction-label">توقع إجمالي الدائن 2027</div>
-          <div id="predictionValue" class="prediction-value">0</div>
+      <div class="grid">
+        <div id="predictionValueCard" class="box smart-blue">
+          <div class="label">توقع إجمالي الدائن 2027</div>
+          <div id="predictionValue" class="big">0</div>
         </div>
 
-        <div class="prediction-card prediction-orange">
-          <div class="prediction-label">الاتجاه المتوقع</div>
-          <div id="predictionTrend" class="prediction-value">—</div>
+        <div id="predictionTrendCard" class="box smart-orange">
+          <div class="label">الاتجاه المتوقع</div>
+          <div id="predictionTrend" class="big">—</div>
         </div>
       </div>
 
@@ -606,6 +575,23 @@ function formatDateOnly(dateValue){
   const date = new Date(dateValue)
   if(isNaN(date.getTime())) return '—'
   return date.toLocaleDateString('en-GB')
+}
+
+function formatRelativeTime(dateValue){
+  const date = new Date(dateValue)
+  if(isNaN(date.getTime())) return ''
+
+  const now = new Date()
+  const diffMs = now - date
+  const diffMinutes = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if(diffMinutes < 1) return 'الآن'
+  if(diffMinutes < 60) return `قبل ${diffMinutes} دقيقة`
+  if(diffHours < 24) return `قبل ${diffHours} ساعة`
+  if(diffDays < 30) return `قبل ${diffDays} يوم`
+  return ''
 }
 
 function removeSmartClasses(el){
@@ -699,12 +685,13 @@ async function loadNotifications(code){
     const title = item.title || getNotificationTypeText(type)
     const message = item.message || ''
     const dateText = item.created_at ? formatDateOnly(item.created_at) : '—'
+    const relativeText = item.created_at ? formatRelativeTime(item.created_at) : ''
 
     html += `
       <div class="notify-card">
         <div class="notify-head">
           <div class="notify-title">${title}</div>
-          <div class="notify-date">${dateText}</div>
+          <div class="notify-date">${dateText}${relativeText ? ` • ${relativeText}` : ''}</div>
         </div>
         <div style="margin-bottom:8px;">
           <span class="notify-badge notify-${type}">${getNotificationTypeText(type)}</span>
@@ -724,6 +711,8 @@ async function loadCreditTrend(code){
   const predictionValue = document.getElementById('predictionValue')
   const predictionTrend = document.getElementById('predictionTrend')
   const predictionNote = document.getElementById('predictionNote')
+  const predictionValueCard = document.getElementById('predictionValueCard')
+  const predictionTrendCard = document.getElementById('predictionTrendCard')
 
   const { data, error } = await supabase
     .from('tenant_summary')
@@ -776,8 +765,30 @@ async function loadCreditTrend(code){
   if(predicted2027 !== null){
     predictionSection.classList.remove('hidden')
     predictionValue.innerText = formatNumber(predicted2027)
-    predictionTrend.innerText = getTrendDirection(predicted2027, lastActual)
-    predictionNote.innerText = `التوقع مبني على اتجاه تغيّر إجمالي الدائن في السنوات السابقة.`
+
+    const trendDirection = getTrendDirection(predicted2027, lastActual)
+    predictionTrend.innerText = trendDirection
+
+    removeSmartClasses(predictionValueCard)
+    removeSmartClasses(predictionTrendCard)
+
+    if(predicted2027 >= lastActual){
+      predictionValueCard.classList.add('smart-green')
+    } else if(predicted2027 > 0){
+      predictionValueCard.classList.add('smart-orange')
+    } else {
+      predictionValueCard.classList.add('smart-red')
+    }
+
+    if(trendDirection === 'صاعد'){
+      predictionTrendCard.classList.add('smart-green')
+    } else if(trendDirection === 'هابط'){
+      predictionTrendCard.classList.add('smart-orange')
+    } else {
+      predictionTrendCard.classList.add('smart-blue')
+    }
+
+    predictionNote.innerText = `التوقع مبني على متوسط تغيّر إجمالي الدائن عبر السنوات السابقة.`
   } else {
     predictionSection.classList.add('hidden')
   }
