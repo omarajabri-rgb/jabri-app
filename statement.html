@@ -179,9 +179,14 @@ const supabase = createClient(
 
 const params = new URLSearchParams(window.location.search)
 const tenant = params.get("tenant")
+const from = params.get("from")
 
 window.goBack = function(){
-  window.history.back()
+  if(from === 'admin'){
+    window.location.href = 'admin.html'
+  } else {
+    window.history.back()
+  }
 }
 
 function format(n){
