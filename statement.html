@@ -204,6 +204,10 @@ function getRowOrder(desc){
   return 9
 }
 
+function isCarryRow(desc){
+  return String(desc || '').includes('رصيد سابق')
+}
+
 document.addEventListener("DOMContentLoaded", load)
 
 async function load(){
@@ -226,7 +230,6 @@ async function load(){
     return
   }
 
-  // 1) Group first without balance
   const grouped = {}
 
   data.forEach(r=>{
@@ -240,14 +243,11 @@ async function load(){
     })
   })
 
-  // 2) Sort years
-  const years = Object.keys(grouped).sort((a,b) => a - b)
-
-  // 3) Calculate running balance AFTER sorting
-  let runningBalance = 0
   let html = ""
+  let runningBalance = 0
 
-  years.forEach(year => {
+  Object.keys(grouped).sort((a,b) => a - b).forEach(year => {
+
     const rows = grouped[year]
 
     rows.sort((a,b)=>{
@@ -263,7 +263,12 @@ async function load(){
       totalDebit += r.debit
       totalCredit += r.credit
 
-      runningBalance += r.debit - r.credit
+      const carryRow = isCarryRow(r.description)
+
+      if(!carryRow){
+        runningBalance += r.debit - r.credit
+      }
+
       r.balance = runningBalance
     })
 
