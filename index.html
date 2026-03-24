@@ -290,6 +290,25 @@
       font-weight:700;
     }
 
+    .trend-card{
+      overflow:hidden;
+    }
+
+    .trend-wrap{
+      position:relative;
+      width:100%;
+      height:300px;
+    }
+
+    .trend-note{
+      margin-top:12px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+      font-weight:700;
+    }
+
     @media (min-width:768px){
       .app{
         max-width:780px;
@@ -381,6 +400,17 @@
       <div id="paymentNote" class="note"></div>
     </div>
 
+    <div id="trendSection" class="section trend-card hidden">
+      <h3 class="section-title">تطور الدفعات عبر السنوات</h3>
+      <p class="section-subtitle">عرض بصري لحركة إجمالي الدائن للمستأجر بين السنوات</p>
+
+      <div class="trend-wrap">
+        <canvas id="creditTrendChart"></canvas>
+      </div>
+
+      <div id="trendNote" class="trend-note"></div>
+    </div>
+
     <div class="section">
       <button onclick="openStatement()" class="app-btn">كشف الحساب</button>
       <button onclick="logout()" class="soft-btn">تسجيل خروج</button>
@@ -398,6 +428,7 @@ const supabase = createClient(
 )
 
 let chart = null
+let creditTrendChart = null
 let currentTenantCode = ''
 let selectedYear = '2026'
 
@@ -432,6 +463,132 @@ function getAccountState(paid, remaining){
   if(remaining <= 0 && paid > 0) return 'green'
   if(paid > 0 && remaining > 0) return 'orange'
   return 'red'
+}
+
+async function loadCreditTrend(code){
+  const trendSection = document.getElementById('trendSection')
+  const trendNote = document.getElementById('trendNote')
+
+  const { data, error } = await supabase
+    .from('tenant_summary')
+    .select('*')
+    .eq('رمز_المستأجر', code)
+    .order('year', { ascending: true })
+
+  if(error || !data || data.length < 2){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart){
+      creditTrendChart.destroy()
+      creditTrendChart = null
+    }
+    trendNote.innerText = ''
+    return
+  }
+
+  const sorted = data
+    .filter(row => Number(row.year || 0) > 0)
+    .sort((a,b) => Number(a.year || 0) - Number(b.year || 0))
+
+  if(sorted.length < 2){
+    trendSection.classList.add('hidden')
+    if(creditTrendChart){
+      creditTrendChart.destroy()
+      creditTrendChart = null
+    }
+    trendNote.innerText = ''
+    return
+  }
+
+  const labels = sorted.map(row => String(row.year))
+  const values = sorted.map(row => Number(row["إجمالي_الدائن"] || row.credit || 0))
+
+  const bestValue = Math.max(...values)
+  const worstValue = Math.min(...values)
+  const bestYear = sorted[values.indexOf(bestValue)]?.year || ''
+  const worstYear = sorted[values.indexOf(worstValue)]?.year || ''
+
+  trendSection.classList.remove('hidden')
+
+  if(creditTrendChart){
+    creditTrendChart.destroy()
+  }
+
+  const canvas = document.getElementById('creditTrendChart')
+  const ctx = canvas.getContext('2d')
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300)
+  gradient.addColorStop(0, 'rgba(24,169,87,0.28)')
+  gradient.addColorStop(1, 'rgba(24,169,87,0.02)')
+
+  creditTrendChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'إجمالي الدائن',
+        data:values,
+        borderColor:'#18a957',
+        backgroundColor:gradient,
+        borderWidth:4,
+        tension:0.38,
+        fill:true,
+        pointRadius:5,
+        pointHoverRadius:7,
+        pointBackgroundColor:'#ffffff',
+        pointBorderColor:'#18a957',
+        pointBorderWidth:3
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{
+        duration:1400,
+        easing:'easeOutQuart'
+      },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          callbacks:{
+            label: function(context){
+              return `إجمالي الدائن: ${formatNumber(context.raw)} د.أ`
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{
+            display:false
+          },
+          ticks:{
+            color:'#7b8497',
+            font:{
+              size:12,
+              weight:'700'
+            }
+          }
+        },
+        y:{
+          beginAtZero:true,
+          grid:{
+            color:'rgba(123,132,151,0.12)'
+          },
+          ticks:{
+            color:'#7b8497',
+            font:{
+              size:12,
+              weight:'700'
+            },
+            callback:function(value){
+              return formatNumber(value)
+            }
+          }
+        }
+      }
+    }
+  })
+
+  trendNote.innerText = `أفضل سنة دفع: ${bestYear} | أقل سنة دفع: ${worstYear}`
 }
 
 async function loadTenantSummary(code, year){
@@ -525,6 +682,8 @@ async function loadTenantSummary(code, year){
   }
 
   document.getElementById('paymentNote').innerText = noteText
+
+  await loadCreditTrend(code)
 }
 
 window.login = async function(){
