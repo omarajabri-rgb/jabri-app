@@ -986,6 +986,85 @@ async function loadNotifications(code){
   const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
   const nowMs = Date.now()
   const tenMinutesMs = 10 * 60 * 1000
+  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+
+  const visibleNotifications = data.filter(item => {
+    const createdAtMs = new Date(item.created_at).getTime()
+
+    // إخفاء الإشعارات القديمة جداً
+    if((nowMs - createdAtMs) > twoDaysMs){
+      return false
+    }
+
+    // إخفاء الإشعار بعد 10 دقائق من قراءته
+    const readAt = storedReadMap[item.id]
+    if(readAt && (nowMs - readAt) >= tenMinutesMs){
+      return false
+    }
+
+    return true
+  })
+
+  if(visibleNotifications.length === 0){
+    notifyBadge.innerText = '0'
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
+  emptyNotifications.classList.add('hidden')
+
+  const unreadItems = visibleNotifications.filter(item => !item.is_read)
+  notifyBadge.innerText = unreadItems.length
+
+  visibleNotifications.forEach(item => {
+    const typeClass = getNotificationTypeClass(item)
+
+    notificationList.innerHTML += `
+      <div class="notification-item ${typeClass}">
+        <div class="notification-title">${item.title || ''}</div>
+        <div class="notification-message">${item.message || ''}</div>
+        <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
+      </div>
+    `
+  })
+
+  if(unreadItems.length > 0){
+    unreadItems.forEach(item => {
+      storedReadMap[item.id] = nowMs
+    })
+
+    localStorage.setItem(storageKey, JSON.stringify(storedReadMap))
+
+    const unreadIds = unreadItems.map(item => item.id)
+
+    await supabase
+      .from('tenant_notifications')
+      .update({ is_read: true })
+      .in('id', unreadIds)
+
+    notifyBadge.innerText = '0'
+  }
+}
+
+  notificationList.innerHTML = ''
+
+  const { data, error } = await supabase
+    .from('tenant_notifications')
+    .select('*')
+    .eq('tenant_code', code)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  if(error || !data || data.length === 0){
+    notifyBadge.innerText = '0'
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
+  const storageKey = getNotificationStorageKey(code)
+  const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
+  const nowMs = Date.now()
+  const tenMinutesMs = 10 * 60 * 1000
 
   const visibleNotifications = data.filter(item => {
     const readAt = storedReadMap[item.id]
