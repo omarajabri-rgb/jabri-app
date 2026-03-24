@@ -16,7 +16,7 @@ body{
   max-width:420px;
   margin:auto;
   padding:15px;
-  padding-bottom:90px;
+  padding-bottom:120px; /* ✅ FIX BACK BUTTON */
 }
 
 /* Header */
@@ -76,32 +76,10 @@ th{
   background:#f1f3f7;
 }
 
-/* Premium Table */
-tbody tr:nth-child(even){
-  background:rgba(0,0,0,0.015);
-}
-
+/* ✅ Hover */
 tbody tr:hover{
   background:rgba(47,111,237,0.05);
   transition:0.2s;
-}
-
-/* Upgrade date chip style */
-table th:nth-child(1){
-  color:#2f6fed;
-  font-weight:900;
-}
-
-.date-chip{
-  display:inline-block;
-  background:#eef4ff;
-  color:#2f6fed;
-  padding:5px 10px;
-  border-radius:12px;
-  font-size:11px;
-  font-weight:900;
-  line-height:1.2;
-  min-width:74px;
 }
 
 .debit{
@@ -116,9 +94,10 @@ table th:nth-child(1){
   font-size:13px;
 }
 
+/* ✅ Balance stronger */
 .balance{
   font-weight:900;
-  font-size:13px;
+  font-size:14px;
 }
 
 .balance-positive{ color:#e05252; }
@@ -126,9 +105,26 @@ table th:nth-child(1){
 
 .receipt{
   background:#eef4ff;
-  padding:4px 8px;
-  border-radius:10px;
-  display:inline-block;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:900;
+  color:#2f6fed;
+}
+
+/* ✅ Date Chip */
+.date-chip{
+  background:rgba(47,111,237,0.08);
+  color:#2f6fed;
+  font-weight:800;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+}
+
+td:nth-child(5){
+  font-weight:700;
+  color:#1d2940;
 }
 
 /* Summary */
@@ -142,20 +138,12 @@ table th:nth-child(1){
 .summary-card{
   background:rgba(255,255,255,0.55);
   backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,0.7);
   box-shadow:0 8px 20px rgba(0,0,0,0.06);
   border-radius:16px;
   padding:12px 10px;
   text-align:center;
-  animation:summaryFade .5s ease forwards;
-  opacity:0;
-  transform:translateY(10px);
 }
-
-.summary-card:nth-child(1){ animation-delay:.05s; }
-.summary-card:nth-child(2){ animation-delay:.12s; }
-.summary-card:nth-child(3){ animation-delay:.2s; }
 
 .summary-label{
   font-size:12px;
@@ -173,14 +161,7 @@ table th:nth-child(1){
 .summary-credit .summary-value{ color:#18a957; }
 .summary-balance .summary-value{ color:#1d2940; }
 
-@keyframes summaryFade{
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-/* Status Box */
+/* Status */
 .status-box{
   min-width:70px;
   padding:6px 12px;
@@ -189,8 +170,6 @@ table th:nth-child(1){
   font-weight:900;
   text-align:center;
   display:inline-block;
-  background:rgba(255,255,255,0.7);
-  box-shadow:0 6px 14px rgba(16,24,40,0.05);
 }
 
 .status-paid{
@@ -198,10 +177,12 @@ table th:nth-child(1){
   color:#18a957;
 }
 
+/* ✅ Improved Partial */
 .status-partial{
-  background:#ffffff;
-  color:#d68a1d;
-  border:1px solid rgba(214,138,29,0.3);
+  background:rgba(214,138,29,0.12);
+  color:#b96a00;
+  border:1px solid rgba(214,138,29,0.25);
+  box-shadow:0 4px 10px rgba(214,138,29,0.08);
 }
 
 .status-unpaid{
@@ -209,7 +190,7 @@ table th:nth-child(1){
   color:#e05252;
 }
 
-/* Back Button Bottom */
+/* Back Button */
 .back-bottom{
   position:fixed;
   bottom:15px;
@@ -217,7 +198,6 @@ table th:nth-child(1){
   transform:translateX(-50%);
   width:90%;
   max-width:400px;
-  z-index:1000;
 }
 
 .back-bottom button{
@@ -228,9 +208,6 @@ table th:nth-child(1){
   background:#1d2940;
   color:#fff;
   font-weight:bold;
-  font-size:16px;
-  box-shadow:0 10px 25px rgba(16,24,40,0.1);
-  cursor:pointer;
 }
 </style>
 
@@ -258,7 +235,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'YOUR_KEY'
 )
 
 const params = new URLSearchParams(window.location.search)
@@ -268,7 +245,7 @@ const from = params.get("from")
 window.goBack = function(){
   if(from === 'admin'){
     window.location.href = 'admin.html'
-  } else if(document.referrer && document.referrer !== ''){
+  } else if(document.referrer){
     window.history.back()
   } else {
     window.location.href = 'index.html'
@@ -375,7 +352,7 @@ async function load(){
       statusClass = 'status-paid'
     } else if(totalCredit > 0){
       color = 'orange'
-      status = ' سداد جزئي'
+      status = 'سداد جزئي'
       statusClass = 'status-partial'
     }
 
@@ -383,7 +360,6 @@ async function load(){
 
     html += `
     <div class="year-card ${color}">
-
       <div class="year-header">
         <span class="year-title">${year}</span>
         ${statusHTML}
