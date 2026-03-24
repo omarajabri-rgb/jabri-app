@@ -125,6 +125,29 @@
       font-weight:700;
     }
 
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .head-badge{
+      min-width:28px;
+      height:28px;
+      padding:0 10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      background:var(--red);
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+      box-shadow:0 8px 18px rgba(224,82,82,0.18);
+    }
+
     .app-input{
       width:100%;
       height:50px;
@@ -176,7 +199,7 @@
     }
 
     .hidden{
-      display:none;
+      display:none !important;
     }
 
     .tenant-name{
@@ -294,10 +317,7 @@
       overflow:hidden;
     }
 
-    .trend-card .section-title{
-      text-align:center;
-    }
-
+    .trend-card .section-title,
     .trend-card .section-subtitle{
       text-align:center;
     }
@@ -323,6 +343,98 @@
       line-height:1.8;
       font-weight:800;
     }
+
+    .prediction-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .prediction-card{
+      background:rgba(255,255,255,0.72);
+      border:1px solid rgba(255,255,255,0.7);
+      box-shadow:0 8px 20px rgba(16,24,40,0.05);
+      border-radius:18px;
+      padding:14px;
+      text-align:center;
+    }
+
+    .prediction-label{
+      font-size:13px;
+      font-weight:800;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .prediction-value{
+      font-size:28px;
+      font-weight:900;
+      color:var(--primary);
+    }
+
+    .prediction-green .prediction-value{ color:var(--green); }
+    .prediction-orange .prediction-value{ color:var(--orange); }
+    .prediction-blue .prediction-value{ color:var(--blue); }
+
+    .notifications{
+      display:grid;
+      gap:10px;
+    }
+
+    .notify-card{
+      background:rgba(255,255,255,0.78);
+      border:1px solid rgba(255,255,255,0.75);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 8px 20px rgba(16,24,40,0.05);
+    }
+
+    .notify-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .notify-title{
+      font-size:15px;
+      font-weight:900;
+      color:var(--primary);
+    }
+
+    .notify-date{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .notify-message{
+      font-size:14px;
+      color:var(--text);
+      line-height:1.8;
+      font-weight:700;
+    }
+
+    .notify-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:80px;
+      height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .notify-general{ background:var(--blue-bg); color:var(--blue); }
+    .notify-first{ background:var(--orange-bg); color:var(--orange); }
+    .notify-second{ background:var(--orange-bg); color:var(--orange); }
+    .notify-third{ background:#fff2df; color:#bc6e00; }
+    .notify-legal{ background:#ffe8e8; color:var(--red); }
+    .notify-legal_final{ background:#ffdede; color:#b82323; }
 
     @media (min-width:768px){
       .app{
@@ -426,6 +538,36 @@
       <div id="trendNote" class="trend-note"></div>
     </div>
 
+    <div id="predictionSection" class="section hidden">
+      <h3 class="section-title">توقع السنة القادمة</h3>
+      <p class="section-subtitle">تقدير مبني على أداء السنوات السابقة</p>
+
+      <div class="prediction-grid">
+        <div class="prediction-card prediction-blue">
+          <div class="prediction-label">توقع إجمالي الدائن 2027</div>
+          <div id="predictionValue" class="prediction-value">0</div>
+        </div>
+
+        <div class="prediction-card prediction-orange">
+          <div class="prediction-label">الاتجاه المتوقع</div>
+          <div id="predictionTrend" class="prediction-value">—</div>
+        </div>
+      </div>
+
+      <div id="predictionNote" class="note"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h3 class="section-title" style="margin:0;">الإشعارات</h3>
+        <div id="notifyBadge" class="head-badge hidden">0</div>
+      </div>
+      <p class="section-subtitle">آخر التنبيهات والإشعارات الخاصة بحسابك</p>
+
+      <div id="notificationList" class="notifications"></div>
+      <div id="emptyNotifications" class="note hidden">لا يوجد إشعارات حالياً</div>
+    </div>
+
     <div class="section">
       <button onclick="openStatement()" class="app-btn">كشف الحساب</button>
       <button onclick="logout()" class="soft-btn">تسجيل خروج</button>
@@ -453,10 +595,17 @@ function formatNumber(n){
 
 function formatDateTime(dateValue){
   const date = new Date(dateValue)
+  if(isNaN(date.getTime())) return '—'
   return date.toLocaleDateString('en-GB') + ' - ' + date.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function formatDateOnly(dateValue){
+  const date = new Date(dateValue)
+  if(isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-GB')
 }
 
 function removeSmartClasses(el){
@@ -480,9 +629,101 @@ function getAccountState(paid, remaining){
   return 'red'
 }
 
+function getNotificationTypeText(type){
+  const map = {
+    general:'تنبيه عام',
+    first:'المطالبة الأولى',
+    second:'المطالبة الثانية',
+    third:'المطالبة الثالثة',
+    legal:'إنذار عدلي',
+    legal_final:'إجراء قانوني نهائي'
+  }
+  return map[type] || 'إشعار'
+}
+
+function getTrendDirection(predicted, lastActual){
+  if(predicted > lastActual) return 'صاعد'
+  if(predicted < lastActual) return 'هابط'
+  return 'مستقر'
+}
+
+function calculatePrediction(values){
+  if(!values || values.length < 2) return null
+
+  const last = Number(values[values.length - 1] || 0)
+  const prev = Number(values[values.length - 2] || 0)
+  const diff = last - prev
+
+  let predicted = last + diff
+
+  if(values.length >= 3){
+    let totalDiff = 0
+    for(let i = 1; i < values.length; i++){
+      totalDiff += Number(values[i] || 0) - Number(values[i - 1] || 0)
+    }
+    const avgDiff = totalDiff / (values.length - 1)
+    predicted = last + avgDiff
+  }
+
+  predicted = Math.max(0, Math.round(predicted))
+  return predicted
+}
+
+async function loadNotifications(code){
+  const notificationList = document.getElementById('notificationList')
+  const emptyNotifications = document.getElementById('emptyNotifications')
+  const notifyBadge = document.getElementById('notifyBadge')
+
+  notificationList.innerHTML = ''
+  emptyNotifications.classList.add('hidden')
+  notifyBadge.classList.add('hidden')
+
+  const { data, error } = await supabase
+    .from('tenant_notifications')
+    .select('*')
+    .eq('tenant_code', code)
+    .order('created_at', { ascending: false })
+
+  if(error || !data || data.length === 0){
+    emptyNotifications.classList.remove('hidden')
+    return
+  }
+
+  notifyBadge.classList.remove('hidden')
+  notifyBadge.innerText = data.length
+
+  let html = ''
+
+  data.forEach(item => {
+    const type = item.type || 'general'
+    const title = item.title || getNotificationTypeText(type)
+    const message = item.message || ''
+    const dateText = item.created_at ? formatDateOnly(item.created_at) : '—'
+
+    html += `
+      <div class="notify-card">
+        <div class="notify-head">
+          <div class="notify-title">${title}</div>
+          <div class="notify-date">${dateText}</div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <span class="notify-badge notify-${type}">${getNotificationTypeText(type)}</span>
+        </div>
+        <div class="notify-message">${message}</div>
+      </div>
+    `
+  })
+
+  notificationList.innerHTML = html
+}
+
 async function loadCreditTrend(code){
   const trendSection = document.getElementById('trendSection')
   const trendNote = document.getElementById('trendNote')
+  const predictionSection = document.getElementById('predictionSection')
+  const predictionValue = document.getElementById('predictionValue')
+  const predictionTrend = document.getElementById('predictionTrend')
+  const predictionNote = document.getElementById('predictionNote')
 
   const { data, error } = await supabase
     .from('tenant_summary')
@@ -492,11 +733,13 @@ async function loadCreditTrend(code){
 
   if(error || !data || data.length < 2){
     trendSection.classList.add('hidden')
+    predictionSection.classList.add('hidden')
     if(creditTrendChart){
       creditTrendChart.destroy()
       creditTrendChart = null
     }
     trendNote.innerText = ''
+    predictionNote.innerText = ''
     return
   }
 
@@ -506,11 +749,13 @@ async function loadCreditTrend(code){
 
   if(sorted.length < 2){
     trendSection.classList.add('hidden')
+    predictionSection.classList.add('hidden')
     if(creditTrendChart){
       creditTrendChart.destroy()
       creditTrendChart = null
     }
     trendNote.innerText = ''
+    predictionNote.innerText = ''
     return
   }
 
@@ -523,8 +768,19 @@ async function loadCreditTrend(code){
   const worstIndex = values.indexOf(worstValue)
   const bestYear = sorted[bestIndex]?.year || ''
   const worstYear = sorted[worstIndex]?.year || ''
+  const lastActual = Number(values[values.length - 1] || 0)
+  const predicted2027 = calculatePrediction(values)
 
   trendSection.classList.remove('hidden')
+
+  if(predicted2027 !== null){
+    predictionSection.classList.remove('hidden')
+    predictionValue.innerText = formatNumber(predicted2027)
+    predictionTrend.innerText = getTrendDirection(predicted2027, lastActual)
+    predictionNote.innerText = `التوقع مبني على اتجاه تغيّر إجمالي الدائن في السنوات السابقة.`
+  } else {
+    predictionSection.classList.add('hidden')
+  }
 
   if(creditTrendChart){
     creditTrendChart.destroy()
@@ -549,36 +805,64 @@ async function loadCreditTrend(code){
     }
   }
 
+  const predictionLabels = predicted2027 !== null ? [...labels, '2027'] : [...labels]
+  const predictionData = predicted2027 !== null
+    ? [...new Array(values.length - 1).fill(null), values[values.length - 1], predicted2027]
+    : []
+
   creditTrendChart = new Chart(ctx, {
     type:'line',
     data:{
-      labels,
-      datasets:[{
-        label:'إجمالي الدائن',
-        data:values,
-        borderColor:'#18a957',
-        backgroundColor:gradient,
-        borderWidth:4,
-        tension:0.4,
-        fill:true,
-        pointRadius: function(context){
-          return context.dataIndex === bestIndex ? 7 : 5
+      labels: predictionLabels,
+      datasets:[
+        {
+          label:'إجمالي الدائن',
+          data: predicted2027 !== null ? [...values, null] : values,
+          borderColor:'#18a957',
+          backgroundColor:gradient,
+          borderWidth:4,
+          tension:0.4,
+          fill:true,
+          pointRadius: function(context){
+            return context.dataIndex === bestIndex ? 7 : 5
+          },
+          pointHoverRadius: function(context){
+            return context.dataIndex === bestIndex ? 9 : 7
+          },
+          pointBackgroundColor: function(context){
+            if(context.dataIndex === bestIndex) return '#18a957'
+            if(context.dataIndex === values.length - 1) return '#e05252'
+            return '#ffffff'
+          },
+          pointBorderColor: function(context){
+            if(context.dataIndex === bestIndex) return '#18a957'
+            if(context.dataIndex === values.length - 1) return '#e05252'
+            return '#18a957'
+          },
+          pointBorderWidth:3,
+          spanGaps:false
         },
-        pointHoverRadius: function(context){
-          return context.dataIndex === bestIndex ? 9 : 7
-        },
-        pointBackgroundColor: function(context){
-          if(context.dataIndex === bestIndex) return '#18a957'
-          if(context.dataIndex === values.length - 1) return '#e05252'
-          return '#ffffff'
-        },
-        pointBorderColor: function(context){
-          if(context.dataIndex === bestIndex) return '#18a957'
-          if(context.dataIndex === values.length - 1) return '#e05252'
-          return '#18a957'
-        },
-        pointBorderWidth:3
-      }]
+        {
+          label:'توقع 2027',
+          data: predictionData,
+          borderColor:'#d68a1d',
+          backgroundColor:'transparent',
+          borderWidth:3,
+          tension:0.35,
+          fill:false,
+          borderDash:[8,6],
+          pointRadius:function(context){
+            return context.dataIndex === predictionLabels.length - 1 ? 7 : 0
+          },
+          pointHoverRadius:function(context){
+            return context.dataIndex === predictionLabels.length - 1 ? 9 : 0
+          },
+          pointBackgroundColor:'#d68a1d',
+          pointBorderColor:'#ffffff',
+          pointBorderWidth:3,
+          spanGaps:true
+        }
+      ]
     },
     options:{
       responsive:true,
@@ -592,6 +876,9 @@ async function loadCreditTrend(code){
         tooltip:{
           callbacks:{
             label: function(context){
+              if(context.dataset.label === 'توقع 2027'){
+                return `توقع 2027: ${formatNumber(context.raw)} د.أ`
+              }
               return `إجمالي الدائن: ${formatNumber(context.raw)} د.أ`
             }
           }
@@ -599,28 +886,18 @@ async function loadCreditTrend(code){
       },
       scales:{
         x:{
-          grid:{
-            display:false
-          },
+          grid:{ display:false },
           ticks:{
             color:'#7b8497',
-            font:{
-              size:14,
-              weight:'900'
-            }
+            font:{ size:14, weight:'900' }
           }
         },
         y:{
           beginAtZero:true,
-          grid:{
-            color:'rgba(123,132,151,0.12)'
-          },
+          grid:{ color:'rgba(123,132,151,0.12)' },
           ticks:{
             color:'#7b8497',
-            font:{
-              size:13,
-              weight:'800'
-            },
+            font:{ size:13, weight:'800' },
             callback:function(value){
               return formatNumber(value)
             }
@@ -631,7 +908,11 @@ async function loadCreditTrend(code){
     plugins:[shadowLinePlugin]
   })
 
-  trendNote.innerText = `أفضل سنة: ${bestYear} 📈  |  أضعف سنة: ${worstYear} ⚠️`
+  if(predicted2027 !== null){
+    trendNote.innerText = `أفضل سنة: ${bestYear} 📈  |  أضعف سنة: ${worstYear} ⚠️  |  توقع 2027: ${formatNumber(predicted2027)}`
+  } else {
+    trendNote.innerText = `أفضل سنة: ${bestYear} 📈  |  أضعف سنة: ${worstYear} ⚠️`
+  }
 }
 
 async function loadTenantSummary(code, year){
@@ -726,7 +1007,10 @@ async function loadTenantSummary(code, year){
 
   document.getElementById('paymentNote').innerText = noteText
 
-  await loadCreditTrend(code)
+  await Promise.all([
+    loadCreditTrend(code),
+    loadNotifications(code)
+  ])
 }
 
 window.login = async function(){
