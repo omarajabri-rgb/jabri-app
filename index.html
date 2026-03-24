@@ -25,6 +25,8 @@
       --purple-text:#8d3df2;
       --orange-bg:#fff6ea;
       --orange-text:#d68a1d;
+      --red-bg:#fff1f1;
+      --red-text:#e05252;
 
       --glass:rgba(255,255,255,0.58);
       --glass-strong:rgba(255,255,255,0.72);
@@ -289,7 +291,7 @@
       box-shadow:var(--soft-shadow);
       backdrop-filter:blur(12px);
       -webkit-backdrop-filter:blur(12px);
-      transition:transform .2s ease, box-shadow .2s ease;
+      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
     }
 
     .box:hover,
@@ -304,6 +306,30 @@
     .green{ background:rgba(237,248,241,0.92); color:#18a957; }
     .purple{ background:rgba(245,238,252,0.92); color:#8d3df2; }
     .orange{ background:rgba(255,246,234,0.92); color:#d68a1d; }
+
+    .smart-green{
+      background:rgba(237,248,241,0.95) !important;
+      color:#18a957 !important;
+      border:1px solid rgba(207,238,218,0.9) !important;
+    }
+
+    .smart-orange{
+      background:rgba(255,246,234,0.95) !important;
+      color:#d68a1d !important;
+      border:1px solid rgba(255,229,195,0.9) !important;
+    }
+
+    .smart-red{
+      background:rgba(255,241,241,0.95) !important;
+      color:#e05252 !important;
+      border:1px solid rgba(255,216,216,0.95) !important;
+    }
+
+    .smart-blue{
+      background:rgba(238,244,255,0.95) !important;
+      color:#2f6fed !important;
+      border:1px solid rgba(214,226,255,0.95) !important;
+    }
 
     .label{
       font-size:14px;
@@ -328,20 +354,24 @@
     .mini-card{
       border-radius:18px;
       padding:15px;
-      transition:transform .2s ease, box-shadow .2s ease;
+      transition:transform .2s ease, box-shadow .2s ease, background .25s ease, color .25s ease;
       box-shadow:var(--soft-shadow);
+      border:1px solid rgba(255,255,255,0.45);
+      background:rgba(255,255,255,0.72);
     }
 
     .mini-label{
       font-size:13px;
       margin-bottom:8px;
       font-weight:800;
+      color:inherit;
     }
 
     .mini-value{
       font-size:28px;
       font-weight:900;
       line-height:1;
+      color:inherit;
     }
 
     .paid{
@@ -350,30 +380,6 @@
 
     .remaining{
       color:#e05252;
-    }
-
-    .status-grid .mini-card:nth-child(1){
-      background:rgba(238,244,255,0.92);
-      color:var(--blue-text);
-      border:1px solid rgba(255,255,255,0.45);
-    }
-
-    .status-grid .mini-card:nth-child(2){
-      background:rgba(255,246,234,0.92);
-      color:var(--orange-text);
-      border:1px solid rgba(255,255,255,0.45);
-    }
-
-    .status-grid .mini-card:nth-child(3){
-      background:rgba(237,248,241,0.92);
-      color:var(--green-text);
-      border:1px solid rgba(255,255,255,0.45);
-    }
-
-    .status-grid .mini-card:nth-child(4){
-      background:rgba(245,238,252,0.92);
-      color:var(--purple-text);
-      border:1px solid rgba(255,255,255,0.45);
     }
 
     .advice-card{
@@ -442,31 +448,8 @@
       box-shadow:0 10px 24px rgba(16,24,40,0.06);
       backdrop-filter:blur(12px);
       -webkit-backdrop-filter:blur(12px);
-    }
-
-    .legend-item:hover{
-      transform:translateY(-3px);
-      box-shadow:0 14px 28px rgba(16,24,40,0.10);
-    }
-
-    .legend-paid{
-      background:rgba(237,248,241,0.95);
-      color:#18a957;
-    }
-
-    .legend-remaining-green{
-      background:rgba(237,248,241,0.95);
-      color:#18a957;
-    }
-
-    .legend-remaining-orange{
-      background:rgba(255,246,234,0.95);
-      color:#d68a1d;
-    }
-
-    .legend-remaining-red{
-      background:rgba(255,241,241,0.95);
-      color:#e05252;
+      background:rgba(255,255,255,0.70);
+      color:var(--text);
     }
 
     .legend-dot{
@@ -487,6 +470,7 @@
     .legend-value{
       font-size:20px;
       font-weight:900;
+      color:inherit;
     }
 
     .note{
@@ -666,22 +650,22 @@
       <p class="section-subtitle">عرض سريع لأهم أرقام الحساب</p>
 
       <div class="grid">
-        <div class="box blue">
+        <div id="debitBox" class="box smart-blue">
           <div class="label">إجمالي المدين</div>
           <div id="debit" class="big">0</div>
         </div>
 
-        <div class="box green">
+        <div id="creditBox" class="box smart-blue">
           <div class="label">إجمالي الدائن</div>
           <div id="credit" class="big">0</div>
         </div>
 
-        <div class="box purple">
+        <div id="balanceBox" class="box smart-blue">
           <div class="label">الرصيد</div>
           <div id="balance" class="big">0</div>
         </div>
 
-        <div class="box orange">
+        <div id="rentBox" class="box smart-blue">
           <div class="label">الإيجار</div>
           <div id="rent" class="big">0</div>
         </div>
@@ -693,22 +677,22 @@
       <p class="section-subtitle">تحليل واضح للمدفوع مقابل المتبقي</p>
 
       <div class="status-grid">
-        <div class="mini-card">
+        <div id="paidCard" class="mini-card smart-blue">
           <div class="mini-label">المدفوع</div>
-          <div id="paidValue" class="mini-value paid">0</div>
+          <div id="paidValue" class="mini-value">0</div>
         </div>
 
-        <div class="mini-card">
+        <div id="remainingCard" class="mini-card smart-blue">
           <div class="mini-label">المتبقي</div>
-          <div id="remainingValue" class="mini-value remaining">0</div>
+          <div id="remainingValue" class="mini-value">0</div>
         </div>
 
-        <div class="mini-card">
+        <div id="paidPercentCard" class="mini-card smart-blue">
           <div class="mini-label">نسبة السداد</div>
           <div id="paidPercent" class="mini-value">0%</div>
         </div>
 
-        <div class="mini-card">
+        <div id="remainingPercentCard" class="mini-card smart-blue">
           <div class="mini-label">نسبة المتبقي</div>
           <div id="remainingPercent" class="mini-value">0%</div>
         </div>
@@ -743,17 +727,17 @@
       </div>
 
       <div class="chart-legend">
-        <div id="legendPaidCard" class="legend-item legend-paid">
+        <div id="legendPaidCard" class="legend-item smart-blue">
           <div class="legend-title">
-            <span class="legend-dot" style="background:#18a957"></span>
+            <span id="paidDot" class="legend-dot" style="background:#2f6fed"></span>
             المدفوع
           </div>
           <div id="legendPaid" class="legend-value">0</div>
         </div>
 
-        <div id="legendRemainingCard" class="legend-item legend-remaining-red">
+        <div id="legendRemainingCard" class="legend-item smart-blue">
           <div class="legend-title">
-            <span id="remainingDot" class="legend-dot" style="background:#e05252"></span>
+            <span id="remainingDot" class="legend-dot" style="background:#2f6fed"></span>
             المتبقي
           </div>
           <div id="legendRemaining" class="legend-value">0</div>
@@ -855,6 +839,82 @@ function animateValue(elementId, endValue, duration = 700, suffix = '', decimals
   }
 
   requestAnimationFrame(update)
+}
+
+function removeSmartClasses(el){
+  if(!el) return
+  el.classList.remove('smart-green', 'smart-orange', 'smart-red', 'smart-blue')
+}
+
+function applySmartClass(el, state){
+  if(!el) return
+  removeSmartClasses(el)
+
+  if(state === 'green'){
+    el.classList.add('smart-green')
+  }else if(state === 'orange'){
+    el.classList.add('smart-orange')
+  }else if(state === 'red'){
+    el.classList.add('smart-red')
+  }else{
+    el.classList.add('smart-blue')
+  }
+}
+
+function getAccountState(paid, remaining){
+  if(remaining === 0 && paid > 0) return 'green'
+  if(paid > 0 && remaining > 0) return 'orange'
+  return 'red'
+}
+
+function setDotColor(dotId, state){
+  const dot = document.getElementById(dotId)
+  if(!dot) return
+
+  if(state === 'green'){
+    dot.style.background = '#18a957'
+  }else if(state === 'orange'){
+    dot.style.background = '#d68a1d'
+  }else if(state === 'red'){
+    dot.style.background = '#e05252'
+  }else{
+    dot.style.background = '#2f6fed'
+  }
+}
+
+function applySmartUI(paid, remaining, paidPercent, remainingPercent){
+  const accountState = getAccountState(paid, remaining)
+
+  applySmartClass(document.getElementById('debitBox'), accountState)
+  applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
+  applySmartClass(document.getElementById('balanceBox'), accountState)
+  applySmartClass(document.getElementById('rentBox'), accountState)
+
+  applySmartClass(document.getElementById('paidCard'), paid > 0 ? 'green' : 'red')
+  applySmartClass(document.getElementById('remainingCard'), accountState)
+
+  let paidPercentState = 'red'
+  if(paidPercent >= 100){
+    paidPercentState = 'green'
+  }else if(paidPercent > 0){
+    paidPercentState = 'orange'
+  }
+
+  let remainingPercentState = 'red'
+  if(remainingPercent === 0 && paid > 0){
+    remainingPercentState = 'green'
+  }else if(remaining > 0 && paid > 0){
+    remainingPercentState = 'orange'
+  }
+
+  applySmartClass(document.getElementById('paidPercentCard'), paidPercentState)
+  applySmartClass(document.getElementById('remainingPercentCard'), remainingPercentState)
+
+  applySmartClass(document.getElementById('legendPaidCard'), paid > 0 ? 'green' : 'red')
+  applySmartClass(document.getElementById('legendRemainingCard'), accountState)
+
+  setDotColor('paidDot', paid > 0 ? 'green' : 'red')
+  setDotColor('remainingDot', accountState)
 }
 
 async function loadNotifications(code){
@@ -1075,8 +1135,6 @@ async function loadTenantSummary(code, year){
   animateValue('credit', credit)
   animateValue('rent', rent)
 
-  const balanceEl = document.getElementById('balance')
-  balanceEl.style.color = balance > 0 ? '#e05252' : '#18a957'
   animateValue('balance', balance)
 
   const paid = Math.max(credit, 0)
@@ -1090,6 +1148,8 @@ async function loadTenantSummary(code, year){
   animateValue('remainingValue', remaining)
   animateValue('paidPercent', paidPercent, 700, '%', 0)
   animateValue('remainingPercent', remainingPercent, 700, '%', 0)
+
+  applySmartUI(paid, remaining, paidPercent, remainingPercent)
 
   const now = new Date()
   const currentMonth = now.getMonth() + 1
@@ -1113,26 +1173,6 @@ async function loadTenantSummary(code, year){
 
   document.getElementById('legendPaid').innerText = formatNumber(paid) + ' د.أ'
   document.getElementById('legendRemaining').innerText = formatNumber(remaining) + ' د.أ'
-
-  const legendRemainingCard = document.getElementById('legendRemainingCard')
-  const remainingDot = document.getElementById('remainingDot')
-
-  legendRemainingCard.classList.remove(
-    'legend-remaining-green',
-    'legend-remaining-orange',
-    'legend-remaining-red'
-  )
-
-  if(remaining === 0 && paid > 0){
-    legendRemainingCard.classList.add('legend-remaining-green')
-    remainingDot.style.background = '#18a957'
-  } else if(paid > 0 && remaining > 0){
-    legendRemainingCard.classList.add('legend-remaining-orange')
-    remainingDot.style.background = '#d68a1d'
-  } else {
-    legendRemainingCard.classList.add('legend-remaining-red')
-    remainingDot.style.background = '#e05252'
-  }
 
   let noteText = ''
   if(remaining === 0 && paid > 0){
