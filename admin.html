@@ -1239,52 +1239,58 @@
   }
 
   async function saveProfileNotification(){
-    hideBox('profileNotificationSuccess')
-    hideBox('profileNotificationError')
+  hideBox('profileNotificationSuccess')
+  hideBox('profileNotificationError')
 
-    if(selectedTenantCode === 'ALL'){
-      showBox('profileNotificationError')
-      document.getElementById('profileNotificationError').innerText = 'اختر مستأجر أولاً'
-      return
-    }
+  if(selectedTenantCode === 'ALL'){
+    showBox('profileNotificationError')
+    document.getElementById('profileNotificationError').innerText = 'اختر مستأجر أولاً'
+    return
+  }
 
-    const notifyType = document.getElementById('profileNotifyType').value
-    const message = document.getElementById('profileNotifyMessage').value.trim()
+  const notifyType = document.getElementById('profileNotifyType').value
+  const message = document.getElementById('profileNotifyMessage').value.trim()
 
-    if(!notifyType || !message){
-      showBox('profileNotificationError')
-      document.getElementById('profileNotificationError').innerText = 'يرجى اختيار نوع التنبيه وكتابة النص'
-      return
-    }
+  if(!notifyType || !message){
+    showBox('profileNotificationError')
+    document.getElementById('profileNotificationError').innerText = 'يرجى اختيار نوع التنبيه وكتابة النص'
+    return
+  }
 
-    const titleMap = {
-      general:'تنبيه عام',
-      first:'إشعار أول',
-      second:'إشعار ثانٍ',
-      third:'إشعار نهائي',
-      legal:'إنذار عدلي'
-    }
+  const titleMap = {
+    general:'تنبيه عام',
+    first:'إشعار أول',
+    second:'إشعار ثانٍ',
+    third:'إشعار نهائي',
+    legal:'إنذار عدلي',
+    legal_final:'إجراء قانوني نهائي'
+  }
 
-    const notificationTitle = titleMap[notifyType] || 'تنبيه'
+  const notificationTitle = titleMap[notifyType] || 'تنبيه'
 
-    showLoading()
+  showLoading()
 
-    const { error } = await supabase
-      .from('tenant_notifications')
-      .insert([{
-        tenant_code: selectedTenantCode,
-        type: notifyType,
-        title: notificationTitle,
-        message: message
-      }])
+  const { error } = await supabase
+    .from('tenant_notifications')
+    .insert([{
+      tenant_code: selectedTenantCode,
+      type: notifyType,
+      title: notificationTitle,
+      message: message
+    }])
 
-    hideLoading()
+  hideLoading()
 
-    if(error){
-      showBox('profileNotificationError')
-      document.getElementById('profileNotificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
-      return
-    }
+  if(error){
+    showBox('profileNotificationError')
+    document.getElementById('profileNotificationError').innerText = 'حدث خطأ أثناء إرسال التنبيه'
+    return
+  }
+
+  document.getElementById('profileNotifyType').value = ''
+  document.getElementById('profileNotifyMessage').value = ''
+  showBox('profileNotificationSuccess')
+}
 
     document.getElementById('profileNotifyType').value = ''
     document.getElementById('profileNotifyMessage').value = ''
