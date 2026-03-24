@@ -374,14 +374,6 @@
       color:inherit;
     }
 
-    .paid{
-      color:#18a957;
-    }
-
-    .remaining{
-      color:#e05252;
-    }
-
     .advice-card{
       background:linear-gradient(180deg, rgba(247,249,253,0.86) 0%, rgba(255,255,255,0.70) 100%);
     }
@@ -1003,83 +995,74 @@ function getNotificationStorageKey(code){
 }
 
 function getNotificationTypeClass(item){
-  const raw = String(item.type || item.title || '').toLowerCase()
+  const type = String(item.type || '').toLowerCase()
+  const raw = String(item.title || '').toLowerCase()
 
-  if(
-    raw.includes('legal') ||
-    raw.includes('إنذار') ||
-    raw.includes('third') ||
-    raw.includes('نهائي') ||
-    raw.includes('urgent') ||
-    raw.includes('late') ||
-    raw.includes('alert') ||
-    raw.includes('عاجل') ||
-    raw.includes('تأخر')
-  ){
-    return 'notification-red'
-  }
-
-  if(
-    raw.includes('second') ||
-    raw.includes('ثان') ||
-    raw.includes('5days') ||
-    raw.includes('10days') ||
-    raw.includes('reminder') ||
-    raw.includes('تذكير') ||
-    raw.includes('خلال')
-  ){
-    return 'notification-orange'
-  }
-
+  if(type === 'legal_final') return 'notification-red'
+  if(type === 'legal') return 'notification-red'
+  if(type === 'third' || raw.includes('نهائي')) return 'notification-red'
+  if(type === 'second' || raw.includes('ثان')) return 'notification-orange'
+  if(type === 'first' || raw.includes('أول')) return 'notification-blue'
   return 'notification-blue'
 }
 
 function getNotificationPriority(item){
-  const raw = String(item.type || item.title || '').toLowerCase()
+  const type = String(item.type || '').toLowerCase()
+  const raw = String(item.title || '').toLowerCase()
 
-  if(raw.includes('legal') || raw.includes('إنذار')) return 1
-  if(raw.includes('third') || raw.includes('نهائي')) return 2
-  if(raw.includes('second') || raw.includes('ثان')) return 3
-  if(raw.includes('first') || raw.includes('أول')) return 4
+  if(type === 'legal_final') return 0
+  if(type === 'legal' || raw.includes('إنذار')) return 1
+  if(type === 'third' || raw.includes('نهائي')) return 2
+  if(type === 'second' || raw.includes('ثان')) return 3
+  if(type === 'first' || raw.includes('أول')) return 4
   return 5
 }
 
 function getNotificationIcon(item){
-  const raw = String(item.type || item.title || '').toLowerCase()
+  const type = String(item.type || '').toLowerCase()
+  const raw = String(item.title || '').toLowerCase()
 
-  if(raw.includes('legal') || raw.includes('إنذار')) return '🚫'
-  if(raw.includes('third') || raw.includes('نهائي')) return '⚠️'
-  if(raw.includes('second') || raw.includes('ثان')) return '⏰'
-  if(raw.includes('first') || raw.includes('أول')) return '🔔'
+  if(type === 'legal_final') return '🚨'
+  if(type === 'legal' || raw.includes('إنذار')) return '🚫'
+  if(type === 'third' || raw.includes('نهائي')) return '⚠️'
+  if(type === 'second' || raw.includes('ثان')) return '⏰'
+  if(type === 'first' || raw.includes('أول')) return '🔔'
   return '📩'
 }
 
 function getNotificationBadgeLabel(item){
-  const raw = String(item.type || item.title || '').toLowerCase()
+  const type = String(item.type || '').toLowerCase()
+  const raw = String(item.title || '').toLowerCase()
 
-  if(raw.includes('legal') || raw.includes('إنذار')) return 'إنذار عدلي'
-  if(raw.includes('third') || raw.includes('نهائي')) return 'إشعار نهائي'
-  if(raw.includes('second') || raw.includes('ثان')) return 'إشعار ثانٍ'
-  if(raw.includes('first') || raw.includes('أول')) return 'إشعار أول'
+  if(type === 'legal_final') return 'إجراء قانوني نهائي'
+  if(type === 'legal' || raw.includes('إنذار')) return 'إنذار عدلي'
+  if(type === 'third' || raw.includes('نهائي')) return 'إشعار نهائي'
+  if(type === 'second' || raw.includes('ثان')) return 'إشعار ثانٍ'
+  if(type === 'first' || raw.includes('أول')) return 'إشعار أول'
   return 'تنبيه'
 }
 
 function getNotificationLifetimeMs(item){
-  const raw = String(item.type || item.title || '').toLowerCase()
+  const type = String(item.type || '').toLowerCase()
+  const raw = String(item.title || '').toLowerCase()
 
-  if(raw.includes('first') || raw.includes('أول')){
+  if(type === 'first' || raw.includes('أول')){
     return 10 * 60 * 1000
   }
 
-  if(raw.includes('second') || raw.includes('ثان')){
+  if(type === 'second' || raw.includes('ثان')){
     return 24 * 60 * 60 * 1000
   }
 
-  if(raw.includes('third') || raw.includes('نهائي')){
+  if(type === 'third' || raw.includes('نهائي')){
     return 24 * 60 * 60 * 1000
   }
 
-  if(raw.includes('legal') || raw.includes('إنذار')){
+  if(type === 'legal' || raw.includes('إنذار')){
+    return 30 * 24 * 60 * 60 * 1000
+  }
+
+  if(type === 'legal_final'){
     return 30 * 24 * 60 * 60 * 1000
   }
 
