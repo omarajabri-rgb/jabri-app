@@ -579,9 +579,8 @@ window.openStatement = function(){
   if(!currentTenantCode) return
 
   localStorage.setItem('jabri_tenant_code', currentTenantCode)
-  localStorage.setItem('jabri_selected_year', selectedYear)
 
-  window.location.href = `statement.html?tenant=${encodeURIComponent(currentTenantCode)}&year=${encodeURIComponent(selectedYear)}`
+  window.location.href = `statement.html?tenant=${encodeURIComponent(currentTenantCode)}`
 }
 
 window.logout = function(){
