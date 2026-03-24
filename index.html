@@ -521,12 +521,23 @@
     }
 
     .notification-item{
+      position:relative;
       background:rgba(255,255,255,0.72);
       border:1px solid rgba(255,255,255,0.5);
       border-radius:16px;
       padding:14px;
       box-shadow:var(--soft-shadow);
       transition:transform .2s ease, box-shadow .2s ease;
+      overflow:hidden;
+    }
+
+    .notification-topbar{
+      position:absolute;
+      top:0;
+      right:0;
+      left:0;
+      height:4px;
+      background:#dbe7ff;
     }
 
     .notification-blue{
@@ -534,14 +545,54 @@
       border:1px solid rgba(214,226,255,0.95);
     }
 
+    .notification-blue .notification-topbar{
+      background:#2f6fed;
+    }
+
     .notification-orange{
       background:rgba(255,246,234,0.92);
       border:1px solid rgba(255,229,195,0.95);
     }
 
+    .notification-orange .notification-topbar{
+      background:#d68a1d;
+    }
+
     .notification-red{
       background:rgba(255,241,241,0.92);
       border:1px solid rgba(255,216,216,0.95);
+    }
+
+    .notification-red .notification-topbar{
+      background:#e05252;
+    }
+
+    .notification-headline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:4px;
+      margin-bottom:8px;
+    }
+
+    .notification-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      background:rgba(255,255,255,0.75);
+      color:#1d2940;
+      border:1px solid rgba(255,255,255,0.7);
+      white-space:nowrap;
+    }
+
+    .notification-icon{
+      font-size:14px;
+      line-height:1;
     }
 
     .notification-title{
@@ -559,10 +610,25 @@
       font-weight:700;
     }
 
+    .notification-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .notification-date{
       font-size:12px;
       color:var(--muted);
       font-weight:800;
+    }
+
+    .notification-expiry{
+      font-size:12px;
+      font-weight:900;
+      color:#1d2940;
+      opacity:.85;
     }
 
     .empty-notifications{
@@ -940,6 +1006,10 @@ function getNotificationTypeClass(item){
   const raw = String(item.type || item.title || '').toLowerCase()
 
   if(
+    raw.includes('legal') ||
+    raw.includes('إنذار') ||
+    raw.includes('third') ||
+    raw.includes('نهائي') ||
     raw.includes('urgent') ||
     raw.includes('late') ||
     raw.includes('alert') ||
@@ -950,6 +1020,8 @@ function getNotificationTypeClass(item){
   }
 
   if(
+    raw.includes('second') ||
+    raw.includes('ثان') ||
     raw.includes('5days') ||
     raw.includes('10days') ||
     raw.includes('reminder') ||
@@ -960,6 +1032,74 @@ function getNotificationTypeClass(item){
   }
 
   return 'notification-blue'
+}
+
+function getNotificationPriority(item){
+  const raw = String(item.type || item.title || '').toLowerCase()
+
+  if(raw.includes('legal') || raw.includes('إنذار')) return 1
+  if(raw.includes('third') || raw.includes('نهائي')) return 2
+  if(raw.includes('second') || raw.includes('ثان')) return 3
+  if(raw.includes('first') || raw.includes('أول')) return 4
+  return 5
+}
+
+function getNotificationIcon(item){
+  const raw = String(item.type || item.title || '').toLowerCase()
+
+  if(raw.includes('legal') || raw.includes('إنذار')) return '🚫'
+  if(raw.includes('third') || raw.includes('نهائي')) return '⚠️'
+  if(raw.includes('second') || raw.includes('ثان')) return '⏰'
+  if(raw.includes('first') || raw.includes('أول')) return '🔔'
+  return '📩'
+}
+
+function getNotificationBadgeLabel(item){
+  const raw = String(item.type || item.title || '').toLowerCase()
+
+  if(raw.includes('legal') || raw.includes('إنذار')) return 'إنذار عدلي'
+  if(raw.includes('third') || raw.includes('نهائي')) return 'إشعار نهائي'
+  if(raw.includes('second') || raw.includes('ثان')) return 'إشعار ثانٍ'
+  if(raw.includes('first') || raw.includes('أول')) return 'إشعار أول'
+  return 'تنبيه'
+}
+
+function getNotificationLifetimeMs(item){
+  const raw = String(item.type || item.title || '').toLowerCase()
+
+  if(raw.includes('first') || raw.includes('أول')){
+    return 10 * 60 * 1000
+  }
+
+  if(raw.includes('second') || raw.includes('ثان')){
+    return 24 * 60 * 60 * 1000
+  }
+
+  if(raw.includes('third') || raw.includes('نهائي')){
+    return 24 * 60 * 60 * 1000
+  }
+
+  if(raw.includes('legal') || raw.includes('إنذار')){
+    return 30 * 24 * 60 * 60 * 1000
+  }
+
+  return 10 * 60 * 1000
+}
+
+function formatRemainingTime(ms){
+  const minutes = Math.ceil(ms / (1000 * 60))
+  const hours = Math.ceil(ms / (1000 * 60 * 60))
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24))
+
+  if(minutes < 60){
+    return `ينتهي خلال ${minutes} دقيقة`
+  }
+
+  if(hours < 24){
+    return `ينتهي خلال ${hours} ساعة`
+  }
+
+  return `ينتهي خلال ${days} يوم`
 }
 
 async function loadNotifications(code){
@@ -974,7 +1114,7 @@ async function loadNotifications(code){
     .select('*')
     .eq('tenant_code', code)
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(20)
 
   if(error || !data || data.length === 0){
     notifyBadge.innerText = '0'
@@ -985,25 +1125,30 @@ async function loadNotifications(code){
   const storageKey = getNotificationStorageKey(code)
   const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
   const nowMs = Date.now()
-  const tenMinutesMs = 10 * 60 * 1000
-  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+  const maxAgeMs = 30 * 24 * 60 * 60 * 1000
 
-  const visibleNotifications = data.filter(item => {
-    const createdAtMs = new Date(item.created_at).getTime()
+  const visibleNotifications = data
+    .filter(item => {
+      const createdAtMs = new Date(item.created_at).getTime()
 
-    // إخفاء الإشعارات القديمة جداً
-    if((nowMs - createdAtMs) > twoDaysMs){
-      return false
-    }
+      if((nowMs - createdAtMs) > maxAgeMs){
+        return false
+      }
 
-    // إخفاء الإشعار بعد 10 دقائق من قراءته
-    const readAt = storedReadMap[item.id]
-    if(readAt && (nowMs - readAt) >= tenMinutesMs){
-      return false
-    }
+      const readAt = storedReadMap[item.id]
+      const lifetimeMs = getNotificationLifetimeMs(item)
 
-    return true
-  })
+      if(readAt && (nowMs - readAt) >= lifetimeMs){
+        return false
+      }
+
+      return true
+    })
+    .sort((a, b) => {
+      const prioDiff = getNotificationPriority(a) - getNotificationPriority(b)
+      if(prioDiff !== 0) return prioDiff
+      return new Date(b.created_at) - new Date(a.created_at)
+    })
 
   if(visibleNotifications.length === 0){
     notifyBadge.innerText = '0'
@@ -1018,84 +1163,39 @@ async function loadNotifications(code){
 
   visibleNotifications.forEach(item => {
     const typeClass = getNotificationTypeClass(item)
-
-    notificationList.innerHTML += `
-      <div class="notification-item ${typeClass}">
-        <div class="notification-title">${item.title || ''}</div>
-        <div class="notification-message">${item.message || ''}</div>
-        <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
-      </div>
-    `
-  })
-
-  if(unreadItems.length > 0){
-    unreadItems.forEach(item => {
-      storedReadMap[item.id] = nowMs
-    })
-
-    localStorage.setItem(storageKey, JSON.stringify(storedReadMap))
-
-    const unreadIds = unreadItems.map(item => item.id)
-
-    await supabase
-      .from('tenant_notifications')
-      .update({ is_read: true })
-      .in('id', unreadIds)
-
-    notifyBadge.innerText = '0'
-  }
-}
-
-  notificationList.innerHTML = ''
-
-  const { data, error } = await supabase
-    .from('tenant_notifications')
-    .select('*')
-    .eq('tenant_code', code)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  if(error || !data || data.length === 0){
-    notifyBadge.innerText = '0'
-    emptyNotifications.classList.remove('hidden')
-    return
-  }
-
-  const storageKey = getNotificationStorageKey(code)
-  const storedReadMap = JSON.parse(localStorage.getItem(storageKey) || '{}')
-  const nowMs = Date.now()
-  const tenMinutesMs = 10 * 60 * 1000
-
-  const visibleNotifications = data.filter(item => {
+    const icon = getNotificationIcon(item)
+    const badge = getNotificationBadgeLabel(item)
     const readAt = storedReadMap[item.id]
-    if(!readAt) return true
-    return (nowMs - readAt) < tenMinutesMs
-  })
+    const lifetimeMs = getNotificationLifetimeMs(item)
 
-  if(visibleNotifications.length === 0){
-    notifyBadge.innerText = '0'
-    emptyNotifications.classList.remove('hidden')
-    return
-  }
-
-  emptyNotifications.classList.add('hidden')
-
-  const unreadCount = visibleNotifications.filter(item => !item.is_read).length
-  notifyBadge.innerText = unreadCount
-
-  visibleNotifications.forEach(item => {
-    const typeClass = getNotificationTypeClass(item)
+    let expiryText = 'مستمر حالياً'
+    if(readAt){
+      const remainingMs = lifetimeMs - (nowMs - readAt)
+      if(remainingMs > 0){
+        expiryText = formatRemainingTime(remainingMs)
+      }else{
+        expiryText = 'انتهت مدة العرض'
+      }
+    }
 
     notificationList.innerHTML += `
       <div class="notification-item ${typeClass}">
+        <div class="notification-topbar"></div>
+        <div class="notification-headline">
+          <div class="notification-badge">
+            <span class="notification-icon">${icon}</span>
+            <span>${badge}</span>
+          </div>
+        </div>
         <div class="notification-title">${item.title || ''}</div>
         <div class="notification-message">${item.message || ''}</div>
-        <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
+        <div class="notification-meta">
+          <div class="notification-date">${formatNotificationDate(item.created_at)}</div>
+          <div class="notification-expiry">${expiryText}</div>
+        </div>
       </div>
     `
   })
-
-  const unreadItems = visibleNotifications.filter(item => !item.is_read)
 
   if(unreadItems.length > 0){
     unreadItems.forEach(item => {
@@ -1443,6 +1543,12 @@ document.getElementById('yearSelect').addEventListener('change', async function(
     await loadTenantSummary(currentTenantCode, selectedYear)
   }
 })
+
+setInterval(async () => {
+  if(currentTenantCode){
+    await loadNotifications(currentTenantCode)
+  }
+}, 60000)
 
 const saved = localStorage.getItem('jabri_tenant_code')
 const urlParams = new URLSearchParams(window.location.search)
