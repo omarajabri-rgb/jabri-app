@@ -350,14 +350,45 @@
     }
 
     .notify-card{
-  border:none;
-  border-radius:20px;
-  padding:14px;
-  background:rgba(255,255,255,0.75);
-  box-shadow:0 10px 25px rgba(16,24,40,0.06);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-}
+      border:none;
+      border-radius:20px;
+      padding:14px;
+      background:rgba(255,255,255,0.75);
+      box-shadow:0 10px 25px rgba(16,24,40,0.06);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+
+    .notify-card.general{
+      background:rgba(238,244,255,0.85);
+      color:var(--blue);
+    }
+
+    .notify-card.first{
+      background:rgba(255,246,234,0.88);
+      color:var(--orange);
+    }
+
+    .notify-card.second{
+      background:rgba(255,240,220,0.90);
+      color:#c87a00;
+    }
+
+    .notify-card.third{
+      background:rgba(255,230,200,0.92);
+      color:#a85d00;
+    }
+
+    .notify-card.legal{
+      background:rgba(255,235,235,0.90);
+      color:var(--red);
+    }
+
+    .notify-card.legal_final{
+      background:rgba(255,215,215,0.95);
+      color:#a80000;
+      box-shadow:0 12px 28px rgba(224,82,82,0.15);
+    }
 
     .notify-head{
       display:flex;
@@ -720,7 +751,7 @@ async function loadNotifications(code){
     const relativeText = item.created_at ? formatRelativeTime(item.created_at) : ''
 
     html += `
-      <div class="notify-card">
+      <div class="notify-card ${type}">
         <div class="notify-head">
           <div class="notify-title">${title}</div>
           <div class="notify-date">${dateText}${relativeText ? ` • ${relativeText}` : ''}</div>
