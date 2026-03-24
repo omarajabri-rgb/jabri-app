@@ -323,7 +323,6 @@
       align-items:start;
     }
 
-    /* updated */
     .profile-mini-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -332,7 +331,6 @@
       margin-bottom:18px;
     }
 
-    /* updated */
     .profile-box{
       border-radius:22px;
       padding:18px;
@@ -994,20 +992,24 @@
     animateValue('profileCredit', credit)
     animateValue('profileBalance', balance)
 
-    let statusClass = 'green'
-    if(balance > 0){
-      statusClass = 'red'
-    }else if(balance < 0){
-      statusClass = 'orange'
-    }else{
-      statusClass = 'green'
-    }
+    const debitBox = document.getElementById('profileDebit').parentElement
+    const creditBox = document.getElementById('profileCredit').parentElement
+    const balanceBox = document.getElementById('profileBalance').parentElement
 
-    const boxes = document.querySelectorAll('.profile-box')
-    boxes.forEach(box => {
-      box.classList.remove('blue','green','orange','red')
-      box.classList.add(statusClass)
-    })
+    debitBox.classList.remove('blue','green','orange','red')
+    creditBox.classList.remove('blue','green','orange','red')
+    balanceBox.classList.remove('blue','green','orange','red')
+
+    debitBox.classList.add('red')
+    creditBox.classList.add('green')
+
+    if(balance <= 0){
+      balanceBox.classList.add('green')
+    }else if(credit > 0){
+      balanceBox.classList.add('orange')
+    }else{
+      balanceBox.classList.add('red')
+    }
 
     document.getElementById('profileNotifyType').value = ''
     document.getElementById('profileNotifyMessage').value = ''
