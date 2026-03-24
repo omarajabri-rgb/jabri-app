@@ -524,23 +524,23 @@
     }
 
     .notification-topbar{
-  display:none;
-}
+      display:none;
+    }
 
     .notification-blue{
-  background:rgba(245,249,255,0.96);
-  border:1px solid rgba(210,224,248,0.95);
-}
+      background:rgba(245,249,255,0.96);
+      border:1px solid rgba(210,224,248,0.95);
+    }
 
-.notification-orange{
-  background:rgba(255,249,240,0.96);
-  border:1px solid rgba(245,220,182,0.95);
-}
+    .notification-orange{
+      background:rgba(255,249,240,0.96);
+      border:1px solid rgba(245,220,182,0.95);
+    }
 
-.notification-red{
-  background:rgba(255,245,245,0.96);
-  border:1px solid rgba(244,205,205,0.95);
-}
+    .notification-red{
+      background:rgba(255,245,245,0.96);
+      border:1px solid rgba(244,205,205,0.95);
+    }
 
     .notification-headline{
       display:flex;
@@ -827,7 +827,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
 )
 
 let chart
@@ -1029,25 +1029,11 @@ function getNotificationLifetimeMs(item){
   const type = String(item.type || '').toLowerCase()
   const raw = String(item.title || '').toLowerCase()
 
-  if(type === 'first' || raw.includes('أول')){
-    return 10 * 60 * 1000
-  }
-
-  if(type === 'second' || raw.includes('ثان')){
-    return 24 * 60 * 60 * 1000
-  }
-
-  if(type === 'third' || raw.includes('نهائي')){
-    return 24 * 60 * 60 * 1000
-  }
-
-  if(type === 'legal' || raw.includes('إنذار')){
-    return 30 * 24 * 60 * 60 * 1000
-  }
-
-  if(type === 'legal_final'){
-    return 30 * 24 * 60 * 60 * 1000
-  }
+  if(type === 'first' || raw.includes('أول')) return 10 * 60 * 1000
+  if(type === 'second' || raw.includes('ثان')) return 24 * 60 * 60 * 1000
+  if(type === 'third' || raw.includes('نهائي')) return 24 * 60 * 60 * 1000
+  if(type === 'legal' || raw.includes('إنذار')) return 30 * 24 * 60 * 60 * 1000
+  if(type === 'legal_final') return 30 * 24 * 60 * 60 * 1000
 
   return 10 * 60 * 1000
 }
@@ -1057,14 +1043,8 @@ function formatRemainingTime(ms){
   const hours = Math.ceil(ms / (1000 * 60 * 60))
   const days = Math.ceil(ms / (1000 * 60 * 60 * 24))
 
-  if(minutes < 60){
-    return `ينتهي خلال ${minutes} دقيقة`
-  }
-
-  if(hours < 24){
-    return `ينتهي خلال ${hours} ساعة`
-  }
-
+  if(minutes < 60) return `ينتهي خلال ${minutes} دقيقة`
+  if(hours < 24) return `ينتهي خلال ${hours} ساعة`
   return `ينتهي خلال ${days} يوم`
 }
 
@@ -1096,10 +1076,7 @@ async function loadNotifications(code){
   const visibleNotifications = data
     .filter(item => {
       const createdAtMs = new Date(item.created_at).getTime()
-
-      if((nowMs - createdAtMs) > maxAgeMs){
-        return false
-      }
+      if((nowMs - createdAtMs) > maxAgeMs) return false
 
       const readAt = storedReadMap[item.id]
       const lifetimeMs = getNotificationLifetimeMs(item)
@@ -1137,11 +1114,7 @@ async function loadNotifications(code){
     let expiryText = 'مستمر حالياً'
     if(readAt){
       const remainingMs = lifetimeMs - (nowMs - readAt)
-      if(remainingMs > 0){
-        expiryText = formatRemainingTime(remainingMs)
-      }else{
-        expiryText = 'انتهت مدة العرض'
-      }
+      expiryText = remainingMs > 0 ? formatRemainingTime(remainingMs) : 'انتهت مدة العرض'
     }
 
     notificationList.innerHTML += `
@@ -1255,12 +1228,7 @@ async function loadCreditTrend(code){
       responsive: true,
       maintainAspectRatio: false,
       layout: {
-        padding: {
-          top: 0,
-          right: 4,
-          bottom: 0,
-          left: 4
-        }
+        padding: { top: 0, right: 4, bottom: 0, left: 4 }
       },
       animation: {
         duration: 1400,
@@ -1279,30 +1247,20 @@ async function loadCreditTrend(code){
       scales: {
         x: {
           offset: false,
-          grid: {
-            color: 'rgba(123,132,151,0.12)'
-          },
+          grid: { color: 'rgba(123,132,151,0.12)' },
           ticks: {
-            font: {
-              size: 12,
-              weight: '700'
-            }
+            font: { size: 12, weight: '700' }
           }
         },
         y: {
           beginAtZero: false,
-          grid: {
-            color: 'rgba(123,132,151,0.12)'
-          },
+          grid: { color: 'rgba(123,132,151,0.12)' },
           ticks: {
             stepSize: 200,
             callback: function(value){
               return formatNumber(value)
             },
-            font: {
-              size: 12,
-              weight: '700'
-            }
+            font: { size: 12, weight: '700' }
           }
         }
       }
@@ -1481,18 +1439,24 @@ window.login = async function(){
   document.getElementById('name').innerText = tenant.tenant_name || ''
   document.getElementById('codeText').innerText = tenant.tenant_code || ''
 
-  await loadTenantSummary(code, selectedYear)
-
   localStorage.setItem('jabri_tenant_code', code)
+  localStorage.setItem('jabri_selected_year', String(selectedYear))
+
+  await loadTenantSummary(code, selectedYear)
 }
 
 window.openStatement = function(){
   if(!currentTenantCode) return
-  window.location.href = `statement.html?tenant=${currentTenantCode}&year=${selectedYear}`
+
+  localStorage.setItem('jabri_tenant_code', currentTenantCode)
+  localStorage.setItem('jabri_selected_year', String(selectedYear))
+
+  window.location.href = `statement.html?tenant=${encodeURIComponent(currentTenantCode)}&year=${encodeURIComponent(selectedYear)}`
 }
 
 window.logout = function(){
   localStorage.removeItem('jabri_tenant_code')
+  localStorage.removeItem('jabri_selected_year')
   location.reload()
 }
 
@@ -1504,6 +1468,7 @@ document.getElementById('code').addEventListener('keydown', function(e){
 
 document.getElementById('yearSelect').addEventListener('change', async function(e){
   selectedYear = Number(e.target.value)
+  localStorage.setItem('jabri_selected_year', String(selectedYear))
 
   if(currentTenantCode){
     await loadTenantSummary(currentTenantCode, selectedYear)
@@ -1517,21 +1482,22 @@ setInterval(async () => {
 }, 60000)
 
 const saved = localStorage.getItem('jabri_tenant_code')
+const savedYear = Number(localStorage.getItem('jabri_selected_year') || 2026)
 const urlParams = new URLSearchParams(window.location.search)
 const tenantFromUrl = (urlParams.get('tenant') || '').trim().toUpperCase()
-const yearFromUrl = Number(urlParams.get('year') || 2026)
+const yearFromUrl = Number(urlParams.get('year') || savedYear || 2026)
+
+if([2023, 2024, 2025, 2026].includes(yearFromUrl)){
+  document.getElementById('yearSelect').value = String(yearFromUrl)
+} else {
+  document.getElementById('yearSelect').value = '2026'
+}
 
 if(tenantFromUrl){
   document.getElementById('code').value = tenantFromUrl
-  if([2023, 2024, 2025, 2026].includes(yearFromUrl)){
-    document.getElementById('yearSelect').value = String(yearFromUrl)
-  } else {
-    document.getElementById('yearSelect').value = '2026'
-  }
   login()
 } else if(saved){
   document.getElementById('code').value = saved
-  document.getElementById('yearSelect').value = '2026'
   login()
 }
 </script>
