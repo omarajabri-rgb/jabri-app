@@ -18,7 +18,6 @@
   --muted:#7b8497;
   --line:#e8edf4;
   --white:rgba(255,255,255,0.74);
-  --white-strong:rgba(255,255,255,0.94);
   --red:#e05252;
   --green:#18a957;
   --orange:#b96a00;
@@ -99,6 +98,39 @@ body{
   letter-spacing:.4px;
 }
 
+.overall-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.overall-card{
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:20px;
+  padding:14px 10px;
+  text-align:center;
+  box-shadow:0 10px 22px rgba(17,24,39,.05);
+}
+
+.overall-label{
+  font-size:11px;
+  font-weight:900;
+  color:#5d6678;
+  margin-bottom:6px;
+}
+
+.overall-value{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-.3px;
+}
+
+.overall-debit .overall-value{ color:var(--red); }
+.overall-credit .overall-value{ color:var(--green); }
+.overall-balance .overall-value{ color:var(--navy); }
+
 .year-card{
   background:rgba(255,248,238,.70);
   backdrop-filter:blur(18px);
@@ -128,13 +160,6 @@ body{
   align-items:center;
   gap:10px;
   margin-bottom:12px;
-}
-
-.header-side{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
 }
 
 .year-title{
@@ -205,6 +230,7 @@ thead th:first-child{
   border-top-right-radius:12px;
   border-bottom-right-radius:12px;
 }
+
 thead th:last-child{
   border-top-left-radius:12px;
   border-bottom-left-radius:12px;
@@ -427,7 +453,8 @@ tbody td:last-child{
   padding:7px 7px;
 }
 
-.pdf-mode .summary-value{
+.pdf-mode .summary-value,
+.pdf-mode .overall-value{
   font-size:24px;
 }
 
@@ -456,8 +483,9 @@ tbody td:last-child{
 @media (max-width:420px){
   .app{ padding:12px; }
   .year-card{ padding:12px; }
-  .summary{ gap:8px; }
+  .summary, .overall-summary{ gap:8px; }
   .summary-value{ font-size:17px; }
+  .overall-value{ font-size:19px; }
   tbody td{ font-size:11.5px; }
 }
 </style>
@@ -480,6 +508,7 @@ tbody td:last-child{
     <div class="pdf-date" id="pdfDate"></div>
   </div>
 
+  <div id="overallSummary"></div>
   <div id="container"></div>
 
   <div class="bottom-actions">
@@ -493,7 +522,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
@@ -505,12 +534,10 @@ window.goBack = function(){
     window.location.href = "admin.html"
     return
   }
-
   if(window.history.length > 1){
     window.history.back()
     return
   }
-
   window.location.href = "index.html"
 }
 
@@ -528,11 +555,7 @@ window.savePDF = async function(){
       margin: 0.3,
       filename: `statement_${safeFileName || "tenant"}.pdf`,
       image: { type: "jpeg", quality: 1 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0
-      },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     }
 
@@ -617,7 +640,7 @@ function formatDate(dateStr){
   return d.toLocaleDateString("en-GB")
 }
 
-function getYear(dateStr){
+function getBaseYear(dateStr){
   if(!dateStr) return null
   const raw = String(dateStr).trim()
 
@@ -635,45 +658,54 @@ function getYear(dateStr){
   return d.getFullYear()
 }
 
-function toSortableTime(dateStr){
+function isCarryRow(desc){
+  const text = normalizeText(desc)
+  return (
+    text.includes("رصيد عام") ||
+    text.includes("رصيد سابق") ||
+    text.includes("سابق عام")
+  )
+}
+
+function getDisplayYear(row){
+  const baseYear = getBaseYear(row.date)
+  if(baseYear === null) return null
+  return isCarryRow(row.description) ? baseYear + 1 : baseYear
+}
+
+function toSortableTime(dateStr, displayYear){
   if(!dateStr) return Number.MAX_SAFE_INTEGER
   const raw = String(dateStr).trim()
+
+  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if(ymdDash){
+    const y = displayYear || Number(ymdDash[1])
+    return new Date(`${y}-${ymdDash[2]}-${ymdDash[3]}T00:00:00`).getTime()
+  }
 
   const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
   if(dmy){
     const [, d, m, y] = dmy
-    return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
+    const year = displayYear || Number(y)
+    return new Date(`${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
   }
 
   const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
   if(ymdSlash){
     const [, y, m, d] = ymdSlash
-    return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
-  }
-
-  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(ymdDash){
-    return new Date(`${ymdDash[1]}-${ymdDash[2]}-${ymdDash[3]}T00:00:00`).getTime()
+    const year = displayYear || Number(y)
+    return new Date(`${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
   }
 
   const t = new Date(raw).getTime()
   return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t
 }
 
-function isCarryRow(desc){
-  const text = normalizeText(desc)
-  return (
-    text.includes("رصيد سابق") ||
-    text.includes("سابق عام") ||
-    text.includes("رصيد عام")
-  )
-}
-
 function getRowOrder(desc){
   const text = normalizeText(desc)
-  if(text.includes("ايجار") || text.includes("الإيجار") || text.includes("الايجار")) return 1
-  if(text.includes("معارف")) return 2
-  if(isCarryRow(text)) return 3
+  if(isCarryRow(text)) return 1
+  if(text.includes("ايجار") || text.includes("الإيجار") || text.includes("الايجار")) return 2
+  if(text.includes("معارف")) return 3
   return 4
 }
 
@@ -695,6 +727,25 @@ function buildTenantHeader(name, code){
   `
 }
 
+function renderOverallSummary(totalDebit, totalCredit, balance){
+  return `
+    <div class="overall-summary">
+      <div class="overall-card overall-debit">
+        <div class="overall-label">إجمالي المدين</div>
+        <div class="overall-value">${displayNumber(totalDebit)}</div>
+      </div>
+      <div class="overall-card overall-credit">
+        <div class="overall-label">إجمالي الدائن</div>
+        <div class="overall-value">${displayNumber(totalCredit)}</div>
+      </div>
+      <div class="overall-card overall-balance">
+        <div class="overall-label">إجمالي الرصيد</div>
+        <div class="overall-value">${displaySignedNumber(balance)}</div>
+      </div>
+    </div>
+  `
+}
+
 document.addEventListener("DOMContentLoaded", load)
 
 async function load(){
@@ -702,6 +753,7 @@ async function load(){
   const tenantName = document.getElementById("tenantName")
   const pdfTenantName = document.getElementById("pdfTenantName")
   const pdfDate = document.getElementById("pdfDate")
+  const overallSummary = document.getElementById("overallSummary")
 
   if(!tenant){
     container.innerHTML = `<div class="empty-box">لا يوجد مستأجر</div>`
@@ -729,20 +781,10 @@ async function load(){
   tenantName.innerHTML = buildTenantHeader(tenantDisplayName, tenant)
   pdfTenantName.innerText = tenantDisplayName
 
-  let response
-  try{
-    response = await supabase
-      .from("tenant_transactions")
-      .select("tenant_code,date,description,debit,credit,receipt_no,notes")
-      .eq("tenant_code", tenant)
-      .order("date", { ascending:true })
-  } catch(err){
-    console.error("Unexpected load error:", err)
-    container.innerHTML = `<div class="error-box">حصل خطأ غير متوقع أثناء تحميل البيانات</div>`
-    return
-  }
-
-  const { data, error } = response
+  const { data, error } = await supabase
+    .from("tenant_transactions")
+    .select("tenant_code,date,description,debit,credit,receipt_no,notes")
+    .eq("tenant_code", tenant)
 
   if(error){
     console.error("Supabase error:", error)
@@ -753,7 +795,8 @@ async function load(){
   const rows = (data || [])
     .filter(r => normalizeText(r.tenant_code).toUpperCase() === tenant)
     .map(normalizeRow)
-    .filter(r => getYear(r.date) !== null)
+    .map(r => ({ ...r, displayYear: getDisplayYear(r) }))
+    .filter(r => r.displayYear !== null)
 
   if(rows.length === 0){
     container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
@@ -762,12 +805,14 @@ async function load(){
 
   const grouped = {}
   rows.forEach(r => {
-    const year = getYear(r.date)
-    if(!grouped[year]) grouped[year] = []
-    grouped[year].push(r)
+    if(!grouped[r.displayYear]) grouped[r.displayYear] = []
+    grouped[r.displayYear].push(r)
   })
 
   let html = ""
+  let smartTotalDebit = 0
+  let smartTotalCredit = 0
+  let finalOverallBalance = 0
 
   Object.keys(grouped)
     .sort((a,b) => Number(a) - Number(b))
@@ -775,8 +820,8 @@ async function load(){
       const yearRows = grouped[year]
 
       yearRows.sort((a,b) => {
-        const t1 = toSortableTime(a.date)
-        const t2 = toSortableTime(b.date)
+        const t1 = toSortableTime(a.date, a.displayYear)
+        const t2 = toSortableTime(b.date, b.displayYear)
         if(t1 !== t2) return t1 - t2
         return getRowOrder(a.description) - getRowOrder(b.description)
       })
@@ -790,9 +835,15 @@ async function load(){
         totalCredit += r.credit
         runningBalance += r.debit - r.credit
         r.balance = runningBalance
+
+        if(!isCarryRow(r.description)){
+          smartTotalDebit += r.debit
+          smartTotalCredit += r.credit
+        }
       })
 
       const yearBalance = runningBalance
+      finalOverallBalance = yearBalance
 
       let color = "red"
       let status = "غير مسدد"
@@ -811,12 +862,8 @@ async function load(){
       html += `
         <div class="year-card ${color}">
           <div class="year-header">
-            <div class="header-side">
-              <span class="year-title">${year}</span>
-            </div>
-            <div class="header-side">
-              <span class="status-box ${statusClass}">${status}</span>
-            </div>
+            <span class="year-title">${year}</span>
+            <span class="status-box ${statusClass}">${status}</span>
           </div>
 
           <div class="table-shell">
@@ -875,6 +922,12 @@ async function load(){
         </div>
       `
     })
+
+  overallSummary.innerHTML = renderOverallSummary(
+    smartTotalDebit,
+    smartTotalCredit,
+    finalOverallBalance
+  )
 
   container.innerHTML = html
 }
