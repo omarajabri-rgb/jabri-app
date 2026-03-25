@@ -459,13 +459,10 @@ function parseDateValue(value){
 
   const slash = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
   if(slash){
-    let first = Number(slash[1])
-    let second = Number(slash[2])
+    let day = Number(slash[1])
+    let month = Number(slash[2])
     let year = Number(slash[3])
     if(year < 100) year += 2000
-
-    const day = first
-    const month = second
 
     return {
       valid:true,
@@ -499,6 +496,10 @@ function getYear(dateStr){
   return p.valid ? p.year : null
 }
 
+function isCarryRow(desc){
+  return normalizeText(desc).includes("رصيد")
+}
+
 function isRentRow(desc){
   return normalizeText(desc).includes("ايجار")
 }
@@ -507,12 +508,15 @@ function isFeesRow(desc){
   return normalizeText(desc).includes("معارف")
 }
 
-function isCarryRow(desc){
-  return normalizeText(desc).includes("رصيد")
-}
-
-function isPaymentRow(desc){
-  return normalizeText(desc).includes("دفعة")
+function isPaymentText(text){
+  const t = normalizeText(text)
+  return (
+    t.includes("دفعة") ||
+    t.includes("سداد") ||
+    t.includes("تسوية") ||
+    t.includes("إغلاق") ||
+    t.includes("خصم")
+  )
 }
 
 function getCarryBaseYear(desc){
@@ -528,19 +532,16 @@ function getStatementYear(row){
   if(isCarryRow(desc)){
     const baseYear = getCarryBaseYear(desc)
     if(baseYear) return baseYear + 1
-    return dateYear
   }
 
   return dateYear
 }
 
-function getRowOrder(desc){
-  const text = normalizeText(desc)
-
-  if(isCarryRow(text)) return 0
-  if(isRentRow(text)) return 1
-  if(isFeesRow(text)) return 2
-  if(isPaymentRow(text)) return 3
+function getRowOrder(row){
+  if(row.isCarry) return 0
+  if(row.rowType === "rent") return 1
+  if(row.rowType === "fees") return 2
+  if(row.rowType === "payment") return 3
   return 9
 }
 
@@ -574,6 +575,55 @@ function getBalanceClass(balance){
   return "balance-negative"
 }
 
+function buildRow(r, index){
+  const description = normalizeText(r.description)
+  const notes = normalizeText(r.notes)
+  const receiptNo = normalizeText(r.receipt_no || "-")
+
+  const rawDebit = num(r.debit)
+  const rawCredit = num(r.credit)
+
+  const isCarry = isCarryRow(description)
+
+  const isPayment =
+    !isCarry && (
+      rawCredit > 0 ||
+      (rawDebit > 0 && (isPaymentText(description) || isPaymentText(notes)))
+    )
+
+  let effectiveDebit = rawDebit
+  let effectiveCredit = rawCredit
+
+  if(isPayment && rawCredit === 0 && rawDebit > 0){
+    effectiveDebit = 0
+    effectiveCredit = rawDebit
+  }
+
+  let rowType = "other"
+  if(isCarry) rowType = "carry"
+  else if(isRentRow(description)) rowType = "rent"
+  else if(isFeesRow(description)) rowType = "fees"
+  else if(isPayment) rowType = "payment"
+
+  return {
+    ...r,
+    originalIndex: index,
+    parsedDate: parseDateValue(r.date),
+    description,
+    notes,
+    receipt_no: receiptNo,
+    rawDebit,
+    rawCredit,
+    debit: effectiveDebit,
+    credit: effectiveCredit,
+    isCarry,
+    isPayment,
+    rowType,
+    sectionYear: getStatementYear(r),
+    balance: 0
+  }
+}
+
 document.addEventListener("DOMContentLoaded", load)
 
 async function load(){
@@ -595,7 +645,7 @@ async function load(){
   try{
     response = await supabase
       .from("tenant_transactions")
-      .select("*")
+      .select("tenant_code, date, description, debit, credit, receipt_no, notes")
       .eq("tenant_code", tenant)
       .order("date", { ascending: true })
   } catch(err){
@@ -618,19 +668,7 @@ async function load(){
   }
 
   const validRows = data
-    .map((r, index) => ({
-      ...r,
-      originalIndex: index,
-      date: r.date,
-      parsedDate: parseDateValue(r.date),
-      debit: num(r.debit),
-      credit: num(r.credit),
-      description: normalizeText(r.description || ""),
-      receipt_no: normalizeText(r.receipt_no || "-"),
-      sectionYear: getStatementYear(r),
-      isCarry: isCarryRow(r.description || ""),
-      balance: 0
-    }))
+    .map(buildRow)
     .filter(r => r.sectionYear !== null)
 
   if(validRows.length === 0){
@@ -648,7 +686,7 @@ async function load(){
     const bTs = b.parsedDate.valid ? b.parsedDate.ts : 0
     if(aTs !== bTs) return aTs - bTs
 
-    const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
+    const orderDiff = getRowOrder(a) - getRowOrder(b)
     if(orderDiff !== 0) return orderDiff
 
     return a.originalIndex - b.originalIndex
@@ -659,22 +697,6 @@ async function load(){
     if(!grouped[row.sectionYear]) grouped[row.sectionYear] = []
     grouped[row.sectionYear].push(row)
   }
-
-  Object.values(grouped).forEach(rows => {
-    rows.sort((a, b) => {
-      if(a.isCarry && !b.isCarry) return -1
-      if(!a.isCarry && b.isCarry) return 1
-
-      const aTs = a.parsedDate.valid ? a.parsedDate.ts : 0
-      const bTs = b.parsedDate.valid ? b.parsedDate.ts : 0
-      if(aTs !== bTs) return aTs - bTs
-
-      const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
-      if(orderDiff !== 0) return orderDiff
-
-      return a.originalIndex - b.originalIndex
-    })
-  })
 
   let html = ""
 
@@ -691,7 +713,7 @@ async function load(){
 
       rows.forEach(r => {
         if(r.isCarry){
-          openingBalance = r.debit - r.credit
+          openingBalance = r.rawDebit > 0 ? r.rawDebit : (r.debit - r.credit)
           yearBalance = openingBalance
           r.balance = yearBalance
           return
@@ -699,8 +721,10 @@ async function load(){
 
         movementDebit += r.debit
         movementCredit += r.credit
+
         yearBalance += r.debit
         yearBalance -= r.credit
+
         r.balance = yearBalance
       })
 
@@ -778,3 +802,6 @@ async function load(){
   container.innerHTML = html
 }
 </script>
+
+</body>
+</html>
