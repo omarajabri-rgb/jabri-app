@@ -1,319 +1,126 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>كشف الحساب</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-:root{
-  --bg-1:#edf2f7;
-  --bg-2:#f8fafc;
-  --navy:#1d2940;
-  --navy-2:#243552;
-  --gold:#c9a46b;
-  --gold-2:#b89155;
-  --text:#1d2940;
-  --muted:#7b8497;
-  --line:#e8edf4;
-  --white:rgba(255,255,255,0.74);
-  --red:#e05252;
-  --green:#18a957;
-  --orange:#b96a00;
-  --soft-red:#fff3f3;
-  --soft-green:#edf8f1;
-  --soft-orange:#fff7ec;
-  --soft-blue:#eef4ff;
-  --shadow:0 14px 40px rgba(15,23,42,0.08);
-}
-
-*{ box-sizing:border-box; }
-
 body{
   margin:0;
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(circle at top right, rgba(201,164,107,.12), transparent 22%),
-    linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
 }
 
 .app{
-  max-width:470px;
+  max-width:420px;
   margin:auto;
-  padding:16px;
-  padding-bottom:26px;
+  padding:15px;
+  padding-bottom:20px;
 }
 
 .card{
-  background:var(--white);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,.85);
-  border-radius:24px;
-  padding:18px 16px;
-  margin-bottom:16px;
-  box-shadow:var(--shadow);
-}
-
-.title-wrap{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.page-title{
-  margin:0;
-  font-size:22px;
-  font-weight:900;
-  color:var(--navy);
-  letter-spacing:-.3px;
-}
-
-.title-badge{
-  background:linear-gradient(135deg,var(--gold),var(--gold-2));
-  color:#fff;
-  border-radius:999px;
-  padding:7px 12px;
-  font-size:11px;
-  font-weight:900;
-  box-shadow:0 8px 18px rgba(185,145,85,.24);
-}
-
-.tenant-name-main{
-  font-size:24px;
-  font-weight:900;
-  color:var(--navy);
-  margin:14px 0 4px;
-  line-height:1.2;
-  letter-spacing:-.35px;
-}
-
-.tenant-code-sub{
-  font-size:12px;
-  font-weight:800;
-  color:var(--muted);
-  letter-spacing:.4px;
-}
-
-.overall-summary{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:16px;
-}
-
-.overall-card{
-  background:rgba(255,255,255,.82);
-  border:1px solid rgba(255,255,255,.95);
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(14px);
   border-radius:20px;
-  padding:14px 10px;
-  text-align:center;
-  box-shadow:0 10px 22px rgba(17,24,39,.05);
+  padding:15px;
+  margin-bottom:15px;
 }
-
-.overall-label{
-  font-size:11px;
-  font-weight:900;
-  color:#5d6678;
-  margin-bottom:6px;
-}
-
-.overall-value{
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:-.3px;
-}
-
-.overall-debit .overall-value{ color:var(--red); }
-.overall-credit .overall-value{ color:var(--green); }
-.overall-balance .overall-value{ color:var(--navy); }
 
 .year-card{
-  background:rgba(255,248,238,.70);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,.82);
-  border-radius:24px;
-  padding:14px;
-  margin-bottom:16px;
-  box-shadow:0 12px 34px rgba(15,23,42,.06);
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
 }
 
-.year-card.green{
-  background:linear-gradient(180deg, rgba(237,248,241,.92), rgba(255,255,255,.72));
-}
-
-.year-card.orange{
-  background:linear-gradient(180deg, rgba(255,246,234,.92), rgba(255,255,255,.72));
-}
-
-.year-card.red{
-  background:linear-gradient(180deg, rgba(255,241,241,.88), rgba(255,255,255,.72));
-}
+.green{ background:#edf8f1; }
+.orange{ background:#fff6ea; }
+.red{ background:#fff1f1; }
 
 .year-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  margin-bottom:10px;
   gap:10px;
-  margin-bottom:12px;
 }
 
 .year-title{
-  min-width:58px;
-  text-align:center;
-  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  background:#1d2940;
   color:#fff;
-  padding:7px 15px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:900;
-  box-shadow:0 8px 18px rgba(29,41,64,.18);
-}
-
-.status-box{
-  min-width:76px;
-  text-align:center;
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:900;
-  display:inline-block;
-}
-
-.status-paid{
-  background:var(--soft-green);
-  color:var(--green);
-  border:1px solid rgba(24,169,87,.14);
-}
-
-.status-partial{
-  background:var(--soft-orange);
-  color:var(--orange);
-  border:1px solid rgba(185,106,0,.14);
-}
-
-.status-unpaid{
-  background:var(--soft-red);
-  color:var(--red);
-  border:1px solid rgba(224,82,82,.14);
-}
-
-.table-shell{
-  background:rgba(255,255,255,.74);
-  border:1px solid rgba(255,255,255,.95);
-  border-radius:18px;
-  padding:6px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  padding:6px 14px;
+  border-radius:20px;
+  font-weight:bold;
 }
 
 table{
   width:100%;
-  border-collapse:separate;
-  border-spacing:0 4px;
+  border-collapse:collapse;
+  background:rgba(255,255,255,0.7);
+  border-radius:14px;
+  overflow:hidden;
 }
 
-thead th{
-  background:#f3f6fa;
-  color:#2d3748;
-  font-size:11px;
-  font-weight:900;
+th, td{
+  padding:8px;
+  font-size:12px;
   text-align:center;
-  padding:8px 6px;
-  border:none;
+  border-bottom:1px solid #eee;
 }
 
-thead th:first-child{
-  border-top-right-radius:12px;
-  border-bottom-right-radius:12px;
-}
-
-thead th:last-child{
-  border-top-left-radius:12px;
-  border-bottom-left-radius:12px;
-}
-
-tbody tr{
-  background:rgba(255,255,255,.95);
-  box-shadow:0 3px 10px rgba(17,24,39,.03);
+th{
+  background:#f1f3f7;
 }
 
 tbody tr:hover{
-  background:#fbfdff;
-  transition:.2s ease;
-}
-
-tbody td{
-  padding:6px 6px;
-  font-size:12px;
-  text-align:center;
-  border:none;
-  line-height:1.18;
-  vertical-align:middle;
-}
-
-tbody td:first-child{
-  border-top-right-radius:12px;
-  border-bottom-right-radius:12px;
-}
-
-tbody td:last-child{
-  border-top-left-radius:12px;
-  border-bottom-left-radius:12px;
+  background:rgba(47,111,237,0.05);
+  transition:0.2s;
 }
 
 .debit{
-  color:var(--red);
-  font-weight:900;
-  font-size:12px;
+  color:#e05252;
+  font-weight:bold;
+  font-size:13px;
 }
 
 .credit{
-  color:var(--green);
-  font-weight:900;
-  font-size:12px;
+  color:#18a957;
+  font-weight:bold;
+  font-size:13px;
 }
 
 .balance{
   font-weight:900;
-  font-size:13px;
-  direction:ltr;
-  unicode-bidi:isolate;
+  font-size:14px;
 }
 
-.balance-positive{ color:var(--red); }
-.balance-negative{ color:var(--orange); }
-.balance-zero{ color:var(--green); }
-
-.desc-cell{
-  font-weight:800;
-  color:var(--navy);
-  line-height:1.22;
-}
+.balance-positive{ color:#e05252; }
+.balance-zero{ color:#18a957; }
 
 .receipt{
-  background:var(--soft-blue);
-  color:#2f6fed;
-  padding:3px 8px;
-  border-radius:999px;
-  font-size:10px;
+  background:#eef4ff;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
   font-weight:900;
+  color:#2f6fed;
   display:inline-block;
-  min-width:40px;
 }
 
 .date-chip{
-  background:rgba(47,111,237,.08);
+  background:rgba(47,111,237,0.08);
   color:#2f6fed;
-  font-weight:900;
-  padding:3px 8px;
-  border-radius:999px;
-  font-size:10px;
+  font-weight:800;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
   display:inline-block;
-  white-space:nowrap;
+}
+
+td:nth-child(5){
+  font-weight:700;
+  color:#1d2940;
 }
 
 .summary{
@@ -324,75 +131,108 @@ tbody td:last-child{
 }
 
 .summary-card{
-  background:rgba(255,255,255,.82);
-  border:1px solid rgba(255,255,255,.95);
-  border-radius:18px;
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.7);
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+  border-radius:16px;
   padding:12px 10px;
   text-align:center;
-  box-shadow:0 10px 22px rgba(17,24,39,.05);
 }
 
 .summary-label{
-  font-size:11px;
-  font-weight:900;
-  color:#5d6678;
+  font-size:12px;
+  font-weight:800;
+  color:#555;
   margin-bottom:6px;
 }
 
 .summary-value{
-  font-size:18px;
+  font-size:22px;
   font-weight:900;
-  letter-spacing:-.3px;
 }
 
-.summary-debit .summary-value{ color:var(--red); }
-.summary-credit .summary-value{ color:var(--green); }
-.summary-balance .summary-value{ color:var(--navy); }
+.summary-debit .summary-value{ color:#e05252; }
+.summary-credit .summary-value{ color:#18a957; }
+.summary-balance .summary-value{ color:#1d2940; }
 
+.status-box{
+  min-width:70px;
+  padding:6px 12px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+  display:inline-block;
+}
+
+.status-paid{
+  background:#edf8f1;
+  color:#18a957;
+}
+
+.status-partial{
+  background:rgba(214,138,29,0.12);
+  color:#b96a00;
+  border:1px solid rgba(214,138,29,0.25);
+  box-shadow:0 4px 10px rgba(214,138,29,0.08);
+}
+
+.status-unpaid{
+  background:#fff1f1;
+  color:#e05252;
+}
+
+/* bottom buttons - updated only */
 .bottom-actions{
   display:flex;
   flex-direction:row-reverse;
   gap:12px;
   width:100%;
-  max-width:470px;
-  margin:18px auto 0;
-  padding:0 4px 10px;
+  max-width:420px;
+  margin:20px auto 0;
+  padding:0 10px 10px;
+  box-sizing:border-box;
 }
 
 .pdf-btn,
 .back-btn{
   height:52px;
   border:none;
-  border-radius:16px;
+  border-radius:14px;
   font-weight:900;
   cursor:pointer;
   font-size:16px;
-  letter-spacing:.2px;
-  transition:transform .18s ease, box-shadow .18s ease;
+  letter-spacing:0.5px;
+  transition:transform 0.2s, opacity 0.2s;
 }
 
 .pdf-btn{
   flex:1.2;
-  background:linear-gradient(135deg,var(--gold),var(--gold-2));
+  background:linear-gradient(135deg,#c9a46b,#b89155);
   color:#fff;
-  box-shadow:0 12px 24px rgba(185,145,85,.24);
 }
 
 .back-btn{
-  flex:.8;
-  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  flex:0.8;
+  background:linear-gradient(135deg,#1f2d4a,#2b3d63);
   color:#fff;
-  box-shadow:0 12px 24px rgba(29,41,64,.20);
-}
-
-.pdf-btn:hover,
-.back-btn:hover{
-  transform:translateY(-1px);
 }
 
 .pdf-btn:active,
 .back-btn:active{
-  transform:scale(.98);
+  transform:scale(0.97);
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .pdf-header{
@@ -402,25 +242,25 @@ tbody td:last-child{
 .pdf-mode .pdf-header{
   display:block;
   text-align:center;
-  margin-bottom:28px;
+  margin-bottom:25px;
 }
 
 .pdf-logo{
-  width:82px;
+  width:80px;
   margin-bottom:10px;
 }
 
 .pdf-title{
   font-size:28px;
   font-weight:900;
-  color:var(--navy);
+  color:#1d2940;
   margin-bottom:5px;
 }
 
 .pdf-tenant{
-  font-size:21px;
+  font-size:20px;
   font-weight:800;
-  color:var(--gold);
+  color:#c9a46b;
 }
 
 .pdf-date{
@@ -435,27 +275,12 @@ tbody td:last-child{
   padding-bottom:20px !important;
 }
 
-.pdf-mode .year-card{
-  break-inside:avoid;
-  page-break-inside:avoid;
+.pdf-mode table{
+  font-size:16px;
 }
 
-.pdf-mode .table-shell{
-  padding:8px;
-}
-
-.pdf-mode thead th{
-  font-size:13px;
-}
-
-.pdf-mode tbody td{
-  font-size:13px;
-  padding:7px 7px;
-}
-
-.pdf-mode .summary-value,
-.pdf-mode .overall-value{
-  font-size:24px;
+.pdf-mode .summary-value{
+  font-size:26px;
 }
 
 .pdf-mode .bottom-actions{
@@ -464,10 +289,9 @@ tbody td:last-child{
 
 .error-box,
 .empty-box{
-  padding:16px;
-  border-radius:18px;
-  font-weight:900;
-  text-align:center;
+  padding:14px;
+  border-radius:14px;
+  font-weight:800;
 }
 
 .error-box{
@@ -477,27 +301,16 @@ tbody td:last-child{
 
 .empty-box{
   color:#7b8497;
-  background:rgba(255,255,255,.78);
-}
-
-@media (max-width:420px){
-  .app{ padding:12px; }
-  .year-card{ padding:12px; }
-  .summary, .overall-summary{ gap:8px; }
-  .summary-value{ font-size:17px; }
-  .overall-value{ font-size:19px; }
-  tbody td{ font-size:11.5px; }
+  background:#ffffffaa;
 }
 </style>
 </head>
+
 <body>
 
 <div class="app">
   <div class="card">
-    <div class="title-wrap">
-      <h2 class="page-title">كشف الحساب</h2>
-      <span class="title-badge">JABRI</span>
-    </div>
+    <h2>كشف الحساب</h2>
     <div id="tenantName"></div>
   </div>
 
@@ -508,11 +321,10 @@ tbody td:last-child{
     <div class="pdf-date" id="pdfDate"></div>
   </div>
 
-  <div id="overallSummary"></div>
   <div id="container"></div>
 
   <div class="bottom-actions">
-    <button class="pdf-btn" onclick="savePDF()">PDF</button>
+    <button class="pdf-btn" id="pdfBtn" onclick="savePDF()">PDF</button>
     <button class="back-btn" onclick="goBack()">رجوع</button>
   </div>
 </div>
@@ -526,7 +338,7 @@ const supabase = createClient(
 )
 
 const params = new URLSearchParams(window.location.search)
-const tenant = (params.get("tenant") || localStorage.getItem("jabri_tenant_code") || "").trim().toUpperCase()
+const tenant = params.get("tenant") || localStorage.getItem("jabri_tenant_code")
 const from = params.get("from")
 
 window.goBack = function(){
@@ -534,10 +346,12 @@ window.goBack = function(){
     window.location.href = "admin.html"
     return
   }
+
   if(window.history.length > 1){
     window.history.back()
     return
   }
+
   window.location.href = "index.html"
 }
 
@@ -546,7 +360,7 @@ window.savePDF = async function(){
     document.body.classList.add("pdf-mode")
 
     const element = document.querySelector(".app")
-    const tenantText = (document.getElementById("pdfTenantName").innerText || tenant || "statement").trim()
+    const tenantText = (document.getElementById("tenantName").innerText || "statement").trim()
     const safeFileName = tenantText
       .replace(/[^\u0600-\u06FF\w\- ]/g, "")
       .replace(/\s+/g, "_")
@@ -555,7 +369,11 @@ window.savePDF = async function(){
       margin: 0.3,
       filename: `statement_${safeFileName || "tenant"}.pdf`,
       image: { type: "jpeg", quality: 1 },
-      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0
+      },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     }
 
@@ -567,11 +385,15 @@ window.savePDF = async function(){
     const fileName = `statement_${safeFileName || "tenant"}.pdf`
     const file = new File([pdfBlob], fileName, { type: "application/pdf" })
 
-    if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
       await navigator.share({
-        files:[file],
-        title:"كشف حساب",
-        text:`كشف حساب ${tenantText || "المستأجر"}`
+        files: [file],
+        title: "كشف حساب",
+        text: `كشف حساب ${tenantText || "المستأجر"}`
       })
       return
     }
@@ -585,22 +407,15 @@ window.savePDF = async function(){
     a.remove()
     URL.revokeObjectURL(url)
 
-  } catch(err){
+  } catch (err){
     console.error("PDF/Share error:", err)
     document.body.classList.remove("pdf-mode")
     alert("تعذر إنشاء أو مشاركة PDF")
   }
 }
 
-function normalizeText(v){
-  return String(v || "").replace(/\s+/g, " ").trim()
-}
-
 function num(v){
-  if(v === null || v === undefined || v === "") return 0
-  const cleaned = String(v).replace(/,/g, "").trim()
-  if(cleaned === "-" || cleaned === "—") return 0
-  const n = Number(cleaned)
+  const n = Number(v)
   return Number.isFinite(n) ? n : 0
 }
 
@@ -608,142 +423,30 @@ function displayNumber(v){
   return num(v).toLocaleString("en-US")
 }
 
-function displaySignedNumber(v){
-  const n = Number(v) || 0
-  const abs = Math.abs(n).toLocaleString("en-US")
-  return n < 0 ? `-${abs}` : abs
-}
-
 function formatDate(dateStr){
   if(!dateStr) return "-"
-  const raw = String(dateStr).trim()
-
-  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if(dmy){
-    const [, d, m, y] = dmy
-    return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${y}`
-  }
-
-  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
-  if(ymdSlash){
-    const [, y, m, d] = ymdSlash
-    return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${y}`
-  }
-
-  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(ymdDash){
-    return `${ymdDash[3]}/${ymdDash[2]}/${ymdDash[1]}`
-  }
-
-  const d = new Date(raw)
-  if(Number.isNaN(d.getTime())) return raw
+  const d = new Date(dateStr)
+  if(Number.isNaN(d.getTime())) return "-"
   return d.toLocaleDateString("en-GB")
 }
 
-function getBaseYear(dateStr){
-  if(!dateStr) return null
-  const raw = String(dateStr).trim()
-
-  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if(dmy) return Number(dmy[3])
-
-  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
-  if(ymdSlash) return Number(ymdSlash[1])
-
-  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(ymdDash) return Number(ymdDash[1])
-
-  const d = new Date(raw)
+function getYear(dateStr){
+  const d = new Date(dateStr)
   if(Number.isNaN(d.getTime())) return null
   return d.getFullYear()
 }
 
-function isCarryRow(desc){
-  const text = normalizeText(desc)
-  return (
-    text.includes("رصيد عام") ||
-    text.includes("رصيد سابق") ||
-    text.includes("سابق عام")
-  )
-}
-
-function getDisplayYear(row){
-  const baseYear = getBaseYear(row.date)
-  if(baseYear === null) return null
-  return isCarryRow(row.description) ? baseYear + 1 : baseYear
-}
-
-function toSortableTime(dateStr, displayYear){
-  if(!dateStr) return Number.MAX_SAFE_INTEGER
-  const raw = String(dateStr).trim()
-
-  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(ymdDash){
-    const y = displayYear || Number(ymdDash[1])
-    return new Date(`${y}-${ymdDash[2]}-${ymdDash[3]}T00:00:00`).getTime()
-  }
-
-  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if(dmy){
-    const [, d, m, y] = dmy
-    const year = displayYear || Number(y)
-    return new Date(`${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
-  }
-
-  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
-  if(ymdSlash){
-    const [, y, m, d] = ymdSlash
-    const year = displayYear || Number(y)
-    return new Date(`${year}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
-  }
-
-  const t = new Date(raw).getTime()
-  return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t
-}
-
 function getRowOrder(desc){
-  const text = normalizeText(desc)
-  if(isCarryRow(text)) return 1
-  if(text.includes("ايجار") || text.includes("الإيجار") || text.includes("الايجار")) return 2
-  if(text.includes("معارف")) return 3
-  return 4
+  const text = String(desc || "")
+  if(text.includes("ايجار")) return 1
+  if(text.includes("معارف")) return 2
+  if(text.includes("رصيد سابق")) return 3
+  if(text.includes("دفعة")) return 4
+  return 9
 }
 
-function normalizeRow(raw){
-  return {
-    tenant_code: normalizeText(raw.tenant_code).toUpperCase(),
-    date: raw.date,
-    description: normalizeText(raw.description) || "-",
-    debit: num(raw.debit),
-    credit: num(raw.credit),
-    receipt_no: normalizeText(raw.receipt_no) || "-"
-  }
-}
-
-function buildTenantHeader(name, code){
-  return `
-    <div class="tenant-name-main">${name || code}</div>
-    <div class="tenant-code-sub">${code}</div>
-  `
-}
-
-function renderOverallSummary(totalDebit, totalCredit, balance){
-  return `
-    <div class="overall-summary">
-      <div class="overall-card overall-debit">
-        <div class="overall-label">إجمالي المدين</div>
-        <div class="overall-value">${displayNumber(totalDebit)}</div>
-      </div>
-      <div class="overall-card overall-credit">
-        <div class="overall-label">إجمالي الدائن</div>
-        <div class="overall-value">${displayNumber(totalCredit)}</div>
-      </div>
-      <div class="overall-card overall-balance">
-        <div class="overall-label">إجمالي الرصيد</div>
-        <div class="overall-value">${displaySignedNumber(balance)}</div>
-      </div>
-    </div>
-  `
+function isCarryRow(desc){
+  return String(desc || "").includes("رصيد سابق")
 }
 
 document.addEventListener("DOMContentLoaded", load)
@@ -753,38 +456,30 @@ async function load(){
   const tenantName = document.getElementById("tenantName")
   const pdfTenantName = document.getElementById("pdfTenantName")
   const pdfDate = document.getElementById("pdfDate")
-  const overallSummary = document.getElementById("overallSummary")
 
   if(!tenant){
     container.innerHTML = `<div class="empty-box">لا يوجد مستأجر</div>`
     return
   }
 
+  tenantName.innerText = tenant
+  pdfTenantName.innerText = tenant
   pdfDate.innerText = "تاريخ الإصدار: " + new Date().toLocaleDateString("en-GB")
 
-  let tenantDisplayName = tenant
-
+  let response
   try{
-    const { data: tenantData } = await supabase
-      .from("tenants")
-      .select("tenant_name")
+    response = await supabase
+      .from("tenant_transactions")
+      .select("*")
       .eq("tenant_code", tenant)
-      .maybeSingle()
-
-    if(tenantData?.tenant_name){
-      tenantDisplayName = tenantData.tenant_name
-    }
+      .order("date", { ascending: true })
   } catch(err){
-    console.error("Tenant name load error:", err)
+    console.error("Unexpected load error:", err)
+    container.innerHTML = `<div class="error-box">حصل خطأ غير متوقع أثناء تحميل البيانات</div>`
+    return
   }
 
-  tenantName.innerHTML = buildTenantHeader(tenantDisplayName, tenant)
-  pdfTenantName.innerText = tenantDisplayName
-
-  const { data, error } = await supabase
-    .from("tenant_transactions")
-    .select("tenant_code,date,description,debit,credit,receipt_no,notes")
-    .eq("tenant_code", tenant)
+  const { data, error } = response
 
   if(error){
     console.error("Supabase error:", error)
@@ -792,64 +487,71 @@ async function load(){
     return
   }
 
-  const rows = (data || [])
-    .filter(r => normalizeText(r.tenant_code).toUpperCase() === tenant)
-    .map(normalizeRow)
-    .map(r => ({ ...r, displayYear: getDisplayYear(r) }))
-    .filter(r => r.displayYear !== null)
-
-  if(rows.length === 0){
+  if(!Array.isArray(data) || data.length === 0){
     container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
     return
   }
 
+  const validRows = data
+    .map(r => ({
+      ...r,
+      debit: num(r.debit),
+      credit: num(r.credit),
+      description: r.description || "",
+      receipt_no: r.receipt_no || "-"
+    }))
+    .filter(r => getYear(r.date) !== null)
+
+  if(validRows.length === 0){
+    container.innerHTML = `<div class="empty-box">لا توجد تواريخ صحيحة لعرض كشف الحساب</div>`
+    return
+  }
+
   const grouped = {}
-  rows.forEach(r => {
-    if(!grouped[r.displayYear]) grouped[r.displayYear] = []
-    grouped[r.displayYear].push(r)
+
+  validRows.forEach(r => {
+    const year = getYear(r.date)
+    if(!grouped[year]) grouped[year] = []
+    grouped[year].push(r)
   })
 
   let html = ""
-  let smartTotalDebit = 0
-  let smartTotalCredit = 0
-  let finalOverallBalance = 0
+  let runningBalance = 0
 
   Object.keys(grouped)
     .sort((a,b) => Number(a) - Number(b))
     .forEach(year => {
-      const yearRows = grouped[year]
 
-      yearRows.sort((a,b) => {
-        const t1 = toSortableTime(a.date, a.displayYear)
-        const t2 = toSortableTime(b.date, b.displayYear)
-        if(t1 !== t2) return t1 - t2
+      const rows = grouped[year]
+
+      rows.sort((a,b)=>{
+        const d1 = new Date(a.date).getTime()
+        const d2 = new Date(b.date).getTime()
+        if(d1 !== d2) return d1 - d2
         return getRowOrder(a.description) - getRowOrder(b.description)
       })
 
       let totalDebit = 0
       let totalCredit = 0
-      let runningBalance = 0
 
-      yearRows.forEach(r => {
+      rows.forEach(r=>{
         totalDebit += r.debit
         totalCredit += r.credit
-        runningBalance += r.debit - r.credit
-        r.balance = runningBalance
 
         if(!isCarryRow(r.description)){
-          smartTotalDebit += r.debit
-          smartTotalCredit += r.credit
+          runningBalance += r.debit - r.credit
         }
+
+        r.balance = runningBalance
       })
 
-      const yearBalance = runningBalance
-      finalOverallBalance = yearBalance
+      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
 
       let color = "red"
       let status = "غير مسدد"
       let statusClass = "status-unpaid"
 
-      if(yearBalance <= 0){
+      if(endYearBalance <= 0){
         color = "green"
         status = "مسدد"
         statusClass = "status-paid"
@@ -866,42 +568,38 @@ async function load(){
             <span class="status-box ${statusClass}">${status}</span>
           </div>
 
-          <div class="table-shell">
-            <table>
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th>مدين</th>
-                  <th>دائن</th>
-                  <th>الرصيد</th>
-                  <th>البيان</th>
-                  <th>رقم السند</th>
-                </tr>
-              </thead>
-              <tbody>
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+                <th>البيان</th>
+                <th>رقم السند</th>
+              </tr>
+            </thead>
+            <tbody>
       `
 
-      yearRows.forEach(r => {
-        let balanceClass = "balance-zero"
-        if(r.balance > 0) balanceClass = "balance-positive"
-        if(r.balance < 0) balanceClass = "balance-negative"
+      rows.forEach(r=>{
+        const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
 
         html += `
           <tr>
             <td><span class="date-chip">${formatDate(r.date)}</span></td>
             <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
-            <td class="balance ${balanceClass}">${displaySignedNumber(r.balance)}</td>
-            <td class="desc-cell">${r.description}</td>
+            <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
+            <td>${r.description || "-"}</td>
             <td><span class="receipt">${r.receipt_no}</span></td>
           </tr>
         `
       })
 
       html += `
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
 
           <div class="summary">
             <div class="summary-card summary-debit">
@@ -916,21 +614,16 @@ async function load(){
 
             <div class="summary-card summary-balance">
               <div class="summary-label">الرصيد</div>
-              <div class="summary-value">${displaySignedNumber(yearBalance)}</div>
+              <div class="summary-value">${displayNumber(endYearBalance)}</div>
             </div>
           </div>
         </div>
       `
     })
 
-  overallSummary.innerHTML = renderOverallSummary(
-    smartTotalDebit,
-    smartTotalCredit,
-    finalOverallBalance
-  )
-
   container.innerHTML = html
 }
 </script>
+
 </body>
 </html>
