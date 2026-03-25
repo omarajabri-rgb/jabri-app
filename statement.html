@@ -351,7 +351,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
@@ -432,50 +432,87 @@ function num(v){
   return Number.isFinite(n) ? n : 0
 }
 
-function displayNumber(v){
-  return num(v).toLocaleString("en-US")
-}
-
-function formatDate(dateStr){
-  if(!dateStr) return "-"
-  const d = new Date(dateStr)
-  if(Number.isNaN(d.getTime())) return "-"
-  return d.toLocaleDateString("en-GB")
-}
-
-function getYear(dateStr){
-  if(!dateStr) return null
-
-  const direct = new Date(dateStr)
-  if(!Number.isNaN(direct.getTime())) return direct.getFullYear()
-
-  const text = String(dateStr).trim()
-  const match = text.match(/(\d{4})/)
-  return match ? Number(match[1]) : null
-}
-
 function normalizeText(text){
   return String(text || "").trim()
 }
 
+function displayNumber(v){
+  return num(v).toLocaleString("en-US")
+}
+
+function parseDateValue(value){
+  if(!value) return { valid:false, ts:0, year:null, month:null, day:null }
+
+  const text = String(value).trim()
+
+  const iso = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
+  if(iso){
+    const year = Number(iso[1])
+    const month = Number(iso[2])
+    const day = Number(iso[3])
+    return {
+      valid:true,
+      ts:new Date(year, month - 1, day).getTime(),
+      year, month, day
+    }
+  }
+
+  const slash = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
+  if(slash){
+    let first = Number(slash[1])
+    let second = Number(slash[2])
+    let year = Number(slash[3])
+    if(year < 100) year += 2000
+
+    const day = first
+    const month = second
+
+    return {
+      valid:true,
+      ts:new Date(year, month - 1, day).getTime(),
+      year, month, day
+    }
+  }
+
+  const d = new Date(text)
+  if(!Number.isNaN(d.getTime())){
+    return {
+      valid:true,
+      ts:d.getTime(),
+      year:d.getFullYear(),
+      month:d.getMonth() + 1,
+      day:d.getDate()
+    }
+  }
+
+  return { valid:false, ts:0, year:null, month:null, day:null }
+}
+
+function formatDate(dateStr){
+  const p = parseDateValue(dateStr)
+  if(!p.valid) return "-"
+  return `${String(p.day).padStart(2,"0")}/${String(p.month).padStart(2,"0")}/${p.year}`
+}
+
+function getYear(dateStr){
+  const p = parseDateValue(dateStr)
+  return p.valid ? p.year : null
+}
+
 function isRentRow(desc){
-  const text = normalizeText(desc)
-  return text.includes("ايجار")
+  return normalizeText(desc).includes("ايجار")
 }
 
 function isFeesRow(desc){
-  const text = normalizeText(desc)
-  return text.includes("معارف")
+  return normalizeText(desc).includes("معارف")
 }
 
 function isCarryRow(desc){
-  const text = normalizeText(desc)
-  return text.includes("رصيد")
+  return normalizeText(desc).includes("رصيد")
 }
 
 function isPaymentRow(desc){
-  const text = normalizeText(desc)
-  return text.includes("دفعة")
+  return normalizeText(desc).includes("دفعة")
 }
 
 function getCarryBaseYear(desc){
@@ -491,7 +528,7 @@ function getStatementYear(row){
   if(isCarryRow(desc)){
     const baseYear = getCarryBaseYear(desc)
     if(baseYear) return baseYear + 1
-    if(dateYear) return dateYear + 1
+    return dateYear
   }
 
   return dateYear
@@ -500,14 +537,14 @@ function getStatementYear(row){
 function getRowOrder(desc){
   const text = normalizeText(desc)
 
+  if(isCarryRow(text)) return 0
   if(isRentRow(text)) return 1
   if(isFeesRow(text)) return 2
-  if(isCarryRow(text)) return 3
-  if(isPaymentRow(text)) return 4
+  if(isPaymentRow(text)) return 3
   return 9
 }
 
-function getStatus(endYearBalance, statementCredit){
+function getStatus(endYearBalance, totalCredit){
   if(Math.abs(endYearBalance) < 0.01){
     return {
       color: "green",
@@ -516,7 +553,7 @@ function getStatus(endYearBalance, statementCredit){
     }
   }
 
-  if(statementCredit > 0){
+  if(totalCredit > 0){
     return {
       color: "orange",
       label: "سداد جزئي",
@@ -585,11 +622,14 @@ async function load(){
       ...r,
       originalIndex: index,
       date: r.date,
+      parsedDate: parseDateValue(r.date),
       debit: num(r.debit),
       credit: num(r.credit),
       description: normalizeText(r.description || ""),
       receipt_no: normalizeText(r.receipt_no || "-"),
-      sectionYear: getStatementYear(r)
+      sectionYear: getStatementYear(r),
+      isCarry: isCarryRow(r.description || ""),
+      balance: 0
     }))
     .filter(r => r.sectionYear !== null)
 
@@ -601,12 +641,15 @@ async function load(){
   validRows.sort((a, b) => {
     if(a.sectionYear !== b.sectionYear) return a.sectionYear - b.sectionYear
 
+    if(a.isCarry && !b.isCarry) return -1
+    if(!a.isCarry && b.isCarry) return 1
+
+    const aTs = a.parsedDate.valid ? a.parsedDate.ts : 0
+    const bTs = b.parsedDate.valid ? b.parsedDate.ts : 0
+    if(aTs !== bTs) return aTs - bTs
+
     const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
     if(orderDiff !== 0) return orderDiff
-
-    const aDate = new Date(a.date).getTime()
-    const bDate = new Date(b.date).getTime()
-    if(!Number.isNaN(aDate) && !Number.isNaN(bDate) && aDate !== bDate) return aDate - bDate
 
     return a.originalIndex - b.originalIndex
   })
@@ -617,6 +660,22 @@ async function load(){
     grouped[row.sectionYear].push(row)
   }
 
+  Object.values(grouped).forEach(rows => {
+    rows.sort((a, b) => {
+      if(a.isCarry && !b.isCarry) return -1
+      if(!a.isCarry && b.isCarry) return 1
+
+      const aTs = a.parsedDate.valid ? a.parsedDate.ts : 0
+      const bTs = b.parsedDate.valid ? b.parsedDate.ts : 0
+      if(aTs !== bTs) return aTs - bTs
+
+      const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
+      if(orderDiff !== 0) return orderDiff
+
+      return a.originalIndex - b.originalIndex
+    })
+  })
+
   let html = ""
 
   Object.keys(grouped)
@@ -625,27 +684,24 @@ async function load(){
     .forEach(year => {
       const rows = grouped[year]
 
-      let yearBalance = 0
       let openingBalance = 0
       let movementDebit = 0
       let movementCredit = 0
+      let yearBalance = 0
 
       rows.forEach(r => {
-        const desc = normalizeText(r.description)
-
-        if(isCarryRow(desc)){
-          openingBalance = r.debit
+        if(r.isCarry){
+          openingBalance = r.debit - r.credit
           yearBalance = openingBalance
           r.balance = yearBalance
-          r.isCarry = true
           return
         }
 
         movementDebit += r.debit
         movementCredit += r.credit
-        yearBalance += r.debit - r.credit
+        yearBalance += r.debit
+        yearBalance -= r.credit
         r.balance = yearBalance
-        r.isCarry = false
       })
 
       const statementDebit = openingBalance + movementDebit
@@ -694,7 +750,7 @@ async function load(){
             <td class="credit">${displayNumber(statementCredit)}</td>
             <td class="balance ${getBalanceClass(endYearBalance)}">${displayNumber(endYearBalance)}</td>
             <td>رصيد مستحق ${year}</td>
-            <td><span class="receipt">${displayNumber(endYearBalance)}</span></td>
+            <td><span class="receipt">-</span></td>
           </tr>
             </tbody>
           </table>
@@ -722,6 +778,3 @@ async function load(){
   container.innerHTML = html
 }
 </script>
-
-</body>
-</html>
