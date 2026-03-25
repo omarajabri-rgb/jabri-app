@@ -22,6 +22,9 @@
   --shadow-soft:0 8px 22px rgba(18,26,43,0.06);
   --green:#16a34a;
   --red:#dc2626;
+  --red-soft:#fff1f1;
+  --green-soft:#f2fff7;
+  --gold-soft:#fffaf1;
 }
 
 *{
@@ -132,7 +135,7 @@ body.winter-theme::after{
 .app{
   position:relative;
   z-index:1;
-  max-width:460px;
+  width:min(100%, 980px);
   margin:auto;
   padding:18px 14px 24px;
 }
@@ -170,6 +173,7 @@ body.winter-theme::after{
   border-radius:2px;
   margin:10px auto 0;
   background:var(--accent);
+  box-shadow:0 0 10px rgba(201,164,107,0.28);
 }
 
 .statement-title{
@@ -232,8 +236,7 @@ body.winter-theme::after{
 }
 
 .table-wrap{
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
+  overflow:hidden;
   border-radius:18px;
   background:rgba(255,255,255,0.42);
   border:1px solid rgba(255,255,255,0.28);
@@ -241,18 +244,18 @@ body.winter-theme::after{
 
 table{
   width:100%;
-  min-width:620px;
   border-collapse:collapse;
-  margin-top:0;
   table-layout:fixed;
+  margin-top:0;
 }
 
 th,td{
-  padding:10px 8px;
-  font-size:12px;
+  padding:8px 4px;
+  font-size:11px;
   border-bottom:1px solid var(--table-line);
   text-align:center;
   white-space:nowrap;
+  vertical-align:middle;
 }
 
 th{
@@ -264,25 +267,31 @@ th{
   z-index:1;
 }
 
-th:nth-child(1), td:nth-child(1){ width:110px; }
-th:nth-child(2), td:nth-child(2){ width:80px; }
-th:nth-child(3), td:nth-child(3){ width:80px; }
-th:nth-child(4), td:nth-child(4){ width:90px; }
-th:nth-child(5), td:nth-child(5){ width:170px; }
-th:nth-child(6), td:nth-child(6){ width:90px; }
+th:nth-child(1), td:nth-child(1){ width:21%; } /* التاريخ */
+th:nth-child(2), td:nth-child(2){ width:13%; } /* مدين */
+th:nth-child(3), td:nth-child(3){ width:13%; } /* دائن */
+th:nth-child(4), td:nth-child(4){ width:16%; } /* الرصيد */
+th:nth-child(5), td:nth-child(5){ width:25%; } /* البيان */
+th:nth-child(6), td:nth-child(6){ width:12%; } /* السند */
 
 td:nth-child(5){
   white-space:normal;
-  line-height:1.45;
+  line-height:1.28;
   font-weight:700;
+  word-break:break-word;
 }
 
 tbody tr{
-  transition:background .22s ease;
+  transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 
 tbody tr:hover{
-  background:rgba(201,164,107,0.06);
+  background:rgba(201,164,107,0.05);
+}
+
+tbody tr:active{
+  transform:scale(0.992);
+  background:rgba(201,164,107,0.10);
 }
 
 .debit{
@@ -298,14 +307,33 @@ tbody tr:hover{
 .balance{
   font-weight:900;
   color:var(--navy);
+  transition:color .18s ease, transform .18s ease, text-shadow .18s ease;
 }
 
-.balance-negative{
-  color:#18a957;
+.balance-due{
+  color:var(--red);
 }
 
+.balance-paid,
 .balance-zero{
-  color:#18a957;
+  color:var(--green);
+}
+
+tbody tr:hover .balance,
+tbody tr:active .balance{
+  transform:scale(1.03);
+}
+
+tbody tr:hover .balance-due,
+tbody tr:active .balance-due{
+  text-shadow:0 0 10px rgba(220,38,38,0.16);
+}
+
+tbody tr:hover .balance-paid,
+tbody tr:active .balance-paid,
+tbody tr:hover .balance-zero,
+tbody tr:active .balance-zero{
+  text-shadow:0 0 10px rgba(22,163,74,0.12);
 }
 
 .date-col{
@@ -326,9 +354,9 @@ td.date-col{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:6px 12px;
+  padding:4px 8px;
   border-radius:999px;
-  font-size:11px;
+  font-size:9px;
   font-weight:800;
   background:rgba(255,255,255,0.74);
   border:1px solid rgba(255,255,255,0.46);
@@ -343,14 +371,28 @@ td.date-col{
   color:var(--accent-dark);
   border:1px solid rgba(201,164,107,0.26);
   background:rgba(201,164,107,0.10);
-  min-width:58px;
-  font-size:10px;
-  padding:5px 10px;
+  min-width:48px;
+  font-size:8.5px;
+  padding:4px 7px;
   letter-spacing:.2px;
 }
 
 .carry-row{
   background:rgba(29,41,64,0.045);
+}
+
+.payment-row td{
+  transition:background .2s ease, color .2s ease;
+}
+
+.payment-row:hover td,
+.payment-row:active td{
+  background:rgba(22,163,74,0.04);
+}
+
+.payment-row:hover .credit,
+.payment-row:active .credit{
+  animation:creditPulse .55s ease;
 }
 
 .summary-line{
@@ -367,6 +409,11 @@ td.date-col{
   font-weight:900;
   border:1px solid rgba(255,255,255,0.30);
   box-shadow:var(--shadow-soft);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+
+.mini-stat:hover{
+  transform:translateY(-1px);
 }
 
 .mini-stat .mini-label{
@@ -383,33 +430,67 @@ td.date-col{
 }
 
 .mini-stat.debit-stat{
-  background:linear-gradient(180deg,#fff5f5 0%, #ffecec 100%);
-  border-color:#ffd6d6;
+  background:linear-gradient(180deg,#ffe5e5 0%, #ffdada 100%);
+  border:1px solid #ffcaca;
+  box-shadow:0 8px 18px rgba(220,38,38,0.12), 0 0 0 rgba(220,38,38,0);
 }
 
-.mini-stat.debit-stat .mini-label,
+.mini-stat.debit-stat .mini-label{
+  color:#b91c1c;
+}
+
 .mini-stat.debit-stat .mini-value{
-  color:var(--red);
+  color:#dc2626;
 }
 
 .mini-stat.credit-stat{
   background:linear-gradient(180deg,#f2fff7 0%, #e9fbf0 100%);
-  border-color:#cdeed9;
+  border:1px solid #cdeed9;
+  box-shadow:0 8px 18px rgba(22,163,74,0.10), 0 0 0 rgba(22,163,74,0);
 }
 
 .mini-stat.credit-stat .mini-label,
 .mini-stat.credit-stat .mini-value{
-  color:var(--green);
+  color:#16a34a;
 }
 
 .mini-stat.balance-stat{
-  background:linear-gradient(180deg,#fffaf1 0%, #fdf2dd 100%);
-  border-color:#ecd9ad;
+  border:1px solid #ecd9ad;
+  box-shadow:0 8px 18px rgba(201,164,107,0.10);
 }
 
-.mini-stat.balance-stat .mini-label,
-.mini-stat.balance-stat .mini-value{
+.balance-due-box{
+  background:linear-gradient(180deg,#fff1f1 0%, #ffe5e5 100%);
+  border-color:#ffd6d6;
+  box-shadow:0 8px 18px rgba(220,38,38,0.12), 0 0 14px rgba(220,38,38,0.08);
+}
+
+.balance-due-box .mini-label,
+.balance-due-box .mini-value{
+  color:#dc2626;
+}
+
+.balance-paid-box{
+  background:linear-gradient(180deg,#fffaf1 0%, #fdf2dd 100%);
+  border-color:#ecd9ad;
+  box-shadow:0 8px 18px rgba(201,164,107,0.10), 0 0 12px rgba(201,164,107,0.10);
+}
+
+.balance-paid-box .mini-label,
+.balance-paid-box .mini-value{
   color:var(--accent-dark);
+}
+
+.glow-red{
+  box-shadow:0 8px 18px rgba(220,38,38,0.12), 0 0 16px rgba(220,38,38,0.12);
+}
+
+.glow-green{
+  box-shadow:0 8px 18px rgba(22,163,74,0.10), 0 0 14px rgba(22,163,74,0.10);
+}
+
+.glow-gold{
+  box-shadow:0 8px 18px rgba(201,164,107,0.10), 0 0 14px rgba(201,164,107,0.12);
 }
 
 .bottom-actions{
@@ -452,35 +533,172 @@ button:hover{
   font-weight:900;
 }
 
-@media (max-width:430px){
+@keyframes creditPulse{
+  0%{
+    transform:scale(1);
+    opacity:1;
+  }
+  40%{
+    transform:scale(1.08);
+    opacity:.88;
+  }
+  100%{
+    transform:scale(1);
+    opacity:1;
+  }
+}
+
+@keyframes countUpFade{
+  0%{
+    opacity:.2;
+    transform:translateY(8px);
+  }
+  100%{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.count-up{
+  animation:countUpFade .45s ease;
+}
+
+@media (max-width:480px){
   .app{
-    padding:14px 12px 22px;
+    padding:14px 10px 22px;
   }
 
   .tenant-title{
     font-size:21px;
   }
 
-  th,td{
-    font-size:11px;
-    padding:9px 6px;
+  .debug{
+    display:none;
   }
 
-  table{
-    min-width:600px;
+  th,td{
+    font-size:10px;
+    padding:7px 3px;
   }
 
   .chip{
-    padding:5px 9px;
-    font-size:10px;
+    padding:3px 6px;
+    font-size:8px;
+  }
+
+  .chip-date{
+    padding:3px 5px;
+    font-size:8px;
+  }
+
+  .chip-receipt{
+    padding:3px 5px;
+    font-size:7.5px;
+    min-width:42px;
   }
 
   .summary-line{
     gap:8px;
   }
 
+  .mini-stat{
+    padding:11px 7px;
+    border-radius:16px;
+  }
+
+  .mini-stat .mini-label{
+    font-size:11px;
+  }
+
   .mini-stat .mini-value{
-    font-size:15px;
+    font-size:14px;
+  }
+
+  button{
+    font-size:14px;
+    height:46px;
+  }
+}
+
+@media (min-width:768px) and (max-width:1024px){
+  .app{
+    width:min(100%, 820px);
+    padding:22px 20px 28px;
+  }
+
+  .card{
+    padding:26px 22px 20px;
+  }
+
+  .tenant-title{
+    font-size:28px;
+  }
+
+  .statement-title{
+    font-size:16px;
+  }
+
+  .year-card{
+    padding:20px 18px 18px;
+  }
+
+  .year-title{
+    font-size:18px;
+    padding:10px 18px;
+  }
+
+  .year-status{
+    font-size:13px;
+    padding:8px 16px;
+  }
+
+  th,td{
+    padding:10px 6px;
+    font-size:12px;
+  }
+
+  .chip{
+    font-size:10px;
+    padding:5px 8px;
+  }
+
+  .chip-date{
+    font-size:9px;
+    padding:4px 7px;
+  }
+
+  .chip-receipt{
+    font-size:9px;
+    padding:4px 7px;
+    min-width:52px;
+  }
+
+  .mini-stat .mini-value{
+    font-size:19px;
+  }
+
+  button{
+    height:52px;
+    font-size:17px;
+  }
+}
+
+@media (min-width:1025px){
+  .app{
+    width:min(100%, 980px);
+  }
+
+  th,td{
+    font-size:12px;
+    padding:10px 6px;
+  }
+
+  .chip{
+    font-size:10px;
+  }
+
+  .mini-stat .mini-value{
+    font-size:19px;
   }
 }
 
@@ -498,6 +716,7 @@ button:hover{
 
   .app{
     max-width:100%;
+    width:100%;
     padding:0;
   }
 
@@ -671,8 +890,8 @@ function getRowOrder(desc){
 
 function getBalanceClass(balance){
   if(Math.abs(balance) < 0.01) return "balance balance-zero"
-  if(balance < 0) return "balance balance-negative"
-  return "balance"
+  if(balance > 0) return "balance balance-due"
+  return "balance balance-paid"
 }
 
 function getYearStatus(balance){
@@ -692,6 +911,32 @@ function getSeasonClass(){
 
 function setSeasonTheme(){
   document.body.classList.add(getSeasonClass())
+}
+
+function animateCount(el, endValue){
+  const finalValue = Number(endValue) || 0
+  const duration = 700
+  const start = performance.now()
+
+  function frame(now){
+    const progress = Math.min((now - start) / duration, 1)
+    const current = Math.round(finalValue * progress)
+    el.textContent = current.toLocaleString("en-US")
+    if(progress < 1){
+      requestAnimationFrame(frame)
+    } else {
+      el.textContent = finalValue.toLocaleString("en-US")
+    }
+  }
+
+  requestAnimationFrame(frame)
+}
+
+function runCountUp(){
+  document.querySelectorAll(".count-up").forEach(el => {
+    const value = Number(el.dataset.value || 0)
+    animateCount(el, value)
+  })
 }
 
 async function load(){
@@ -773,6 +1018,10 @@ async function load(){
       const debit = num(r.debitVal)
       const credit = num(r.creditVal)
       const desc = normalizeText(r.description)
+      const rowClasses = [
+        desc.includes("رصيد") ? "carry-row" : "",
+        desc.includes("دفعة") ? "payment-row" : ""
+      ].join(" ").trim()
 
       if(i === 0 && desc.includes("رصيد")){
         balance = debit
@@ -784,7 +1033,7 @@ async function load(){
       creditTotal += credit
 
       return `
-        <tr class="${desc.includes("رصيد") ? "carry-row" : ""}">
+        <tr class="${rowClasses}">
           <td class="date-col">
             <span class="chip chip-date">${formatDate(r.date)}</span>
           </td>
@@ -800,6 +1049,7 @@ async function load(){
     }).join("")
 
     const status = getYearStatus(balance)
+    const balanceBoxClass = balance > 0 ? "balance-due-box glow-red" : "balance-paid-box glow-gold"
 
     html += `
       <div class="year-card">
@@ -827,17 +1077,17 @@ async function load(){
         </div>
 
         <div class="summary-line">
-          <div class="mini-stat debit-stat">
+          <div class="mini-stat debit-stat glow-red">
             <span class="mini-label">مدين</span>
-            <span class="mini-value">${formatNumber(debitTotal)}</span>
+            <span class="mini-value count-up" data-value="${debitTotal}">${formatNumber(debitTotal)}</span>
           </div>
 
-          <div class="mini-stat credit-stat">
+          <div class="mini-stat credit-stat glow-green">
             <span class="mini-label">دائن</span>
-            <span class="mini-value">${formatNumber(creditTotal)}</span>
+            <span class="mini-value count-up" data-value="${creditTotal}">${formatNumber(creditTotal)}</span>
           </div>
 
-          <div class="mini-stat balance-stat">
+          <div class="mini-stat balance-stat ${balanceBoxClass}">
             <span class="mini-label">الرصيد</span>
             <span class="mini-value">${formatNumber(balance)}</span>
           </div>
@@ -847,6 +1097,7 @@ async function load(){
   })
 
   container.innerHTML = html
+  runCountUp()
 }
 
 window.savePDF = async function(){
