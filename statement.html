@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>كشف الحساب</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -21,7 +20,6 @@ body{
   padding-bottom:110px;
 }
 
-/* Cards */
 .card{
   background:rgba(255,255,255,0.6);
   backdrop-filter:blur(14px);
@@ -45,6 +43,7 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:10px;
+  gap:10px;
 }
 
 .year-title{
@@ -55,7 +54,6 @@ body{
   font-weight:bold;
 }
 
-/* Table */
 table{
   width:100%;
   border-collapse:collapse;
@@ -75,20 +73,117 @@ th{
   background:#f1f3f7;
 }
 
-.debit{ color:#e05252; font-weight:bold; }
-.credit{ color:#18a957; font-weight:bold; }
+tbody tr:hover{
+  background:rgba(47,111,237,0.05);
+  transition:0.2s;
+}
+
+.debit{
+  color:#e05252;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.credit{
+  color:#18a957;
+  font-weight:bold;
+  font-size:13px;
+}
 
 .balance{
   font-weight:900;
+  font-size:14px;
 }
 
 .balance-positive{ color:#e05252; }
 .balance-zero{ color:#18a957; }
 
-/* ===================== */
-/* 🔥 BOTTOM BUTTONS */
-/* ===================== */
+.receipt{
+  background:#eef4ff;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:900;
+  color:#2f6fed;
+  display:inline-block;
+}
 
+.date-chip{
+  background:rgba(47,111,237,0.08);
+  color:#2f6fed;
+  font-weight:800;
+  padding:5px 10px;
+  border-radius:12px;
+  font-size:11px;
+  display:inline-block;
+}
+
+td:nth-child(5){
+  font-weight:700;
+  color:#1d2940;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.summary-card{
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.7);
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+  border-radius:16px;
+  padding:12px 10px;
+  text-align:center;
+}
+
+.summary-label{
+  font-size:12px;
+  font-weight:800;
+  color:#555;
+  margin-bottom:6px;
+}
+
+.summary-value{
+  font-size:22px;
+  font-weight:900;
+}
+
+.summary-debit .summary-value{ color:#e05252; }
+.summary-credit .summary-value{ color:#18a957; }
+.summary-balance .summary-value{ color:#1d2940; }
+
+.status-box{
+  min-width:70px;
+  padding:6px 12px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+  display:inline-block;
+}
+
+.status-paid{
+  background:#edf8f1;
+  color:#18a957;
+}
+
+.status-partial{
+  background:rgba(214,138,29,0.12);
+  color:#b96a00;
+  border:1px solid rgba(214,138,29,0.25);
+  box-shadow:0 4px 10px rgba(214,138,29,0.08);
+}
+
+.status-unpaid{
+  background:#fff1f1;
+  color:#e05252;
+}
+
+/* bottom buttons */
 .bottom-actions{
   position:fixed;
   bottom:0;
@@ -98,13 +193,11 @@ th{
   max-width:420px;
   margin:0 auto;
   display:flex;
-  flex-direction:row;
-  gap:10px;
+  flex-direction:row-reverse;
+  gap:12px;
   z-index:1000;
-
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));
   box-sizing:border-box;
-
   background:rgba(255,255,255,0.25);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
@@ -116,22 +209,24 @@ th{
 
 .pdf-btn,
 .back-btn{
-  flex:1;
   height:52px;
   border:none;
   border-radius:14px;
   font-weight:900;
   cursor:pointer;
   font-size:16px;
-  transition:0.2s;
+  letter-spacing:0.5px;
+  transition:transform 0.2s, opacity 0.2s;
 }
 
 .pdf-btn{
+  flex:1.2;
   background:linear-gradient(135deg,#c9a46b,#b89155);
   color:#fff;
 }
 
 .back-btn{
+  flex:0.8;
   background:linear-gradient(135deg,#1f2d4a,#2b3d63);
   color:#fff;
 }
@@ -152,9 +247,73 @@ th{
   }
 }
 
-/* PDF mode */
+.pdf-header{
+  display:none;
+}
+
+.pdf-mode .pdf-header{
+  display:block;
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.pdf-logo{
+  width:80px;
+  margin-bottom:10px;
+}
+
+.pdf-title{
+  font-size:28px;
+  font-weight:900;
+  color:#1d2940;
+  margin-bottom:5px;
+}
+
+.pdf-tenant{
+  font-size:20px;
+  font-weight:800;
+  color:#c9a46b;
+}
+
+.pdf-date{
+  font-size:14px;
+  color:#555;
+  margin-top:6px;
+}
+
+.pdf-mode .app{
+  max-width:900px !important;
+  padding:30px !important;
+  padding-bottom:20px !important;
+}
+
+.pdf-mode table{
+  font-size:16px;
+}
+
+.pdf-mode .summary-value{
+  font-size:26px;
+}
+
 .pdf-mode .bottom-actions{
   display:none !important;
+}
+
+.error-box,
+.empty-box{
+  padding:14px;
+  border-radius:14px;
+  font-weight:800;
+}
+
+.error-box{
+  color:#c62828;
+  background:#fff1f1;
+}
+
+.empty-box{
+  color:#7b8497;
+  background:#ffffffaa;
 }
 </style>
 </head>
@@ -162,19 +321,23 @@ th{
 <body>
 
 <div class="app">
-
   <div class="card">
     <h2>كشف الحساب</h2>
     <div id="tenantName"></div>
   </div>
 
-  <div id="container"></div>
+  <div class="pdf-header">
+    <img src="logo.png" class="pdf-logo" onerror="this.style.display='none'" />
+    <div class="pdf-title">كشف حساب</div>
+    <div class="pdf-tenant" id="pdfTenantName"></div>
+    <div class="pdf-date" id="pdfDate"></div>
+  </div>
 
+  <div id="container"></div>
 </div>
 
-<!-- 🔥 BUTTONS -->
 <div class="bottom-actions">
-  <button class="pdf-btn" onclick="savePDF()">PDF</button>
+  <button class="pdf-btn" id="pdfBtn" onclick="savePDF()">PDF</button>
   <button class="back-btn" onclick="goBack()">رجوع</button>
 </div>
 
@@ -186,69 +349,291 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-window.goBack = () => window.history.back()
+const params = new URLSearchParams(window.location.search)
+const tenant = params.get("tenant") || localStorage.getItem("jabri_tenant_code")
+const from = params.get("from")
+
+window.goBack = function(){
+  if(from === "admin"){
+    window.location.href = "admin.html"
+    return
+  }
+
+  if(window.history.length > 1){
+    window.history.back()
+    return
+  }
+
+  window.location.href = "index.html"
+}
 
 window.savePDF = async function(){
   try{
     document.body.classList.add("pdf-mode")
 
     const element = document.querySelector(".app")
-    const pdfBlob = await html2pdf().from(element).outputPdf("blob")
+    const tenantText = (document.getElementById("tenantName").innerText || "statement").trim()
+    const safeFileName = tenantText
+      .replace(/[^\u0600-\u06FF\w\- ]/g, "")
+      .replace(/\s+/g, "_")
 
-    document.body.classList.remove("pdf-mode")
-
-    const file = new File([pdfBlob], "statement.pdf", { type: "application/pdf" })
-
-    if (navigator.share && navigator.canShare && navigator.canShare({ files:[file] })) {
-      await navigator.share({
-        files:[file],
-        title:"كشف حساب"
-      })
-    } else {
-      const url = URL.createObjectURL(pdfBlob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "statement.pdf"
-      a.click()
+    const opt = {
+      margin: 0.3,
+      filename: `statement_${safeFileName || "tenant"}.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0
+      },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     }
 
-  } catch(e){
-    console.error(e)
-    alert("خطأ في PDF")
+    const worker = html2pdf().set(opt).from(element)
+    const pdfBlob = await worker.outputPdf("blob")
+
     document.body.classList.remove("pdf-mode")
+
+    const fileName = `statement_${safeFileName || "tenant"}.pdf`
+    const file = new File([pdfBlob], fileName, { type: "application/pdf" })
+
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
+      await navigator.share({
+        files: [file],
+        title: "كشف حساب",
+        text: `كشف حساب ${tenantText || "المستأجر"}`
+      })
+      return
+    }
+
+    const url = URL.createObjectURL(pdfBlob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+
+  } catch (err){
+    console.error("PDF/Share error:", err)
+    document.body.classList.remove("pdf-mode")
+    alert("تعذر إنشاء أو مشاركة PDF")
   }
+}
+
+function num(v){
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+function displayNumber(v){
+  return num(v).toLocaleString("en-US")
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return "-"
+  const d = new Date(dateStr)
+  if(Number.isNaN(d.getTime())) return "-"
+  return d.toLocaleDateString("en-GB")
+}
+
+function getYear(dateStr){
+  const d = new Date(dateStr)
+  if(Number.isNaN(d.getTime())) return null
+  return d.getFullYear()
+}
+
+function getRowOrder(desc){
+  const text = String(desc || "")
+  if(text.includes("ايجار")) return 1
+  if(text.includes("معارف")) return 2
+  if(text.includes("رصيد سابق")) return 3
+  if(text.includes("دفعة")) return 4
+  return 9
+}
+
+function isCarryRow(desc){
+  return String(desc || "").includes("رصيد سابق")
 }
 
 document.addEventListener("DOMContentLoaded", load)
 
 async function load(){
-  const tenant = localStorage.getItem("jabri_tenant_code")
+  const container = document.getElementById("container")
+  const tenantName = document.getElementById("tenantName")
+  const pdfTenantName = document.getElementById("pdfTenantName")
+  const pdfDate = document.getElementById("pdfDate")
 
   if(!tenant){
-    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
+    container.innerHTML = `<div class="empty-box">لا يوجد مستأجر</div>`
     return
   }
 
-  document.getElementById("tenantName").innerText = tenant
+  tenantName.innerText = tenant
+  pdfTenantName.innerText = tenant
+  pdfDate.innerText = "تاريخ الإصدار: " + new Date().toLocaleDateString("en-GB")
 
-  const { data } = await supabase
-    .from("tenant_transactions")
-    .select("*")
-    .eq("tenant_code", tenant)
+  let response
+  try{
+    response = await supabase
+      .from("tenant_transactions")
+      .select("*")
+      .eq("tenant_code", tenant)
+      .order("date", { ascending: true })
+  } catch(err){
+    console.error("Unexpected load error:", err)
+    container.innerHTML = `<div class="error-box">حصل خطأ غير متوقع أثناء تحميل البيانات</div>`
+    return
+  }
 
-  let balance = 0
-  let html = ""
+  const { data, error } = response
 
-  data.forEach(r=>{
-    balance += (r.debit || 0) - (r.credit || 0)
+  if(error){
+    console.error("Supabase error:", error)
+    container.innerHTML = `<div class="error-box">${error.message || "خطأ في قراءة البيانات"}</div>`
+    return
+  }
 
-    html += `
-    <div class="card">
-      ${r.date} | ${r.debit || 0} | ${r.credit || 0} | ${balance}
-    </div>`
+  if(!Array.isArray(data) || data.length === 0){
+    container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
+    return
+  }
+
+  const validRows = data
+    .map(r => ({
+      ...r,
+      debit: num(r.debit),
+      credit: num(r.credit),
+      description: r.description || "",
+      receipt_no: r.receipt_no || "-"
+    }))
+    .filter(r => getYear(r.date) !== null)
+
+  if(validRows.length === 0){
+    container.innerHTML = `<div class="empty-box">لا توجد تواريخ صحيحة لعرض كشف الحساب</div>`
+    return
+  }
+
+  const grouped = {}
+
+  validRows.forEach(r => {
+    const year = getYear(r.date)
+    if(!grouped[year]) grouped[year] = []
+    grouped[year].push(r)
   })
 
-  document.getElementById("container").innerHTML = html
+  let html = ""
+  let runningBalance = 0
+
+  Object.keys(grouped)
+    .sort((a,b) => Number(a) - Number(b))
+    .forEach(year => {
+
+      const rows = grouped[year]
+
+      rows.sort((a,b)=>{
+        const d1 = new Date(a.date).getTime()
+        const d2 = new Date(b.date).getTime()
+        if(d1 !== d2) return d1 - d2
+        return getRowOrder(a.description) - getRowOrder(b.description)
+      })
+
+      let totalDebit = 0
+      let totalCredit = 0
+
+      rows.forEach(r=>{
+        totalDebit += r.debit
+        totalCredit += r.credit
+
+        if(!isCarryRow(r.description)){
+          runningBalance += r.debit - r.credit
+        }
+
+        r.balance = runningBalance
+      })
+
+      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
+
+      let color = "red"
+      let status = "غير مسدد"
+      let statusClass = "status-unpaid"
+
+      if(endYearBalance <= 0){
+        color = "green"
+        status = "مسدد"
+        statusClass = "status-paid"
+      } else if(totalCredit > 0){
+        color = "orange"
+        status = "سداد جزئي"
+        statusClass = "status-partial"
+      }
+
+      html += `
+        <div class="year-card ${color}">
+          <div class="year-header">
+            <span class="year-title">${year}</span>
+            <span class="status-box ${statusClass}">${status}</span>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+                <th>البيان</th>
+                <th>رقم السند</th>
+              </tr>
+            </thead>
+            <tbody>
+      `
+
+      rows.forEach(r=>{
+        const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
+
+        html += `
+          <tr>
+            <td><span class="date-chip">${formatDate(r.date)}</span></td>
+            <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
+            <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
+            <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
+            <td>${r.description || "-"}</td>
+            <td><span class="receipt">${r.receipt_no}</span></td>
+          </tr>
+        `
+      })
+
+      html += `
+            </tbody>
+          </table>
+
+          <div class="summary">
+            <div class="summary-card summary-debit">
+              <div class="summary-label">إجمالي المدين</div>
+              <div class="summary-value">${displayNumber(totalDebit)}</div>
+            </div>
+
+            <div class="summary-card summary-credit">
+              <div class="summary-label">إجمالي الدائن</div>
+              <div class="summary-value">${displayNumber(totalCredit)}</div>
+            </div>
+
+            <div class="summary-card summary-balance">
+              <div class="summary-label">الرصيد</div>
+              <div class="summary-value">${displayNumber(endYearBalance)}</div>
+            </div>
+          </div>
+        </div>
+      `
+    })
+
+  container.innerHTML = html
 }
 </script>
 
