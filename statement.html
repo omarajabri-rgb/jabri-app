@@ -24,9 +24,7 @@
   --shadow:0 12px 32px rgba(20,30,50,0.08);
   --radius:22px;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -35,14 +33,12 @@ body{
     linear-gradient(135deg,var(--bg1),var(--bg2));
   color:var(--text);
 }
-
 .app{
   max-width:430px;
   margin:auto;
   padding:16px;
   padding-bottom:26px;
 }
-
 .glass-card{
   background:var(--card);
   backdrop-filter:blur(18px);
@@ -51,39 +47,38 @@ body{
   border-radius:var(--radius);
   box-shadow:var(--shadow);
 }
-
 .hero{
   padding:18px 16px;
   margin-bottom:14px;
   text-align:center;
 }
-
 .hero h2{
   margin:0;
   font-size:20px;
   font-weight:900;
-  letter-spacing:.2px;
 }
-
 .hero #tenantName{
   margin-top:8px;
   font-size:16px;
   font-weight:900;
   color:var(--blue);
 }
-
 .hero-sub{
   margin-top:6px;
   color:var(--muted);
   font-size:12px;
   font-weight:700;
 }
-
+.debug-box{
+  margin-top:10px;
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.6;
+}
 .year-card{
   padding:14px;
   margin-bottom:14px;
 }
-
 .year-head{
   display:flex;
   justify-content:space-between;
@@ -91,7 +86,6 @@ body{
   gap:10px;
   margin-bottom:10px;
 }
-
 .year-title{
   background:#1d2940;
   color:#fff;
@@ -99,9 +93,7 @@ body{
   padding:7px 14px;
   font-size:13px;
   font-weight:900;
-  box-shadow:0 8px 20px rgba(29,41,64,0.18);
 }
-
 .status-chip{
   border-radius:999px;
   padding:7px 12px;
@@ -109,21 +101,9 @@ body{
   font-weight:900;
   white-space:nowrap;
 }
-
-.status-paid{
-  color:var(--green);
-  background:rgba(24,169,87,0.10);
-}
-
-.status-partial{
-  color:#b96a00;
-  background:rgba(214,138,29,0.12);
-}
-
-.status-unpaid{
-  color:var(--red);
-  background:rgba(224,82,82,0.10);
-}
+.status-paid{ color:var(--green); background:rgba(24,169,87,0.10); }
+.status-partial{ color:#b96a00; background:rgba(214,138,29,0.12); }
+.status-unpaid{ color:var(--red); background:rgba(224,82,82,0.10); }
 
 .table-wrap{
   overflow:hidden;
@@ -131,54 +111,31 @@ body{
   background:var(--card-strong);
   border:1px solid rgba(255,255,255,0.82);
 }
-
 table{
   width:100%;
   border-collapse:collapse;
 }
-
 th,td{
   padding:9px 6px;
   font-size:11px;
   text-align:center;
   border-bottom:1px solid rgba(20,30,50,0.06);
 }
-
 th{
   background:rgba(241,243,247,0.95);
   color:#111;
   font-weight:900;
 }
-
 td.desc{
   text-align:right;
   color:var(--text);
   font-weight:800;
 }
-
-.debit{
-  color:var(--red);
-  font-weight:900;
-}
-
-.credit{
-  color:var(--green);
-  font-weight:900;
-}
-
-.balance{
-  color:var(--text);
-  font-weight:900;
-}
-
-.balance-zero{
-  color:var(--green);
-}
-
-.balance-negative{
-  color:var(--green);
-}
-
+.debit{ color:var(--red); font-weight:900; }
+.credit{ color:var(--green); font-weight:900; }
+.balance{ color:var(--text); font-weight:900; }
+.balance-zero{ color:var(--green); }
+.balance-negative{ color:var(--green); }
 .receipt{
   display:inline-block;
   min-width:34px;
@@ -188,7 +145,6 @@ td.desc{
   color:var(--blue);
   font-weight:900;
 }
-
 .date-chip{
   display:inline-block;
   background:var(--blue-soft);
@@ -197,46 +153,35 @@ td.desc{
   border-radius:10px;
   font-weight:900;
 }
-
-.carry-row td{
-  background:rgba(29,41,64,0.035);
-}
-
+.carry-row td{ background:rgba(29,41,64,0.035); }
 .final-row td{
   background:rgba(201,164,107,0.14);
   font-weight:900;
 }
-
 .summary{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
   margin-top:12px;
 }
-
 .summary-card{
   background:rgba(255,255,255,0.55);
   backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,0.78);
   border-radius:16px;
   padding:12px 8px;
   text-align:center;
-  box-shadow:0 8px 18px rgba(20,30,50,0.05);
 }
-
 .summary-label{
   font-size:10px;
   font-weight:900;
   color:var(--muted);
   margin-bottom:6px;
 }
-
 .summary-value{
   font-size:15px;
   font-weight:900;
 }
-
 .summary-debit .summary-value{ color:var(--red); }
 .summary-credit .summary-value{ color:var(--green); }
 .summary-balance .summary-value{ color:var(--text); }
@@ -247,7 +192,6 @@ td.desc{
   gap:12px;
   margin-top:18px;
 }
-
 button{
   border:none;
   cursor:pointer;
@@ -255,52 +199,33 @@ button{
   border-radius:16px;
   font-size:15px;
   font-weight:900;
-  letter-spacing:.2px;
 }
-
 .pdf-btn{
   flex:1.2;
   color:#fff;
   background:linear-gradient(135deg,var(--gold),var(--gold-2));
-  box-shadow:0 10px 24px rgba(201,164,107,0.28);
 }
-
 .back-btn{
   flex:0.8;
   color:#fff;
   background:linear-gradient(135deg,#1f2d4a,#2b3d63);
-  box-shadow:0 10px 24px rgba(29,41,64,0.22);
 }
-
-button:active{
-  transform:scale(.98);
-}
-
 .error-box,.empty-box{
   padding:16px;
   text-align:center;
   font-weight:900;
   border-radius:18px;
 }
-
 .error-box{
   color:#c62828;
   background:#fff1f1;
 }
-
 .empty-box{
   color:var(--muted);
   background:rgba(255,255,255,0.72);
 }
-
-.pdf-mode .bottom-actions{
-  display:none !important;
-}
-
-.pdf-mode .app{
-  max-width:920px !important;
-}
-
+.pdf-mode .bottom-actions{ display:none !important; }
+.pdf-mode .app{ max-width:920px !important; }
 .pdf-mode table th,
 .pdf-mode table td{
   font-size:14px;
@@ -315,6 +240,7 @@ button:active{
     <h2>كشف حساب مستأجر</h2>
     <div id="tenantName">جاري التحميل...</div>
     <div class="hero-sub">مجمع جبري الصناعي التجاري</div>
+    <div id="debugBox" class="debug-box"></div>
   </div>
 
   <div id="container"></div>
@@ -355,11 +281,7 @@ function parseDateValue(value){
     const year = Number(iso[1])
     const month = Number(iso[2])
     const day = Number(iso[3])
-    return {
-      valid:true,
-      ts:new Date(year, month - 1, day).getTime(),
-      year, month, day
-    }
+    return { valid:true, ts:new Date(year, month - 1, day).getTime(), year, month, day }
   }
 
   const slash = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
@@ -368,22 +290,12 @@ function parseDateValue(value){
     let month = Number(slash[2])
     let year = Number(slash[3])
     if(year < 100) year += 2000
-    return {
-      valid:true,
-      ts:new Date(year, month - 1, day).getTime(),
-      year, month, day
-    }
+    return { valid:true, ts:new Date(year, month - 1, day).getTime(), year, month, day }
   }
 
   const d = new Date(text)
   if(!Number.isNaN(d.getTime())){
-    return {
-      valid:true,
-      ts:d.getTime(),
-      year:d.getFullYear(),
-      month:d.getMonth() + 1,
-      day:d.getDate()
-    }
+    return { valid:true, ts:d.getTime(), year:d.getFullYear(), month:d.getMonth() + 1, day:d.getDate() }
   }
 
   return { valid:false, ts:0, year:null, month:null, day:null }
@@ -469,9 +381,8 @@ function buildRow(r, index){
 
   const isCarry = isCarryRow(description)
 
-  // description فقط للمعلومة، لا نعتمد عليه للحسبة
-  // الاستثناء الوحيد: سطر الرصيد الافتتاحي إذا فيه "رصيد"
-  // وأيضًا notes فقط للمساعدة إذا الدفعة مخزنة في debit بدل credit
+  // description فقط للمعلومة
+  // notes فقط للمساعدة إذا دفعة مخزنة في debit
   const paymentStoredInDebit =
     !isCarry &&
     rawCredit === 0 &&
@@ -503,15 +414,31 @@ function buildRow(r, index){
   }
 }
 
+function getTenantCode(){
+  const params = new URLSearchParams(window.location.search)
+  return (
+    params.get("tenant") ||
+    params.get("code") ||
+    localStorage.getItem("jabri_tenant_code") ||
+    localStorage.getItem("tenant_code") ||
+    localStorage.getItem("tenantCode") ||
+    ""
+  ).trim()
+}
+
 async function load(){
   const container = document.getElementById("container")
   const tenantDisplay = document.getElementById("tenantName")
+  const debugBox = document.getElementById("debugBox")
 
-  const params = new URLSearchParams(window.location.search)
-  const tenantCode = params.get("tenant") || localStorage.getItem("jabri_tenant_code")
+  const tenantCode = getTenantCode()
+
+  debugBox.innerHTML = `
+    tenant param/localStorage: <strong>${tenantCode || "(empty)"}</strong>
+  `
 
   if(!tenantCode){
-    container.innerHTML = "<div class='empty-box'>يرجى اختيار مستأجر</div>"
+    container.innerHTML = "<div class='empty-box'>لا يوجد كود مستأجر داخل الرابط أو localStorage</div>"
     return
   }
 
@@ -521,7 +448,7 @@ async function load(){
   try{
     result = await supabase
       .from("tenant_transactions")
-      .select("tenant_code, date, description, debit, credit, receipt_no, notes")
+      .select("*")
       .eq("tenant_code", tenantCode)
       .order("date", { ascending:true })
   } catch(err){
@@ -533,12 +460,15 @@ async function load(){
   const { data, error } = result
 
   if(error){
+    console.error(error)
     container.innerHTML = `<div class='error-box'>خطأ في تحميل البيانات: ${error.message}</div>`
     return
   }
 
+  debugBox.innerHTML += `<br>rows found: <strong>${Array.isArray(data) ? data.length : 0}</strong>`
+
   if(!data || data.length === 0){
-    container.innerHTML = "<div class='empty-box'>لا توجد حركات مالية لهذا المستأجر</div>"
+    container.innerHTML = "<div class='empty-box'>No data found for this tenant code</div>"
     return
   }
 
@@ -547,7 +477,7 @@ async function load(){
     .filter(r => r.sectionYear !== null)
 
   if(rows.length === 0){
-    container.innerHTML = "<div class='empty-box'>لا توجد تواريخ صالحة لعرض كشف الحساب</div>"
+    container.innerHTML = "<div class='empty-box'>البيانات موجودة لكن التواريخ غير صالحة للعرض</div>"
     return
   }
 
