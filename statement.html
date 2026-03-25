@@ -10,31 +10,18 @@
 <style>
 :root{
   --accent:#c9a46b;
-  --accent-soft:#e9d8b5;
   --accent-dark:#9a6b2f;
-
   --text:#182033;
   --muted:#7c879c;
-  --date-color:#9aa3b2;
-
-  --glass:rgba(255,255,255,0.56);
-  --glass-strong:rgba(255,255,255,0.72);
-  --glass-soft:rgba(255,255,255,0.38);
-
-  --line:rgba(255,255,255,0.42);
-  --table-line:#eef1f6;
-
+  --navy:#1d2940;
+  --date-color:#1d2940;
+  --table-line:#e9edf5;
+  --line:rgba(255,255,255,0.44);
+  --glass:rgba(255,255,255,0.64);
   --shadow:0 14px 40px rgba(18,26,43,0.08);
   --shadow-soft:0 8px 22px rgba(18,26,43,0.06);
-
   --green:#16a34a;
-  --green-soft:rgba(22,163,74,0.10);
-
   --red:#dc2626;
-  --red-soft:rgba(220,38,38,0.10);
-
-  --navy:#1d2940;
-  --navy-soft:rgba(29,41,64,0.07);
 }
 
 *{
@@ -58,7 +45,6 @@ body::before,
 body::after{
   content:"";
   position:fixed;
-  inset:auto;
   pointer-events:none;
   z-index:0;
   filter:blur(18px);
@@ -155,67 +141,42 @@ body.winter-theme::after{
 .year-card,
 .empty-box{
   background:var(--glass);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
   border:1px solid var(--line);
   border-radius:24px;
   box-shadow:var(--shadow);
 }
 
 .card{
-  padding:20px 16px 18px;
+  padding:22px 16px 18px;
   margin-bottom:16px;
   text-align:center;
-  position:relative;
-  overflow:hidden;
 }
 
-.card::before,
-.year-card::before{
-  content:"";
-  position:absolute;
-  inset:-30% auto auto -20%;
-  width:140%;
-  height:140%;
-  background:linear-gradient(
-    120deg,
-    transparent 24%,
-    rgba(255,255,255,0.16) 45%,
-    transparent 68%
-  );
-  transform:rotate(8deg);
-  animation:glassShine 9s linear infinite;
-  pointer-events:none;
-}
-
-.header-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:7px 14px;
-  border-radius:999px;
-  background:rgba(201,164,107,0.10);
-  color:var(--accent-dark);
-  border:1px solid rgba(201,164,107,0.18);
-  font-size:12px;
-  font-weight:800;
+.tenant-title{
+  margin:0;
+  font-size:23px;
+  font-weight:900;
+  color:var(--navy);
   letter-spacing:.2px;
-  margin-bottom:12px;
+}
+
+.tenant-title::after{
+  content:"";
+  display:block;
+  width:42px;
+  height:2px;
+  border-radius:2px;
+  margin:10px auto 0;
+  background:var(--accent);
 }
 
 .statement-title{
-  margin:0;
-  font-size:25px;
-  font-weight:900;
-  letter-spacing:.3px;
-  color:var(--text);
-}
-
-#tenantName{
-  font-weight:900;
-  color:#2f6fed;
-  margin-top:10px;
-  font-size:19px;
+  margin:10px 0 0;
+  font-size:14px;
+  font-weight:800;
+  color:var(--accent-dark);
 }
 
 .debug{
@@ -223,91 +184,6 @@ body.winter-theme::after{
   color:var(--muted);
   margin-top:8px;
 }
-
-.summary-grid{
-  width:100%;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin:16px 0 18px;
-}
-
-.summary-box{
-  position:relative;
-  overflow:hidden;
-  text-align:center;
-  padding:16px 10px;
-  border-radius:22px;
-  background:rgba(255,255,255,0.22);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  border:1px solid rgba(255,255,255,0.28);
-  box-shadow:
-    0 10px 24px rgba(15,23,42,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.35);
-  transition:transform .28s ease, box-shadow .28s ease;
-}
-
-.summary-box::before{
-  content:"";
-  position:absolute;
-  inset:-35% auto auto -30%;
-  width:150%;
-  height:140%;
-  background:linear-gradient(
-    120deg,
-    transparent 25%,
-    rgba(255,255,255,0.14) 45%,
-    transparent 70%
-  );
-  transform:rotate(10deg);
-  animation:glassShine 7s linear infinite;
-  pointer-events:none;
-}
-
-.summary-box:hover{
-  transform:translateY(-3px);
-  box-shadow:
-    0 18px 34px rgba(15,23,42,0.10),
-    inset 0 1px 0 rgba(255,255,255,0.42);
-}
-
-.summary-label{
-  font-size:12px;
-  font-weight:800;
-  margin-bottom:8px;
-}
-
-.summary-value{
-  font-size:25px;
-  font-weight:900;
-  line-height:1.05;
-  letter-spacing:.25px;
-}
-
-.debit-box{
-  border-color:rgba(220,38,38,0.14);
-  background:linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.13));
-}
-
-.debit-box .summary-label{ color:#b42323; }
-.debit-box .summary-value{ color:var(--red); }
-
-.credit-box{
-  border-color:rgba(22,163,74,0.14);
-  background:linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.13));
-}
-
-.credit-box .summary-label{ color:#12783b; }
-.credit-box .summary-value{ color:var(--green); }
-
-.balance-box{
-  border-color:rgba(201,164,107,0.22);
-  background:linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.15));
-}
-
-.balance-box .summary-label{ color:var(--accent-dark); }
-.balance-box .summary-value{ color:var(--accent); }
 
 .year-card{
   position:relative;
@@ -335,23 +211,40 @@ body.winter-theme::after{
   box-shadow:0 8px 18px rgba(29,41,64,0.16);
 }
 
-.year-subtle{
-  color:var(--muted);
+.year-status{
+  padding:7px 14px;
+  border-radius:999px;
   font-size:12px;
-  font-weight:700;
+  font-weight:900;
+  box-shadow:var(--shadow-soft);
+}
+
+.status-full{
+  background:#eafaf0;
+  color:var(--green);
+  border:1px solid #cdeed9;
+}
+
+.status-partial{
+  background:#fff4f4;
+  color:var(--red);
+  border:1px solid #ffd6d6;
 }
 
 .table-wrap{
   overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
   border-radius:18px;
-  background:rgba(255,255,255,0.34);
-  border:1px solid rgba(255,255,255,0.24);
+  background:rgba(255,255,255,0.42);
+  border:1px solid rgba(255,255,255,0.28);
 }
 
 table{
   width:100%;
+  min-width:620px;
   border-collapse:collapse;
   margin-top:0;
+  table-layout:fixed;
 }
 
 th,td{
@@ -363,16 +256,29 @@ th,td{
 }
 
 th{
-  background:rgba(244,246,251,0.78);
+  background:rgba(244,246,251,0.92);
   font-weight:900;
-  color:var(--text);
+  color:var(--navy);
   position:sticky;
   top:0;
   z-index:1;
 }
 
+th:nth-child(1), td:nth-child(1){ width:110px; }
+th:nth-child(2), td:nth-child(2){ width:80px; }
+th:nth-child(3), td:nth-child(3){ width:80px; }
+th:nth-child(4), td:nth-child(4){ width:90px; }
+th:nth-child(5), td:nth-child(5){ width:170px; }
+th:nth-child(6), td:nth-child(6){ width:90px; }
+
+td:nth-child(5){
+  white-space:normal;
+  line-height:1.45;
+  font-weight:700;
+}
+
 tbody tr{
-  transition:background .22s ease, transform .22s ease;
+  transition:background .22s ease;
 }
 
 tbody tr:hover{
@@ -408,27 +314,24 @@ tbody tr:hover{
 
 th.date-col{
   color:var(--date-color) !important;
-  font-weight:800;
+  font-weight:900;
 }
 
 td.date-col{
   color:var(--date-color) !important;
-  font-weight:700;
+  font-weight:800;
 }
 
 .chip{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:6px;
   padding:6px 12px;
   border-radius:999px;
   font-size:11px;
   font-weight:800;
-  background:rgba(255,255,255,0.62);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.42);
+  background:rgba(255,255,255,0.74);
+  border:1px solid rgba(255,255,255,0.46);
   box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 
@@ -439,8 +342,11 @@ td.date-col{
 .chip-receipt{
   color:var(--accent-dark);
   border:1px solid rgba(201,164,107,0.26);
-  background:rgba(201,164,107,0.09);
-  min-width:46px;
+  background:rgba(201,164,107,0.10);
+  min-width:58px;
+  font-size:10px;
+  padding:5px 10px;
+  letter-spacing:.2px;
 }
 
 .carry-row{
@@ -455,12 +361,11 @@ td.date-col{
 }
 
 .mini-stat{
-  padding:12px 10px;
+  padding:13px 10px;
   border-radius:18px;
   text-align:center;
   font-weight:900;
-  background:rgba(255,255,255,0.34);
-  border:1px solid rgba(255,255,255,0.28);
+  border:1px solid rgba(255,255,255,0.30);
   box-shadow:var(--shadow-soft);
 }
 
@@ -468,7 +373,6 @@ td.date-col{
   display:block;
   font-size:12px;
   margin-bottom:5px;
-  color:var(--muted);
   font-weight:800;
 }
 
@@ -478,9 +382,35 @@ td.date-col{
   font-weight:900;
 }
 
-.mini-stat.debit-stat .mini-value{ color:var(--red); }
-.mini-stat.credit-stat .mini-value{ color:var(--green); }
-.mini-stat.balance-stat .mini-value{ color:var(--accent); }
+.mini-stat.debit-stat{
+  background:linear-gradient(180deg,#fff5f5 0%, #ffecec 100%);
+  border-color:#ffd6d6;
+}
+
+.mini-stat.debit-stat .mini-label,
+.mini-stat.debit-stat .mini-value{
+  color:var(--red);
+}
+
+.mini-stat.credit-stat{
+  background:linear-gradient(180deg,#f2fff7 0%, #e9fbf0 100%);
+  border-color:#cdeed9;
+}
+
+.mini-stat.credit-stat .mini-label,
+.mini-stat.credit-stat .mini-value{
+  color:var(--green);
+}
+
+.mini-stat.balance-stat{
+  background:linear-gradient(180deg,#fffaf1 0%, #fdf2dd 100%);
+  border-color:#ecd9ad;
+}
+
+.mini-stat.balance-stat .mini-label,
+.mini-stat.balance-stat .mini-value{
+  color:var(--accent-dark);
+}
 
 .bottom-actions{
   display:flex;
@@ -522,45 +452,27 @@ button:hover{
   font-weight:900;
 }
 
-@keyframes glassShine{
-  0%{
-    transform:translateX(-65%) rotate(8deg);
-    opacity:.28;
-  }
-  50%{
-    opacity:.14;
-  }
-  100%{
-    transform:translateX(65%) rotate(8deg);
-    opacity:.28;
-  }
-}
-
 @media (max-width:430px){
   .app{
     padding:14px 12px 22px;
   }
 
-  .statement-title{
-    font-size:23px;
-  }
-
-  .summary-grid{
-    gap:10px;
-  }
-
-  .summary-box{
-    padding:14px 8px;
-    border-radius:20px;
-  }
-
-  .summary-value{
-    font-size:22px;
+  .tenant-title{
+    font-size:21px;
   }
 
   th,td{
     font-size:11px;
     padding:9px 6px;
+  }
+
+  table{
+    min-width:600px;
+  }
+
+  .chip{
+    padding:5px 9px;
+    font-size:10px;
   }
 
   .summary-line{
@@ -596,7 +508,6 @@ button:hover{
     border:1px solid #eee !important;
   }
 
-  .summary-box,
   .mini-stat,
   .chip{
     box-shadow:none !important;
@@ -610,13 +521,10 @@ button:hover{
 <div class="app">
 
   <div class="card">
-    <div class="header-badge">JABRI STATEMENT</div>
-    <h3 class="statement-title">كشف حساب</h3>
-    <div id="tenantName"></div>
+    <h2 class="tenant-title" id="tenantName"></h2>
+    <div class="statement-title">كشف حساب</div>
     <div id="debug" class="debug"></div>
   </div>
-
-  <div id="summaryContainer"></div>
 
   <div id="container"></div>
 
@@ -708,7 +616,6 @@ function getTenantCode(){
   return ""
 }
 
-// إصلاح الصفوف التي دخلت shifted في 2025 و2026
 function normalizeRow(r){
   let description = normalizeText(r.description)
   let receiptNo = normalizeText(r.receipt_no || "-")
@@ -725,13 +632,11 @@ function normalizeRow(r){
     const amount = cleanNum(description)
 
     if(receiptLooksPayment){
-      // مثل نقدي + 450 / 850 / 1000
       credit = amount
       debit = 0
       description = "دفعة من الإيجار"
       receiptNo = "-"
     } else {
-      // مثل 1800 / 36 / 2494 / 2030
       debit = amount
       credit = 0
 
@@ -770,6 +675,13 @@ function getBalanceClass(balance){
   return "balance"
 }
 
+function getYearStatus(balance){
+  if(Math.abs(balance) < 0.01){
+    return { text:"مكتمل", class:"status-full" }
+  }
+  return { text:"جزئي", class:"status-partial" }
+}
+
 function getSeasonClass(){
   const month = new Date().getMonth() + 1
   if([3,4,5].includes(month)) return "spring-theme"
@@ -780,28 +692,6 @@ function getSeasonClass(){
 
 function setSeasonTheme(){
   document.body.classList.add(getSeasonClass())
-}
-
-function renderTopSummary(totalDebit, totalCredit, totalBalance){
-  const summaryContainer = document.getElementById("summaryContainer")
-  summaryContainer.innerHTML = `
-    <div class="summary-grid">
-      <div class="summary-box debit-box">
-        <div class="summary-label">إجمالي المدين</div>
-        <div class="summary-value">${formatNumber(totalDebit)}</div>
-      </div>
-
-      <div class="summary-box credit-box">
-        <div class="summary-label">إجمالي الدائن</div>
-        <div class="summary-value">${formatNumber(totalCredit)}</div>
-      </div>
-
-      <div class="summary-box balance-box">
-        <div class="summary-label">الرصيد</div>
-        <div class="summary-value">${formatNumber(totalBalance)}</div>
-      </div>
-    </div>
-  `
 }
 
 async function load(){
@@ -860,13 +750,8 @@ async function load(){
   })
 
   let html = ""
-  let grandDebit = 0
-  let grandCredit = 0
-  let grandBalance = 0
 
-  const sortedYears = Object.keys(grouped).sort((a,b) => Number(a) - Number(b))
-
-  sortedYears.forEach((year, index) => {
+  Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
     let yearRows = grouped[year]
 
     yearRows.sort((a, b) => {
@@ -914,15 +799,13 @@ async function load(){
       `
     }).join("")
 
-    grandDebit += debitTotal
-    grandCredit += creditTotal
-    grandBalance = balance
+    const status = getYearStatus(balance)
 
     html += `
       <div class="year-card">
         <div class="year-head">
           <div class="year-title">سنة ${year}</div>
-          <div class="year-subtle">كشف من الأقدم إلى الأحدث</div>
+          <div class="year-status ${status.class}">${status.text}</div>
         </div>
 
         <div class="table-wrap">
@@ -963,7 +846,6 @@ async function load(){
     `
   })
 
-  renderTopSummary(grandDebit, grandCredit, grandBalance)
   container.innerHTML = html
 }
 
