@@ -569,13 +569,14 @@ async function load(){
         r.balance = runningBalance
       })
 
+      const yearBalance = totalDebit - totalCredit
       const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
 
       let color = "red"
       let status = "غير مسدد"
       let statusClass = "status-unpaid"
 
-      if(endYearBalance <= 0){
+      if(yearBalance <= 0){
         color = "green"
         status = "مسدد"
         statusClass = "status-paid"
@@ -638,7 +639,7 @@ async function load(){
 
             <div class="summary-card summary-balance">
               <div class="summary-label">الرصيد</div>
-              <div class="summary-value">${displayNumber(endYearBalance)}</div>
+              <div class="summary-value">${displayNumber(yearBalance)}</div>
             </div>
           </div>
         </div>
