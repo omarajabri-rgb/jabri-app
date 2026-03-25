@@ -183,7 +183,6 @@ td:nth-child(5){
   color:#e05252;
 }
 
-/* bottom buttons - updated only */
 .bottom-actions{
   display:flex;
   flex-direction:row-reverse;
@@ -436,17 +435,78 @@ function getYear(dateStr){
   return d.getFullYear()
 }
 
-function getRowOrder(desc){
-  const text = String(desc || "")
-  if(text.includes("ايجار")) return 1
-  if(text.includes("معارف")) return 2
-  if(text.includes("رصيد سابق")) return 3
-  if(text.includes("دفعة")) return 4
-  return 9
+function normalizeText(text){
+  return String(text || "").trim()
+}
+
+function isRentRow(desc){
+  return /ايجار/i.test(normalizeText(desc))
+}
+
+function isFeesRow(desc){
+  return /معارف/i.test(normalizeText(desc))
 }
 
 function isCarryRow(desc){
-  return String(desc || "").includes("رصيد سابق")
+  return /رصيد\s*(سابق\s*)?عام/i.test(normalizeText(desc))
+}
+
+function isPaymentRow(desc){
+  return /دفعة/i.test(normalizeText(desc))
+}
+
+function getCarryBaseYear(desc){
+  const text = normalizeText(desc)
+  const match = text.match(/عام\s*(\d{4})/)
+  return match ? Number(match[1]) : null
+}
+
+function getStatementYear(row){
+  const desc = normalizeText(row.description)
+  const dateYear = getYear(row.date)
+
+  if(isCarryRow(desc)){
+    const carryBaseYear = getCarryBaseYear(desc)
+    if(carryBaseYear){
+      return carryBaseYear + 1
+    }
+  }
+
+  return dateYear
+}
+
+function getRowOrder(desc){
+  const text = normalizeText(desc)
+
+  if(isRentRow(text)) return 1
+  if(isFeesRow(text)) return 2
+  if(isCarryRow(text)) return 3
+  if(isPaymentRow(text)) return 4
+  return 9
+}
+
+function getStatus(totalDebit, totalCredit, endYearBalance){
+  if(endYearBalance <= 0){
+    return {
+      color: "green",
+      label: "مسدد",
+      className: "status-paid"
+    }
+  }
+
+  if(totalCredit > 0){
+    return {
+      color: "orange",
+      label: "سداد جزئي",
+      className: "status-partial"
+    }
+  }
+
+  return {
+    color: "red",
+    label: "غير مسدد",
+    className: "status-unpaid"
+  }
 }
 
 document.addEventListener("DOMContentLoaded", load)
@@ -493,79 +553,68 @@ async function load(){
   }
 
   const validRows = data
-    .map(r => ({
+    .map((r, index) => ({
       ...r,
+      originalIndex: index,
       debit: num(r.debit),
       credit: num(r.credit),
-      description: r.description || "",
-      receipt_no: r.receipt_no || "-"
+      description: normalizeText(r.description || ""),
+      receipt_no: normalizeText(r.receipt_no || "-"),
+      sectionYear: getStatementYear(r)
     }))
-    .filter(r => getYear(r.date) !== null)
+    .filter(r => r.sectionYear !== null)
 
   if(validRows.length === 0){
     container.innerHTML = `<div class="empty-box">لا توجد تواريخ صحيحة لعرض كشف الحساب</div>`
     return
   }
 
-  const grouped = {}
+  validRows.sort((a, b) => {
+    if(a.sectionYear !== b.sectionYear) return a.sectionYear - b.sectionYear
 
-  validRows.forEach(r => {
-    const year = getYear(r.date)
-    if(!grouped[year]) grouped[year] = []
-    grouped[year].push(r)
+    const aDate = new Date(a.date).getTime()
+    const bDate = new Date(b.date).getTime()
+    if(aDate !== bDate) return aDate - bDate
+
+    const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
+    if(orderDiff !== 0) return orderDiff
+
+    return a.originalIndex - b.originalIndex
   })
+
+  const grouped = {}
+  for(const row of validRows){
+    if(!grouped[row.sectionYear]) grouped[row.sectionYear] = []
+    grouped[row.sectionYear].push(row)
+  }
 
   let html = ""
   let runningBalance = 0
 
   Object.keys(grouped)
-    .sort((a,b) => Number(a) - Number(b))
+    .map(Number)
+    .sort((a, b) => a - b)
     .forEach(year => {
-
       const rows = grouped[year]
-
-      rows.sort((a,b)=>{
-        const d1 = new Date(a.date).getTime()
-        const d2 = new Date(b.date).getTime()
-        if(d1 !== d2) return d1 - d2
-        return getRowOrder(a.description) - getRowOrder(b.description)
-      })
 
       let totalDebit = 0
       let totalCredit = 0
 
-      rows.forEach(r=>{
+      rows.forEach(r => {
         totalDebit += r.debit
         totalCredit += r.credit
-
-        if(!isCarryRow(r.description)){
-          runningBalance += r.debit - r.credit
-        }
-
+        runningBalance += r.debit - r.credit
         r.balance = runningBalance
       })
 
       const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
-
-      let color = "red"
-      let status = "غير مسدد"
-      let statusClass = "status-unpaid"
-
-      if(endYearBalance <= 0){
-        color = "green"
-        status = "مسدد"
-        statusClass = "status-paid"
-      } else if(totalCredit > 0){
-        color = "orange"
-        status = "سداد جزئي"
-        statusClass = "status-partial"
-      }
+      const yearStatus = getStatus(totalDebit, totalCredit, endYearBalance)
 
       html += `
-        <div class="year-card ${color}">
+        <div class="year-card ${yearStatus.color}">
           <div class="year-header">
             <span class="year-title">${year}</span>
-            <span class="status-box ${statusClass}">${status}</span>
+            <span class="status-box ${yearStatus.className}">${yearStatus.label}</span>
           </div>
 
           <table>
@@ -582,7 +631,7 @@ async function load(){
             <tbody>
       `
 
-      rows.forEach(r=>{
+      rows.forEach(r => {
         const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
 
         html += `
@@ -592,7 +641,7 @@ async function load(){
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
             <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
             <td>${r.description || "-"}</td>
-            <td><span class="receipt">${r.receipt_no}</span></td>
+            <td><span class="receipt">${r.receipt_no || "-"}</span></td>
           </tr>
         `
       })
