@@ -281,7 +281,6 @@ td:nth-child(5){
   word-break:break-word;
 }
 
-/* Fade rows */
 tbody tr{
   opacity:0;
   transform:translateY(8px);
@@ -412,7 +411,6 @@ td.date-col{
   animation:creditPulse .55s ease;
 }
 
-/* latest payment */
 .latest-payment td{
   background:rgba(22,163,74,0.07) !important;
 }
@@ -1049,13 +1047,8 @@ async function load(){
 
   data.forEach(r => {
     const fixed = normalizeRow(r)
-
-    let displayYear
     const rowDate = new Date(fixed.date)
-const displayYear = rowDate.getFullYear()
-    } else {
-      displayYear = new Date(fixed.date).getFullYear()
-    }
+    const displayYear = rowDate.getFullYear()
 
     if(!grouped[displayYear]) grouped[displayYear] = []
     grouped[displayYear].push(fixed)
