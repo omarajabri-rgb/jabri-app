@@ -54,6 +54,19 @@ body{
   font-weight:bold;
 }
 
+.tenant-name-main{
+  font-size:22px;
+  font-weight:900;
+  color:#1d2940;
+  margin-bottom:6px;
+}
+
+.tenant-code-sub{
+  font-size:13px;
+  font-weight:800;
+  color:#7b8497;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -183,7 +196,6 @@ td:nth-child(5){
   color:#e05252;
 }
 
-/* bottom buttons - updated only */
 .bottom-actions{
   display:flex;
   flex-direction:row-reverse;
@@ -222,17 +234,6 @@ td:nth-child(5){
 .pdf-btn:active,
 .back-btn:active{
   transform:scale(0.97);
-}
-
-@keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
 }
 
 .pdf-header{
@@ -334,7 +335,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
@@ -360,7 +361,7 @@ window.savePDF = async function(){
     document.body.classList.add("pdf-mode")
 
     const element = document.querySelector(".app")
-    const tenantText = (document.getElementById("tenantName").innerText || "statement").trim()
+    const tenantText = (document.getElementById("pdfTenantName").innerText || tenant || "statement").trim()
     const safeFileName = tenantText
       .replace(/[^\u0600-\u06FF\w\- ]/g, "")
       .replace(/\s+/g, "_")
@@ -385,11 +386,7 @@ window.savePDF = async function(){
     const fileName = `statement_${safeFileName || "tenant"}.pdf`
     const file = new File([pdfBlob], fileName, { type: "application/pdf" })
 
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({ files: [file] })
-    ) {
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: "كشف حساب",
@@ -440,13 +437,21 @@ function getRowOrder(desc){
   const text = String(desc || "")
   if(text.includes("ايجار")) return 1
   if(text.includes("معارف")) return 2
-  if(text.includes("رصيد سابق")) return 3
+  if(text.includes("رصيد سابق") || text.includes("سابق عام")) return 3
   if(text.includes("دفعة")) return 4
   return 9
 }
 
 function isCarryRow(desc){
-  return String(desc || "").includes("رصيد سابق")
+  const text = String(desc || "")
+  return text.includes("رصيد سابق") || text.includes("سابق عام")
+}
+
+function buildTenantHeader(name, code){
+  return `
+    <div class="tenant-name-main">${name || code}</div>
+    <div class="tenant-code-sub">${code}</div>
+  `
 }
 
 document.addEventListener("DOMContentLoaded", load)
@@ -462,15 +467,32 @@ async function load(){
     return
   }
 
-  tenantName.innerText = tenant
-  pdfTenantName.innerText = tenant
   pdfDate.innerText = "تاريخ الإصدار: " + new Date().toLocaleDateString("en-GB")
+
+  let tenantDisplayName = tenant
+
+  try{
+    const { data: tenantData } = await supabase
+      .from("tenants")
+      .select("tenant_name")
+      .eq("tenant_code", tenant)
+      .maybeSingle()
+
+    if(tenantData?.tenant_name){
+      tenantDisplayName = tenantData.tenant_name
+    }
+  } catch(err){
+    console.error("Tenant name load error:", err)
+  }
+
+  tenantName.innerHTML = buildTenantHeader(tenantDisplayName, tenant)
+  pdfTenantName.innerText = tenantDisplayName
 
   let response
   try{
     response = await supabase
       .from("tenant_transactions")
-      .select("*")
+      .select("tenant_code,date,description,debit,credit,receipt_no,notes")
       .eq("tenant_code", tenant)
       .order("date", { ascending: true })
   } catch(err){
@@ -538,7 +560,9 @@ async function load(){
         totalDebit += r.debit
         totalCredit += r.credit
 
-        if(!isCarryRow(r.description)){
+        if(isCarryRow(r.description)){
+          runningBalance = r.debit
+        } else {
           runningBalance += r.debit - r.credit
         }
 
