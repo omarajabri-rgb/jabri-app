@@ -267,12 +267,12 @@ th{
   z-index:1;
 }
 
-th:nth-child(1), td:nth-child(1){ width:21%; } /* التاريخ */
-th:nth-child(2), td:nth-child(2){ width:13%; } /* مدين */
-th:nth-child(3), td:nth-child(3){ width:13%; } /* دائن */
-th:nth-child(4), td:nth-child(4){ width:16%; } /* الرصيد */
-th:nth-child(5), td:nth-child(5){ width:25%; } /* البيان */
-th:nth-child(6), td:nth-child(6){ width:12%; } /* السند */
+th:nth-child(1), td:nth-child(1){ width:21%; }
+th:nth-child(2), td:nth-child(2){ width:13%; }
+th:nth-child(3), td:nth-child(3){ width:13%; }
+th:nth-child(4), td:nth-child(4){ width:16%; }
+th:nth-child(5), td:nth-child(5){ width:25%; }
+th:nth-child(6), td:nth-child(6){ width:12%; }
 
 td:nth-child(5){
   white-space:normal;
@@ -281,9 +281,26 @@ td:nth-child(5){
   word-break:break-word;
 }
 
+/* Fade rows */
 tbody tr{
+  opacity:0;
+  transform:translateY(8px);
+  animation:rowFadeIn .45s ease forwards;
   transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
+
+tbody tr:nth-child(1){ animation-delay:.03s; }
+tbody tr:nth-child(2){ animation-delay:.06s; }
+tbody tr:nth-child(3){ animation-delay:.09s; }
+tbody tr:nth-child(4){ animation-delay:.12s; }
+tbody tr:nth-child(5){ animation-delay:.15s; }
+tbody tr:nth-child(6){ animation-delay:.18s; }
+tbody tr:nth-child(7){ animation-delay:.21s; }
+tbody tr:nth-child(8){ animation-delay:.24s; }
+tbody tr:nth-child(9){ animation-delay:.27s; }
+tbody tr:nth-child(10){ animation-delay:.30s; }
+tbody tr:nth-child(11){ animation-delay:.33s; }
+tbody tr:nth-child(12){ animation-delay:.36s; }
 
 tbody tr:hover{
   background:rgba(201,164,107,0.05);
@@ -393,6 +410,37 @@ td.date-col{
 .payment-row:hover .credit,
 .payment-row:active .credit{
   animation:creditPulse .55s ease;
+}
+
+/* latest payment */
+.latest-payment td{
+  background:rgba(22,163,74,0.07) !important;
+}
+
+.latest-payment td:first-child{
+  position:relative;
+}
+
+.latest-payment td:first-child::before{
+  content:"";
+  position:absolute;
+  right:2px;
+  top:50%;
+  transform:translateY(-50%);
+  width:5px;
+  height:68%;
+  border-radius:999px;
+  background:#16a34a;
+  box-shadow:0 0 12px rgba(22,163,74,0.28);
+}
+
+.latest-payment .credit{
+  text-shadow:0 0 10px rgba(22,163,74,0.14);
+}
+
+.latest-payment .chip-date,
+.latest-payment .chip-receipt{
+  border-color:rgba(22,163,74,0.20);
 }
 
 .summary-line{
@@ -554,6 +602,17 @@ button:hover{
     transform:translateY(8px);
   }
   100%{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes rowFadeIn{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
     opacity:1;
     transform:translateY(0);
   }
@@ -788,6 +847,10 @@ function formatNumber(v){
   return num(v).toLocaleString("en-US")
 }
 
+function formatBalanceNumber(v){
+  return Math.abs(num(v)).toLocaleString("en-US")
+}
+
 function isNumericText(v){
   return /^-?\d+(\.\d+)?$/.test(normalizeText(v))
 }
@@ -878,13 +941,22 @@ function normalizeRow(r){
   }
 }
 
-function getRowOrder(desc){
+function getRowOrder(desc, date){
   const text = normalizeText(desc)
+  const d = new Date(date)
+
+  if(d.getDate() === 1 && d.getMonth() === 0){
+    if(text.includes("رصيد")) return 1
+    if(text.includes("معارف")) return 2
+    if(text.includes("إيجار")) return 3
+    return 4
+  }
 
   if(text.includes("رصيد")) return 1
-  if(text.includes("إيجار")) return 2
-  if(text.includes("معارف")) return 3
+  if(text.includes("معارف")) return 2
+  if(text.includes("إيجار")) return 3
   if(text.includes("دفعة")) return 4
+
   return 9
 }
 
@@ -1000,8 +1072,8 @@ async function load(){
     let yearRows = grouped[year]
 
     yearRows.sort((a, b) => {
-      const oa = getRowOrder(a.description)
-      const ob = getRowOrder(b.description)
+      const oa = getRowOrder(a.description, a.date)
+      const ob = getRowOrder(b.description, b.date)
 
       if(oa !== ob) return oa - ob
 
@@ -1014,14 +1086,18 @@ async function load(){
     let debitTotal = 0
     let creditTotal = 0
 
+    const paymentRows = yearRows
+      .map((r, idx) => ({ r, idx }))
+      .filter(item => normalizeText(item.r.description).includes("دفعة"))
+
+    const latestPaymentIndex = paymentRows.length
+      ? paymentRows[paymentRows.length - 1].idx
+      : -1
+
     const rows = yearRows.map((r, i) => {
       const debit = num(r.debitVal)
       const credit = num(r.creditVal)
       const desc = normalizeText(r.description)
-      const rowClasses = [
-        desc.includes("رصيد") ? "carry-row" : "",
-        desc.includes("دفعة") ? "payment-row" : ""
-      ].join(" ").trim()
 
       if(i === 0 && desc.includes("رصيد")){
         balance = debit
@@ -1032,6 +1108,12 @@ async function load(){
       debitTotal += debit
       creditTotal += credit
 
+      const rowClasses = [
+        desc.includes("رصيد") ? "carry-row" : "",
+        desc.includes("دفعة") ? "payment-row" : "",
+        i === latestPaymentIndex ? "latest-payment" : ""
+      ].join(" ").trim()
+
       return `
         <tr class="${rowClasses}">
           <td class="date-col">
@@ -1039,7 +1121,7 @@ async function load(){
           </td>
           <td class="debit">${debit > 0 ? formatNumber(debit) : "-"}</td>
           <td class="credit">${credit > 0 ? formatNumber(credit) : "-"}</td>
-          <td class="${getBalanceClass(balance)}">${formatNumber(balance)}</td>
+          <td class="${getBalanceClass(balance)}">${formatBalanceNumber(balance)}</td>
           <td>${desc || "-"}</td>
           <td>
             <span class="chip chip-receipt">${r.receipt_no || "-"}</span>
@@ -1089,7 +1171,7 @@ async function load(){
 
           <div class="mini-stat balance-stat ${balanceBoxClass}">
             <span class="mini-label">الرصيد</span>
-            <span class="mini-value">${formatNumber(balance)}</span>
+            <span class="mini-value">${formatBalanceNumber(balance)}</span>
           </div>
         </div>
       </div>
