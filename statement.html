@@ -22,9 +22,6 @@
   --shadow-soft:0 8px 22px rgba(18,26,43,0.06);
   --green:#16a34a;
   --red:#dc2626;
-  --red-soft:#fff1f1;
-  --green-soft:#f2fff7;
-  --gold-soft:#fffaf1;
 }
 
 *{
@@ -957,14 +954,6 @@ function getRowOrder(desc, date, debitVal){
   return 5
 }
 
-  if(text.includes("رصيد")) return 1
-  if(text.includes("إيجار") || text.includes("ايجار")) return 2
-  if(text.includes("معارف")) return 3
-  if(text.includes("دفعة")) return 4
-
-  return 9
-}
-
 function getBalanceClass(balance){
   if(Math.abs(balance) < 0.01) return "balance balance-zero"
   if(balance > 0) return "balance balance-due"
@@ -1066,23 +1055,16 @@ async function load(){
   Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
     let yearRows = grouped[year]
 
-    function getRowOrder(row){
-  const text = normalizeText(row.description)
-  const debit = num(row.debitVal)
+    yearRows.sort((a, b) => {
+      const oa = getRowOrder(a.description, a.date, a.debitVal)
+      const ob = getRowOrder(b.description, b.date, b.debitVal)
 
-  const isCarry = text.includes("رصيد")
-  const isRent = text.includes("إيجار") || text.includes("ايجار")
-  const isFee = text.includes("معارف")
+      if(oa !== ob) return oa - ob
 
-  if(debit > 0){
-    if(isCarry) return 1
-    if(isRent) return 2
-    if(isFee) return 3
-    return 4
-  }
-
-  return 5
-}
+      const da = new Date(a.date).getTime()
+      const db = new Date(b.date).getTime()
+      return da - db
+    })
 
     let balance = 0
     let debitTotal = 0
