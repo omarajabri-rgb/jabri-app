@@ -13,13 +13,11 @@ body{
   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:linear-gradient(135deg,#edf2f7,#f7f9fc);
 }
-
 .app{
   max-width:420px;
   margin:auto;
   padding:15px;
 }
-
 .card{
   background:rgba(255,255,255,0.6);
   backdrop-filter:blur(14px);
@@ -28,55 +26,46 @@ body{
   margin-bottom:15px;
   text-align:center;
 }
-
 .year-card{
-  background:rgba(255,255,255,0.72);
+  background:rgba(255,255,255,0.7);
   backdrop-filter:blur(14px);
   border-radius:20px;
   padding:15px;
   margin-bottom:15px;
 }
-
 .year-title{
   background:#1d2940;
   color:#fff;
-  padding:8px 14px;
+  padding:6px 12px;
   border-radius:20px;
   font-weight:bold;
   display:inline-block;
-  margin-bottom:10px;
 }
-
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:10px;
 }
-
 th,td{
   padding:8px;
   font-size:12px;
   border-bottom:1px solid #eee;
   text-align:center;
 }
-
 th{
   background:#f4f6fb;
   font-weight:900;
 }
-
 .debit{color:#e05252;font-weight:bold;}
 .credit{color:#18a957;font-weight:bold;}
 .balance{font-weight:bold;color:#1d2940;}
 .balance-negative{color:#18a957;}
 .balance-zero{color:#18a957;}
-
 .bottom-actions{
   display:flex;
   gap:10px;
   margin-top:15px;
 }
-
 button{
   flex:1;
   height:45px;
@@ -84,16 +73,13 @@ button{
   border-radius:12px;
   font-weight:bold;
 }
-
 .pdf-btn{background:#c9a46b;color:#fff;}
 .back-btn{background:#1d2940;color:#fff;}
-
 .debug{
   font-size:11px;
   color:#777;
   margin-top:5px;
 }
-
 .receipt{
   background:#eef4ff;
   padding:3px 7px;
@@ -103,17 +89,14 @@ button{
   display:inline-block;
   min-width:26px;
 }
-
 .carry-row{
   background:rgba(29,41,64,0.04);
 }
-
 .summary-line{
   margin-top:10px;
   font-weight:bold;
   font-size:14px;
 }
-
 .empty-box{
   background:#fff;
   border-radius:18px;
@@ -197,6 +180,13 @@ function isPaymentReceipt(receipt){
   )
 }
 
+function normalizeArabic(text){
+  return String(text || "")
+    .replace(/أ|إ|آ/g, "ا")
+    .replace(/ى/g, "ي")
+    .trim()
+}
+
 function getTenantCode(){
   const params = new URLSearchParams(window.location.search)
 
@@ -225,9 +215,10 @@ function getTenantCode(){
   return ""
 }
 
-// إصلاح الصفوف التي دخلت shifted في 2025 و2026
+// الإصلاح المهم لصفوف 2025/2026
 function normalizeRow(r){
-  let description = normalizeText(r.description)
+  const originalDescription = normalizeText(r.description)
+  let description = originalDescription
   let receiptNo = normalizeText(r.receipt_no || "-")
   let debit = cleanNum(r.debit)
   let credit = cleanNum(r.credit)
@@ -235,20 +226,18 @@ function normalizeRow(r){
   const rowDate = new Date(r.date)
   const rowYear = isNaN(rowDate.getTime()) ? "" : rowDate.getFullYear()
 
-  const shiftedNumber = isNumericText(description) && debit === 0 && credit === 0
+  const shiftedNumber = isNumericText(originalDescription) && debit === 0 && credit === 0
   const receiptLooksPayment = isPaymentReceipt(receiptNo)
 
   if(shiftedNumber){
-    const amount = cleanNum(description)
+    const amount = cleanNum(originalDescription)
 
     if(receiptLooksPayment){
-      // مثل نقدي + 450 / 850 / 1000
       credit = amount
       debit = 0
       description = "دفعة من الإيجار"
       receiptNo = "-"
     } else {
-      // مثل 1800 / 36 / 2494 / 2030
       debit = amount
       credit = 0
 
@@ -271,11 +260,19 @@ function normalizeRow(r){
   }
 }
 
+function getDisplayYear(row){
+  if(isCarryDescription(row.description)){
+    const match = normalizeText(row.description).match(/عام\s*(\d{4})/)
+    if(match) return Number(match[1]) + 1
+  }
+  return new Date(row.date).getFullYear()
+}
+
 function getRowOrder(desc){
-  const text = normalizeText(desc)
+  const text = normalizeArabic(desc)
 
   if(text.includes("رصيد")) return 1
-  if(text.includes("إيجار")) return 2
+  if(text.includes("ايجار")) return 2
   if(text.includes("معارف")) return 3
   if(text.includes("دفعة")) return 4
   return 9
@@ -321,24 +318,11 @@ async function load(){
     return
   }
 
-  // تجميع حسب سنة العرض
   const grouped = {}
 
   data.forEach(r => {
     const fixed = normalizeRow(r)
-
-    // لو السطر رصيد سابق عام 2024 يعرض في 2025
-    let displayYear
-    if(isCarryDescription(fixed.description)){
-      const match = fixed.description.match(/عام\s*(\d{4})/)
-      if(match){
-        displayYear = Number(match[1]) + 1
-      } else {
-        displayYear = new Date(fixed.date).getFullYear()
-      }
-    } else {
-      displayYear = new Date(fixed.date).getFullYear()
-    }
+    const displayYear = getDisplayYear(fixed)
 
     if(!grouped[displayYear]) grouped[displayYear] = []
     grouped[displayYear].push(fixed)
@@ -346,78 +330,83 @@ async function load(){
 
   let html = ""
 
-  Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
-    let yearRows = grouped[year]
+  Object.keys(grouped)
+    .sort((a,b) => Number(a) - Number(b))
+    .forEach(year => {
+      let yearRows = grouped[year]
 
-    // من الأقدم إلى الأحدث داخل كل جدول
-    // مع إبقاء الرصيد السابق أولاً ثم الإيجار ثم المعارف ثم الدفعات
-    yearRows.sort((a, b) => {
-      const oa = getRowOrder(a.description)
-      const ob = getRowOrder(b.description)
+      // التاريخ أولاً من الأقدم إلى الأحدث
+      // وإذا نفس التاريخ: رصيد ثم إيجار ثم معارف ثم دفعة
+      yearRows.sort((a, b) => {
+        const da = new Date(a.date).getTime()
+        const db = new Date(b.date).getTime()
 
-      if(oa !== ob) return oa - ob
+        if(da !== db) return da - db
 
-      const da = new Date(a.date).getTime()
-      const db = new Date(b.date).getTime()
-      return da - db
-    })
+        const oa = getRowOrder(a.description)
+        const ob = getRowOrder(b.description)
 
-    let balance = 0
-    let debitTotal = 0
-    let creditTotal = 0
+        if(oa !== ob) return oa - ob
 
-    const rows = yearRows.map((r, i) => {
-      const debit = num(r.debitVal)
-      const credit = num(r.creditVal)
-      const desc = normalizeText(r.description)
+        return 0
+      })
 
-      if(i === 0 && desc.includes("رصيد")){
-        balance = debit
-      } else {
-        balance += debit - credit
-      }
+      let balance = 0
+      let debitTotal = 0
+      let creditTotal = 0
 
-      debitTotal += debit
-      creditTotal += credit
+      const rows = yearRows.map((r, i) => {
+        const debit = num(r.debitVal)
+        const credit = num(r.creditVal)
+        const desc = normalizeText(r.description)
 
-      return `
-        <tr class="${desc.includes("رصيد") ? "carry-row" : ""}">
-          <td>${formatDate(r.date)}</td>
-          <td class="debit">${debit > 0 ? formatNumber(debit) : "-"}</td>
-          <td class="credit">${credit > 0 ? formatNumber(credit) : "-"}</td>
-          <td class="${getBalanceClass(balance)}">${formatNumber(balance)}</td>
-          <td>${desc || "-"}</td>
-          <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-        </tr>
-      `
-    }).join("")
+        if(i === 0 && desc.includes("رصيد")){
+          balance = debit
+        } else {
+          balance += debit - credit
+        }
 
-    html += `
-      <div class="year-card">
-        <div class="year-title">سنة ${year}</div>
+        debitTotal += debit
+        creditTotal += credit
 
-        <table>
-          <thead>
-            <tr>
-              <th>تاريخ</th>
-              <th>مدين</th>
-              <th>دائن</th>
-              <th>رصيد</th>
-              <th>بيان</th>
-              <th>سند</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
+        return `
+          <tr class="${desc.includes("رصيد") ? "carry-row" : ""}">
+            <td>${formatDate(r.date)}</td>
+            <td class="debit">${debit > 0 ? formatNumber(debit) : "-"}</td>
+            <td class="credit">${credit > 0 ? formatNumber(credit) : "-"}</td>
+            <td class="${getBalanceClass(balance)}">${formatNumber(balance)}</td>
+            <td>${desc || "-"}</td>
+            <td><span class="receipt">${r.receipt_no || "-"}</span></td>
+          </tr>
+        `
+      }).join("")
 
-        <div class="summary-line">
-          مدين: ${formatNumber(debitTotal)} | دائن: ${formatNumber(creditTotal)} | رصيد: ${formatNumber(balance)}
+      html += `
+        <div class="year-card">
+          <div class="year-title">سنة ${year}</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>تاريخ</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>رصيد</th>
+                <th>بيان</th>
+                <th>سند</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+
+          <div class="summary-line">
+            مدين: ${formatNumber(debitTotal)} | دائن: ${formatNumber(creditTotal)} | رصيد: ${formatNumber(balance)}
+          </div>
         </div>
-      </div>
-    `
-  })
+      `
+    })
 
   container.innerHTML = html
 }
