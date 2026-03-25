@@ -9,7 +9,7 @@
 <style>
 body{
   margin:0;
-  font-family:-apple-system, BlinkMacSystemFont;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:linear-gradient(135deg,#edf2f7,#f7f9fc);
 }
 
@@ -43,6 +43,7 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:10px;
+  gap:10px;
 }
 
 .year-title{
@@ -104,6 +105,7 @@ tbody tr:hover{
   font-size:11px;
   font-weight:900;
   color:#2f6fed;
+  display:inline-block;
 }
 
 .date-chip{
@@ -113,6 +115,7 @@ tbody tr:hover{
   padding:5px 10px;
   border-radius:12px;
   font-size:11px;
+  display:inline-block;
 }
 
 td:nth-child(5){
@@ -194,6 +197,7 @@ td:nth-child(5){
   color:#fff;
   font-weight:bold;
   z-index:10;
+  cursor:pointer;
 }
 
 .back-bottom{
@@ -203,6 +207,7 @@ td:nth-child(5){
   transform:translateX(-50%);
   width:90%;
   max-width:400px;
+  z-index:10;
 }
 
 .back-bottom button{
@@ -213,6 +218,7 @@ td:nth-child(5){
   background:linear-gradient(135deg,#1f2d4a,#2b3d63);
   color:#fff;
   font-weight:bold;
+  cursor:pointer;
 }
 
 .pdf-header{
@@ -252,6 +258,7 @@ td:nth-child(5){
 .pdf-mode .app{
   max-width:900px !important;
   padding:30px !important;
+  padding-bottom:20px !important;
 }
 
 .pdf-mode table{
@@ -260,6 +267,28 @@ td:nth-child(5){
 
 .pdf-mode .summary-value{
   font-size:26px;
+}
+
+.pdf-mode .pdf-btn,
+.pdf-mode .back-bottom{
+  display:none !important;
+}
+
+.error-box,
+.empty-box{
+  padding:14px;
+  border-radius:14px;
+  font-weight:800;
+}
+
+.error-box{
+  color:#c62828;
+  background:#fff1f1;
+}
+
+.empty-box{
+  color:#7b8497;
+  background:#ffffffaa;
 }
 </style>
 </head>
@@ -273,7 +302,7 @@ td:nth-child(5){
   </div>
 
   <div class="pdf-header">
-    <img src="logo.png" class="pdf-logo" />
+    <img src="logo.png" class="pdf-logo" onerror="this.style.display='none'" />
     <div class="pdf-title">كشف حساب</div>
     <div class="pdf-tenant" id="pdfTenantName"></div>
     <div class="pdf-date" id="pdfDate"></div>
@@ -282,7 +311,7 @@ td:nth-child(5){
   <div id="container"></div>
 </div>
 
-<button class="pdf-btn" onclick="savePDF()">حفظ PDF</button>
+<button class="pdf-btn" id="pdfBtn" onclick="savePDF()">حفظ PDF</button>
 
 <div class="back-bottom">
   <button onclick="goBack()">رجوع</button>
@@ -293,229 +322,264 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
-const tenant = params.get("tenant") || localStorage.getItem('jabri_tenant_code')
+const tenant = params.get("tenant") || localStorage.getItem("jabri_tenant_code")
 const from = params.get("from")
 
 window.goBack = function(){
-  if(from === 'admin'){
-    window.location.href = 'admin.html'
-  } else if(document.referrer){
+  if(from === "admin"){
+    window.location.href = "admin.html"
+    return
+  }
+
+  if(window.history.length > 1){
     window.history.back()
-  } else {
-    window.location.href = 'index.html'
+    return
+  }
+
+  window.location.href = "index.html"
+}
+
+window.savePDF = async function(){
+  try{
+    document.body.classList.add("pdf-mode")
+
+    const element = document.querySelector(".app")
+    const tenantText = (document.getElementById("tenantName").innerText || "statement").trim()
+    const safeFileName = tenantText.replace(/[^\u0600-\u06FF\w\- ]/g, "").replace(/\s+/g, "_")
+
+    const opt = {
+      margin: 0.3,
+      filename: `statement_${safeFileName || "tenant"}.pdf`,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0
+      },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+    }
+
+    await html2pdf().set(opt).from(element).save()
+  } catch (err){
+    console.error("PDF error:", err)
+    alert("تعذر حفظ PDF")
+  } finally {
+    document.body.classList.remove("pdf-mode")
   }
 }
 
-window.savePDF = function(){
-  document.body.classList.add("pdf-mode")
-
-  const element = document.querySelector('.app')
-
-  const opt = {
-    margin: 0.3,
-    filename: 'statement.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 3, useCORS: true },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-  }
-
-  html2pdf().set(opt).from(element).save().then(() => {
-    document.body.classList.remove("pdf-mode")
-  }).catch(() => {
-    document.body.classList.remove("pdf-mode")
-  })
+function num(v){
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
 }
 
-function format(n){
-  return Number(n || 0)
+function displayNumber(v){
+  return num(v).toLocaleString("en-US")
 }
 
 function formatDate(dateStr){
   if(!dateStr) return "-"
   const d = new Date(dateStr)
-  if(isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-GB')
+  if(Number.isNaN(d.getTime())) return "-"
+  return d.toLocaleDateString("en-GB")
+}
+
+function getYear(dateStr){
+  const d = new Date(dateStr)
+  if(Number.isNaN(d.getTime())) return null
+  return d.getFullYear()
 }
 
 function getRowOrder(desc){
-  const text = String(desc || '')
-  if(text.includes('ايجار')) return 1
-  if(text.includes('معارف')) return 2
-  if(text.includes('رصيد سابق')) return 3
-  if(text.includes('دفعة')) return 4
+  const text = String(desc || "")
+  if(text.includes("ايجار")) return 1
+  if(text.includes("معارف")) return 2
+  if(text.includes("رصيد سابق")) return 3
+  if(text.includes("دفعة")) return 4
   return 9
 }
 
 function isCarryRow(desc){
-  return String(desc || '').includes('رصيد سابق')
+  return String(desc || "").includes("رصيد سابق")
 }
 
 document.addEventListener("DOMContentLoaded", load)
 
 async function load(){
+  const container = document.getElementById("container")
+  const tenantName = document.getElementById("tenantName")
+  const pdfTenantName = document.getElementById("pdfTenantName")
+  const pdfDate = document.getElementById("pdfDate")
 
   if(!tenant){
-    document.getElementById("container").innerHTML = "لا يوجد مستأجر"
+    container.innerHTML = `<div class="empty-box">لا يوجد مستأجر</div>`
     return
   }
 
-  document.getElementById("tenantName").innerText = tenant
-  document.getElementById("pdfTenantName").innerText = tenant
+  tenantName.innerText = tenant
+  pdfTenantName.innerText = tenant
+  pdfDate.innerText = "تاريخ الإصدار: " + new Date().toLocaleDateString("en-GB")
 
-  const today = new Date()
-  document.getElementById("pdfDate").innerText =
-    "تاريخ الإصدار: " + today.toLocaleDateString('en-GB')
+  let response
+  try{
+    response = await supabase
+      .from("tenant_transactions")
+      .select("*")
+      .eq("tenant_code", tenant)
+      .order("date", { ascending: true })
+  } catch(err){
+    console.error("Unexpected load error:", err)
+    container.innerHTML = `<div class="error-box">حصل خطأ غير متوقع أثناء تحميل البيانات</div>`
+    return
+  }
 
-  const { data, error } = await supabase
-    .from('tenant_transactions')
-    .select('*')
-    .eq('tenant_code', tenant)
-    .order('date', { ascending: true })
+  const { data, error } = response
 
   if(error){
-    console.log('Supabase error:', error)
-    document.getElementById("container").innerHTML = `
-      <div style="color:#c62828;font-weight:800;padding:12px;">
-        ${error.message}
-      </div>
-    `
+    console.error("Supabase error:", error)
+    container.innerHTML = `<div class="error-box">${error.message || "خطأ في قراءة البيانات"}</div>`
     return
   }
 
-  if(!data || data.length === 0){
-    document.getElementById("container").innerHTML = `
-      <div style="color:#7b8497;font-weight:800;padding:12px;">
-        لا توجد بيانات لهذا المستأجر
-      </div>
-    `
+  if(!Array.isArray(data) || data.length === 0){
+    container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
+    return
+  }
+
+  const validRows = data
+    .map(r => ({
+      ...r,
+      debit: num(r.debit),
+      credit: num(r.credit),
+      description: r.description || "",
+      receipt_no: r.receipt_no || "-"
+    }))
+    .filter(r => getYear(r.date) !== null)
+
+  if(validRows.length === 0){
+    container.innerHTML = `<div class="empty-box">لا توجد تواريخ صحيحة لعرض كشف الحساب</div>`
     return
   }
 
   const grouped = {}
 
-  data.forEach(r=>{
-    const year = new Date(r.date).getFullYear()
+  validRows.forEach(r => {
+    const year = getYear(r.date)
     if(!grouped[year]) grouped[year] = []
-
-    grouped[year].push({
-      ...r,
-      debit: Number(r.debit || 0),
-      credit: Number(r.credit || 0)
-    })
+    grouped[year].push(r)
   })
 
   let html = ""
   let runningBalance = 0
 
-  Object.keys(grouped).sort((a,b) => a - b).forEach(year => {
+  Object.keys(grouped)
+    .sort((a,b) => Number(a) - Number(b))
+    .forEach(year => {
 
-    const rows = grouped[year]
+      const rows = grouped[year]
 
-    rows.sort((a,b)=>{
-      const d = new Date(a.date) - new Date(b.date)
-      if(d !== 0) return d
-      return getRowOrder(a.description) - getRowOrder(b.description)
-    })
+      rows.sort((a,b)=>{
+        const d1 = new Date(a.date).getTime()
+        const d2 = new Date(b.date).getTime()
+        if(d1 !== d2) return d1 - d2
+        return getRowOrder(a.description) - getRowOrder(b.description)
+      })
 
-    let totalDebit = 0
-    let totalCredit = 0
+      let totalDebit = 0
+      let totalCredit = 0
 
-    rows.forEach(r=>{
-      totalDebit += r.debit
-      totalCredit += r.credit
+      rows.forEach(r=>{
+        totalDebit += r.debit
+        totalCredit += r.credit
 
-      const carryRow = isCarryRow(r.description)
+        if(!isCarryRow(r.description)){
+          runningBalance += r.debit - r.credit
+        }
 
-      if(!carryRow){
-        runningBalance += r.debit - r.credit
+        r.balance = runningBalance
+      })
+
+      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
+
+      let color = "red"
+      let status = "غير مسدد"
+      let statusClass = "status-unpaid"
+
+      if(endYearBalance <= 0){
+        color = "green"
+        status = "مسدد"
+        statusClass = "status-paid"
+      } else if(totalCredit > 0){
+        color = "orange"
+        status = "سداد جزئي"
+        statusClass = "status-partial"
       }
 
-      r.balance = runningBalance
-    })
+      html += `
+        <div class="year-card ${color}">
+          <div class="year-header">
+            <span class="year-title">${year}</span>
+            <span class="status-box ${statusClass}">${status}</span>
+          </div>
 
-    const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>مدين</th>
+                <th>دائن</th>
+                <th>الرصيد</th>
+                <th>البيان</th>
+                <th>رقم السند</th>
+              </tr>
+            </thead>
+            <tbody>
+      `
 
-    let color = 'red'
-    let status = 'غير مسدد'
-    let statusClass = 'status-unpaid'
+      rows.forEach(r=>{
+        const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
 
-    if(endYearBalance <= 0){
-      color = 'green'
-      status = 'مسدد'
-      statusClass = 'status-paid'
-    } else if(totalCredit > 0){
-      color = 'orange'
-      status = 'سداد جزئي'
-      statusClass = 'status-partial'
-    }
-
-    const statusHTML = `<span class="status-box ${statusClass}">${status}</span>`
-
-    html += `
-    <div class="year-card ${color}">
-      <div class="year-header">
-        <span class="year-title">${year}</span>
-        ${statusHTML}
-      </div>
-
-      <table>
-        <thead>
+        html += `
           <tr>
-            <th>التاريخ</th>
-            <th>مدين</th>
-            <th>دائن</th>
-            <th>الرصيد</th>
-            <th>البيان</th>
-            <th>رقم السند</th>
+            <td><span class="date-chip">${formatDate(r.date)}</span></td>
+            <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
+            <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
+            <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
+            <td>${r.description || "-"}</td>
+            <td><span class="receipt">${r.receipt_no}</span></td>
           </tr>
-        </thead>
-        <tbody>
-    `
-
-    rows.forEach(r=>{
-      let balanceClass = r.balance > 0 ? 'balance-positive' : 'balance-zero'
+        `
+      })
 
       html += `
-      <tr>
-        <td><span class="date-chip">${formatDate(r.date)}</span></td>
-        <td class="debit">${r.debit ? format(r.debit) : "-"}</td>
-        <td class="credit">${r.credit ? format(r.credit) : "-"}</td>
-        <td class="balance ${balanceClass}">${format(r.balance)}</td>
-        <td>${r.description || "-"}</td>
-        <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-      </tr>
+            </tbody>
+          </table>
+
+          <div class="summary">
+            <div class="summary-card summary-debit">
+              <div class="summary-label">إجمالي المدين</div>
+              <div class="summary-value">${displayNumber(totalDebit)}</div>
+            </div>
+
+            <div class="summary-card summary-credit">
+              <div class="summary-label">إجمالي الدائن</div>
+              <div class="summary-value">${displayNumber(totalCredit)}</div>
+            </div>
+
+            <div class="summary-card summary-balance">
+              <div class="summary-label">الرصيد</div>
+              <div class="summary-value">${displayNumber(endYearBalance)}</div>
+            </div>
+          </div>
+        </div>
       `
     })
 
-    html += `
-        </tbody>
-      </table>
-
-      <div class="summary">
-        <div class="summary-card summary-debit">
-          <div class="summary-label">إجمالي المدين</div>
-          <div class="summary-value">${format(totalDebit)}</div>
-        </div>
-
-        <div class="summary-card summary-credit">
-          <div class="summary-label">إجمالي الدائن</div>
-          <div class="summary-value">${format(totalCredit)}</div>
-        </div>
-
-        <div class="summary-card summary-balance">
-          <div class="summary-label">الرصيد</div>
-          <div class="summary-value">${format(endYearBalance)}</div>
-        </div>
-      </div>
-    </div>
-    `
-  })
-
-  document.getElementById("container").innerHTML = html
+  container.innerHTML = html
 }
 </script>
 
