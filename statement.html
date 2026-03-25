@@ -2,253 +2,108 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>كشف حساب مجمع جبري</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>كشف حساب</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-:root{
-  --bg1:#edf2f7;
-  --bg2:#f7f9fc;
-  --card:rgba(255,255,255,0.58);
-  --card-strong:rgba(255,255,255,0.72);
-  --line:rgba(255,255,255,0.65);
-  --text:#1d2940;
-  --muted:#6b7280;
-  --gold:#c9a46b;
-  --gold-2:#b89155;
-  --blue:#2f6fed;
-  --blue-soft:rgba(47,111,237,0.08);
-  --red:#e05252;
-  --green:#18a957;
-  --shadow:0 12px 32px rgba(20,30,50,0.08);
-  --radius:22px;
-}
-*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:
-    radial-gradient(circle at top right, rgba(201,164,107,0.10), transparent 22%),
-    linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:var(--text);
+  font-family:-apple-system;
+  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
 }
+
 .app{
-  max-width:430px;
+  max-width:420px;
   margin:auto;
-  padding:16px;
-  padding-bottom:26px;
+  padding:15px;
 }
-.glass-card{
-  background:var(--card);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-}
-.hero{
-  padding:18px 16px;
-  margin-bottom:14px;
+
+.card{
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(14px);
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
   text-align:center;
 }
-.hero h2{
-  margin:0;
-  font-size:20px;
-  font-weight:900;
-}
-.hero #tenantName{
-  margin-top:8px;
-  font-size:16px;
-  font-weight:900;
-  color:var(--blue);
-}
-.hero-sub{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:12px;
-  font-weight:700;
-}
-.debug-box{
-  margin-top:10px;
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.6;
-}
+
 .year-card{
-  padding:14px;
-  margin-bottom:14px;
+  background:rgba(255,255,255,0.7);
+  backdrop-filter:blur(14px);
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
 }
-.year-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
+
 .year-title{
   background:#1d2940;
   color:#fff;
-  border-radius:999px;
-  padding:7px 14px;
-  font-size:13px;
-  font-weight:900;
+  padding:6px 12px;
+  border-radius:20px;
+  font-weight:bold;
 }
-.status-chip{
-  border-radius:999px;
-  padding:7px 12px;
-  font-size:12px;
-  font-weight:900;
-  white-space:nowrap;
-}
-.status-paid{ color:var(--green); background:rgba(24,169,87,0.10); }
-.status-partial{ color:#b96a00; background:rgba(214,138,29,0.12); }
-.status-unpaid{ color:var(--red); background:rgba(224,82,82,0.10); }
 
-.table-wrap{
-  overflow:hidden;
-  border-radius:18px;
-  background:var(--card-strong);
-  border:1px solid rgba(255,255,255,0.82);
-}
 table{
   width:100%;
   border-collapse:collapse;
+  margin-top:10px;
 }
+
 th,td{
-  padding:9px 6px;
-  font-size:11px;
-  text-align:center;
-  border-bottom:1px solid rgba(20,30,50,0.06);
-}
-th{
-  background:rgba(241,243,247,0.95);
-  color:#111;
-  font-weight:900;
-}
-td.desc{
-  text-align:right;
-  color:var(--text);
-  font-weight:800;
-}
-.debit{ color:var(--red); font-weight:900; }
-.credit{ color:var(--green); font-weight:900; }
-.balance{ color:var(--text); font-weight:900; }
-.balance-zero{ color:var(--green); }
-.balance-negative{ color:var(--green); }
-.receipt{
-  display:inline-block;
-  min-width:34px;
-  padding:4px 8px;
-  border-radius:10px;
-  background:#eef4ff;
-  color:var(--blue);
-  font-weight:900;
-}
-.date-chip{
-  display:inline-block;
-  background:var(--blue-soft);
-  color:var(--blue);
-  padding:4px 8px;
-  border-radius:10px;
-  font-weight:900;
-}
-.carry-row td{ background:rgba(29,41,64,0.035); }
-.final-row td{
-  background:rgba(201,164,107,0.14);
-  font-weight:900;
-}
-.summary{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:12px;
-}
-.summary-card{
-  background:rgba(255,255,255,0.55);
-  backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.78);
-  border-radius:16px;
-  padding:12px 8px;
+  padding:8px;
+  font-size:12px;
+  border-bottom:1px solid #eee;
   text-align:center;
 }
-.summary-label{
-  font-size:10px;
-  font-weight:900;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-.summary-value{
-  font-size:15px;
-  font-weight:900;
-}
-.summary-debit .summary-value{ color:var(--red); }
-.summary-credit .summary-value{ color:var(--green); }
-.summary-balance .summary-value{ color:var(--text); }
+
+.debit{color:#e05252;font-weight:bold;}
+.credit{color:#18a957;font-weight:bold;}
+.balance{font-weight:bold;}
 
 .bottom-actions{
   display:flex;
-  flex-direction:row-reverse;
-  gap:12px;
-  margin-top:18px;
+  gap:10px;
+  margin-top:15px;
 }
+
 button{
+  flex:1;
+  height:45px;
   border:none;
-  cursor:pointer;
-  height:52px;
-  border-radius:16px;
-  font-size:15px;
-  font-weight:900;
+  border-radius:12px;
+  font-weight:bold;
 }
-.pdf-btn{
-  flex:1.2;
-  color:#fff;
-  background:linear-gradient(135deg,var(--gold),var(--gold-2));
-}
-.back-btn{
-  flex:0.8;
-  color:#fff;
-  background:linear-gradient(135deg,#1f2d4a,#2b3d63);
-}
-.error-box,.empty-box{
-  padding:16px;
-  text-align:center;
-  font-weight:900;
-  border-radius:18px;
-}
-.error-box{
-  color:#c62828;
-  background:#fff1f1;
-}
-.empty-box{
-  color:var(--muted);
-  background:rgba(255,255,255,0.72);
-}
-.pdf-mode .bottom-actions{ display:none !important; }
-.pdf-mode .app{ max-width:920px !important; }
-.pdf-mode table th,
-.pdf-mode table td{
-  font-size:14px;
-  padding:10px 8px;
+
+.pdf-btn{background:#c9a46b;color:#fff;}
+.back-btn{background:#1d2940;color:#fff;}
+
+.debug{
+  font-size:11px;
+  color:#777;
+  margin-top:5px;
 }
 </style>
 </head>
+
 <body>
 
 <div class="app">
-  <div class="hero glass-card">
-    <h2>كشف حساب مستأجر</h2>
-    <div id="tenantName">جاري التحميل...</div>
-    <div class="hero-sub">مجمع جبري الصناعي التجاري</div>
-    <div id="debugBox" class="debug-box"></div>
-  </div>
 
-  <div id="container"></div>
+<div class="card">
+  <h3>كشف حساب</h3>
+  <div id="tenantName"></div>
+  <div id="debug" class="debug"></div>
+</div>
 
-  <div class="bottom-actions">
-    <button class="pdf-btn" onclick="savePDF()">تحميل كشف PDF</button>
-    <button class="back-btn" onclick="history.back()">رجوع</button>
-  </div>
+<div id="container"></div>
+
+<div class="bottom-actions">
+  <button class="pdf-btn" onclick="savePDF()">PDF</button>
+  <button class="back-btn" onclick="history.back()">رجوع</button>
+</div>
+
 </div>
 
 <script type="module">
@@ -259,369 +114,161 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-function cleanNum(v){
-  if(typeof v === 'number') return Number.isFinite(v) ? v : 0
-  if(v === null || v === undefined || v === "" || v === "NaN") return 0
-  const cleaned = String(v).replace(/[^\d.-]/g, '')
-  const n = parseFloat(cleaned)
-  return Number.isFinite(n) ? n : 0
-}
-
-function normalizeText(text){
-  return String(text || "").trim()
-}
-
-function parseDateValue(value){
-  if(!value) return { valid:false, ts:0, year:null, month:null, day:null }
-
-  const text = String(value).trim()
-
-  const iso = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
-  if(iso){
-    const year = Number(iso[1])
-    const month = Number(iso[2])
-    const day = Number(iso[3])
-    return { valid:true, ts:new Date(year, month - 1, day).getTime(), year, month, day }
-  }
-
-  const slash = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
-  if(slash){
-    let day = Number(slash[1])
-    let month = Number(slash[2])
-    let year = Number(slash[3])
-    if(year < 100) year += 2000
-    return { valid:true, ts:new Date(year, month - 1, day).getTime(), year, month, day }
-  }
-
-  const d = new Date(text)
-  if(!Number.isNaN(d.getTime())){
-    return { valid:true, ts:d.getTime(), year:d.getFullYear(), month:d.getMonth() + 1, day:d.getDate() }
-  }
-
-  return { valid:false, ts:0, year:null, month:null, day:null }
-}
-
-function formatDate(dateStr){
-  const p = parseDateValue(dateStr)
-  if(!p.valid) return "-"
-  return `${String(p.day).padStart(2,"0")}/${String(p.month).padStart(2,"0")}/${p.year}`
-}
-
-function formatNumber(v){
-  return cleanNum(v).toLocaleString("en-US")
-}
-
-function getYear(dateStr){
-  const p = parseDateValue(dateStr)
-  return p.valid ? p.year : null
-}
-
-function isCarryRow(description){
-  return normalizeText(description).includes("رصيد")
-}
-
-function isPaymentByNotes(notes){
-  const t = normalizeText(notes)
-  return (
-    t.includes("دفعة") ||
-    t.includes("سداد") ||
-    t.includes("تسوية") ||
-    t.includes("إغلاق") ||
-    t.includes("خصم")
-  )
-}
-
-function getCarryBaseYear(description){
-  const text = normalizeText(description)
-  const match = text.match(/عام\s*(\d{4})/)
-  return match ? Number(match[1]) : null
-}
-
-function getSectionYear(row){
-  const description = normalizeText(row.description)
-  const dateYear = getYear(row.date)
-
-  if(isCarryRow(description)){
-    const baseYear = getCarryBaseYear(description)
-    if(baseYear) return baseYear + 1
-  }
-
-  return dateYear
-}
-
-function getBalanceClass(balance){
-  if(Math.abs(balance) < 0.01) return "balance balance-zero"
-  if(balance < 0) return "balance balance-negative"
-  return "balance"
-}
-
-function getStatus(endBalance, totalCredit){
-  if(Math.abs(endBalance) < 0.01){
-    return { label:"مسدد", className:"status-chip status-paid" }
-  }
-  if(totalCredit > 0){
-    return { label:"سداد جزئي", className:"status-chip status-partial" }
-  }
-  return { label:"غير مسدد", className:"status-chip status-unpaid" }
-}
-
-function getRowOrder(row){
-  if(row.isCarry) return 0
-  if(row.creditVal > 0) return 3
-  return 1
-}
-
-function buildRow(r, index){
-  const description = normalizeText(r.description)
-  const notes = normalizeText(r.notes)
-  const receiptNo = normalizeText(r.receipt_no || "-")
-
-  const rawDebit = cleanNum(r.debit)
-  const rawCredit = cleanNum(r.credit)
-
-  const isCarry = isCarryRow(description)
-
-  // description فقط للمعلومة
-  // notes فقط للمساعدة إذا دفعة مخزنة في debit
-  const paymentStoredInDebit =
-    !isCarry &&
-    rawCredit === 0 &&
-    rawDebit > 0 &&
-    isPaymentByNotes(notes)
-
-  let debitVal = rawDebit
-  let creditVal = rawCredit
-
-  if(paymentStoredInDebit){
-    debitVal = 0
-    creditVal = rawDebit
-  }
-
-  return {
-    ...r,
-    originalIndex:index,
-    parsedDate:parseDateValue(r.date),
-    description,
-    notes,
-    receipt_no:receiptNo,
-    rawDebit,
-    rawCredit,
-    debitVal,
-    creditVal,
-    isCarry,
-    sectionYear:getSectionYear(r),
-    balance:0
-  }
-}
-
+// 🔥 جلب tenant code من كل مكان
 function getTenantCode(){
+
   const params = new URLSearchParams(window.location.search)
-  return (
+
+  let code =
     params.get("tenant") ||
+    params.get("tenant_code") ||
     params.get("code") ||
     localStorage.getItem("jabri_tenant_code") ||
     localStorage.getItem("tenant_code") ||
-    localStorage.getItem("tenantCode") ||
-    ""
-  ).trim()
+    localStorage.getItem("tenantCode")
+
+  if(code && code.trim()) return code.trim()
+
+  // 🔥 fallback من object
+  const keys = ["tenant","user","currentTenant","loggedTenant"]
+
+  for(const k of keys){
+    try{
+      const obj = JSON.parse(localStorage.getItem(k))
+      if(obj){
+        const c = obj.tenant_code || obj.code || obj.id
+        if(c) return String(c).trim()
+      }
+    }catch(e){}
+  }
+
+  return ""
+}
+
+function num(v){
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+function formatDate(d){
+  const x = new Date(d)
+  return isNaN(x) ? "-" : x.toLocaleDateString("en-GB")
 }
 
 async function load(){
+
   const container = document.getElementById("container")
-  const tenantDisplay = document.getElementById("tenantName")
-  const debugBox = document.getElementById("debugBox")
+  const tenantName = document.getElementById("tenantName")
+  const debug = document.getElementById("debug")
 
-  const tenantCode = getTenantCode()
+  const tenant = getTenantCode()
 
-  debugBox.innerHTML = `
-    tenant param/localStorage: <strong>${tenantCode || "(empty)"}</strong>
-  `
+  debug.innerText = "tenant code: " + tenant
 
-  if(!tenantCode){
-    container.innerHTML = "<div class='empty-box'>لا يوجد كود مستأجر داخل الرابط أو localStorage</div>"
+  if(!tenant){
+    container.innerHTML = "❌ لا يوجد tenant code"
     return
   }
 
-  tenantDisplay.innerText = tenantCode
+  tenantName.innerText = tenant
 
-  let result
-  try{
-    result = await supabase
-      .from("tenant_transactions")
-      .select("*")
-      .eq("tenant_code", tenantCode)
-      .order("date", { ascending:true })
-  } catch(err){
-    console.error(err)
-    container.innerHTML = "<div class='error-box'>حصل خطأ أثناء قراءة البيانات</div>"
-    return
-  }
-
-  const { data, error } = result
+  // 🔥 جلب البيانات
+  const {data,error} = await supabase
+    .from("tenant_transactions")
+    .select("*")
+    .ilike("tenant_code", tenant)
 
   if(error){
-    console.error(error)
-    container.innerHTML = `<div class='error-box'>خطأ في تحميل البيانات: ${error.message}</div>`
+    container.innerHTML = error.message
     return
   }
 
-  debugBox.innerHTML += `<br>rows found: <strong>${Array.isArray(data) ? data.length : 0}</strong>`
+  debug.innerText += " | rows: " + data.length
 
   if(!data || data.length === 0){
-    container.innerHTML = "<div class='empty-box'>No data found for this tenant code</div>"
+    container.innerHTML = "⚠️ لا يوجد بيانات"
     return
   }
 
-  const rows = data
-    .map(buildRow)
-    .filter(r => r.sectionYear !== null)
+  // ترتيب
+  data.sort((a,b)=> new Date(a.date) - new Date(b.date))
 
-  if(rows.length === 0){
-    container.innerHTML = "<div class='empty-box'>البيانات موجودة لكن التواريخ غير صالحة للعرض</div>"
-    return
-  }
-
-  rows.sort((a, b) => {
-    if(a.sectionYear !== b.sectionYear) return a.sectionYear - b.sectionYear
-    if(a.isCarry && !b.isCarry) return -1
-    if(!a.isCarry && b.isCarry) return 1
-
-    const aTs = a.parsedDate.valid ? a.parsedDate.ts : 0
-    const bTs = b.parsedDate.valid ? b.parsedDate.ts : 0
-    if(aTs !== bTs) return aTs - bTs
-
-    const orderDiff = getRowOrder(a) - getRowOrder(b)
-    if(orderDiff !== 0) return orderDiff
-
-    return a.originalIndex - b.originalIndex
-  })
-
+  // تجميع حسب السنة
   const grouped = {}
-  rows.forEach(r => {
-    if(!grouped[r.sectionYear]) grouped[r.sectionYear] = []
-    grouped[r.sectionYear].push(r)
+
+  data.forEach(r=>{
+    const y = new Date(r.date).getFullYear()
+    if(!grouped[y]) grouped[y]=[]
+    grouped[y].push(r)
   })
 
-  let html = ""
+  let html=""
 
-  Object.keys(grouped)
-    .sort((a,b) => Number(a) - Number(b))
-    .forEach(year => {
-      const yearRows = grouped[year]
+  Object.keys(grouped).forEach(year=>{
 
-      let openingBalance = 0
-      let movementDebit = 0
-      let movementCredit = 0
-      let runningBalance = 0
+    let balance = 0
+    let debitTotal = 0
+    let creditTotal = 0
 
-      yearRows.forEach(r => {
-        if(r.isCarry){
-          openingBalance = r.rawDebit > 0 ? r.rawDebit : (r.debitVal - r.creditVal)
-          runningBalance = openingBalance
-          r.balance = runningBalance
-          return
-        }
+    const rows = grouped[year].map((r,i)=>{
 
-        movementDebit += r.debitVal
-        movementCredit += r.creditVal
+      let debit = num(r.debit)
+      let credit = num(r.credit)
 
-        runningBalance += r.debitVal
-        runningBalance -= r.creditVal
+      // 🔥 فقط لو رصيد افتتاحي
+      if(i === 0 && String(r.description).includes("رصيد")){
+        balance = debit
+      }else{
+        balance += debit - credit
+      }
 
-        r.balance = runningBalance
-      })
+      debitTotal += debit
+      creditTotal += credit
 
-      const statementDebit = openingBalance + movementDebit
-      const statementCredit = movementCredit
-      const endBalance = yearRows.length ? yearRows[yearRows.length - 1].balance : 0
-      const status = getStatus(endBalance, statementCredit)
+      return `
+      <tr>
+        <td>${formatDate(r.date)}</td>
+        <td class="debit">${debit || "-"}</td>
+        <td class="credit">${credit || "-"}</td>
+        <td class="balance">${balance}</td>
+        <td>${r.description || "-"}</td>
+        <td>${r.receipt_no || "-"}</td>
+      </tr>`
+    }).join("")
 
-      const tableRows = yearRows.map(r => `
-        <tr class="${r.isCarry ? 'carry-row' : ''}">
-          <td><span class="date-chip">${formatDate(r.date)}</span></td>
-          <td class="debit">${r.debitVal > 0 ? formatNumber(r.debitVal) : "-"}</td>
-          <td class="credit">${r.creditVal > 0 ? formatNumber(r.creditVal) : "-"}</td>
-          <td class="${getBalanceClass(r.balance)}">${formatNumber(r.balance)}</td>
-          <td class="desc">${r.description || "-"}</td>
-          <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-        </tr>
-      `).join("")
+    html += `
+    <div class="year-card">
+      <div class="year-title">سنة ${year}</div>
 
-      html += `
-        <div class="year-card glass-card">
-          <div class="year-head">
-            <span class="year-title">سنة ${year}</span>
-            <span class="${status.className}">${status.label}</span>
-          </div>
+      <table>
+        <thead>
+          <tr>
+            <th>تاريخ</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>رصيد</th>
+            <th>بيان</th>
+            <th>سند</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>التاريخ</th>
-                  <th>مدين</th>
-                  <th>دائن</th>
-                  <th>الرصيد</th>
-                  <th>البيان</th>
-                  <th>السند</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tableRows}
-                <tr class="final-row">
-                  <td>-</td>
-                  <td class="debit">${formatNumber(statementDebit)}</td>
-                  <td class="credit">${formatNumber(statementCredit)}</td>
-                  <td class="${getBalanceClass(endBalance)}">${formatNumber(endBalance)}</td>
-                  <td class="desc">رصيد مستحق ${year}</td>
-                  <td><span class="receipt">-</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="summary">
-            <div class="summary-card summary-debit">
-              <div class="summary-label">إجمالي المدين</div>
-              <div class="summary-value">${formatNumber(statementDebit)}</div>
-            </div>
-            <div class="summary-card summary-credit">
-              <div class="summary-label">إجمالي الدائن</div>
-              <div class="summary-value">${formatNumber(statementCredit)}</div>
-            </div>
-            <div class="summary-card summary-balance">
-              <div class="summary-label">رصيد السنة</div>
-              <div class="summary-value">${formatNumber(endBalance)}</div>
-            </div>
-          </div>
-        </div>
-      `
-    })
+      <div style="margin-top:10px;font-weight:bold">
+        مدين: ${debitTotal} | دائن: ${creditTotal} | رصيد: ${balance}
+      </div>
+    </div>`
+  })
 
   container.innerHTML = html
 }
 
 window.savePDF = function(){
-  try{
-    document.body.classList.add("pdf-mode")
-    const element = document.querySelector(".app")
-    const opt = {
-      margin:0.2,
-      filename:'كشف_حساب.pdf',
-      image:{ type:'jpeg', quality:0.98 },
-      html2canvas:{ scale:2, useCORS:true },
-      jsPDF:{ unit:'in', format:'a4', orientation:'portrait' }
-    }
-    html2pdf().set(opt).from(element).save().then(() => {
-      document.body.classList.remove("pdf-mode")
-    })
-  } catch(err){
-    document.body.classList.remove("pdf-mode")
-    alert("تعذر إنشاء PDF")
-  }
+  html2pdf().from(document.body).save("statement.pdf")
 }
 
 load()
 </script>
+
 </body>
 </html>
