@@ -7,133 +7,286 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+:root{
+  --bg-1:#eef2f7;
+  --bg-2:#f8fafc;
+  --navy:#1d2940;
+  --navy-2:#243552;
+  --gold:#c9a46b;
+  --gold-2:#b89155;
+  --line:#e8edf4;
+  --text:#1d2940;
+  --muted:#7b8497;
+  --white:rgba(255,255,255,0.72);
+  --white-strong:rgba(255,255,255,0.92);
+  --red:#e05252;
+  --green:#18a957;
+  --orange:#b96a00;
+  --soft-red:#fff3f3;
+  --soft-green:#edf8f1;
+  --soft-orange:#fff7ec;
+  --soft-blue:#eef4ff;
+}
+
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
+  background:
+    radial-gradient(circle at top right, rgba(201,164,107,0.10), transparent 24%),
+    linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  color:var(--text);
 }
 
 .app{
-  max-width:420px;
+  max-width:460px;
   margin:auto;
-  padding:15px;
-  padding-bottom:20px;
+  padding:16px;
+  padding-bottom:24px;
 }
 
 .card{
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(14px);
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
+  background:var(--white);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.8);
+  border-radius:24px;
+  padding:18px 16px;
+  margin-bottom:16px;
+  box-shadow:0 14px 40px rgba(17,24,39,0.08);
+}
+
+.title-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.page-title{
+  margin:0;
+  font-size:22px;
+  font-weight:900;
+  color:var(--navy);
+  letter-spacing:-0.3px;
+}
+
+.title-badge{
+  background:linear-gradient(135deg,var(--gold),var(--gold-2));
+  color:#fff;
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:0 8px 18px rgba(185,145,85,0.25);
+}
+
+.tenant-name-main{
+  font-size:24px;
+  font-weight:900;
+  color:var(--navy);
+  margin:14px 0 4px;
+  line-height:1.2;
+  letter-spacing:-0.4px;
+}
+
+.tenant-code-sub{
+  font-size:12px;
+  font-weight:800;
+  color:var(--muted);
+  letter-spacing:0.4px;
 }
 
 .year-card{
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
+  background:rgba(255,248,238,0.68);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.8);
+  border-radius:24px;
+  padding:14px;
+  margin-bottom:16px;
+  box-shadow:0 14px 38px rgba(15,23,42,0.06);
 }
 
-.green{ background:#edf8f1; }
-.orange{ background:#fff6ea; }
-.red{ background:#fff1f1; }
+.year-card.green{
+  background:linear-gradient(180deg,rgba(237,248,241,0.88),rgba(255,255,255,0.72));
+}
+
+.year-card.orange{
+  background:linear-gradient(180deg,rgba(255,246,234,0.92),rgba(255,255,255,0.72));
+}
+
+.year-card.red{
+  background:linear-gradient(180deg,rgba(255,241,241,0.88),rgba(255,255,255,0.72));
+}
 
 .year-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px;
   gap:10px;
+  margin-bottom:12px;
+}
+
+.header-side{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
 }
 
 .year-title{
-  background:#1d2940;
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
   color:#fff;
-  padding:6px 14px;
-  border-radius:20px;
-  font-weight:bold;
-}
-
-.tenant-name-main{
-  font-size:22px;
-  font-weight:900;
-  color:#1d2940;
-  margin-bottom:6px;
-}
-
-.tenant-code-sub{
+  padding:7px 15px;
+  border-radius:999px;
   font-size:13px;
-  font-weight:800;
-  color:#7b8497;
+  font-weight:900;
+  min-width:58px;
+  text-align:center;
+  box-shadow:0 8px 18px rgba(29,41,64,0.18);
+}
+
+.status-box{
+  min-width:72px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  text-align:center;
+  display:inline-block;
+}
+
+.status-paid{
+  background:var(--soft-green);
+  color:var(--green);
+  border:1px solid rgba(24,169,87,0.14);
+}
+
+.status-partial{
+  background:var(--soft-orange);
+  color:var(--orange);
+  border:1px solid rgba(185,106,0,0.14);
+}
+
+.status-unpaid{
+  background:var(--soft-red);
+  color:var(--red);
+  border:1px solid rgba(224,82,82,0.14);
+}
+
+.table-shell{
+  background:rgba(255,255,255,0.72);
+  border:1px solid rgba(255,255,255,0.95);
+  border-radius:18px;
+  padding:6px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
 table{
   width:100%;
-  border-collapse:collapse;
-  background:rgba(255,255,255,0.7);
-  border-radius:14px;
-  overflow:hidden;
+  border-collapse:separate;
+  border-spacing:0 4px;
 }
 
-th, td{
-  padding:8px;
-  font-size:12px;
+thead th{
+  background:#f3f6fa;
+  color:#2d3748;
+  font-size:11px;
+  font-weight:900;
   text-align:center;
-  border-bottom:1px solid #eee;
+  padding:8px 6px;
+  border:none;
 }
 
-th{
-  background:#f1f3f7;
+thead th:first-child{
+  border-top-right-radius:12px;
+  border-bottom-right-radius:12px;
+}
+thead th:last-child{
+  border-top-left-radius:12px;
+  border-bottom-left-radius:12px;
+}
+
+tbody tr{
+  background:rgba(255,255,255,0.92);
+  box-shadow:0 3px 10px rgba(17,24,39,0.03);
 }
 
 tbody tr:hover{
-  background:rgba(47,111,237,0.05);
-  transition:0.2s;
+  background:#fbfdff;
+  transition:0.2s ease;
+}
+
+tbody td{
+  padding:6px 6px;
+  font-size:12px;
+  text-align:center;
+  border:none;
+  line-height:1.18;
+  vertical-align:middle;
+}
+
+tbody td:first-child{
+  border-top-right-radius:12px;
+  border-bottom-right-radius:12px;
+}
+
+tbody td:last-child{
+  border-top-left-radius:12px;
+  border-bottom-left-radius:12px;
 }
 
 .debit{
-  color:#e05252;
-  font-weight:bold;
-  font-size:13px;
+  color:var(--red);
+  font-weight:900;
+  font-size:12px;
 }
 
 .credit{
-  color:#18a957;
-  font-weight:bold;
-  font-size:13px;
+  color:var(--green);
+  font-weight:900;
+  font-size:12px;
 }
 
 .balance{
   font-weight:900;
-  font-size:14px;
+  font-size:13px;
+  direction:ltr;
+  unicode-bidi:isolate;
 }
 
-.balance-positive{ color:#e05252; }
-.balance-zero{ color:#18a957; }
+.balance-positive{ color:var(--red); }
+.balance-negative{ color:var(--orange); }
+.balance-zero{ color:var(--green); }
+
+.desc-cell{
+  font-weight:800;
+  color:var(--navy);
+  line-height:1.22;
+}
 
 .receipt{
-  background:#eef4ff;
-  padding:5px 10px;
-  border-radius:12px;
-  font-size:11px;
-  font-weight:900;
+  background:var(--soft-blue);
   color:#2f6fed;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
   display:inline-block;
+  min-width:40px;
 }
 
 .date-chip{
   background:rgba(47,111,237,0.08);
   color:#2f6fed;
-  font-weight:800;
-  padding:5px 10px;
-  border-radius:12px;
-  font-size:11px;
+  font-weight:900;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:10px;
   display:inline-block;
-}
-
-td:nth-child(5){
-  font-weight:700;
-  color:#1d2940;
+  white-space:nowrap;
 }
 
 .summary{
@@ -144,96 +297,75 @@ td:nth-child(5){
 }
 
 .summary-card{
-  background:rgba(255,255,255,0.55);
-  backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.7);
-  box-shadow:0 8px 20px rgba(0,0,0,0.06);
-  border-radius:16px;
+  background:rgba(255,255,255,0.8);
+  border:1px solid rgba(255,255,255,0.95);
+  border-radius:18px;
   padding:12px 10px;
   text-align:center;
+  box-shadow:0 10px 22px rgba(17,24,39,0.05);
 }
 
 .summary-label{
-  font-size:12px;
-  font-weight:800;
-  color:#555;
+  font-size:11px;
+  font-weight:900;
+  color:#5d6678;
   margin-bottom:6px;
 }
 
 .summary-value{
-  font-size:22px;
+  font-size:18px;
   font-weight:900;
+  letter-spacing:-0.3px;
 }
 
-.summary-debit .summary-value{ color:#e05252; }
-.summary-credit .summary-value{ color:#18a957; }
-.summary-balance .summary-value{ color:#1d2940; }
-
-.status-box{
-  min-width:70px;
-  padding:6px 12px;
-  border-radius:10px;
-  font-size:12px;
-  font-weight:900;
-  text-align:center;
-  display:inline-block;
-}
-
-.status-paid{
-  background:#edf8f1;
-  color:#18a957;
-}
-
-.status-partial{
-  background:rgba(214,138,29,0.12);
-  color:#b96a00;
-  border:1px solid rgba(214,138,29,0.25);
-  box-shadow:0 4px 10px rgba(214,138,29,0.08);
-}
-
-.status-unpaid{
-  background:#fff1f1;
-  color:#e05252;
-}
+.summary-debit .summary-value{ color:var(--red); }
+.summary-credit .summary-value{ color:var(--green); }
+.summary-balance .summary-value{ color:var(--navy); }
 
 .bottom-actions{
   display:flex;
   flex-direction:row-reverse;
   gap:12px;
   width:100%;
-  max-width:420px;
-  margin:20px auto 0;
-  padding:0 10px 10px;
-  box-sizing:border-box;
+  max-width:460px;
+  margin:18px auto 0;
+  padding:0 4px 10px;
 }
 
 .pdf-btn,
 .back-btn{
   height:52px;
   border:none;
-  border-radius:14px;
+  border-radius:16px;
   font-weight:900;
   cursor:pointer;
   font-size:16px;
-  letter-spacing:0.5px;
-  transition:transform 0.2s, opacity 0.2s;
+  letter-spacing:0.2px;
+  transition:transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
 }
 
 .pdf-btn{
   flex:1.2;
-  background:linear-gradient(135deg,#c9a46b,#b89155);
+  background:linear-gradient(135deg,var(--gold),var(--gold-2));
   color:#fff;
+  box-shadow:0 12px 24px rgba(185,145,85,0.24);
 }
 
 .back-btn{
   flex:0.8;
-  background:linear-gradient(135deg,#1f2d4a,#2b3d63);
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
   color:#fff;
+  box-shadow:0 12px 24px rgba(29,41,64,0.20);
+}
+
+.pdf-btn:hover,
+.back-btn:hover{
+  transform:translateY(-1px);
 }
 
 .pdf-btn:active,
 .back-btn:active{
-  transform:scale(0.97);
+  transform:scale(0.98);
 }
 
 .pdf-header{
@@ -243,25 +375,25 @@ td:nth-child(5){
 .pdf-mode .pdf-header{
   display:block;
   text-align:center;
-  margin-bottom:25px;
+  margin-bottom:28px;
 }
 
 .pdf-logo{
-  width:80px;
+  width:82px;
   margin-bottom:10px;
 }
 
 .pdf-title{
   font-size:28px;
   font-weight:900;
-  color:#1d2940;
+  color:var(--navy);
   margin-bottom:5px;
 }
 
 .pdf-tenant{
-  font-size:20px;
+  font-size:21px;
   font-weight:800;
-  color:#c9a46b;
+  color:var(--gold);
 }
 
 .pdf-date{
@@ -276,12 +408,26 @@ td:nth-child(5){
   padding-bottom:20px !important;
 }
 
-.pdf-mode table{
-  font-size:16px;
+.pdf-mode .year-card{
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+
+.pdf-mode .table-shell{
+  padding:8px;
+}
+
+.pdf-mode thead th{
+  font-size:13px;
+}
+
+.pdf-mode tbody td{
+  font-size:13px;
+  padding:7px 7px;
 }
 
 .pdf-mode .summary-value{
-  font-size:26px;
+  font-size:24px;
 }
 
 .pdf-mode .bottom-actions{
@@ -290,9 +436,10 @@ td:nth-child(5){
 
 .error-box,
 .empty-box{
-  padding:14px;
-  border-radius:14px;
-  font-weight:800;
+  padding:16px;
+  border-radius:18px;
+  font-weight:900;
+  text-align:center;
 }
 
 .error-box{
@@ -302,7 +449,15 @@ td:nth-child(5){
 
 .empty-box{
   color:#7b8497;
-  background:#ffffffaa;
+  background:rgba(255,255,255,0.78);
+}
+
+@media (max-width:420px){
+  .app{ padding:12px; }
+  .year-card{ padding:12px; }
+  .summary{ gap:8px; }
+  .summary-value{ font-size:17px; }
+  tbody td{ font-size:11.5px; }
 }
 </style>
 </head>
@@ -311,7 +466,10 @@ td:nth-child(5){
 
 <div class="app">
   <div class="card">
-    <h2>كشف الحساب</h2>
+    <div class="title-wrap">
+      <h2 class="page-title">كشف الحساب</h2>
+      <span class="title-badge">JABRI</span>
+    </div>
     <div id="tenantName"></div>
   </div>
 
@@ -420,6 +578,13 @@ function displayNumber(v){
   return num(v).toLocaleString("en-US")
 }
 
+function displaySignedNumber(v){
+  const n = num(v)
+  const abs = Math.abs(n).toLocaleString("en-US")
+  if(n < 0) return `-${abs}`
+  return abs
+}
+
 function formatDate(dateStr){
   if(!dateStr) return "-"
   const d = new Date(dateStr)
@@ -437,14 +602,18 @@ function getRowOrder(desc){
   const text = String(desc || "")
   if(text.includes("ايجار")) return 1
   if(text.includes("معارف")) return 2
-  if(text.includes("رصيد سابق") || text.includes("سابق عام")) return 3
+  if(text.includes("رصيد سابق") || text.includes("سابق عام") || text.includes("رصيد عام")) return 3
   if(text.includes("دفعة")) return 4
   return 9
 }
 
 function isCarryRow(desc){
   const text = String(desc || "")
-  return text.includes("رصيد سابق") || text.includes("سابق عام")
+  return (
+    text.includes("رصيد سابق") ||
+    text.includes("سابق عام") ||
+    text.includes("رصيد عام")
+  )
 }
 
 function buildTenantHeader(name, code){
@@ -543,7 +712,6 @@ async function load(){
   Object.keys(grouped)
     .sort((a,b) => Number(a) - Number(b))
     .forEach(year => {
-
       const rows = grouped[year]
 
       rows.sort((a,b)=>{
@@ -556,12 +724,16 @@ async function load(){
       let totalDebit = 0
       let totalCredit = 0
 
-      rows.forEach(r=>{
-        totalDebit += r.debit
-        totalCredit += r.credit
+      rows.forEach(r => {
+        const carryRow = isCarryRow(r.description)
 
-        if(isCarryRow(r.description)){
-          runningBalance = r.debit
+        if(!carryRow){
+          totalDebit += r.debit
+          totalCredit += r.credit
+        }
+
+        if(carryRow){
+          runningBalance = r.debit - r.credit
         } else {
           runningBalance += r.debit - r.credit
         }
@@ -570,7 +742,6 @@ async function load(){
       })
 
       const yearBalance = totalDebit - totalCredit
-      const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
 
       let color = "red"
       let status = "غير مسدد"
@@ -589,42 +760,55 @@ async function load(){
       html += `
         <div class="year-card ${color}">
           <div class="year-header">
-            <span class="year-title">${year}</span>
-            <span class="status-box ${statusClass}">${status}</span>
+            <div class="header-side">
+              <span class="year-title">${year}</span>
+            </div>
+            <div class="header-side">
+              <span class="status-box ${statusClass}">${status}</span>
+            </div>
           </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>مدين</th>
-                <th>دائن</th>
-                <th>الرصيد</th>
-                <th>البيان</th>
-                <th>رقم السند</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>مدين</th>
+                  <th>دائن</th>
+                  <th>الرصيد</th>
+                  <th>البيان</th>
+                  <th>رقم السند</th>
+                </tr>
+              </thead>
+              <tbody>
       `
 
-      rows.forEach(r=>{
-        const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
+      rows.forEach(r => {
+        let balanceClass = ""
+        if (r.balance > 0) {
+          balanceClass = "balance-positive"
+        } else if (r.balance < 0) {
+          balanceClass = "balance-negative"
+        } else {
+          balanceClass = "balance-zero"
+        }
 
         html += `
           <tr>
             <td><span class="date-chip">${formatDate(r.date)}</span></td>
             <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
-            <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
-            <td>${r.description || "-"}</td>
+            <td class="balance ${balanceClass}">${displaySignedNumber(r.balance)}</td>
+            <td class="desc-cell">${r.description || "-"}</td>
             <td><span class="receipt">${r.receipt_no}</span></td>
           </tr>
         `
       })
 
       html += `
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
 
           <div class="summary">
             <div class="summary-card summary-debit">
@@ -639,7 +823,7 @@ async function load(){
 
             <div class="summary-card summary-balance">
               <div class="summary-label">الرصيد</div>
-              <div class="summary-value">${displayNumber(yearBalance)}</div>
+              <div class="summary-value">${displaySignedNumber(yearBalance)}</div>
             </div>
           </div>
         </div>
