@@ -18,7 +18,6 @@
   --text:#1d2940;
   --muted:#7b8497;
   --white:rgba(255,255,255,0.72);
-  --white-strong:rgba(255,255,255,0.92);
   --red:#e05252;
   --green:#18a957;
   --orange:#b96a00;
@@ -497,7 +496,7 @@ const supabase = createClient(
 )
 
 const params = new URLSearchParams(window.location.search)
-const tenant = params.get("tenant") || localStorage.getItem("jabri_tenant_code")
+const tenant = (params.get("tenant") || localStorage.getItem("jabri_tenant_code") || "").trim().toUpperCase()
 const from = params.get("from")
 
 window.goBack = function(){
@@ -570,7 +569,9 @@ window.savePDF = async function(){
 }
 
 function num(v){
-  const n = Number(v)
+  if(v === null || v === undefined || v === "") return 0
+  const cleaned = String(v).replace(/,/g, "").replace(/-/g, "").trim()
+  const n = Number(cleaned)
   return Number.isFinite(n) ? n : 0
 }
 
@@ -579,7 +580,7 @@ function displayNumber(v){
 }
 
 function displaySignedNumber(v){
-  const n = num(v)
+  const n = Number(v) || 0
   const abs = Math.abs(n).toLocaleString("en-US")
   if(n < 0) return `-${abs}`
   return abs
@@ -598,22 +599,122 @@ function getYear(dateStr){
   return d.getFullYear()
 }
 
-function getRowOrder(desc){
-  const text = String(desc || "")
-  if(text.includes("ايجار")) return 1
-  if(text.includes("معارف")) return 2
-  if(text.includes("رصيد سابق") || text.includes("سابق عام") || text.includes("رصيد عام")) return 3
-  if(text.includes("دفعة")) return 4
-  return 9
+function normalizeText(v){
+  return String(v || "")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 function isCarryRow(desc){
-  const text = String(desc || "")
+  const text = normalizeText(desc)
   return (
     text.includes("رصيد سابق") ||
     text.includes("سابق عام") ||
     text.includes("رصيد عام")
   )
+}
+
+function isPaymentText(text){
+  return (
+    text.includes("دفعة") ||
+    text.includes("نقدي") ||
+    text.includes("تحويل") ||
+    text.includes("شيك") ||
+    text.includes("سداد") ||
+    text.includes("قبض") ||
+    text.includes("تسوية") ||
+    text.includes("خصم كورونا")
+  )
+}
+
+function isDebitText(text){
+  return (
+    text.includes("ايجار") ||
+    text.includes("الإيجار") ||
+    text.includes("الايجار") ||
+    text.includes("معارف") ||
+    text.includes("مطلوب")
+  )
+}
+
+function looksLikeNumberOnly(text){
+  return /^[\d,\.\-]+$/.test(String(text || "").trim())
+}
+
+function smartNormalizeRow(raw){
+  const originalDesc = normalizeText(raw.description)
+  const originalReceipt = normalizeText(raw.receipt_no)
+  let debit = num(raw.debit)
+  let credit = num(raw.credit)
+  let description = originalDesc
+  let receipt_no = originalReceipt || "-"
+
+  const descIsNumberOnly = looksLikeNumberOnly(description)
+  const receiptLooksText = receipt_no && receipt_no !== "-" && !looksLikeNumberOnly(receipt_no)
+
+  if((debit > 0 || credit > 0) && descIsNumberOnly && receiptLooksText){
+    description = receipt_no
+    receipt_no = "-"
+  }
+
+  if(description === "" && receiptLooksText){
+    description = receipt_no
+    receipt_no = "-"
+  }
+
+  const text = normalizeText(`${description} ${receipt_no}`)
+
+  const carryRow = isCarryRow(description)
+  const paymentRow = isPaymentText(text)
+  const debitRow = isDebitText(text)
+
+  if(!carryRow){
+    if(paymentRow){
+      const amount = Math.max(debit, credit)
+      debit = 0
+      credit = amount
+      if(!description) description = "دفعة"
+    } else if(debitRow){
+      const amount = Math.max(debit, credit)
+      debit = amount
+      credit = 0
+    } else {
+      if(credit > 0 && debit === 0){
+        // keep as credit
+      } else if(debit > 0 && credit === 0){
+        // keep as debit
+      } else if(debit > 0 && credit > 0){
+        // if both filled, prefer larger as the actual movement and preserve sign via text
+        if(paymentRow){
+          credit = Math.max(debit, credit)
+          debit = 0
+        } else {
+          debit = Math.max(debit, credit)
+          credit = 0
+        }
+      }
+    }
+  }
+
+  return {
+    ...raw,
+    tenant_code: normalizeText(raw.tenant_code).toUpperCase(),
+    date: raw.date,
+    description: description || "-",
+    receipt_no: receipt_no || "-",
+    debit,
+    credit,
+    carryRow
+  }
+}
+
+function getRowOrder(desc){
+  const text = normalizeText(desc)
+  if(text.includes("ايجار") || text.includes("الإيجار")) return 1
+  if(text.includes("معارف")) return 2
+  if(isCarryRow(text)) return 3
+  if(isPaymentText(text)) return 4
+  return 9
 }
 
 function buildTenantHeader(name, code){
@@ -643,7 +744,7 @@ async function load(){
   try{
     const { data: tenantData } = await supabase
       .from("tenants")
-      .select("tenant_name")
+      .select("tenant_name, tenant_code")
       .eq("tenant_code", tenant)
       .maybeSingle()
 
@@ -678,19 +779,17 @@ async function load(){
     return
   }
 
-  if(!Array.isArray(data) || data.length === 0){
+  const filteredData = (data || []).filter(r =>
+    normalizeText(r.tenant_code).toUpperCase() === tenant
+  )
+
+  if(filteredData.length === 0){
     container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
     return
   }
 
-  const validRows = data
-    .map(r => ({
-      ...r,
-      debit: num(r.debit),
-      credit: num(r.credit),
-      description: r.description || "",
-      receipt_no: r.receipt_no || "-"
-    }))
+  const validRows = filteredData
+    .map(smartNormalizeRow)
     .filter(r => getYear(r.date) !== null)
 
   if(validRows.length === 0){
@@ -725,7 +824,7 @@ async function load(){
       let totalCredit = 0
 
       rows.forEach(r => {
-        const carryRow = isCarryRow(r.description)
+        const carryRow = r.carryRow
 
         if(!carryRow){
           totalDebit += r.debit
@@ -785,9 +884,9 @@ async function load(){
 
       rows.forEach(r => {
         let balanceClass = ""
-        if (r.balance > 0) {
+        if(r.balance > 0){
           balanceClass = "balance-positive"
-        } else if (r.balance < 0) {
+        } else if(r.balance < 0){
           balanceClass = "balance-negative"
         } else {
           balanceClass = "balance-zero"
@@ -800,7 +899,7 @@ async function load(){
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
             <td class="balance ${balanceClass}">${displaySignedNumber(r.balance)}</td>
             <td class="desc-cell">${r.description || "-"}</td>
-            <td><span class="receipt">${r.receipt_no}</span></td>
+            <td><span class="receipt">${r.receipt_no || "-"}</span></td>
           </tr>
         `
       })
@@ -831,6 +930,10 @@ async function load(){
     })
 
   container.innerHTML = html
+
+  console.log("Tenant requested:", tenant)
+  console.log("Filtered rows:", filteredData)
+  console.log("Normalized rows:", validRows)
 }
 </script>
 
