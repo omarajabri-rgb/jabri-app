@@ -8,7 +8,7 @@
 
 <style>
 body{
-  margin:0;
+  margin:0;پ
   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:linear-gradient(135deg,#edf2f7,#f7f9fc);
 }
@@ -17,7 +17,7 @@ body{
   max-width:420px;
   margin:auto;
   padding:15px;
-  padding-bottom:110px;
+  padding-bottom:95px;
 }
 
 .card{
@@ -186,25 +186,54 @@ td:nth-child(5){
 /* bottom buttons */
 .bottom-actions{
   position:fixed;
-  bottom:0;
   left:0;
   right:0;
-  width:100%;
-  max-width:420px;
-  margin:0 auto;
+  bottom:0;
+  z-index:9999;
+
   display:flex;
   flex-direction:row-reverse;
   gap:12px;
-  z-index:1000;
+
+  width:min(420px, 100%);
+  margin:0 auto;
+
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));
   box-sizing:border-box;
+
   background:rgba(255,255,255,0.25);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
   border-top:1px solid rgba(255,255,255,0.35);
   border-radius:22px 22px 0 0;
   box-shadow:0 -8px 30px rgba(0,0,0,0.12);
-  animation:fadeUp 0.4s ease;
+}
+
+.pdf-btn,
+.back-btn{
+  flex:1;
+  height:52px;
+  border:none;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:16px;
+  transition:transform .2s;
+}
+
+.pdf-btn{
+  background:linear-gradient(135deg,#c9a46b,#b89155);
+  color:#fff;
+}
+
+.back-btn{
+  background:linear-gradient(135deg,#1f2d4a,#2b3d63);
+  color:#fff;
+}
+
+.pdf-btn:active,
+.back-btn:active{
+  transform:scale(0.97);
 }
 
 .pdf-btn,
