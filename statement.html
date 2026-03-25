@@ -84,6 +84,16 @@ button{
   color:#777;
   margin-top:5px;
 }
+
+.receipt{
+  background:#eef4ff;
+  padding:2px 6px;
+  border-radius:8px;
+  color:#2f6fed;
+  font-weight:bold;
+  display:inline-block;
+  min-width:26px;
+}
 </style>
 </head>
 
@@ -114,9 +124,11 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
-// 🔥 جلب tenant code من كل مكان
-function getTenantCode(){
+function normalizeText(v){
+  return String(v || "").trim()
+}
 
+function getTenantCode(){
   const params = new URLSearchParams(window.location.search)
 
   let code =
@@ -129,9 +141,7 @@ function getTenantCode(){
 
   if(code && code.trim()) return code.trim()
 
-  // 🔥 fallback من object
   const keys = ["tenant","user","currentTenant","loggedTenant"]
-
   for(const k of keys){
     try{
       const obj = JSON.parse(localStorage.getItem(k))
@@ -150,9 +160,76 @@ function num(v){
   return Number.isFinite(n) ? n : 0
 }
 
+function cleanNum(v){
+  if(typeof v === 'number') return Number.isFinite(v) ? v : 0
+  if(v === null || v === undefined || v === "" || v === "NaN") return 0
+  const cleaned = String(v).replace(/[^\d.-]/g, '')
+  const n = parseFloat(cleaned)
+  return Number.isFinite(n) ? n : 0
+}
+
 function formatDate(d){
   const x = new Date(d)
   return isNaN(x) ? "-" : x.toLocaleDateString("en-GB")
+}
+
+function isNumericText(v){
+  return /^-?\d+(\.\d+)?$/.test(normalizeText(v))
+}
+
+function normalizeRow(r, index, rowsOfYear){
+  let description = normalizeText(r.description)
+  let receiptNo = normalizeText(r.receipt_no || "-")
+  let debit = cleanNum(r.debit)
+  let credit = cleanNum(r.credit)
+
+  const rowDate = new Date(r.date)
+  const rowYear = isNaN(rowDate) ? "" : rowDate.getFullYear()
+
+  const receiptLooksPayment =
+    receiptNo.includes("نقد") ||
+    receiptNo.includes("شيك") ||
+    receiptNo.includes("تحويل") ||
+    receiptNo.includes("حوال") ||
+    receiptNo.includes("دفعة")
+
+  const shiftedNumber = isNumericText(description) && debit === 0 && credit === 0
+
+  if(shiftedNumber){
+    const amount = cleanNum(description)
+
+    // إذا السند صار "نقدي" فهذه دفعة
+    if(receiptLooksPayment){
+      credit = amount
+      debit = 0
+      description = "دفعة من الإيجار"
+      receiptNo = "-"
+    } else {
+      // غير هيك نحددها حسب المبلغ ومكان السطر
+      if(amount === 36){
+        debit = 36
+        credit = 0
+        description = `معارف ${rowYear}`
+      } else if(amount === 1800){
+        debit = 1800
+        credit = 0
+        description = `إيجار لعام ${rowYear}`
+      } else {
+        // 2494 / 2030 / أي رصيد سابق
+        debit = amount
+        credit = 0
+        description = `رصيد سابق عام ${rowYear - 1}`
+      }
+    }
+  }
+
+  return {
+    ...r,
+    description,
+    receipt_no: receiptNo,
+    debitVal: num(debit),
+    creditVal: num(credit)
+  }
 }
 
 async function load(){
@@ -172,28 +249,24 @@ async function load(){
 
   tenantName.innerText = tenant
 
-  // 🔥 جلب البيانات
   const {data,error} = await supabase
     .from("tenant_transactions")
     .select("*")
-    .ilike("tenant_code", tenant)
+    .eq("tenant_code", tenant)
+    .order("date",{ascending:true})
 
   if(error){
     container.innerHTML = error.message
     return
   }
 
-  debug.innerText += " | rows: " + data.length
+  debug.innerText += " | rows: " + (data ? data.length : 0)
 
   if(!data || data.length === 0){
     container.innerHTML = "⚠️ لا يوجد بيانات"
     return
   }
 
-  // ترتيب
-  data.sort((a,b)=> new Date(a.date) - new Date(b.date))
-
-  // تجميع حسب السنة
   const grouped = {}
 
   data.forEach(r=>{
@@ -204,21 +277,47 @@ async function load(){
 
   let html=""
 
-  Object.keys(grouped).forEach(year=>{
+  Object.keys(grouped).sort().forEach(year=>{
+
+    // normalize rows only inside same year
+    let yearRows = grouped[year].map((r, i) => normalizeRow(r, i, grouped[year]))
+
+    // إعادة ترتيب بسيطة داخل السنة:
+    // رصيد سابق أولاً ثم الإيجار ثم المعارف ثم الدفعات
+    yearRows.sort((a,b)=>{
+      const aDesc = normalizeText(a.description)
+      const bDesc = normalizeText(b.description)
+
+      const order = (desc) => {
+        if(desc.includes("رصيد")) return 1
+        if(desc.includes("إيجار")) return 2
+        if(desc.includes("معارف")) return 3
+        if(desc.includes("دفعة")) return 4
+        return 9
+      }
+
+      const oa = order(aDesc)
+      const ob = order(bDesc)
+
+      if(oa !== ob) return oa - ob
+
+      return new Date(a.date) - new Date(b.date)
+    })
 
     let balance = 0
     let debitTotal = 0
     let creditTotal = 0
 
-    const rows = grouped[year].map((r,i)=>{
+    const rows = yearRows.map((r,i)=>{
 
-      let debit = num(r.debit)
-      let credit = num(r.credit)
+      let debit = num(r.debitVal)
+      let credit = num(r.creditVal)
+      const desc = normalizeText(r.description)
 
-      // 🔥 فقط لو رصيد افتتاحي
-      if(i === 0 && String(r.description).includes("رصيد")){
+      // الرصيد الافتتاحي
+      if(i === 0 && desc.includes("رصيد")){
         balance = debit
-      }else{
+      } else {
         balance += debit - credit
       }
 
@@ -228,11 +327,11 @@ async function load(){
       return `
       <tr>
         <td>${formatDate(r.date)}</td>
-        <td class="debit">${debit || "-"}</td>
-        <td class="credit">${credit || "-"}</td>
-        <td class="balance">${balance}</td>
-        <td>${r.description || "-"}</td>
-        <td>${r.receipt_no || "-"}</td>
+        <td class="debit">${debit > 0 ? debit.toLocaleString("en-US") : "-"}</td>
+        <td class="credit">${credit > 0 ? credit.toLocaleString("en-US") : "-"}</td>
+        <td class="balance">${balance.toLocaleString("en-US")}</td>
+        <td>${desc || "-"}</td>
+        <td><span class="receipt">${r.receipt_no || "-"}</span></td>
       </tr>`
     }).join("")
 
@@ -255,7 +354,7 @@ async function load(){
       </table>
 
       <div style="margin-top:10px;font-weight:bold">
-        مدين: ${debitTotal} | دائن: ${creditTotal} | رصيد: ${balance}
+        مدين: ${debitTotal.toLocaleString("en-US")} | دائن: ${creditTotal.toLocaleString("en-US")} | رصيد: ${balance.toLocaleString("en-US")}
       </div>
     </div>`
   })
