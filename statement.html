@@ -1051,13 +1051,8 @@ async function load(){
     const fixed = normalizeRow(r)
 
     let displayYear
-    if(isCarryDescription(fixed.description)){
-      const match = fixed.description.match(/عام\s*(\d{4})/)
-      if(match){
-        displayYear = Number(match[1]) + 1
-      } else {
-        displayYear = new Date(fixed.date).getFullYear()
-      }
+    const rowDate = new Date(fixed.date)
+const displayYear = rowDate.getFullYear()
     } else {
       displayYear = new Date(fixed.date).getFullYear()
     }
