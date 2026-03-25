@@ -601,12 +601,17 @@ async function load(){
       let totalCredit = 0
 
       rows.forEach(r => {
-        totalDebit += r.debit
-        totalCredit += r.credit
-        runningBalance += r.debit - r.credit
-        r.balance = runningBalance
-      })
+  totalDebit += r.debit
+  totalCredit += r.credit
 
+  if(isCarryRow(r.description)){
+    runningBalance = r.debit
+  } else {
+    runningBalance += r.debit - r.credit
+  }
+
+  r.balance = runningBalance
+})
       const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
       const yearStatus = getStatus(totalDebit, totalCredit, endYearBalance)
 
