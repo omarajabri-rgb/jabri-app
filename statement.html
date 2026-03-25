@@ -17,7 +17,7 @@ body{
   max-width:420px;
   margin:auto;
   padding:15px;
-  padding-bottom:180px;
+  padding-bottom:150px;
 }
 
 .card{
@@ -183,42 +183,65 @@ td:nth-child(5){
   color:#e05252;
 }
 
-.pdf-btn{
-  position:fixed;
-  bottom:80px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
-  max-width:400px;
-  height:50px;
-  border:none;
-  border-radius:15px;
-  background:linear-gradient(135deg,#c9a46b,#b89155);
-  color:#fff;
-  font-weight:bold;
-  z-index:10;
-  cursor:pointer;
-}
-
-.back-bottom{
+/* bottom buttons */
+.bottom-actions{
   position:fixed;
   bottom:15px;
   left:50%;
   transform:translateX(-50%);
-  width:90%;
-  max-width:400px;
-  z-index:10;
+  width:92%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:1000;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:22px;
+  padding:10px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.15);
+  animation:fadeUp 0.4s ease;
 }
 
-.back-bottom button{
+.pdf-btn,
+.back-btn{
   width:100%;
-  height:50px;
+  height:52px;
   border:none;
-  border-radius:15px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:16px;
+  letter-spacing:0.5px;
+  transition:0.2s;
+}
+
+.pdf-btn{
+  background:linear-gradient(135deg,#c9a46b,#b89155);
+  color:#fff;
+}
+
+.back-btn{
   background:linear-gradient(135deg,#1f2d4a,#2b3d63);
   color:#fff;
-  font-weight:bold;
-  cursor:pointer;
+}
+
+.pdf-btn:active,
+.back-btn:active{
+  transform:scale(0.97);
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translate(-50%,20px);
+  }
+  to{
+    opacity:1;
+    transform:translate(-50%,0);
+  }
 }
 
 .pdf-header{
@@ -269,8 +292,7 @@ td:nth-child(5){
   font-size:26px;
 }
 
-.pdf-mode .pdf-btn,
-.pdf-mode .back-bottom{
+.pdf-mode .bottom-actions{
   display:none !important;
 }
 
@@ -311,10 +333,9 @@ td:nth-child(5){
   <div id="container"></div>
 </div>
 
-<button class="pdf-btn" id="pdfBtn" onclick="savePDF()">حفظ PDF</button>
-
-<div class="back-bottom">
-  <button onclick="goBack()">رجوع</button>
+<div class="bottom-actions">
+  <button class="pdf-btn" id="pdfBtn" onclick="savePDF()">حفظ PDF</button>
+  <button class="back-btn" onclick="goBack()">رجوع</button>
 </div>
 
 <script type="module">
@@ -349,7 +370,9 @@ window.savePDF = async function(){
 
     const element = document.querySelector(".app")
     const tenantText = (document.getElementById("tenantName").innerText || "statement").trim()
-    const safeFileName = tenantText.replace(/[^\u0600-\u06FF\w\- ]/g, "").replace(/\s+/g, "_")
+    const safeFileName = tenantText
+      .replace(/[^\u0600-\u06FF\w\- ]/g, "")
+      .replace(/\s+/g, "_")
 
     const opt = {
       margin: 0.3,
@@ -363,12 +386,40 @@ window.savePDF = async function(){
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     }
 
-    await html2pdf().set(opt).from(element).save()
-  } catch (err){
-    console.error("PDF error:", err)
-    alert("تعذر حفظ PDF")
-  } finally {
+    const worker = html2pdf().set(opt).from(element)
+    const pdfBlob = await worker.outputPdf("blob")
+
     document.body.classList.remove("pdf-mode")
+
+    const fileName = `statement_${safeFileName || "tenant"}.pdf`
+    const file = new File([pdfBlob], fileName, { type: "application/pdf" })
+
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
+      await navigator.share({
+        files: [file],
+        title: "كشف حساب",
+        text: `كشف حساب ${tenantText || "المستأجر"}`
+      })
+      return
+    }
+
+    const url = URL.createObjectURL(pdfBlob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+
+  } catch (err){
+    console.error("PDF/Share error:", err)
+    document.body.classList.remove("pdf-mode")
+    alert("تعذر إنشاء أو مشاركة PDF")
   }
 }
 
