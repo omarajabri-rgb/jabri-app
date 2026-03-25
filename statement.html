@@ -945,14 +945,14 @@ function getRowOrder(desc, date){
 
   if(d.getDate() === 1 && d.getMonth() === 0){
     if(text.includes("رصيد")) return 1
-    if(text.includes("معارف")) return 2
-    if(text.includes("إيجار")) return 3
+    if(text.includes("إيجار") || text.includes("ايجار")) return 2
+    if(text.includes("معارف")) return 3
     return 4
   }
 
   if(text.includes("رصيد")) return 1
-  if(text.includes("معارف")) return 2
-  if(text.includes("إيجار")) return 3
+  if(text.includes("إيجار") || text.includes("ايجار")) return 2
+  if(text.includes("معارف")) return 3
   if(text.includes("دفعة")) return 4
 
   return 9
