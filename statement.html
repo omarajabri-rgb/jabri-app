@@ -1066,16 +1066,23 @@ async function load(){
   Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
     let yearRows = grouped[year]
 
-    yearRows.sort((a, b) => {
-  const oa = getRowOrder(a)
-  const ob = getRowOrder(b)
+    function getRowOrder(row){
+  const text = normalizeText(row.description)
+  const debit = num(row.debitVal)
 
-  if(oa !== ob) return oa - ob
+  const isCarry = text.includes("رصيد")
+  const isRent = text.includes("إيجار") || text.includes("ايجار")
+  const isFee = text.includes("معارف")
 
-  const da = new Date(a.date).getTime()
-  const db = new Date(b.date).getTime()
-  return da - db
-})
+  if(debit > 0){
+    if(isCarry) return 1
+    if(isRent) return 2
+    if(isFee) return 3
+    return 4
+  }
+
+  return 5
+}
 
     let balance = 0
     let debitTotal = 0
