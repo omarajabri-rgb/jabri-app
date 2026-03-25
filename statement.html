@@ -939,9 +939,9 @@ function normalizeRow(r){
   }
 }
 
-function getRowOrder(row){
-  const text = normalizeText(row.description)
-  const debit = num(row.debitVal)
+function getRowOrder(desc, date, debitVal){
+  const text = normalizeText(desc)
+  const debit = num(debitVal)
 
   const isCarry = text.includes("رصيد")
   const isRent = text.includes("إيجار") || text.includes("ايجار")
