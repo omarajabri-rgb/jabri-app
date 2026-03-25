@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>كشف الحساب</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root{
-  --bg-1:#eef2f7;
+  --bg-1:#edf2f7;
   --bg-2:#f8fafc;
   --navy:#1d2940;
   --navy-2:#243552;
   --gold:#c9a46b;
   --gold-2:#b89155;
-  --line:#e8edf4;
   --text:#1d2940;
   --muted:#7b8497;
-  --white:rgba(255,255,255,0.72);
+  --line:#e8edf4;
+  --white:rgba(255,255,255,0.74);
+  --white-strong:rgba(255,255,255,0.94);
   --red:#e05252;
   --green:#18a957;
   --orange:#b96a00;
@@ -25,35 +26,36 @@
   --soft-green:#edf8f1;
   --soft-orange:#fff7ec;
   --soft-blue:#eef4ff;
+  --shadow:0 14px 40px rgba(15,23,42,0.08);
 }
 
 *{ box-sizing:border-box; }
 
 body{
   margin:0;
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at top right, rgba(201,164,107,0.10), transparent 24%),
-    linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
   color:var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(201,164,107,.12), transparent 22%),
+    linear-gradient(135deg,var(--bg-1),var(--bg-2));
 }
 
 .app{
-  max-width:460px;
+  max-width:470px;
   margin:auto;
   padding:16px;
-  padding-bottom:24px;
+  padding-bottom:26px;
 }
 
 .card{
   background:var(--white);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,0.8);
+  border:1px solid rgba(255,255,255,.85);
   border-radius:24px;
   padding:18px 16px;
   margin-bottom:16px;
-  box-shadow:0 14px 40px rgba(17,24,39,0.08);
+  box-shadow:var(--shadow);
 }
 
 .title-wrap{
@@ -68,17 +70,17 @@ body{
   font-size:22px;
   font-weight:900;
   color:var(--navy);
-  letter-spacing:-0.3px;
+  letter-spacing:-.3px;
 }
 
 .title-badge{
   background:linear-gradient(135deg,var(--gold),var(--gold-2));
   color:#fff;
-  padding:7px 12px;
   border-radius:999px;
+  padding:7px 12px;
   font-size:11px;
   font-weight:900;
-  box-shadow:0 8px 18px rgba(185,145,85,0.25);
+  box-shadow:0 8px 18px rgba(185,145,85,.24);
 }
 
 .tenant-name-main{
@@ -87,37 +89,37 @@ body{
   color:var(--navy);
   margin:14px 0 4px;
   line-height:1.2;
-  letter-spacing:-0.4px;
+  letter-spacing:-.35px;
 }
 
 .tenant-code-sub{
   font-size:12px;
   font-weight:800;
   color:var(--muted);
-  letter-spacing:0.4px;
+  letter-spacing:.4px;
 }
 
 .year-card{
-  background:rgba(255,248,238,0.68);
+  background:rgba(255,248,238,.70);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,0.8);
+  border:1px solid rgba(255,255,255,.82);
   border-radius:24px;
   padding:14px;
   margin-bottom:16px;
-  box-shadow:0 14px 38px rgba(15,23,42,0.06);
+  box-shadow:0 12px 34px rgba(15,23,42,.06);
 }
 
 .year-card.green{
-  background:linear-gradient(180deg,rgba(237,248,241,0.88),rgba(255,255,255,0.72));
+  background:linear-gradient(180deg, rgba(237,248,241,.92), rgba(255,255,255,.72));
 }
 
 .year-card.orange{
-  background:linear-gradient(180deg,rgba(255,246,234,0.92),rgba(255,255,255,0.72));
+  background:linear-gradient(180deg, rgba(255,246,234,.92), rgba(255,255,255,.72));
 }
 
 .year-card.red{
-  background:linear-gradient(180deg,rgba(255,241,241,0.88),rgba(255,255,255,0.72));
+  background:linear-gradient(180deg, rgba(255,241,241,.88), rgba(255,255,255,.72));
 }
 
 .year-header{
@@ -136,51 +138,51 @@ body{
 }
 
 .year-title{
+  min-width:58px;
+  text-align:center;
   background:linear-gradient(135deg,var(--navy),var(--navy-2));
   color:#fff;
   padding:7px 15px;
   border-radius:999px;
   font-size:13px;
   font-weight:900;
-  min-width:58px;
-  text-align:center;
-  box-shadow:0 8px 18px rgba(29,41,64,0.18);
+  box-shadow:0 8px 18px rgba(29,41,64,.18);
 }
 
 .status-box{
-  min-width:72px;
+  min-width:76px;
+  text-align:center;
   padding:6px 12px;
   border-radius:999px;
   font-size:11px;
   font-weight:900;
-  text-align:center;
   display:inline-block;
 }
 
 .status-paid{
   background:var(--soft-green);
   color:var(--green);
-  border:1px solid rgba(24,169,87,0.14);
+  border:1px solid rgba(24,169,87,.14);
 }
 
 .status-partial{
   background:var(--soft-orange);
   color:var(--orange);
-  border:1px solid rgba(185,106,0,0.14);
+  border:1px solid rgba(185,106,0,.14);
 }
 
 .status-unpaid{
   background:var(--soft-red);
   color:var(--red);
-  border:1px solid rgba(224,82,82,0.14);
+  border:1px solid rgba(224,82,82,.14);
 }
 
 .table-shell{
-  background:rgba(255,255,255,0.72);
-  border:1px solid rgba(255,255,255,0.95);
+  background:rgba(255,255,255,.74);
+  border:1px solid rgba(255,255,255,.95);
   border-radius:18px;
   padding:6px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
 }
 
 table{
@@ -209,13 +211,13 @@ thead th:last-child{
 }
 
 tbody tr{
-  background:rgba(255,255,255,0.92);
-  box-shadow:0 3px 10px rgba(17,24,39,0.03);
+  background:rgba(255,255,255,.95);
+  box-shadow:0 3px 10px rgba(17,24,39,.03);
 }
 
 tbody tr:hover{
   background:#fbfdff;
-  transition:0.2s ease;
+  transition:.2s ease;
 }
 
 tbody td{
@@ -278,7 +280,7 @@ tbody td:last-child{
 }
 
 .date-chip{
-  background:rgba(47,111,237,0.08);
+  background:rgba(47,111,237,.08);
   color:#2f6fed;
   font-weight:900;
   padding:3px 8px;
@@ -296,12 +298,12 @@ tbody td:last-child{
 }
 
 .summary-card{
-  background:rgba(255,255,255,0.8);
-  border:1px solid rgba(255,255,255,0.95);
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.95);
   border-radius:18px;
   padding:12px 10px;
   text-align:center;
-  box-shadow:0 10px 22px rgba(17,24,39,0.05);
+  box-shadow:0 10px 22px rgba(17,24,39,.05);
 }
 
 .summary-label{
@@ -314,7 +316,7 @@ tbody td:last-child{
 .summary-value{
   font-size:18px;
   font-weight:900;
-  letter-spacing:-0.3px;
+  letter-spacing:-.3px;
 }
 
 .summary-debit .summary-value{ color:var(--red); }
@@ -326,7 +328,7 @@ tbody td:last-child{
   flex-direction:row-reverse;
   gap:12px;
   width:100%;
-  max-width:460px;
+  max-width:470px;
   margin:18px auto 0;
   padding:0 4px 10px;
 }
@@ -339,22 +341,22 @@ tbody td:last-child{
   font-weight:900;
   cursor:pointer;
   font-size:16px;
-  letter-spacing:0.2px;
-  transition:transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+  letter-spacing:.2px;
+  transition:transform .18s ease, box-shadow .18s ease;
 }
 
 .pdf-btn{
   flex:1.2;
   background:linear-gradient(135deg,var(--gold),var(--gold-2));
   color:#fff;
-  box-shadow:0 12px 24px rgba(185,145,85,0.24);
+  box-shadow:0 12px 24px rgba(185,145,85,.24);
 }
 
 .back-btn{
-  flex:0.8;
+  flex:.8;
   background:linear-gradient(135deg,var(--navy),var(--navy-2));
   color:#fff;
-  box-shadow:0 12px 24px rgba(29,41,64,0.20);
+  box-shadow:0 12px 24px rgba(29,41,64,.20);
 }
 
 .pdf-btn:hover,
@@ -364,7 +366,7 @@ tbody td:last-child{
 
 .pdf-btn:active,
 .back-btn:active{
-  transform:scale(0.98);
+  transform:scale(.98);
 }
 
 .pdf-header{
@@ -448,7 +450,7 @@ tbody td:last-child{
 
 .empty-box{
   color:#7b8497;
-  background:rgba(255,255,255,0.78);
+  background:rgba(255,255,255,.78);
 }
 
 @media (max-width:420px){
@@ -460,7 +462,6 @@ tbody td:last-child{
 }
 </style>
 </head>
-
 <body>
 
 <div class="app">
@@ -482,7 +483,7 @@ tbody td:last-child{
   <div id="container"></div>
 
   <div class="bottom-actions">
-    <button class="pdf-btn" id="pdfBtn" onclick="savePDF()">PDF</button>
+    <button class="pdf-btn" onclick="savePDF()">PDF</button>
     <button class="back-btn" onclick="goBack()">رجوع</button>
   </div>
 </div>
@@ -492,7 +493,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 const params = new URLSearchParams(window.location.search)
@@ -543,11 +544,11 @@ window.savePDF = async function(){
     const fileName = `statement_${safeFileName || "tenant"}.pdf`
     const file = new File([pdfBlob], fileName, { type: "application/pdf" })
 
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
       await navigator.share({
-        files: [file],
-        title: "كشف حساب",
-        text: `كشف حساب ${tenantText || "المستأجر"}`
+        files:[file],
+        title:"كشف حساب",
+        text:`كشف حساب ${tenantText || "المستأجر"}`
       })
       return
     }
@@ -561,11 +562,15 @@ window.savePDF = async function(){
     a.remove()
     URL.revokeObjectURL(url)
 
-  } catch (err){
+  } catch(err){
     console.error("PDF/Share error:", err)
     document.body.classList.remove("pdf-mode")
     alert("تعذر إنشاء أو مشاركة PDF")
   }
+}
+
+function normalizeText(v){
+  return String(v || "").replace(/\s+/g, " ").trim()
 }
 
 function num(v){
@@ -583,23 +588,31 @@ function displayNumber(v){
 function displaySignedNumber(v){
   const n = Number(v) || 0
   const abs = Math.abs(n).toLocaleString("en-US")
-  if(n < 0) return `-${abs}`
-  return abs
+  return n < 0 ? `-${abs}` : abs
 }
 
 function formatDate(dateStr){
   if(!dateStr) return "-"
   const raw = String(dateStr).trim()
-  if(raw.includes("/")){
-    const parts = raw.split("/")
-    if(parts.length === 3){
-      const [a,b,c] = parts
-      if(c.length === 4){
-        return `${a.padStart(2,"0")}/${b.padStart(2,"0")}/${c}`
-      }
-    }
+
+  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if(dmy){
+    const [, d, m, y] = dmy
+    return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${y}`
   }
-  const d = new Date(dateStr)
+
+  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
+  if(ymdSlash){
+    const [, y, m, d] = ymdSlash
+    return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${y}`
+  }
+
+  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if(ymdDash){
+    return `${ymdDash[3]}/${ymdDash[2]}/${ymdDash[1]}`
+  }
+
+  const d = new Date(raw)
   if(Number.isNaN(d.getTime())) return raw
   return d.toLocaleDateString("en-GB")
 }
@@ -608,16 +621,14 @@ function getYear(dateStr){
   if(!dateStr) return null
   const raw = String(dateStr).trim()
 
-  const slash = raw.match(/^(\d{1,4})\/(\d{1,2})\/(\d{1,4})$/)
-  if(slash){
-    const third = slash[3]
-    const first = slash[1]
-    if(third.length === 4) return Number(third)
-    if(first.length === 4) return Number(first)
-  }
+  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if(dmy) return Number(dmy[3])
 
-  const dash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(dash) return Number(dash[1])
+  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
+  if(ymdSlash) return Number(ymdSlash[1])
+
+  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if(ymdDash) return Number(ymdDash[1])
 
   const d = new Date(raw)
   if(Number.isNaN(d.getTime())) return null
@@ -628,31 +639,25 @@ function toSortableTime(dateStr){
   if(!dateStr) return Number.MAX_SAFE_INTEGER
   const raw = String(dateStr).trim()
 
-  const dash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if(dash){
-    return new Date(`${dash[1]}-${dash[2]}-${dash[3]}T00:00:00`).getTime()
-  }
-
-  const slashDMY = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if(slashDMY){
-    const [, d, m, y] = slashDMY
+  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if(dmy){
+    const [, d, m, y] = dmy
     return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
   }
 
-  const slashYMD = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
-  if(slashYMD){
-    const [, y, m, d] = slashYMD
+  const ymdSlash = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/)
+  if(ymdSlash){
+    const [, y, m, d] = ymdSlash
     return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T00:00:00`).getTime()
+  }
+
+  const ymdDash = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if(ymdDash){
+    return new Date(`${ymdDash[1]}-${ymdDash[2]}-${ymdDash[3]}T00:00:00`).getTime()
   }
 
   const t = new Date(raw).getTime()
   return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t
-}
-
-function normalizeText(v){
-  return String(v || "")
-    .replace(/\s+/g, " ")
-    .trim()
 }
 
 function isCarryRow(desc){
@@ -664,88 +669,23 @@ function isCarryRow(desc){
   )
 }
 
-function isPaymentText(text){
-  return (
-    text.includes("دفعة") ||
-    text.includes("نقدي") ||
-    text.includes("تحويل") ||
-    text.includes("شيك") ||
-    text.includes("سداد") ||
-    text.includes("قبض") ||
-    text.includes("تسوية") ||
-    text.includes("خصم كورونا")
-  )
-}
-
-function isDebitText(text){
-  return (
-    text.includes("ايجار") ||
-    text.includes("الإيجار") ||
-    text.includes("الايجار") ||
-    text.includes("معارف") ||
-    text.includes("مطلوب")
-  )
-}
-
-function looksLikeNumberOnly(text){
-  return /^[\d,\.\-]+$/.test(String(text || "").trim())
-}
-
-function smartNormalizeRow(raw){
-  const originalDesc = normalizeText(raw.description)
-  const originalReceipt = normalizeText(raw.receipt_no)
-  let debit = num(raw.debit)
-  let credit = num(raw.credit)
-  let description = originalDesc
-  let receipt_no = originalReceipt || "-"
-
-  const descIsNumberOnly = looksLikeNumberOnly(description)
-  const receiptLooksText = receipt_no && receipt_no !== "-" && !looksLikeNumberOnly(receipt_no)
-
-  if((debit > 0 || credit > 0) && descIsNumberOnly && receiptLooksText){
-    description = receipt_no
-    receipt_no = "-"
-  }
-
-  if(description === "" && receiptLooksText){
-    description = receipt_no
-    receipt_no = "-"
-  }
-
-  const text = normalizeText(`${description} ${receipt_no}`)
-  const carryRow = isCarryRow(description)
-  const paymentRow = isPaymentText(text)
-  const debitRow = isDebitText(text)
-
-  if(paymentRow && debit > 0 && credit === 0){
-    credit = debit
-    debit = 0
-  }
-
-  if(!carryRow && debitRow && credit > 0 && debit === 0){
-    debit = credit
-    credit = 0
-  }
-
-  return {
-    ...raw,
-    tenant_code: normalizeText(raw.tenant_code).toUpperCase(),
-    date: raw.date,
-    description: description || "-",
-    receipt_no: receipt_no || "-",
-    debit,
-    credit,
-    carryRow
-  }
-}
-
 function getRowOrder(desc){
   const text = normalizeText(desc)
-  if(text.includes("ايجار") || text.includes("الإيجار")) return 1
+  if(text.includes("ايجار") || text.includes("الإيجار") || text.includes("الايجار")) return 1
   if(text.includes("معارف")) return 2
   if(isCarryRow(text)) return 3
-  if(isPaymentText(text)) return 4
-  return 9
+  return 4
+}
+
+function normalizeRow(raw){
+  return {
+    tenant_code: normalizeText(raw.tenant_code).toUpperCase(),
+    date: raw.date,
+    description: normalizeText(raw.description) || "-",
+    debit: num(raw.debit),
+    credit: num(raw.credit),
+    receipt_no: normalizeText(raw.receipt_no) || "-"
+  }
 }
 
 function buildTenantHeader(name, code){
@@ -775,7 +715,7 @@ async function load(){
   try{
     const { data: tenantData } = await supabase
       .from("tenants")
-      .select("tenant_name, tenant_code")
+      .select("tenant_name")
       .eq("tenant_code", tenant)
       .maybeSingle()
 
@@ -795,7 +735,7 @@ async function load(){
       .from("tenant_transactions")
       .select("tenant_code,date,description,debit,credit,receipt_no,notes")
       .eq("tenant_code", tenant)
-      .order("date", { ascending: true })
+      .order("date", { ascending:true })
   } catch(err){
     console.error("Unexpected load error:", err)
     container.innerHTML = `<div class="error-box">حصل خطأ غير متوقع أثناء تحميل البيانات</div>`
@@ -810,28 +750,18 @@ async function load(){
     return
   }
 
-  const filteredData = (data || []).filter(r =>
-    normalizeText(r.tenant_code).toUpperCase() === tenant
-  )
+  const rows = (data || [])
+    .filter(r => normalizeText(r.tenant_code).toUpperCase() === tenant)
+    .map(normalizeRow)
+    .filter(r => getYear(r.date) !== null)
 
-  if(filteredData.length === 0){
+  if(rows.length === 0){
     container.innerHTML = `<div class="empty-box">لا توجد بيانات لهذا المستأجر</div>`
     return
   }
 
-  const validRows = filteredData
-    .map(smartNormalizeRow)
-    .filter(r => getYear(r.date) !== null)
-    .filter(r => r.date || r.debit || r.credit || r.description !== "-")
-
-  if(validRows.length === 0){
-    container.innerHTML = `<div class="empty-box">لا توجد تواريخ صحيحة لعرض كشف الحساب</div>`
-    return
-  }
-
   const grouped = {}
-
-  validRows.forEach(r => {
+  rows.forEach(r => {
     const year = getYear(r.date)
     if(!grouped[year]) grouped[year] = []
     grouped[year].push(r)
@@ -842,9 +772,9 @@ async function load(){
   Object.keys(grouped)
     .sort((a,b) => Number(a) - Number(b))
     .forEach(year => {
-      const rows = grouped[year]
+      const yearRows = grouped[year]
 
-      rows.sort((a,b)=>{
+      yearRows.sort((a,b) => {
         const t1 = toSortableTime(a.date)
         const t2 = toSortableTime(b.date)
         if(t1 !== t2) return t1 - t2
@@ -855,14 +785,10 @@ async function load(){
       let totalCredit = 0
       let runningBalance = 0
 
-      rows.forEach(r => {
-        const debit = Number(r.debit || 0)
-        const credit = Number(r.credit || 0)
-
-        totalDebit += debit
-        totalCredit += credit
-
-        runningBalance += debit - credit
+      yearRows.forEach(r => {
+        totalDebit += r.debit
+        totalCredit += r.credit
+        runningBalance += r.debit - r.credit
         r.balance = runningBalance
       })
 
@@ -908,15 +834,10 @@ async function load(){
               <tbody>
       `
 
-      rows.forEach(r => {
-        let balanceClass = ""
-        if(r.balance > 0){
-          balanceClass = "balance-positive"
-        } else if(r.balance < 0){
-          balanceClass = "balance-negative"
-        } else {
-          balanceClass = "balance-zero"
-        }
+      yearRows.forEach(r => {
+        let balanceClass = "balance-zero"
+        if(r.balance > 0) balanceClass = "balance-positive"
+        if(r.balance < 0) balanceClass = "balance-negative"
 
         html += `
           <tr>
@@ -924,8 +845,8 @@ async function load(){
             <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
             <td class="balance ${balanceClass}">${displaySignedNumber(r.balance)}</td>
-            <td class="desc-cell">${r.description || "-"}</td>
-            <td><span class="receipt">${r.receipt_no || "-"}</span></td>
+            <td class="desc-cell">${r.description}</td>
+            <td><span class="receipt">${r.receipt_no}</span></td>
           </tr>
         `
       })
@@ -956,12 +877,7 @@ async function load(){
     })
 
   container.innerHTML = html
-
-  console.log("Tenant requested:", tenant)
-  console.log("Filtered rows:", filteredData)
-  console.log("Normalized rows:", validRows)
 }
 </script>
-
 </body>
 </html>
