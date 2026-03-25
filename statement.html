@@ -939,16 +939,23 @@ function normalizeRow(r){
   }
 }
 
-function getRowOrder(desc, date){
-  const text = normalizeText(desc)
-  const d = new Date(date)
+function getRowOrder(row){
+  const text = normalizeText(row.description)
+  const debit = num(row.debitVal)
 
-  if(d.getDate() === 1 && d.getMonth() === 0){
-    if(text.includes("رصيد")) return 1
-    if(text.includes("إيجار") || text.includes("ايجار")) return 2
-    if(text.includes("معارف")) return 3
+  const isCarry = text.includes("رصيد")
+  const isRent = text.includes("إيجار") || text.includes("ايجار")
+  const isFee = text.includes("معارف")
+
+  if(debit > 0){
+    if(isCarry) return 1
+    if(isRent) return 2
+    if(isFee) return 3
     return 4
   }
+
+  return 5
+}
 
   if(text.includes("رصيد")) return 1
   if(text.includes("إيجار") || text.includes("ايجار")) return 2
@@ -1060,15 +1067,15 @@ async function load(){
     let yearRows = grouped[year]
 
     yearRows.sort((a, b) => {
-      const oa = getRowOrder(a.description, a.date)
-      const ob = getRowOrder(b.description, b.date)
+  const oa = getRowOrder(a)
+  const ob = getRowOrder(b)
 
-      if(oa !== ob) return oa - ob
+  if(oa !== ob) return oa - ob
 
-      const da = new Date(a.date).getTime()
-      const db = new Date(b.date).getTime()
-      return da - db
-    })
+  const da = new Date(a.date).getTime()
+  const db = new Date(b.date).getTime()
+  return da - db
+})
 
     let balance = 0
     let debitTotal = 0
