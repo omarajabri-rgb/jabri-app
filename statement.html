@@ -8,102 +8,599 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+:root{
+  --accent:#c9a46b;
+  --accent-soft:#e9d8b5;
+  --accent-dark:#9a6b2f;
+
+  --text:#182033;
+  --muted:#7c879c;
+  --date-color:#9aa3b2;
+
+  --glass:rgba(255,255,255,0.56);
+  --glass-strong:rgba(255,255,255,0.72);
+  --glass-soft:rgba(255,255,255,0.38);
+
+  --line:rgba(255,255,255,0.42);
+  --table-line:#eef1f6;
+
+  --shadow:0 14px 40px rgba(18,26,43,0.08);
+  --shadow-soft:0 8px 22px rgba(18,26,43,0.06);
+
+  --green:#16a34a;
+  --green-soft:rgba(22,163,74,0.10);
+
+  --red:#dc2626;
+  --red-soft:rgba(220,38,38,0.10);
+
+  --navy:#1d2940;
+  --navy-soft:rgba(29,41,64,0.07);
+}
+
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:linear-gradient(135deg,#edf2f7,#f7f9fc);
+  color:var(--text);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.55), transparent 30%),
+    radial-gradient(circle at 85% 12%, rgba(255,255,255,0.42), transparent 26%),
+    linear-gradient(135deg,#edf2f7,#f7f9fc);
+  position:relative;
+  overflow-x:hidden;
 }
+
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  inset:auto;
+  pointer-events:none;
+  z-index:0;
+  filter:blur(18px);
+  opacity:.55;
+}
+
+body::before{
+  width:260px;
+  height:260px;
+  top:70px;
+  left:-60px;
+  border-radius:50%;
+  background:rgba(201,164,107,0.14);
+}
+
+body::after{
+  width:240px;
+  height:240px;
+  bottom:80px;
+  right:-70px;
+  border-radius:50%;
+  background:rgba(64,110,255,0.08);
+}
+
+body.spring-theme{
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,255,255,0.55), transparent 30%),
+    radial-gradient(circle at 85% 12%, rgba(213,255,230,0.26), transparent 24%),
+    linear-gradient(135deg,#edf7f1,#f8fbfc);
+}
+
+body.spring-theme::before{
+  background:rgba(126,211,161,0.18);
+}
+
+body.spring-theme::after{
+  background:rgba(201,164,107,0.10);
+}
+
+body.summer-theme{
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,255,255,0.56), transparent 28%),
+    radial-gradient(circle at 85% 12%, rgba(255,233,196,0.28), transparent 22%),
+    linear-gradient(135deg,#f7f1e8,#fbfcfe);
+}
+
+body.summer-theme::before{
+  background:rgba(201,164,107,0.18);
+}
+
+body.summer-theme::after{
+  background:rgba(255,210,145,0.12);
+}
+
+body.autumn-theme{
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,255,255,0.52), transparent 28%),
+    radial-gradient(circle at 85% 12%, rgba(255,214,176,0.26), transparent 22%),
+    linear-gradient(135deg,#f7efe8,#fbfcfe);
+}
+
+body.autumn-theme::before{
+  background:rgba(181,112,58,0.14);
+}
+
+body.autumn-theme::after{
+  background:rgba(201,164,107,0.12);
+}
+
+body.winter-theme{
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255,255,255,0.50), transparent 30%),
+    radial-gradient(circle at 85% 12%, rgba(209,226,255,0.26), transparent 24%),
+    linear-gradient(135deg,#edf3fb,#f7f9fc);
+}
+
+body.winter-theme::before{
+  background:rgba(139,177,255,0.14);
+}
+
+body.winter-theme::after{
+  background:rgba(201,164,107,0.08);
+}
+
 .app{
-  max-width:420px;
+  position:relative;
+  z-index:1;
+  max-width:460px;
   margin:auto;
-  padding:15px;
+  padding:18px 14px 24px;
 }
+
+.card,
+.year-card,
+.empty-box{
+  background:var(--glass);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+
 .card{
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(14px);
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
+  padding:20px 16px 18px;
+  margin-bottom:16px;
   text-align:center;
+  position:relative;
+  overflow:hidden;
 }
+
+.card::before,
+.year-card::before{
+  content:"";
+  position:absolute;
+  inset:-30% auto auto -20%;
+  width:140%;
+  height:140%;
+  background:linear-gradient(
+    120deg,
+    transparent 24%,
+    rgba(255,255,255,0.16) 45%,
+    transparent 68%
+  );
+  transform:rotate(8deg);
+  animation:glassShine 9s linear infinite;
+  pointer-events:none;
+}
+
+.header-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 14px;
+  border-radius:999px;
+  background:rgba(201,164,107,0.10);
+  color:var(--accent-dark);
+  border:1px solid rgba(201,164,107,0.18);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.2px;
+  margin-bottom:12px;
+}
+
+.statement-title{
+  margin:0;
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:.3px;
+  color:var(--text);
+}
+
+#tenantName{
+  font-weight:900;
+  color:#2f6fed;
+  margin-top:10px;
+  font-size:19px;
+}
+
+.debug{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+}
+
+.summary-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin:16px 0 18px;
+}
+
+.summary-box{
+  position:relative;
+  overflow:hidden;
+  text-align:center;
+  padding:16px 10px;
+  border-radius:22px;
+  background:rgba(255,255,255,0.22);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.28);
+  box-shadow:
+    0 10px 24px rgba(15,23,42,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+  transition:transform .28s ease, box-shadow .28s ease;
+}
+
+.summary-box::before{
+  content:"";
+  position:absolute;
+  inset:-35% auto auto -30%;
+  width:150%;
+  height:140%;
+  background:linear-gradient(
+    120deg,
+    transparent 25%,
+    rgba(255,255,255,0.14) 45%,
+    transparent 70%
+  );
+  transform:rotate(10deg);
+  animation:glassShine 7s linear infinite;
+  pointer-events:none;
+}
+
+.summary-box:hover{
+  transform:translateY(-3px);
+  box-shadow:
+    0 18px 34px rgba(15,23,42,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.42);
+}
+
+.summary-label{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.summary-value{
+  font-size:25px;
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:.25px;
+}
+
+.debit-box{
+  border-color:rgba(220,38,38,0.14);
+  background:linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.13));
+}
+
+.debit-box .summary-label{ color:#b42323; }
+.debit-box .summary-value{ color:var(--red); }
+
+.credit-box{
+  border-color:rgba(22,163,74,0.14);
+  background:linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.13));
+}
+
+.credit-box .summary-label{ color:#12783b; }
+.credit-box .summary-value{ color:var(--green); }
+
+.balance-box{
+  border-color:rgba(201,164,107,0.22);
+  background:linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.15));
+}
+
+.balance-box .summary-label{ color:var(--accent-dark); }
+.balance-box .summary-value{ color:var(--accent); }
+
 .year-card{
-  background:rgba(255,255,255,0.7);
-  backdrop-filter:blur(14px);
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
+  position:relative;
+  padding:16px 14px 14px;
+  margin-bottom:16px;
+  overflow:hidden;
 }
+
+.year-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+
 .year-title{
-  background:#1d2940;
+  background:linear-gradient(135deg,var(--navy),#263653);
   color:#fff;
-  padding:6px 12px;
-  border-radius:20px;
-  font-weight:bold;
+  padding:9px 16px;
+  border-radius:999px;
+  font-weight:900;
   display:inline-block;
+  box-shadow:0 8px 18px rgba(29,41,64,0.16);
 }
+
+.year-subtle{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.table-wrap{
+  overflow-x:auto;
+  border-radius:18px;
+  background:rgba(255,255,255,0.34);
+  border:1px solid rgba(255,255,255,0.24);
+}
+
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:10px;
+  margin-top:0;
 }
+
 th,td{
-  padding:8px;
+  padding:10px 8px;
   font-size:12px;
-  border-bottom:1px solid #eee;
+  border-bottom:1px solid var(--table-line);
   text-align:center;
+  white-space:nowrap;
 }
+
 th{
-  background:#f4f6fb;
+  background:rgba(244,246,251,0.78);
+  font-weight:900;
+  color:var(--text);
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+
+tbody tr{
+  transition:background .22s ease, transform .22s ease;
+}
+
+tbody tr:hover{
+  background:rgba(201,164,107,0.06);
+}
+
+.debit{
+  color:#e05252;
   font-weight:900;
 }
-.debit{color:#e05252;font-weight:bold;}
-.credit{color:#18a957;font-weight:bold;}
-.balance{font-weight:bold;color:#1d2940;}
-.balance-negative{color:#18a957;}
-.balance-zero{color:#18a957;}
+
+.credit{
+  color:#18a957;
+  font-weight:900;
+}
+
+.balance{
+  font-weight:900;
+  color:var(--navy);
+}
+
+.balance-negative{
+  color:#18a957;
+}
+
+.balance-zero{
+  color:#18a957;
+}
+
+.date-col{
+  color:var(--date-color) !important;
+}
+
+th.date-col{
+  color:var(--date-color) !important;
+  font-weight:800;
+}
+
+td.date-col{
+  color:var(--date-color) !important;
+  font-weight:700;
+}
+
+.chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  background:rgba(255,255,255,0.62);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.42);
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.chip-date{
+  color:var(--date-color);
+}
+
+.chip-receipt{
+  color:var(--accent-dark);
+  border:1px solid rgba(201,164,107,0.26);
+  background:rgba(201,164,107,0.09);
+  min-width:46px;
+}
+
+.carry-row{
+  background:rgba(29,41,64,0.045);
+}
+
+.summary-line{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.mini-stat{
+  padding:12px 10px;
+  border-radius:18px;
+  text-align:center;
+  font-weight:900;
+  background:rgba(255,255,255,0.34);
+  border:1px solid rgba(255,255,255,0.28);
+  box-shadow:var(--shadow-soft);
+}
+
+.mini-stat .mini-label{
+  display:block;
+  font-size:12px;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.mini-stat .mini-value{
+  display:block;
+  font-size:17px;
+  font-weight:900;
+}
+
+.mini-stat.debit-stat .mini-value{ color:var(--red); }
+.mini-stat.credit-stat .mini-value{ color:var(--green); }
+.mini-stat.balance-stat .mini-value{ color:var(--accent); }
+
 .bottom-actions{
   display:flex;
   gap:10px;
-  margin-top:15px;
+  margin-top:16px;
 }
+
 button{
   flex:1;
-  height:45px;
+  height:48px;
   border:none;
-  border-radius:12px;
-  font-weight:bold;
+  border-radius:16px;
+  font-weight:900;
+  font-size:15px;
+  cursor:pointer;
+  transition:transform .22s ease, opacity .22s ease, box-shadow .22s ease;
+  box-shadow:var(--shadow-soft);
 }
-.pdf-btn{background:#c9a46b;color:#fff;}
-.back-btn{background:#1d2940;color:#fff;}
-.debug{
-  font-size:11px;
-  color:#777;
-  margin-top:5px;
+
+button:hover{
+  transform:translateY(-2px);
+  opacity:.96;
 }
-.receipt{
-  background:#eef4ff;
-  padding:3px 7px;
-  border-radius:8px;
-  color:#2f6fed;
-  font-weight:bold;
-  display:inline-block;
-  min-width:26px;
+
+.save-btn{
+  background:linear-gradient(135deg,var(--accent),#d7b783);
+  color:#fff;
 }
-.carry-row{
-  background:rgba(29,41,64,0.04);
+
+.back-btn{
+  background:linear-gradient(135deg,var(--navy),#2b3a58);
+  color:#fff;
 }
-.summary-line{
-  margin-top:10px;
-  font-weight:bold;
-  font-size:14px;
-}
+
 .empty-box{
-  background:#fff;
-  border-radius:18px;
-  padding:20px;
+  padding:24px 16px;
   text-align:center;
   color:#777;
-  font-weight:bold;
+  font-weight:900;
+}
+
+@keyframes glassShine{
+  0%{
+    transform:translateX(-65%) rotate(8deg);
+    opacity:.28;
+  }
+  50%{
+    opacity:.14;
+  }
+  100%{
+    transform:translateX(65%) rotate(8deg);
+    opacity:.28;
+  }
+}
+
+@media (max-width:430px){
+  .app{
+    padding:14px 12px 22px;
+  }
+
+  .statement-title{
+    font-size:23px;
+  }
+
+  .summary-grid{
+    gap:10px;
+  }
+
+  .summary-box{
+    padding:14px 8px;
+    border-radius:20px;
+  }
+
+  .summary-value{
+    font-size:22px;
+  }
+
+  th,td{
+    font-size:11px;
+    padding:9px 6px;
+  }
+
+  .summary-line{
+    gap:8px;
+  }
+
+  .mini-stat .mini-value{
+    font-size:15px;
+  }
+}
+
+@media print{
+  body::before,
+  body::after,
+  .bottom-actions,
+  .debug{
+    display:none !important;
+  }
+
+  body{
+    background:#fff !important;
+  }
+
+  .app{
+    max-width:100%;
+    padding:0;
+  }
+
+  .card,
+  .year-card{
+    box-shadow:none !important;
+    background:#fff !important;
+    border:1px solid #eee !important;
+  }
+
+  .summary-box,
+  .mini-stat,
+  .chip{
+    box-shadow:none !important;
+  }
 }
 </style>
 </head>
@@ -113,15 +610,18 @@ button{
 <div class="app">
 
   <div class="card">
-    <h3 style="margin:0;">كشف حساب</h3>
-    <div id="tenantName" style="font-weight:bold;color:#2f6fed;margin-top:8px;font-size:18px;"></div>
+    <div class="header-badge">JABRI STATEMENT</div>
+    <h3 class="statement-title">كشف حساب</h3>
+    <div id="tenantName"></div>
     <div id="debug" class="debug"></div>
   </div>
+
+  <div id="summaryContainer"></div>
 
   <div id="container"></div>
 
   <div class="bottom-actions">
-    <button class="pdf-btn" onclick="savePDF()">PDF</button>
+    <button class="save-btn" onclick="savePDF()">حفظ</button>
     <button class="back-btn" onclick="history.back()">رجوع</button>
   </div>
 
@@ -132,7 +632,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
   'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 )
 
 function normalizeText(v){
@@ -180,13 +680,6 @@ function isPaymentReceipt(receipt){
   )
 }
 
-function normalizeArabic(text){
-  return String(text || "")
-    .replace(/أ|إ|آ/g, "ا")
-    .replace(/ى/g, "ي")
-    .trim()
-}
-
 function getTenantCode(){
   const params = new URLSearchParams(window.location.search)
 
@@ -215,10 +708,9 @@ function getTenantCode(){
   return ""
 }
 
-// الإصلاح المهم لصفوف 2025/2026
+// إصلاح الصفوف التي دخلت shifted في 2025 و2026
 function normalizeRow(r){
-  const originalDescription = normalizeText(r.description)
-  let description = originalDescription
+  let description = normalizeText(r.description)
   let receiptNo = normalizeText(r.receipt_no || "-")
   let debit = cleanNum(r.debit)
   let credit = cleanNum(r.credit)
@@ -226,18 +718,20 @@ function normalizeRow(r){
   const rowDate = new Date(r.date)
   const rowYear = isNaN(rowDate.getTime()) ? "" : rowDate.getFullYear()
 
-  const shiftedNumber = isNumericText(originalDescription) && debit === 0 && credit === 0
+  const shiftedNumber = isNumericText(description) && debit === 0 && credit === 0
   const receiptLooksPayment = isPaymentReceipt(receiptNo)
 
   if(shiftedNumber){
-    const amount = cleanNum(originalDescription)
+    const amount = cleanNum(description)
 
     if(receiptLooksPayment){
+      // مثل نقدي + 450 / 850 / 1000
       credit = amount
       debit = 0
       description = "دفعة من الإيجار"
       receiptNo = "-"
     } else {
+      // مثل 1800 / 36 / 2494 / 2030
       debit = amount
       credit = 0
 
@@ -260,19 +754,11 @@ function normalizeRow(r){
   }
 }
 
-function getDisplayYear(row){
-  if(isCarryDescription(row.description)){
-    const match = normalizeText(row.description).match(/عام\s*(\d{4})/)
-    if(match) return Number(match[1]) + 1
-  }
-  return new Date(row.date).getFullYear()
-}
-
 function getRowOrder(desc){
-  const text = normalizeArabic(desc)
+  const text = normalizeText(desc)
 
   if(text.includes("رصيد")) return 1
-  if(text.includes("ايجار")) return 2
+  if(text.includes("إيجار")) return 2
   if(text.includes("معارف")) return 3
   if(text.includes("دفعة")) return 4
   return 9
@@ -282,6 +768,40 @@ function getBalanceClass(balance){
   if(Math.abs(balance) < 0.01) return "balance balance-zero"
   if(balance < 0) return "balance balance-negative"
   return "balance"
+}
+
+function getSeasonClass(){
+  const month = new Date().getMonth() + 1
+  if([3,4,5].includes(month)) return "spring-theme"
+  if([6,7,8].includes(month)) return "summer-theme"
+  if([9,10,11].includes(month)) return "autumn-theme"
+  return "winter-theme"
+}
+
+function setSeasonTheme(){
+  document.body.classList.add(getSeasonClass())
+}
+
+function renderTopSummary(totalDebit, totalCredit, totalBalance){
+  const summaryContainer = document.getElementById("summaryContainer")
+  summaryContainer.innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-box debit-box">
+        <div class="summary-label">إجمالي المدين</div>
+        <div class="summary-value">${formatNumber(totalDebit)}</div>
+      </div>
+
+      <div class="summary-box credit-box">
+        <div class="summary-label">إجمالي الدائن</div>
+        <div class="summary-value">${formatNumber(totalCredit)}</div>
+      </div>
+
+      <div class="summary-box balance-box">
+        <div class="summary-label">الرصيد</div>
+        <div class="summary-value">${formatNumber(totalBalance)}</div>
+      </div>
+    </div>
+  `
 }
 
 async function load(){
@@ -322,99 +842,157 @@ async function load(){
 
   data.forEach(r => {
     const fixed = normalizeRow(r)
-    const displayYear = getDisplayYear(fixed)
+
+    let displayYear
+    if(isCarryDescription(fixed.description)){
+      const match = fixed.description.match(/عام\s*(\d{4})/)
+      if(match){
+        displayYear = Number(match[1]) + 1
+      } else {
+        displayYear = new Date(fixed.date).getFullYear()
+      }
+    } else {
+      displayYear = new Date(fixed.date).getFullYear()
+    }
 
     if(!grouped[displayYear]) grouped[displayYear] = []
     grouped[displayYear].push(fixed)
   })
 
   let html = ""
+  let grandDebit = 0
+  let grandCredit = 0
+  let grandBalance = 0
 
-  Object.keys(grouped)
-    .sort((a,b) => Number(a) - Number(b))
-    .forEach(year => {
-      let yearRows = grouped[year]
+  const sortedYears = Object.keys(grouped).sort((a,b) => Number(a) - Number(b))
 
-      // التاريخ أولاً من الأقدم إلى الأحدث
-      // وإذا نفس التاريخ: رصيد ثم إيجار ثم معارف ثم دفعة
-      yearRows.sort((a, b) => {
-        const da = new Date(a.date).getTime()
-        const db = new Date(b.date).getTime()
+  sortedYears.forEach((year, index) => {
+    let yearRows = grouped[year]
 
-        if(da !== db) return da - db
+    yearRows.sort((a, b) => {
+      const oa = getRowOrder(a.description)
+      const ob = getRowOrder(b.description)
 
-        const oa = getRowOrder(a.description)
-        const ob = getRowOrder(b.description)
+      if(oa !== ob) return oa - ob
 
-        if(oa !== ob) return oa - ob
+      const da = new Date(a.date).getTime()
+      const db = new Date(b.date).getTime()
+      return da - db
+    })
 
-        return 0
-      })
+    let balance = 0
+    let debitTotal = 0
+    let creditTotal = 0
 
-      let balance = 0
-      let debitTotal = 0
-      let creditTotal = 0
+    const rows = yearRows.map((r, i) => {
+      const debit = num(r.debitVal)
+      const credit = num(r.creditVal)
+      const desc = normalizeText(r.description)
 
-      const rows = yearRows.map((r, i) => {
-        const debit = num(r.debitVal)
-        const credit = num(r.creditVal)
-        const desc = normalizeText(r.description)
+      if(i === 0 && desc.includes("رصيد")){
+        balance = debit
+      } else {
+        balance += debit - credit
+      }
 
-        if(i === 0 && desc.includes("رصيد")){
-          balance = debit
-        } else {
-          balance += debit - credit
-        }
+      debitTotal += debit
+      creditTotal += credit
 
-        debitTotal += debit
-        creditTotal += credit
+      return `
+        <tr class="${desc.includes("رصيد") ? "carry-row" : ""}">
+          <td class="date-col">
+            <span class="chip chip-date">${formatDate(r.date)}</span>
+          </td>
+          <td class="debit">${debit > 0 ? formatNumber(debit) : "-"}</td>
+          <td class="credit">${credit > 0 ? formatNumber(credit) : "-"}</td>
+          <td class="${getBalanceClass(balance)}">${formatNumber(balance)}</td>
+          <td>${desc || "-"}</td>
+          <td>
+            <span class="chip chip-receipt">${r.receipt_no || "-"}</span>
+          </td>
+        </tr>
+      `
+    }).join("")
 
-        return `
-          <tr class="${desc.includes("رصيد") ? "carry-row" : ""}">
-            <td>${formatDate(r.date)}</td>
-            <td class="debit">${debit > 0 ? formatNumber(debit) : "-"}</td>
-            <td class="credit">${credit > 0 ? formatNumber(credit) : "-"}</td>
-            <td class="${getBalanceClass(balance)}">${formatNumber(balance)}</td>
-            <td>${desc || "-"}</td>
-            <td><span class="receipt">${r.receipt_no || "-"}</span></td>
-          </tr>
-        `
-      }).join("")
+    grandDebit += debitTotal
+    grandCredit += creditTotal
+    grandBalance = balance
 
-      html += `
-        <div class="year-card">
+    html += `
+      <div class="year-card">
+        <div class="year-head">
           <div class="year-title">سنة ${year}</div>
+          <div class="year-subtle">كشف من الأقدم إلى الأحدث</div>
+        </div>
 
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>تاريخ</th>
+                <th class="date-col">التاريخ</th>
                 <th>مدين</th>
                 <th>دائن</th>
-                <th>رصيد</th>
-                <th>بيان</th>
-                <th>سند</th>
+                <th>الرصيد</th>
+                <th>البيان</th>
+                <th>السند</th>
               </tr>
             </thead>
             <tbody>
               ${rows}
             </tbody>
           </table>
+        </div>
 
-          <div class="summary-line">
-            مدين: ${formatNumber(debitTotal)} | دائن: ${formatNumber(creditTotal)} | رصيد: ${formatNumber(balance)}
+        <div class="summary-line">
+          <div class="mini-stat debit-stat">
+            <span class="mini-label">مدين</span>
+            <span class="mini-value">${formatNumber(debitTotal)}</span>
+          </div>
+
+          <div class="mini-stat credit-stat">
+            <span class="mini-label">دائن</span>
+            <span class="mini-value">${formatNumber(creditTotal)}</span>
+          </div>
+
+          <div class="mini-stat balance-stat">
+            <span class="mini-label">الرصيد</span>
+            <span class="mini-value">${formatNumber(balance)}</span>
           </div>
         </div>
-      `
-    })
+      </div>
+    `
+  })
 
+  renderTopSummary(grandDebit, grandCredit, grandBalance)
   container.innerHTML = html
 }
 
-window.savePDF = function(){
-  html2pdf().from(document.body).save("statement.pdf")
+window.savePDF = async function(){
+  const element = document.querySelector(".app")
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+  const opt = {
+    margin: 0.2,
+    filename: 'statement.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  }
+
+  if(isIOS){
+    const worker = html2pdf().set(opt).from(element).toPdf()
+    const pdf = await worker.get('pdf')
+    const blob = pdf.output('blob')
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank')
+    return
+  }
+
+  html2pdf().set(opt).from(element).save()
 }
 
+setSeasonTheme()
 load()
 </script>
 
