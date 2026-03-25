@@ -26,12 +26,15 @@ body{
   border-radius:20px;
   padding:15px;
   margin-bottom:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.05);
 }
 
 .year-card{
   border-radius:20px;
   padding:15px;
   margin-bottom:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.04);
+  animation:fadeUp 0.35s ease;
 }
 
 .green{ background:#edf8f1; }
@@ -57,7 +60,7 @@ body{
 table{
   width:100%;
   border-collapse:collapse;
-  background:rgba(255,255,255,0.7);
+  background:rgba(255,255,255,0.72);
   border-radius:14px;
   overflow:hidden;
 }
@@ -71,11 +74,23 @@ th, td{
 
 th{
   background:#f1f3f7;
+  color:#111;
+  font-weight:900;
 }
 
 tbody tr:hover{
   background:rgba(47,111,237,0.05);
   transition:0.2s;
+}
+
+tbody tr.carry-row{
+  background:rgba(29,41,64,0.04);
+}
+
+tbody tr.final-balance-row td{
+  background:rgba(201,164,107,0.16);
+  border-bottom:none;
+  font-weight:900;
 }
 
 .debit{
@@ -97,6 +112,7 @@ tbody tr:hover{
 
 .balance-positive{ color:#e05252; }
 .balance-zero{ color:#18a957; }
+.balance-negative{ color:#18a957; }
 
 .receipt{
   background:#eef4ff;
@@ -106,6 +122,7 @@ tbody tr:hover{
   font-weight:900;
   color:#2f6fed;
   display:inline-block;
+  min-width:34px;
 }
 
 .date-chip{
@@ -116,6 +133,7 @@ tbody tr:hover{
   border-radius:12px;
   font-size:11px;
   display:inline-block;
+  white-space:nowrap;
 }
 
 td:nth-child(5){
@@ -314,7 +332,7 @@ td:nth-child(5){
   </div>
 
   <div class="pdf-header">
-    <img src="logo.png" class="pdf-logo" onerror="this.style.display='none'" />
+    <img src="logo.png" class="pdf-logo" onerror="this.style.display='none'">
     <div class="pdf-title">كشف حساب</div>
     <div class="pdf-tenant" id="pdfTenantName"></div>
     <div class="pdf-date" id="pdfDate"></div>
@@ -384,11 +402,7 @@ window.savePDF = async function(){
     const fileName = `statement_${safeFileName || "tenant"}.pdf`
     const file = new File([pdfBlob], fileName, { type: "application/pdf" })
 
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({ files: [file] })
-    ) {
+    if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })){
       await navigator.share({
         files: [file],
         title: "كشف حساب",
@@ -430,9 +444,14 @@ function formatDate(dateStr){
 }
 
 function getYear(dateStr){
-  const d = new Date(dateStr)
-  if(Number.isNaN(d.getTime())) return null
-  return d.getFullYear()
+  if(!dateStr) return null
+
+  const direct = new Date(dateStr)
+  if(!Number.isNaN(direct.getTime())) return direct.getFullYear()
+
+  const text = String(dateStr).trim()
+  const match = text.match(/(\d{4})/)
+  return match ? Number(match[1]) : null
 }
 
 function normalizeText(text){
@@ -440,19 +459,23 @@ function normalizeText(text){
 }
 
 function isRentRow(desc){
-  return /ايجار/i.test(normalizeText(desc))
+  const text = normalizeText(desc)
+  return text.includes("ايجار")
 }
 
 function isFeesRow(desc){
-  return /معارف/i.test(normalizeText(desc))
+  const text = normalizeText(desc)
+  return text.includes("معارف")
 }
 
 function isCarryRow(desc){
-  return /رصيد\s*(سابق\s*)?عام/i.test(normalizeText(desc))
+  const text = normalizeText(desc)
+  return text.includes("رصيد")
 }
 
 function isPaymentRow(desc){
-  return /دفعة/i.test(normalizeText(desc))
+  const text = normalizeText(desc)
+  return text.includes("دفعة")
 }
 
 function getCarryBaseYear(desc){
@@ -466,10 +489,9 @@ function getStatementYear(row){
   const dateYear = getYear(row.date)
 
   if(isCarryRow(desc)){
-    const carryBaseYear = getCarryBaseYear(desc)
-    if(carryBaseYear){
-      return carryBaseYear + 1
-    }
+    const baseYear = getCarryBaseYear(desc)
+    if(baseYear) return baseYear + 1
+    if(dateYear) return dateYear + 1
   }
 
   return dateYear
@@ -485,8 +507,8 @@ function getRowOrder(desc){
   return 9
 }
 
-function getStatus(totalDebit, totalCredit, endYearBalance){
-  if(endYearBalance <= 0){
+function getStatus(endYearBalance, statementCredit){
+  if(Math.abs(endYearBalance) < 0.01){
     return {
       color: "green",
       label: "مسدد",
@@ -494,7 +516,7 @@ function getStatus(totalDebit, totalCredit, endYearBalance){
     }
   }
 
-  if(totalCredit > 0){
+  if(statementCredit > 0){
     return {
       color: "orange",
       label: "سداد جزئي",
@@ -507,6 +529,12 @@ function getStatus(totalDebit, totalCredit, endYearBalance){
     label: "غير مسدد",
     className: "status-unpaid"
   }
+}
+
+function getBalanceClass(balance){
+  if(Math.abs(balance) < 0.01) return "balance-zero"
+  if(balance > 0) return "balance-positive"
+  return "balance-negative"
 }
 
 document.addEventListener("DOMContentLoaded", load)
@@ -556,6 +584,7 @@ async function load(){
     .map((r, index) => ({
       ...r,
       originalIndex: index,
+      date: r.date,
       debit: num(r.debit),
       credit: num(r.credit),
       description: normalizeText(r.description || ""),
@@ -572,12 +601,12 @@ async function load(){
   validRows.sort((a, b) => {
     if(a.sectionYear !== b.sectionYear) return a.sectionYear - b.sectionYear
 
-    const aDate = new Date(a.date).getTime()
-    const bDate = new Date(b.date).getTime()
-    if(aDate !== bDate) return aDate - bDate
-
     const orderDiff = getRowOrder(a.description) - getRowOrder(b.description)
     if(orderDiff !== 0) return orderDiff
+
+    const aDate = new Date(a.date).getTime()
+    const bDate = new Date(b.date).getTime()
+    if(!Number.isNaN(aDate) && !Number.isNaN(bDate) && aDate !== bDate) return aDate - bDate
 
     return a.originalIndex - b.originalIndex
   })
@@ -589,7 +618,6 @@ async function load(){
   }
 
   let html = ""
-  let runningBalance = 0
 
   Object.keys(grouped)
     .map(Number)
@@ -597,29 +625,39 @@ async function load(){
     .forEach(year => {
       const rows = grouped[year]
 
-      let totalDebit = 0
-      let totalCredit = 0
+      let yearBalance = 0
+      let openingBalance = 0
+      let movementDebit = 0
+      let movementCredit = 0
 
       rows.forEach(r => {
-  totalDebit += r.debit
-  totalCredit += r.credit
+        const desc = normalizeText(r.description)
 
-  if(isCarryRow(r.description)){
-    runningBalance = r.debit
-  } else {
-    runningBalance += r.debit - r.credit
-  }
+        if(isCarryRow(desc)){
+          openingBalance = r.debit
+          yearBalance = openingBalance
+          r.balance = yearBalance
+          r.isCarry = true
+          return
+        }
 
-  r.balance = runningBalance
-})
+        movementDebit += r.debit
+        movementCredit += r.credit
+        yearBalance += r.debit - r.credit
+        r.balance = yearBalance
+        r.isCarry = false
+      })
+
+      const statementDebit = openingBalance + movementDebit
+      const statementCredit = movementCredit
       const endYearBalance = rows.length ? rows[rows.length - 1].balance : 0
-      const yearStatus = getStatus(totalDebit, totalCredit, endYearBalance)
+      const status = getStatus(endYearBalance, statementCredit)
 
       html += `
-        <div class="year-card ${yearStatus.color}">
+        <div class="year-card ${status.color}">
           <div class="year-header">
             <span class="year-title">${year}</span>
-            <span class="status-box ${yearStatus.className}">${yearStatus.label}</span>
+            <span class="status-box ${status.className}">${status.label}</span>
           </div>
 
           <table>
@@ -637,14 +675,12 @@ async function load(){
       `
 
       rows.forEach(r => {
-        const balanceClass = r.balance > 0 ? "balance-positive" : "balance-zero"
-
         html += `
-          <tr>
+          <tr class="${r.isCarry ? 'carry-row' : ''}">
             <td><span class="date-chip">${formatDate(r.date)}</span></td>
             <td class="debit">${r.debit ? displayNumber(r.debit) : "-"}</td>
             <td class="credit">${r.credit ? displayNumber(r.credit) : "-"}</td>
-            <td class="balance ${balanceClass}">${displayNumber(r.balance)}</td>
+            <td class="balance ${getBalanceClass(r.balance)}">${displayNumber(r.balance)}</td>
             <td>${r.description || "-"}</td>
             <td><span class="receipt">${r.receipt_no || "-"}</span></td>
           </tr>
@@ -652,18 +688,26 @@ async function load(){
       })
 
       html += `
+          <tr class="final-balance-row">
+            <td>-</td>
+            <td class="debit">${displayNumber(statementDebit)}</td>
+            <td class="credit">${displayNumber(statementCredit)}</td>
+            <td class="balance ${getBalanceClass(endYearBalance)}">${displayNumber(endYearBalance)}</td>
+            <td>رصيد مستحق ${year}</td>
+            <td><span class="receipt">${displayNumber(endYearBalance)}</span></td>
+          </tr>
             </tbody>
           </table>
 
           <div class="summary">
             <div class="summary-card summary-debit">
               <div class="summary-label">إجمالي المدين</div>
-              <div class="summary-value">${displayNumber(totalDebit)}</div>
+              <div class="summary-value">${displayNumber(statementDebit)}</div>
             </div>
 
             <div class="summary-card summary-credit">
               <div class="summary-label">إجمالي الدائن</div>
-              <div class="summary-value">${displayNumber(totalCredit)}</div>
+              <div class="summary-value">${displayNumber(statementCredit)}</div>
             </div>
 
             <div class="summary-card summary-balance">
