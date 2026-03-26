@@ -1012,14 +1012,23 @@ async function load(){
 
   const tenant = getTenantCode()
 
-  debug.innerText = "tenant code: " + tenant
+const { data: tenantData, error } = await supabase
+  .from('tenants')
+  .select('tenant_name')
+  .eq('tenant_code', tenant)
+  .single()
 
+if(error){
+  console.log(error)
+}
+
+debug.innerText = "tenant code: " + tenant
   if(!tenant){
     container.innerHTML = "<div class='empty-box'>❌ لا يوجد tenant code</div>"
     return
   }
 
-  tenantName.innerText = tenant
+  tenantName.innerText = tenantData?.tenant_name || tenant
 
   const { data, error } = await supabase
     .from("tenant_transactions")
