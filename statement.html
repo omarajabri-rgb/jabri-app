@@ -1019,8 +1019,10 @@ const { data: tenantData, error } = await supabase
   .maybeSingle()
 
 if(error){
-  console.log(error)
+  console.log("ERROR:", error)
 }
+
+console.log("tenantData:", tenantData) // 🔥 مهم جداً
 
 debug.innerText = "tenant code: [" + tenant + "]"
   if(!tenant){
@@ -1030,14 +1032,14 @@ debug.innerText = "tenant code: [" + tenant + "]"
 
   tenantName.innerText = tenantData?.tenant_name || tenant
 
-  const { data, error } = await supabase
+  const { data, error: txError } = await supabase
     .from("tenant_transactions")
     .select("*")
     .eq("tenant_code", tenant)
     .order("date", { ascending: true })
 
-  if(error){
-    container.innerHTML = `<div class="empty-box">${error.message}</div>`
+  if(txError){
+    container.innerHTML = `<div class="empty-box">${txError.message}</div>`
     return
   }
 
