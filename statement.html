@@ -1270,7 +1270,14 @@ window.savePDF = async function(){
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   }
 
-  await html2pdf().set(opt).from(element).save()
+  const pdf = await html2pdf().set(opt).from(element).outputPdf('blob')
+
+const link = document.createElement('a')
+link.href = URL.createObjectURL(pdf)
+link.download = 'statement.pdf'
+document.body.appendChild(link)
+link.click()
+document.body.removeChild(link)
 
 document.body.classList.remove("pdf-mode")
 
