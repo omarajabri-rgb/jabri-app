@@ -1016,7 +1016,7 @@ const { data: tenantData, error } = await supabase
   .from('tenants')
   .select('tenant_name')
   .eq('tenant_code', tenant)
-  .single()
+  .maybeSingle()
 
 if(error){
   console.log(error)
