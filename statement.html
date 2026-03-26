@@ -159,7 +159,7 @@ body.winter-theme::after{
   font-size:23px;
   font-weight:900;
   color:var(--navy);
-  letter-spacing:.2px;
+  letter-spacing:0;
   direction: rtl;
   unicode-bidi: plaintext;
   text-align:center;
@@ -1106,7 +1106,8 @@ debug.innerText = "tenant code: [" + tenant + "]"
     return
   }
 
-  tenantName.innerHTML = `<span dir="rtl">${tenantData?.tenant_name}</span>`
+  tenantName.textContent = tenantData?.tenant_name || tenant
+tenantName.setAttribute("dir","rtl")
 
   const { data, error: txError } = await supabase
     .from("tenant_transactions")
