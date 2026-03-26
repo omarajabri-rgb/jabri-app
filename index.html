@@ -447,9 +447,62 @@
         grid-template-columns:repeat(4,1fr);
       }
     }
+body[data-theme="summer"]{
+  background: linear-gradient(135deg,#fceabb,#f8b500);
+}
+
+body[data-theme="autumn"]{
+  background: linear-gradient(135deg,#d38312,#a83279);
+}
+
+body[data-theme="rain"]{
+  background: linear-gradient(135deg,#4e54c8,#8f94fb);
+}
+
+body[data-theme="snow"]{
+  background: linear-gradient(135deg,#e6e9f0,#eef1f5);
+}
+
+body[data-theme="spring"]{
+  background: linear-gradient(135deg,#a8edea,#fed6e3);
+}
+
+body[data-theme="newyear"]{
+  background: linear-gradient(135deg,#141e30,#243b55);
+}
+body[data-theme="newyear"]{
+  background: linear-gradient(135deg,#141e30,#243b55);
+}
+
+/* 🌧️ المطر */
+#season-effects{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.rain-drop{
+  position:absolute;
+  width:2px;
+  height:15px;
+  background:rgba(255,255,255,0.6);
+  animation:rainFall linear infinite;
+}
+
+@keyframes rainFall{
+  from{ transform:translateY(-100px); }
+  to{ transform:translateY(100vh); }
+}
+
+
   </style>
 </head>
 <body>
+  <div id="season-effects"></div>
 
 <div class="app">
 
@@ -590,7 +643,48 @@ let chart = null
 let creditTrendChart = null
 let currentTenantCode = ''
 let selectedYear = '2026'
+function getSeasonTheme(){
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
 
+  // رأس السنة
+  if ((month === 12 && day >= 25) || (month === 1 && day <= 5)) {
+    return 'newyear'
+  }
+
+  // شتاء ماطر: 1 نوفمبر - 31 يناير
+  if (month === 11 || month === 12 || month === 1) {
+    return 'rain'
+  }
+
+  // شتاء ثلجي: 1 فبراير - 30 أبريل
+  if (month === 2 || month === 3 || month === 4) {
+    return 'snow'
+  }
+
+  // ربيع: 1 مايو - 30 يونيو
+  if (month === 5 || month === 6) {
+    return 'spring'
+  }
+
+  // صيف: 1 يوليو - 31 أغسطس
+  if (month === 7 || month === 8) {
+    return 'summer'
+  }
+
+  // خريف: 1 سبتمبر - 31 أكتوبر
+  if (month === 9 || month === 10) {
+    return 'autumn'
+  }
+
+  return 'default'
+}
+
+function applySeasonTheme(){
+  const theme = getSeasonTheme()
+  document.body.setAttribute('data-theme', theme)
+}
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
@@ -748,7 +842,7 @@ async function loadNotifications(code){
     emptyNotifications.classList.remove('hidden')
     return
   }
-
+applySeasonTheme()
   let html = ''
   let visibleCount = 0
 
@@ -1210,7 +1304,20 @@ if(savedCode){
   document.getElementById('code').value = savedCode
   login()
 }
-</script>
+function getSeason(){
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const day = now.getDate()
 
+  if(month === 12 && day >= 25) return 'newyear'
+  if(month === 11 || month === 12 || month === 1) return 'rain'
+  if(month === 2 || month === 3 || month === 4) return 'snow'
+  if(month === 5 || month === 6) return 'spring'
+  if(month === 7 || month === 8) return 'summer'
+}
+
+document.body.setAttribute('data-theme', getSeason())
+
+</script>
 </body>
 </html>
