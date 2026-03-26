@@ -1140,7 +1140,6 @@ debug.innerText = "tenant code: [" + tenant + "]"
   <div class="pdf-date" id="pdfDate"></div>
 </div>
 `
-
 Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
   let yearRows = grouped[year]
 
@@ -1154,7 +1153,7 @@ Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
     const db = new Date(b.date).getTime()
     return da - db
   })
-   })
+   
 
     let balance = 0
     let debitTotal = 0
