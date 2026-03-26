@@ -594,7 +594,25 @@ let selectedYear = '2026'
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
+function animateCount(el, endValue){
+  const finalValue = Number(endValue) || 0
+  const duration = 700
+  const start = performance.now()
 
+  function frame(now){
+    const progress = Math.min((now - start) / duration, 1)
+    const ease = 1 - Math.pow(1 - progress, 3)
+    const current = Math.round(finalValue * ease)
+
+    el.textContent = current.toLocaleString('en-US')
+
+    if(progress < 1){
+      requestAnimationFrame(frame)
+    }
+  }
+
+  requestAnimationFrame(frame)
+}
 function formatDateTime(dateValue){
   const date = new Date(dateValue)
   if(isNaN(date.getTime())) return '—'
@@ -1045,10 +1063,10 @@ async function loadTenantSummary(code, year){
   const remaining = Math.max(balance, 0)
   const state = getAccountState(paid, remaining)
 
-  document.getElementById('debit').innerText = formatNumber(debit)
-  document.getElementById('credit').innerText = formatNumber(credit)
-  document.getElementById('balance').innerText = formatNumber(balance)
-  document.getElementById('rowsCount').innerText = formatNumber(rowCount)
+  animateCount(document.getElementById('debit'), debit)
+animateCount(document.getElementById('credit'), credit)
+animateCount(document.getElementById('balance'), balance)
+animateCount(document.getElementById('rowsCount'), rowCount)
 
   applySmartClass(document.getElementById('debitBox'), state)
   applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
