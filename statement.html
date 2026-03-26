@@ -1010,7 +1010,14 @@ async function load(){
   const tenantName = document.getElementById("tenantName")
   const debug = document.getElementById("debug")
 
-  const tenant = getTenantCode()?.trim().toUpperCase()
+  const raw = getTenantCode()
+
+const tenant = raw
+  ? raw.toString().trim().toUpperCase()
+  : null
+
+console.log("RAW:", raw)
+console.log("FINAL:", tenant)
 
 const { data: tenantData, error } = await supabase
   .from('tenants')
