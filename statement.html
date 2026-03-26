@@ -811,7 +811,11 @@ body.pdf-mode td{
   color:#182033 !important;
   opacity:1 !important;
 }
-
+body.pdf-mode tbody tr{
+  opacity:1 !important;
+  transform:none !important;
+  animation:none !important;
+}
 body.pdf-mode th{
   background:#f4f6fb !important;
   position:static !important;
@@ -1131,8 +1135,7 @@ debug.innerText = "tenant code: [" + tenant + "]"
 </div>
 `
 
- Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
-
+Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
   let yearRows = grouped[year]
 
   yearRows.sort((a, b) => {
@@ -1143,7 +1146,6 @@ debug.innerText = "tenant code: [" + tenant + "]"
 
     const da = new Date(a.date).getTime()
     const db = new Date(b.date).getTime()
-
     return da - db
   })
    })
