@@ -1123,21 +1123,30 @@ debug.innerText = "tenant code: [" + tenant + "]"
     grouped[displayYear].push(fixed)
   })
 
-  let html = ""
+  let html = `
+<div class="pdf-header">
+  <div class="pdf-title">مجمع جبري الصناعي التجاري</div>
+  <div class="pdf-sub">كشف حساب</div>
+  <div class="pdf-date" id="pdfDate"></div>
+</div>
+`
 
-  Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
-    let yearRows = grouped[year]
+ Object.keys(grouped).sort((a,b) => Number(a) - Number(b)).forEach(year => {
 
-    yearRows.sort((a, b) => {
-      const oa = getRowOrder(a.description, a.date, a.debitVal)
-      const ob = getRowOrder(b.description, b.date, b.debitVal)
+  let yearRows = grouped[year]
 
-      if(oa !== ob) return oa - ob
+  yearRows.sort((a, b) => {
+    const oa = getRowOrder(a.description, a.date, a.debitVal)
+    const ob = getRowOrder(b.description, b.date, b.debitVal)
 
-      const da = new Date(a.date).getTime()
-      const db = new Date(b.date).getTime()
-      return da - db
-    })
+    if(oa !== ob) return oa - ob
+
+    const da = new Date(a.date).getTime()
+    const db = new Date(b.date).getTime()
+
+    return da - db
+  })
+   })
 
     let balance = 0
     let debitTotal = 0
