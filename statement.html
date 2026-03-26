@@ -160,6 +160,10 @@ body.winter-theme::after{
   font-weight:900;
   color:var(--navy);
   letter-spacing:.2px;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align:center;
+  font-family: Arial, Tahoma, sans-serif;
 }
 
 .tenant-title::after{
@@ -860,7 +864,7 @@ body.pdf-mode .debug{
 
   <div class="card">
     <h2 class="tenant-title" id="tenantName"></h2>
-    <div class="statement-title">كشف حساب</div>
+
     <div id="debug" class="debug"></div>
   </div>
 
@@ -1102,7 +1106,7 @@ debug.innerText = "tenant code: [" + tenant + "]"
     return
   }
 
-  tenantName.innerText = tenantData?.tenant_name || tenant
+  tenantName.innerHTML = `<span dir="rtl">${tenantData?.tenant_name}</span>`
 
   const { data, error: txError } = await supabase
     .from("tenant_transactions")
