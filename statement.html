@@ -755,37 +755,92 @@ button:hover{
     font-size:19px;
   }
 }
+/* 🔥 PDF MODE */
 
-@media print{
-  body::before,
-  body::after,
-  .bottom-actions,
-  .debug{
-    display:none !important;
-  }
-
-  body{
-    background:#fff !important;
-  }
-
-  .app{
-    max-width:100%;
-    width:100%;
-    padding:0;
-  }
-
-  .card,
-  .year-card{
-    box-shadow:none !important;
-    background:#fff !important;
-    border:1px solid #eee !important;
-  }
-
-  .mini-stat,
-  .chip{
-    box-shadow:none !important;
-  }
+body.pdf-mode{
+  background:#ffffff !important;
 }
+
+body.pdf-mode::before,
+body.pdf-mode::after{
+  display:none !important;
+}
+
+body.pdf-mode .app{
+  width:100% !important;
+  max-width:100% !important;
+  padding:12px !important;
+  background:#fff !important;
+}
+
+body.pdf-mode .card,
+body.pdf-mode .year-card,
+body.pdf-mode .empty-box{
+  background:#ffffff !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  box-shadow:none !important;
+  border:1px solid #e6eaf2 !important;
+}
+
+body.pdf-mode .year-card{
+  break-inside:avoid;
+  page-break-inside:avoid;
+  margin-bottom:14px !important;
+}
+
+body.pdf-mode .table-wrap{
+  background:#fff !important;
+  border:1px solid #e6eaf2 !important;
+}
+
+body.pdf-mode table{
+  background:#fff !important;
+  page-break-inside:auto;
+break-inside:auto;
+}
+
+body.pdf-mode tr{
+  page-break-inside:avoid;
+  page-break-after:auto;
+}
+body.pdf-mode th,
+body.pdf-mode td{
+  font-size:12px !important;
+  padding:10px 6px !important;
+  color:#182033 !important;
+  opacity:1 !important;
+}
+
+body.pdf-mode th{
+  background:#f4f6fb !important;
+  position:static !important;
+}
+
+body.pdf-mode .tenant-title{
+  font-size:28px !important;
+  color:#1d2940 !important;
+}
+
+body.pdf-mode .statement-title{
+  font-size:16px !important;
+  color:#9a6b2f !important;
+}
+
+body.pdf-mode .year-title{
+  box-shadow:none !important;
+}
+
+body.pdf-mode .mini-stat,
+body.pdf-mode .chip{
+  box-shadow:none !important;
+}
+
+body.pdf-mode .bottom-actions,
+body.pdf-mode .debug{
+  display:none !important;
+}
+
 </style>
 </head>
 
@@ -1185,28 +1240,25 @@ debug.innerText = "tenant code: [" + tenant + "]"
 }
 
 window.savePDF = async function(){
+
   const element = document.querySelector(".app")
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+  // 🔥 دخول وضع PDF
+  document.body.classList.add("pdf-mode")
 
   const opt = {
-    margin: 0.2,
+    margin: 0.3,
     filename: 'statement.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 2.5, useCORS: true, scrollY: 0 },
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   }
 
-  if(isIOS){
-    const worker = html2pdf().set(opt).from(element).toPdf()
-    const pdf = await worker.get('pdf')
-    const blob = pdf.output('blob')
-    const url = URL.createObjectURL(blob)
-    window.open(url, '_blank')
-    return
-  }
+  await html2pdf().set(opt).from(element).save()
 
-  html2pdf().set(opt).from(element).save()
+document.body.classList.remove("pdf-mode")
+
+  
 }
 
 setSeasonTheme()
