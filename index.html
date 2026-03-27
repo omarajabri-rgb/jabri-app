@@ -45,69 +45,7 @@
   background: linear-gradient(135deg,#6f849f,#8fa6c1,#b4c7d9);
 }
 
-  /* 🌙 Night */
-body[data-mode="night"]{
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.06), transparent 35%),
-    linear-gradient(135deg,#1f2633,#283244,#1c2230);
-}
-
-/* 🌸 Spring */
-body[data-season="spring"]{
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(168,237,234,0.10), transparent 35%),
-    linear-gradient(135deg,#edf6f7,#f7fbfc,#eef4f7);
-}
-
-/* ☀️ Summer */
-body[data-season="summer"]{
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(255,240,190,0.12), transparent 35%),
-    linear-gradient(135deg,#f7f6f1,#fafaf7,#f2f0ea);
-}
-
-/* 🍂 Autumn */
-body[data-season="autumn"]{
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(201,164,107,0.10), transparent 35%),
-    linear-gradient(135deg,#f5f3ef,#f8f6f2,#efebe6);
-}
-
-/* ❄️ Winter */
-body[data-season="winter"]{
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(190,220,255,0.12), transparent 35%),
-    linear-gradient(135deg,#edf2f7,#f7f9fc,#eef3f8);
-}
-
-/* ✨ Occasion Glow */
-body[data-occasion]::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-}
-
-/* 🌙 Ramadan */
-body[data-occasion="ramadan"]::after{
-  background: radial-gradient(circle at 50% 10%, rgba(201,164,107,0.10), transparent 35%);
-}
-
-/* 🇯🇴 National Day */
-body[data-occasion="jordan_national_day"]::after{
-  background: radial-gradient(circle at 50% 10%, rgba(0,123,61,0.08), transparent 35%);
-}
-
-/* 🎄 Christmas */
-body[data-occasion="christmas"]::after{
-  background: radial-gradient(circle at 50% 10%, rgba(180,220,255,0.10), transparent 35%);
-}
-
-/* ☪️ Prophet Birthday */
-body[data-occasion="prophet_birthday"]::after{
-  background: radial-gradient(circle at 50% 10%, rgba(201,164,107,0.08), transparent 35%);
-}
+ 
     .app{
       max-width:430px;
       margin:auto;
