@@ -1,18 +1,20 @@
-// 🎯 Jabri Occasions Engine - Smart Layer System
+// 🎯 Jabri Occasions Engine - Final Smart Layer System
 
 const EFFECT_PARTICLES = {
   none: { speed:[0,0], size:[0,0], count:0, icons:null, gravity:0, wind:0 },
-  rain: { speed:[4,6], size:[1,2], count:28, icons:null, gravity:0.16, wind:0.03 },
-  snow: { speed:[0.8,1.4], size:[12,16], count:16, icons:["❄️"], gravity:0.01, wind:0.01 },
-  butterflies: { speed:[0.12,0.22], size:[16,20], count:6, icons:["🦋"], gravity:0.002, wind:0.02 },
-  leaves: { speed:[0.2,0.35], size:[16,20], count:8, icons:["🍂"], gravity:0.01, wind:0.03 },
+
+  rain: { speed:[4,6], size:[1,2], count:24, icons:null, gravity:0.16, wind:0.03 },
+  snow: { speed:[0.8,1.4], size:[12,16], count:14, icons:["❄️"], gravity:0.01, wind:0.01 },
+
+  butterflies: { speed:[0.08,0.16], size:[12,16], count:3, icons:["🦋"], gravity:0.002, wind:0.02 },
+  leaves: { speed:[0.18,0.3], size:[16,20], count:6, icons:["🍂"], gravity:0.01, wind:0.03 },
   sun: { speed:[0.08,0.18], size:[10,12], count:1, icons:["☀️"], gravity:0.001, wind:0.002 },
-  stars: { speed:[0.08,0.14], size:[12,16], count:8, icons:["✦"], gravity:0.001, wind:0.002 },
-  ramadan: { speed:[0.18,0.35], size:[14,20], count:10, icons:["✨","☾"], gravity:0.006, wind:0.008 },
-  national: { speed:[0.25,0.55], size:[16,24], count:12, icons:["🇯🇴","✦"], gravity:0.01, wind:0.01 },
-  christmas: { speed:[0.18,0.45], size:[14,18], count:14, icons:["❄️","✦"], gravity:0.012, wind:0.01 },
-  prophet: { speed:[0.18,0.35], size:[14,18], count:10, icons:["☪️","✨"], gravity:0.008, wind:0.008 },
-  sandstorm: { speed:[1.5,2.6], size:[2,3], count:24, icons:null, gravity:0.02, wind:0.08 }
+  stars: { speed:[0.08,0.14], size:[12,16], count:6, icons:["✦"], gravity:0.001, wind:0.002 },
+
+  ramadan: { speed:[0.16,0.3], size:[14,18], count:8, icons:["✨","☾"], gravity:0.006, wind:0.008 },
+  national: { speed:[0.22,0.45], size:[16,22], count:10, icons:["🇯🇴","✦"], gravity:0.01, wind:0.01 },
+  christmas: { speed:[0.18,0.35], size:[14,18], count:10, icons:["❄️","✦"], gravity:0.012, wind:0.01 },
+  prophet: { speed:[0.16,0.3], size:[14,18], count:8, icons:["☪️","✨"], gravity:0.008, wind:0.008 }
 };
 
 const OccasionsEngine = (() => {
@@ -21,6 +23,7 @@ const OccasionsEngine = (() => {
   let ctx = null;
   let particles = [];
   let animationId = null;
+  let refreshTimer = null;
 
   const state = {
     active: false,
@@ -32,11 +35,12 @@ const OccasionsEngine = (() => {
 
   function getNowParts() {
     const now = new Date();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const hour = now.getHours();
-
-    return { now, month, day, hour };
+    return {
+      now,
+      month: now.getMonth() + 1,
+      day: now.getDate(),
+      hour: now.getHours()
+    };
   }
 
   function determineMode() {
@@ -47,10 +51,10 @@ const OccasionsEngine = (() => {
   function determineSeason() {
     const { month } = getNowParts();
 
-    if ([12,1,2].includes(month)) return "winter";
-    if ([3,4,5].includes(month)) return "spring";
-    if ([6,7,8].includes(month)) return "summer";
-    if ([9,10,11].includes(month)) return "autumn";
+    if ([12, 1, 2].includes(month)) return "winter";
+    if ([3, 4, 5].includes(month)) return "spring";
+    if ([6, 7, 8].includes(month)) return "summer";
+    if ([9, 10, 11].includes(month)) return "autumn";
 
     return "default";
   }
@@ -67,7 +71,10 @@ const OccasionsEngine = (() => {
         month: "numeric"
       }).formatToParts(now);
 
-      const islamicMonth = parseInt(islamic.find(p => p.type === "month")?.value || "0", 10);
+      const islamicMonth = parseInt(
+        islamic.find(p => p.type === "month")?.value || "0",
+        10
+      );
 
       if (islamicMonth === 9) return "ramadan";
       if (islamicMonth === 3) return "prophet_birthday";
@@ -84,7 +91,7 @@ const OccasionsEngine = (() => {
 
     if (state.season === "winter") return state.mode === "night" ? "snow" : "rain";
     if (state.season === "spring") return "butterflies";
-    if (state.season === "summer") return "sun";
+    if (state.season === "summer") return state.mode === "night" ? "stars" : "sun";
     if (state.season === "autumn") return "leaves";
 
     return "none";
@@ -135,7 +142,7 @@ const OccasionsEngine = (() => {
         icon: config.icons ? config.icons[Math.floor(Math.random() * config.icons.length)] : null,
         gravity: config.gravity,
         wind: config.wind,
-        op: 0.18 + Math.random() * 0.22
+        op: 0.12 + Math.random() * 0.15
       });
     }
   }
@@ -153,58 +160,79 @@ const OccasionsEngine = (() => {
     createParticles();
   }
 
+  function drawParticle(p) {
+    ctx.globalAlpha = p.op;
+
+    if (p.icon) {
+      ctx.font = `${Math.floor(p.size)}px Arial`;
+      ctx.fillText(p.icon, p.x, p.y);
+      return;
+    }
+
+    ctx.fillStyle = "rgba(255,255,255,0.28)";
+    ctx.fillRect(p.x, p.y, p.size, 10);
+  }
+
+  function updateParticle(p) {
+    p.vy += p.gravity;
+    p.x += p.vx + p.wind;
+    p.y += p.vy;
+
+    if (p.y > window.innerHeight + 30) {
+      p.y = -30;
+      p.x = Math.random() * window.innerWidth;
+    }
+
+    if (p.x > window.innerWidth + 30) p.x = -30;
+    if (p.x < -30) p.x = window.innerWidth + 30;
+  }
+
   function draw() {
     if (!ctx || !canvas) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     particles.forEach(p => {
-      p.vy += p.gravity;
-      p.x += p.vx + p.wind;
-      p.y += p.vy;
-
-      if (p.y > window.innerHeight + 30) {
-        p.y = -30;
-        p.x = Math.random() * window.innerWidth;
-      }
-
-      if (p.x > window.innerWidth + 30) p.x = -30;
-      if (p.x < -30) p.x = window.innerWidth + 30;
-
-      ctx.globalAlpha = p.op;
-
-      if (p.icon) {
-        ctx.font = `${Math.floor(p.size)}px Arial`;
-        ctx.fillText(p.icon, p.x, p.y);
-      } else {
-        ctx.fillStyle = "rgba(255,255,255,0.28)";
-        ctx.fillRect(p.x, p.y, p.size, 10);
-      }
+      updateParticle(p);
+      drawParticle(p);
     });
 
     animationId = requestAnimationFrame(draw);
   }
 
-  function refresh(manualEffect = null) {
+  function refresh() {
+    const oldSignature = `${state.mode}|${state.season}|${state.occasion}|${state.effect}`;
+
     state.mode = determineMode();
     state.season = determineSeason();
     state.occasion = determineOccasion();
-    state.effect = manualEffect || determineEffect();
+    state.effect = determineEffect();
+
+    const newSignature = `${state.mode}|${state.season}|${state.occasion}|${state.effect}`;
 
     applyBodyData();
-    createParticles();
+
+    if (oldSignature !== newSignature) {
+      createParticles();
+    }
   }
 
   return {
-    start(manualEffect = null) {
+    start() {
       createContainer();
       createCanvas();
-      refresh(manualEffect);
+      refresh();
       resize();
 
       if (!state.active) {
         state.active = true;
         draw();
+      }
+
+      if (!refreshTimer) {
+        refreshTimer = setInterval(() => {
+          this.refresh();
+        }, 60000);
       }
     },
 
@@ -214,6 +242,9 @@ const OccasionsEngine = (() => {
 
     destroy() {
       cancelAnimationFrame(animationId);
+      clearInterval(refreshTimer);
+
+      refreshTimer = null;
       particles = [];
       state.active = false;
 
