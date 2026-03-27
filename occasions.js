@@ -1,4 +1,4 @@
-// 🎯 Jabri Occasions Engine - Real Weather + Smart Layer System
+// 🎯 Jabri Occasions Engine - Animated Real Weather + Smart Layer System
 
 const EFFECT_PARTICLES = {
   none: { speed:[0,0], size:[0,0], count:0, icons:null, gravity:0, wind:0 },
@@ -139,10 +139,7 @@ const OccasionsEngine = (() => {
         condition.includes("thunder")
       ) {
         effect = "rain";
-      } else if (
-        condition.includes("sunny") ||
-        condition.includes("clear")
-      ) {
+      } else if (condition.includes("sunny") || condition.includes("clear")) {
         effect = isDay ? "sun" : "stars";
       } else if (
         condition.includes("cloud") ||
@@ -211,7 +208,9 @@ const OccasionsEngine = (() => {
         icon: config.icons ? config.icons[Math.floor(Math.random() * config.icons.length)] : null,
         gravity: config.gravity,
         wind: config.wind,
-        op: 0.24 + Math.random() * 0.28
+        op: 0.24 + Math.random() * 0.28,
+        drift: Math.random() * 2 - 1,
+        pulse: Math.random() * Math.PI * 2
       });
     }
   }
@@ -229,20 +228,98 @@ const OccasionsEngine = (() => {
     createParticles();
   }
 
-  function drawParticle(p) {
+  function drawRain(p) {
+    ctx.strokeStyle = `rgba(170,200,255,${p.op})`;
+    ctx.lineWidth = p.size;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x - 3, p.y + 18);
+    ctx.stroke();
+  }
+
+  function drawIconParticle(p) {
     ctx.globalAlpha = p.op;
 
-    if (p.icon) {
+    if (state.effect === "sun") {
+      const glow = 24 + Math.sin(p.pulse) * 4;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,220,120,${0.16 + p.op * 0.25})`;
+      ctx.arc(p.x, p.y, glow, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.font = `${Math.floor(p.size)}px Arial`;
       ctx.fillText(p.icon, p.x, p.y);
       return;
     }
 
-    ctx.fillStyle = "rgba(170,200,255,0.65)";
-    ctx.fillRect(p.x, p.y, p.size, 18);
+    ctx.font = `${Math.floor(p.size)}px Arial`;
+    ctx.fillText(p.icon, p.x, p.y);
   }
 
-  function updateParticle(p) {
+  function drawParticle(p) {
+    if (state.effect === "rain") {
+      drawRain(p);
+      return;
+    }
+
+    drawIconParticle(p);
+  }
+
+  function updateRain(p) {
+    p.vy += p.gravity;
+    p.x += p.wind + p.drift * 0.08;
+    p.y += p.vy;
+
+    if (p.y > window.innerHeight + 30) {
+      p.y = -30;
+      p.x = Math.random() * window.innerWidth;
+    }
+  }
+
+  function updateSnow(p) {
+    p.pulse += 0.02;
+    p.y += p.vy * 0.45;
+    p.x += Math.sin(p.pulse) * 0.8 + p.wind;
+
+    if (p.y > window.innerHeight + 30) {
+      p.y = -30;
+      p.x = Math.random() * window.innerWidth;
+    }
+  }
+
+  function updateButterfly(p) {
+    p.pulse += 0.03;
+    p.x += 0.7 + Math.sin(p.pulse) * 0.8;
+    p.y += Math.cos(p.pulse * 1.3) * 0.4;
+
+    if (p.x > window.innerWidth + 40) {
+      p.x = -40;
+      p.y = Math.random() * window.innerHeight;
+    }
+  }
+
+  function updateLeaves(p) {
+    p.pulse += 0.025;
+    p.y += p.vy * 0.35;
+    p.x += Math.sin(p.pulse) * 1.2 + p.wind;
+
+    if (p.y > window.innerHeight + 40) {
+      p.y = -40;
+      p.x = Math.random() * window.innerWidth;
+    }
+  }
+
+  function updateSun(p) {
+    p.pulse += 0.02;
+    p.y += Math.sin(p.pulse) * 0.15;
+  }
+
+  function updateStars(p) {
+    p.pulse += 0.03;
+    p.op = 0.15 + (Math.sin(p.pulse) + 1) * 0.18;
+  }
+
+  function updateGenericIcons(p) {
     p.vy += p.gravity;
     p.x += p.vx + p.wind;
     p.y += p.vy;
@@ -254,6 +331,17 @@ const OccasionsEngine = (() => {
 
     if (p.x > window.innerWidth + 30) p.x = -30;
     if (p.x < -30) p.x = window.innerWidth + 30;
+  }
+
+  function updateParticle(p) {
+    if (state.effect === "rain") return updateRain(p);
+    if (state.effect === "snow") return updateSnow(p);
+    if (state.effect === "butterflies") return updateButterfly(p);
+    if (state.effect === "leaves") return updateLeaves(p);
+    if (state.effect === "sun") return updateSun(p);
+    if (state.effect === "stars") return updateStars(p);
+
+    updateGenericIcons(p);
   }
 
   function draw() {
