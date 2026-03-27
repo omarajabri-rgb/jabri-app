@@ -1,4 +1,4 @@
-// 🎯 Jabri Occasions Engine - Final Smart Layer System (Enhanced Effects)
+// 🎯 Jabri Occasions Engine - Real Weather + Smart Layer System
 
 const EFFECT_PARTICLES = {
   none: { speed:[0,0], size:[0,0], count:0, icons:null, gravity:0, wind:0 },
@@ -31,6 +31,15 @@ const OccasionsEngine = (() => {
     season: "default",
     occasion: "none",
     effect: "none"
+  };
+
+  const WEATHER_API_KEY = "ac2020dd50a54f29a48154956262703";
+  const WEATHER_CITY = "Amman";
+  const WEATHER_CACHE_MINUTES = 15;
+
+  let weatherCache = {
+    timestamp: 0,
+    effect: null
   };
 
   function getNowParts() {
@@ -83,18 +92,82 @@ const OccasionsEngine = (() => {
     return "none";
   }
 
-  function determineEffect() {
-    if (state.occasion === "ramadan") return "ramadan";
-    if (state.occasion === "jordan_national_day") return "national";
-    if (state.occasion === "christmas") return "christmas";
-    if (state.occasion === "prophet_birthday") return "prophet";
-
+  function determineFallbackEffect() {
     if (state.season === "winter") return state.mode === "night" ? "snow" : "rain";
     if (state.season === "spring") return "butterflies";
     if (state.season === "summer") return state.mode === "night" ? "stars" : "sun";
     if (state.season === "autumn") return "leaves";
-
     return "none";
+  }
+
+  function determineOccasionEffect() {
+    if (state.occasion === "ramadan") return "ramadan";
+    if (state.occasion === "jordan_national_day") return "national";
+    if (state.occasion === "christmas") return "christmas";
+    if (state.occasion === "prophet_birthday") return "prophet";
+    return null;
+  }
+
+  async function getWeatherEffect() {
+    const now = Date.now();
+    const cacheAge = now - weatherCache.timestamp;
+    const cacheValid = cacheAge < WEATHER_CACHE_MINUTES * 60 * 1000;
+
+    if (cacheValid) {
+      return weatherCache.effect;
+    }
+
+    try {
+      const res = await fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(WEATHER_CITY)}&aqi=no`
+      );
+
+      if (!res.ok) {
+        throw new Error(`Weather API error: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      const condition = String(data?.current?.condition?.text || "").toLowerCase();
+      const precip = Number(data?.current?.precip_mm || 0);
+      const isDay = Number(data?.current?.is_day || 1);
+
+      let effect = null;
+
+      if (condition.includes("snow")) {
+        effect = "snow";
+      } else if (
+        precip > 0 ||
+        condition.includes("rain") ||
+        condition.includes("drizzle") ||
+        condition.includes("thunder")
+      ) {
+        effect = "rain";
+      } else if (
+        condition.includes("sunny") ||
+        condition.includes("clear")
+      ) {
+        effect = isDay ? "sun" : "stars";
+      } else if (
+        condition.includes("cloud") ||
+        condition.includes("overcast") ||
+        condition.includes("mist") ||
+        condition.includes("fog") ||
+        condition.includes("haze")
+      ) {
+        effect = isDay ? "none" : "stars";
+      }
+
+      weatherCache = {
+        timestamp: now,
+        effect
+      };
+
+      return effect;
+    } catch (error) {
+      console.log("Weather API Error:", error);
+      return null;
+    }
   }
 
   function applyBodyData() {
@@ -200,13 +273,17 @@ const OccasionsEngine = (() => {
     animationId = requestAnimationFrame(draw);
   }
 
-  function refresh() {
+  async function refresh() {
     const oldSignature = `${state.mode}|${state.season}|${state.occasion}|${state.effect}`;
 
     state.mode = determineMode();
     state.season = determineSeason();
     state.occasion = determineOccasion();
-    state.effect = determineEffect();
+
+    const occasionEffect = determineOccasionEffect();
+    const weatherEffect = occasionEffect ? null : await getWeatherEffect();
+
+    state.effect = occasionEffect || weatherEffect || determineFallbackEffect();
 
     const newSignature = `${state.mode}|${state.season}|${state.occasion}|${state.effect}`;
 
@@ -218,10 +295,10 @@ const OccasionsEngine = (() => {
   }
 
   return {
-    start() {
+    async start() {
       createContainer();
       createCanvas();
-      refresh();
+      await this.refresh();
       resize();
 
       if (!state.active) {
@@ -230,8 +307,8 @@ const OccasionsEngine = (() => {
       }
 
       if (!refreshTimer) {
-        refreshTimer = setInterval(() => {
-          this.refresh();
+        refreshTimer = setInterval(async () => {
+          await this.refresh();
         }, 60000);
       }
     },
@@ -262,8 +339,8 @@ const OccasionsEngine = (() => {
   };
 })();
 
-window.addEventListener("DOMContentLoaded", () => {
-  OccasionsEngine.start();
+window.addEventListener("DOMContentLoaded", async () => {
+  await OccasionsEngine.start();
 });
 
 window.addEventListener("resize", () => {
