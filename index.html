@@ -712,6 +712,7 @@ body[data-theme="newyear"]{
   </div>
 </div>
 
+<script src="occasions.js"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -724,47 +725,7 @@ let chart = null
 let creditTrendChart = null
 let currentTenantCode = ''
 let selectedYear = '2026'
-function getSeasonTheme(){
-  const now = new Date()
-  const month = now.getMonth() + 1
-  const day = now.getDate()
 
-  // رأس السنة
-  if ((month === 12 && day >= 25) || (month === 1 && day <= 5)) {
-    return 'newyear'
-  }
-
-  // شتاء ماطر: 1 نوفمبر - 31 يناير
-  if (month === 11 || month === 12 || month === 1) {
-    return 'rain'
-  }
-
-  // شتاء ثلجي: 1 فبراير - 30 أبريل
-  if (month === 2 || month === 3 || month === 4) {
-    return 'snow'
-  }
-
-  // ربيع: 1 مايو - 30 يونيو
-  if (month === 5 || month === 6) {
-    return 'spring'
-  }
-
-  // صيف: 1 يوليو - 31 أغسطس
-  if (month === 7 || month === 8) {
-    return 'summer'
-  }
-
-  // خريف: 1 سبتمبر - 31 أكتوبر
-  if (month === 9 || month === 10) {
-    return 'autumn'
-  }
-
-  return 'default'
-}
-
-function applySeasonTheme(){
-  const theme = getSeasonTheme()
-  document.body.setAttribute('data-theme', theme)
 }
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
@@ -1385,182 +1346,10 @@ if(savedCode){
   document.getElementById('code').value = savedCode
   login()
 }
-function getSeason(){
-  const now = new Date()
-  const month = now.getMonth() + 1
-  const day = now.getDate()
 
-  if(month === 12 && day >= 25) return 'newyear'
-  if(month === 11 || month === 12 || month === 1) return 'rain'
-  if(month === 2 || month === 3 || month === 4) return 'snow'
-  if(month === 5 || month === 6) return 'spring'
-  if(month === 7 || month === 8) return 'summer'
-}
 
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.dataset.theme = getSeason();
-  applySeasonEffects();
-});
-function clearSeasonEffects(){
-  const container = document.getElementById('season-effects')
-  if(container) container.innerHTML = ''
-}
 
-function createRain(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
 
-  for(let i = 0; i < 80; i++){
-    const drop = document.createElement('div')
-    drop.className = 'rain-drop'
-    drop.style.left = Math.random() * 100 + '%'
-    drop.style.animationDuration = (0.5 + Math.random() * 0.9) + 's'
-    drop.style.opacity = (0.25 + Math.random() * 0.5).toFixed(2)
-    container.appendChild(drop)
-  }
-}
+  
 
-function createSnow(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
-
-  for(let i = 0; i < 45; i++){
-    const flake = document.createElement('div')
-    flake.className = 'snow-flake'
-    flake.textContent = '❄'
-    flake.style.left = Math.random() * 100 + '%'
-    flake.style.animationDuration = (3 + Math.random() * 4) + 's'
-    flake.style.fontSize = (10 + Math.random() * 10) + 'px'
-    flake.style.opacity = (0.35 + Math.random() * 0.55).toFixed(2)
-    container.appendChild(flake)
-  }
-}
-
-function createSpring(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
-
-  for(let i = 0; i < 8; i++){
-    const butterfly = document.createElement('div')
-    butterfly.className = 'butterfly'
-    butterfly.textContent = '🦋'
-    butterfly.style.top = (20 + Math.random() * 45) + 'vh'
-    butterfly.style.animationDuration = (10 + Math.random() * 8) + 's'
-    butterfly.style.animationDelay = (Math.random() * 5) + 's'
-    container.appendChild(butterfly)
-  }
-}
-
-function createSummer(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
-
-  const sun = document.createElement('div')
-  sun.className = 'sun-glow'
-  container.appendChild(sun)
-}
-
-function createAutumn(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
-
-  const leaves = ['🍂','🍁']
-  for(let i = 0; i < 18; i++){
-    const leaf = document.createElement('div')
-    leaf.className = 'leaf'
-    leaf.textContent = leaves[Math.floor(Math.random() * leaves.length)]
-    leaf.style.left = Math.random() * 100 + '%'
-    leaf.style.animationDuration = (5 + Math.random() * 5) + 's'
-    leaf.style.fontSize = (14 + Math.random() * 8) + 'px'
-    leaf.style.opacity = (0.5 + Math.random() * 0.4).toFixed(2)
-    container.appendChild(leaf)
-  }
-}
-
-function createNewYear(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-  container.innerHTML = ''
-
-  for(let i = 0; i < 30; i++){
-    const flake = document.createElement('div')
-    flake.className = 'snow-flake'
-    flake.textContent = '✦'
-    flake.style.left = Math.random() * 100 + '%'
-    flake.style.animationDuration = (2.5 + Math.random() * 3) + 's'
-    flake.style.fontSize = (10 + Math.random() * 8) + 'px'
-    flake.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2)
-    container.appendChild(flake)
-  }
-}
-
-function applySeasonEffects(){
-  const container = document.getElementById('season-effects')
-  if(!container) return
-
-  container.innerHTML = ''
-
-  const theme = document.body.dataset.theme
-
-  // 🌧️ Rain
-  if(theme === 'rain'){
-    for(let i=0;i<50;i++){
-      const drop = document.createElement('div')
-      drop.className = 'rain-drop'
-      drop.style.left = Math.random()*100 + 'vw'
-      drop.style.animationDuration = (Math.random()*1+0.5)+'s'
-      container.appendChild(drop)
-    }
-  }
-
-  // ❄️ Snow
-  if(theme === 'snow'){
-    for(let i=0;i<35;i++){
-      const snow = document.createElement('div')
-      snow.className = 'snow-flake'
-      snow.innerHTML = '❄'
-      snow.style.left = Math.random()*100 + 'vw'
-      snow.style.animationDuration = (Math.random()*4+3)+'s'
-      container.appendChild(snow)
-    }
-  }
-
-  // 🍂 Autumn
-  if(theme === 'autumn'){
-    for(let i=0;i<20;i++){
-      const leaf = document.createElement('div')
-      leaf.className = 'leaf'
-      leaf.innerHTML = '🍂'
-      leaf.style.left = Math.random()*100 + 'vw'
-      leaf.style.animationDuration = (Math.random()*5+4)+'s'
-      container.appendChild(leaf)
-    }
-  }
-
-  // 🦋 Spring
-  if(theme === 'spring'){
-    for(let i=0;i<8;i++){
-      const b = document.createElement('div')
-      b.className = 'butterfly'
-      b.innerHTML = '🦋'
-      b.style.top = Math.random()*80 + 'vh'
-      b.style.animationDuration = (Math.random()*8+6)+'s'
-      container.appendChild(b)
-    }
-  }
-
-  // ☀️ Summer
-  if(theme === 'summer'){
-    const sun = document.createElement('div')
-    sun.className = 'sun-glow'
-    container.appendChild(sun)
-  }
-}
-  document.body.dataset.theme = getSeason();
-applySeasonEffects();
   </script>
