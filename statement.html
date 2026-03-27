@@ -865,7 +865,6 @@ body.pdf-mode .debug{
   <div class="card">
     <h2 class="tenant-title" id="tenantName"></h2>
 
-    <div id="debug" class="debug"></div>
   </div>
 
   <div id="container"></div>
@@ -877,7 +876,8 @@ body.pdf-mode .debug{
 
 </div>
 
-<script type="module">
+<script src="occasions.js"></script>
+  <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
@@ -1036,17 +1036,7 @@ function getYearStatus(balance){
   return { text:"جزئي", class:"status-partial" }
 }
 
-function getSeasonClass(){
-  const month = new Date().getMonth() + 1
-  if([3,4,5].includes(month)) return "spring-theme"
-  if([6,7,8].includes(month)) return "summer-theme"
-  if([9,10,11].includes(month)) return "autumn-theme"
-  return "winter-theme"
-}
 
-function setSeasonTheme(){
-  document.body.classList.add(getSeasonClass())
-}
 
 function animateCount(el, endValue){
   const finalValue = Number(endValue) || 0
@@ -1085,8 +1075,6 @@ const tenant = raw
   ? raw.toString().trim().toUpperCase()
   : null
 
-console.log("RAW:", raw)
-console.log("FINAL:", tenant)
 
 const { data: tenantData, error } = await supabase
   .from('tenants')
@@ -1098,9 +1086,6 @@ if(error){
   console.log("ERROR:", error)
 }
 
-console.log("tenantData:", tenantData) // 🔥 مهم جداً
-
-debug.innerText = "tenant code: [" + tenant + "]"
   if(!tenant){
     container.innerHTML = "<div class='empty-box'>❌ لا يوجد tenant code</div>"
     return
