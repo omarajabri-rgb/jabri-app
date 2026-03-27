@@ -3,10 +3,10 @@
 const EFFECT_PARTICLES = {
   none: { speed:[0,0], size:[0,0], count:0, icons:null, gravity:0, wind:0 },
 
-  rain: { speed:[4,6], size:[1,2], count:24, icons:null, gravity:0.16, wind:0.03 },
-  snow: { speed:[0.8,1.4], size:[12,16], count:14, icons:["❄️"], gravity:0.01, wind:0.01 },
+  rain: { speed:[4,6], size:[1,2], count:42, icons:null, gravity:0.16, wind:0.03 },
+  snow: { speed:[0.8,1.4], size:[12,16], count:16, icons:["❄️"], gravity:0.01, wind:0.01 },
 
-  butterflies: { speed:[0.08,0.16], size:[12,16], count:3, icons:["🦋"], gravity:0.002, wind:0.02 },
+  butterflies: { speed:[0.12,0.22], size:[16,20], count:6, icons:["🦋"], gravity:0.002, wind:0.02 },
   leaves: { speed:[0.18,0.3], size:[16,20], count:6, icons:["🍂"], gravity:0.01, wind:0.03 },
   sun: { speed:[0.08,0.18], size:[10,12], count:1, icons:["☀️"], gravity:0.001, wind:0.002 },
   stars: { speed:[0.08,0.14], size:[12,16], count:6, icons:["✦"], gravity:0.001, wind:0.002 },
@@ -51,9 +51,9 @@ const OccasionsEngine = (() => {
   function determineSeason() {
     const { month } = getNowParts();
 
-    if ([12, 1, 2].includes(month)) return "winter";
-    if ([3, 4, 5].includes(month)) return "spring";
-    if ([6, 7, 8].includes(month)) return "summer";
+    if ([12, 1, 2, 3].includes(month)) return "winter";
+    if ([4, 5, 6].includes(month)) return "spring";
+    if ([7, 8].includes(month)) return "summer";
     if ([9, 10, 11].includes(month)) return "autumn";
 
     return "default";
