@@ -1,20 +1,20 @@
-// 🎯 Jabri Occasions Engine - Final Smart Layer System
+// 🎯 Jabri Occasions Engine - Final Smart Layer System (Enhanced Effects)
 
 const EFFECT_PARTICLES = {
   none: { speed:[0,0], size:[0,0], count:0, icons:null, gravity:0, wind:0 },
 
-  rain: { speed:[4,6], size:[1,2], count:42, icons:null, gravity:0.16, wind:0.03 },
-  snow: { speed:[0.8,1.4], size:[12,16], count:16, icons:["❄️"], gravity:0.01, wind:0.01 },
+  rain: { speed:[6,10], size:[2,3], count:85, icons:null, gravity:0.22, wind:0.04 },
+  snow: { speed:[1,1.8], size:[14,20], count:24, icons:["❄️"], gravity:0.012, wind:0.012 },
 
-  butterflies: { speed:[0.12,0.22], size:[16,20], count:6, icons:["🦋"], gravity:0.002, wind:0.02 },
-  leaves: { speed:[0.18,0.3], size:[16,20], count:6, icons:["🍂"], gravity:0.01, wind:0.03 },
-  sun: { speed:[0.08,0.18], size:[10,12], count:1, icons:["☀️"], gravity:0.001, wind:0.002 },
-  stars: { speed:[0.08,0.14], size:[12,16], count:6, icons:["✦"], gravity:0.001, wind:0.002 },
+  butterflies: { speed:[0.14,0.26], size:[18,24], count:10, icons:["🦋"], gravity:0.002, wind:0.024 },
+  leaves: { speed:[0.22,0.36], size:[18,24], count:10, icons:["🍂"], gravity:0.012, wind:0.035 },
+  sun: { speed:[0.08,0.18], size:[20,26], count:2, icons:["☀️"], gravity:0.001, wind:0.002 },
+  stars: { speed:[0.08,0.14], size:[14,20], count:12, icons:["✦"], gravity:0.001, wind:0.002 },
 
-  ramadan: { speed:[0.16,0.3], size:[14,18], count:8, icons:["✨","☾"], gravity:0.006, wind:0.008 },
-  national: { speed:[0.22,0.45], size:[16,22], count:10, icons:["🇯🇴","✦"], gravity:0.01, wind:0.01 },
-  christmas: { speed:[0.18,0.35], size:[14,18], count:10, icons:["❄️","✦"], gravity:0.012, wind:0.01 },
-  prophet: { speed:[0.16,0.3], size:[14,18], count:8, icons:["☪️","✨"], gravity:0.008, wind:0.008 }
+  ramadan: { speed:[0.18,0.34], size:[16,22], count:14, icons:["✨","☾"], gravity:0.006, wind:0.01 },
+  national: { speed:[0.24,0.48], size:[18,26], count:16, icons:["🇯🇴","✦"], gravity:0.01, wind:0.012 },
+  christmas: { speed:[0.18,0.38], size:[16,22], count:16, icons:["❄️","✦"], gravity:0.012, wind:0.01 },
+  prophet: { speed:[0.18,0.32], size:[16,22], count:14, icons:["☪️","✨"], gravity:0.008, wind:0.01 }
 };
 
 const OccasionsEngine = (() => {
@@ -136,13 +136,13 @@ const OccasionsEngine = (() => {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.35,
+        vx: (Math.random() - 0.5) * 0.45,
         vy: config.speed[0] + Math.random() * (config.speed[1] - config.speed[0]),
         size: config.size[0] + Math.random() * (config.size[1] - config.size[0]),
         icon: config.icons ? config.icons[Math.floor(Math.random() * config.icons.length)] : null,
         gravity: config.gravity,
         wind: config.wind,
-        op: 0.12 + Math.random() * 0.15
+        op: 0.24 + Math.random() * 0.28
       });
     }
   }
@@ -169,8 +169,8 @@ const OccasionsEngine = (() => {
       return;
     }
 
-    ctx.fillStyle = "rgba(255,255,255,0.28)";
-    ctx.fillRect(p.x, p.y, p.size, 10);
+    ctx.fillStyle = "rgba(180,210,255,0.46)";
+    ctx.fillRect(p.x, p.y, p.size, 14);
   }
 
   function updateParticle(p) {
