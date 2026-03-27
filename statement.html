@@ -1025,7 +1025,9 @@ tenantName.setAttribute("dir","rtl")
 const { data, error: txError } = await supabase
   .from("tenant_transactions")
   .select("*")
-  .limit(5)
+  .eq("tenant_code", tenant)
+  .order("date", { ascending: true })
+  
   if(txError){
     container.innerHTML = `<div class="empty-box">${txError.message}</div>`
     return
