@@ -726,7 +726,7 @@ let creditTrendChart = null
 let currentTenantCode = ''
 let selectedYear = '2026'
 
-}
+
 function formatNumber(n){
   return Number(n || 0).toLocaleString('en-US')
 }
@@ -884,7 +884,7 @@ async function loadNotifications(code){
     emptyNotifications.classList.remove('hidden')
     return
   }
-applySeasonTheme()
+
   let html = ''
   let visibleCount = 0
 
