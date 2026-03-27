@@ -1067,12 +1067,12 @@ function runCountUp(){
 async function load(){
   const container = document.getElementById("container")
   const tenantName = document.getElementById("tenantName")
-  const debug = document.getElementById("debug")
+  
 
   const raw = getTenantCode()
 
 const tenant = raw
-  ? raw.toString().trim().
+? raw.toString().trim()
   : null
 
 
@@ -1105,7 +1105,7 @@ tenantName.setAttribute("dir","rtl")
     return
   }
 
-  debug.innerText += " | rows: " + (data ? data.length : 0)
+  
 
   if(!data || data.length === 0){
     container.innerHTML = "<div class='empty-box'>⚠️ لا يوجد بيانات</div>"
@@ -1274,7 +1274,7 @@ document.body.classList.remove("pdf-mode")
   
 }
 
-setSeasonTheme()
+
 load()
 </script>
 
