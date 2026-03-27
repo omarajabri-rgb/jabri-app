@@ -113,18 +113,14 @@ const OccasionsEngine = (() => {
     const cacheAge = now - weatherCache.timestamp;
     const cacheValid = cacheAge < WEATHER_CACHE_MINUTES * 60 * 1000;
 
-    if (cacheValid) {
-      return weatherCache.effect;
-    }
+    if (cacheValid) return weatherCache.effect;
 
     try {
       const res = await fetch(
         `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(WEATHER_CITY)}&aqi=no`
       );
 
-      if (!res.ok) {
-        throw new Error(`Weather API error: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
 
       const data = await res.json();
 
@@ -242,8 +238,8 @@ const OccasionsEngine = (() => {
       return;
     }
 
-    ctx.fillStyle = "rgba(180,210,255,0.46)";
-    ctx.fillRect(p.x, p.y, p.size, 14);
+    ctx.fillStyle = "rgba(170,200,255,0.65)";
+    ctx.fillRect(p.x, p.y, p.size, 18);
   }
 
   function updateParticle(p) {
