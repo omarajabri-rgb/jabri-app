@@ -1022,12 +1022,10 @@ if(error){
   tenantName.textContent = tenantData?.tenant_name || tenant
 tenantName.setAttribute("dir","rtl")
 
-  const { data, error: txError } = await supabase
-    .from("tenant_transactions")
-    .select("*")
-    .eq("tenant_code", tenant)
-    .order("date", { ascending: true })
-
+const { data, error: txError } = await supabase
+  .from("tenant_transactions")
+  .select("*")
+  .limit(5)
   if(txError){
     container.innerHTML = `<div class="empty-box">${txError.message}</div>`
     return
