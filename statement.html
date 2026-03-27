@@ -997,7 +997,7 @@ async function load(){
   const tenantName = document.getElementById("tenantName")
   
 
-  const raw = getTenantCode()
+  const raw = getTenantCode() || "JC-01"
 
 const tenant = raw
 ? raw.toString().trim()
