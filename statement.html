@@ -34,35 +34,17 @@ body{
   color:var(--text);
   min-height:100vh;
   
-  background:
-    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.38), transparent 35%),
-    radial-gradient(circle at 80% 15%, rgba(200,220,255,0.22), transparent 30%),
-    linear-gradient(135deg,#eef6ff,#f8fbff,#f1f7ff);
+ body{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color:var(--text);
+  min-height:100vh;
+
+  background: linear-gradient(135deg,#6f849f,#8fa6c1,#b4c7d9);
+
   position:relative;
   overflow-x:hidden;
-}
-body[data-season="spring"]{
-  background:
-    radial-gradient(circle at 20% 25%, rgba(168,237,234,0.10), transparent 35%),
-    linear-gradient(135deg,#edf6f7,#f7fbfc,#eef4f7);
-}
 
-body[data-season="summer"]{
-  background:
-    radial-gradient(circle at 20% 25%, rgba(255,240,190,0.12), transparent 35%),
-    linear-gradient(135deg,#f7f6f1,#fafaf7,#f2f0ea);
-}
-
-body[data-season="autumn"]{
-  background:
-    radial-gradient(circle at 20% 25%, rgba(201,164,107,0.10), transparent 35%),
-    linear-gradient(135deg,#f5f3ef,#f8f6f2,#efebe6);
-}
-
-body[data-season="winter"]{
-  background:
-    radial-gradient(circle at 20% 25%, rgba(190,220,255,0.12), transparent 35%),
-    linear-gradient(135deg,#edf2f7,#f7f9fc,#eef3f8);
 }
 
 .card,
