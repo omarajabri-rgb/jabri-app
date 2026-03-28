@@ -919,8 +919,9 @@ function calculatePrediction(values){
   return predicted
 }
 function renderAccountingTip(debit, credit, balance){
-  const tipEl = document.getElementById('accountingTip')
-  if(!tipEl) return
+  const box = document.getElementById('adviceBox')
+  const tipEl = document.getElementById('adviceText')
+  if(!box || !tipEl) return
 
   if(balance <= 0){
     tipEl.textContent = 'الحساب منتظم'
@@ -931,6 +932,8 @@ function renderAccountingTip(debit, credit, balance){
   } else {
     tipEl.textContent = 'استمر بالدفع'
   }
+
+  box.style.display = 'block'
 }
 async function loadNotifications(code){
   const notificationList = document.getElementById('notificationList')
@@ -1270,6 +1273,7 @@ async function loadTenantSummary(code, year){
 animateCount(document.getElementById('credit'), credit)
 animateCount(document.getElementById('balance'), balance)
 animateCount(document.getElementById('rowsCount'), rowCount)
+renderAccountingTip(debit, credit, balance)  
 
   applySmartClass(document.getElementById('debitBox'), state)
   applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
