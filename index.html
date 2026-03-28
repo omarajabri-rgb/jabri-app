@@ -651,10 +651,7 @@ body[data-effect="stars"]{
   </div>
 
   <div id="dashboard" class="hidden">
-    <div id="adviceBox" class="section" style="display:none;">
-  <div class="section-title">نصيحة</div>
-  <div id="adviceText"></div>
-</div>
+    
 
     <div class="section">
       <h2 id="name" class="tenant-name"></h2>
@@ -672,7 +669,10 @@ body[data-effect="stars"]{
         </select>
       </div>
     </div>
-
+<div id="adviceBox" class="section" style="display:none;">
+  <div class="section-title">نصيحة</div>
+  <div id="adviceText"></div>
+</div>
     <div class="section">
       <h3 class="section-title">الملخص المالي</h3>
       <p class="section-subtitle">عرض سريع لأهم أرقام الحساب</p>
@@ -922,14 +922,35 @@ function renderAccountingTip(debit, credit, balance){
   const tipEl = document.getElementById('adviceText')
   if(!box || !tipEl) return
 
+  // 🧠 النص
   if(balance <= 0){
-    tipEl.textContent = 'الحساب منتظم'
+    tipEl.textContent = '✅ الحساب منتظم'
   } else if(credit === 0){
-    tipEl.textContent = 'ابدأ بالسداد'
+    tipEl.textContent = '🚫 ابدأ بالسداد فوراً'
   } else if(balance > 2000){
-    tipEl.textContent = 'ادفع مبلغ أكبر'
+  const suggested = Math.round(balance * 0.25)
+  tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
+}
+else {
+  const suggested = Math.round(balance * 0.15)
+  tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
+}
   } else {
-    tipEl.textContent = 'استمر بالدفع'
+  const suggested = Math.round(balance * 0.15)
+  tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
+}
+
+  // 🎨 الألوان
+  box.classList.remove('smart-green','smart-orange','smart-red','smart-blue')
+
+  if(balance <= 0){
+    box.classList.add('smart-green')
+  } else if(credit === 0){
+    box.classList.add('smart-red')
+  } else if(balance > 2000){
+    box.classList.add('smart-red')
+  } else {
+    box.classList.add('smart-orange')
   }
 
   box.style.display = 'block'
@@ -1073,6 +1094,17 @@ async function loadCreditTrend(code){
 
     const trendDirection = getTrendDirection(predicted2027, lastActual)
     predictionTrend.innerText = trendDirection
+    const currentBalance = Number(document.getElementById('balance')?.innerText.replace(/,/g,'') || 0)
+const currentCredit = Number(document.getElementById('credit')?.innerText.replace(/,/g,'') || 0)
+const currentDebit = Number(document.getElementById('debit')?.innerText.replace(/,/g,'') || 0)
+
+if(trendDirection === 'هابط' && currentBalance > 0){
+  document.getElementById('adviceText').textContent += ' • ⚠️ انتبه: الأداء يتراجع'
+}
+
+if(trendDirection === 'صاعد' && currentBalance > 0){
+  document.getElementById('adviceText').textContent += ' • 📈 الأداء يتحسن'
+}
 
     removeSmartClasses(predictionValueCard)
     removeSmartClasses(predictionTrendCard)
@@ -1272,7 +1304,12 @@ async function loadTenantSummary(code, year){
 animateCount(document.getElementById('credit'), credit)
 animateCount(document.getElementById('balance'), balance)
 animateCount(document.getElementById('rowsCount'), rowCount)
-renderAccountingTip(debit, credit, balance)  
+renderAccountingTip(debit, credit, balance)
+  setTimeout(() => {
+  if(typeof loadCreditTrend === 'function'){
+    loadCreditTrend(code)
+  }
+}, 300)
 
   applySmartClass(document.getElementById('debitBox'), state)
   applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
