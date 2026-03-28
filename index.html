@@ -593,7 +593,17 @@ body[data-effect="stars"]{
         </div>
       </div>
     </div>
+ </div>
+ </div>
 
+
+<div class="section">
+  <h3 class="section-title">نصيحة محاسبية</h3>
+  <p id="accountingTip" class="section-subtitle">—</p>
+</div>
+
+ <div class="section">
+   <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
     <div class="section">
       <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
       <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
@@ -806,7 +816,20 @@ function calculatePrediction(values){
   predicted = Math.max(0, Math.round(predicted))
   return predicted
 }
+function renderAccountingTip(debit, credit, balance){
+  const tipEl = document.getElementById('accountingTip')
+  if(!tipEl) return
 
+  if(balance <= 0){
+    tipEl.textContent = 'الحساب منتظم'
+  } else if(credit === 0){
+    tipEl.textContent = 'ابدأ بالسداد'
+  } else if(balance > 2000){
+    tipEl.textContent = 'ادفع مبلغ أكبر'
+  } else {
+    tipEl.textContent = 'استمر بالدفع'
+  }
+}
 async function loadNotifications(code){
   const notificationList = document.getElementById('notificationList')
   const emptyNotifications = document.getElementById('emptyNotifications')
@@ -1225,9 +1248,17 @@ window.login = async function(){
     return
   }
 
-  currentTenantCode = code
-  selectedYear = document.getElementById('yearSelect').value || '2026'
+  
+currentTenantCode = code
+selectedYear = document.getElementById('yearSelect').value || '2026'
 
+setTimeout(() => {
+  const debit = Number(document.getElementById('debit')?.innerText || 0)
+  const credit = Number(document.getElementById('credit')?.innerText || 0)
+  const balance = Number(document.getElementById('balance')?.innerText || 0)
+
+  renderAccountingTip(debit, credit, balance)
+}, 800)
   const nowIso = new Date().toISOString()
 
   localStorage.setItem('jabri_tenant_code', code)
