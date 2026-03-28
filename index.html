@@ -522,15 +522,76 @@ body[data-effect="sun"]{
 body[data-effect="stars"]{
   background: linear-gradient(135deg,#1f2633,#2d3950,#1a2230);
 }
- body[data-effect="stars"]{
-  background: linear-gradient(135deg, #1f2633, #2d3748);
-}
+ 
 
 
 
 .section {
   margin-bottom: 20px;
   overflow: hidden;
+}
+    
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.box {
+  padding: 20px 15px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+}
+
+.box:active {
+  transform: scale(0.97);
+}
+
+
+
+#balanceBox {
+  grid-column: span 2;
+  background: var(--red-bg);
+  border: 1px solid #FFD1D1;
+  padding: 25px 20px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.big {
+  font-size: 28px;
+  font-weight: 900;
+}
+
+#balance.big {
+  color: var(--red);
+  font-size: 36px;
+}
+
+#credit.big {
+  color: var(--green);
+}
+
+#debit.big {
+  color: var(--primary);
 }
 
 .section-title {
@@ -576,8 +637,17 @@ body[data-effect="stars"]{
     <h1>أهلاً بكم</h1>
     <p>بوابة المستأجرين لمجمع جبري الصناعي التجاري. أدخل رمز المستأجر لعرض الحالة المالية بشكل واضح واحترافي.</p>
   </div>
+  
 
-  <div id="loginCard" class="section">
+<!-- 👇 النصيحة هون -->
+
+<div id="adviceBox" class="section" style="display:none;">
+  <div class="section-title">نصيحة</div>
+  <div id="adviceText"></div>
+</div>
+
+<div id="loginCard" class="section">
+
     <h3 class="section-title">دخول المستأجر</h3>
     <p class="section-subtitle">أدخل رمز المستأجر مثل JC-01</p>
     <input id="code" class="app-input" placeholder="JC-01">
@@ -634,16 +704,11 @@ body[data-effect="stars"]{
  </div>
 
 
-<div class="section">
-  <h3 class="section-title">نصيحة محاسبية</h3>
-  <p id="accountingTip" class="section-subtitle">—</p>
-</div>
+
 
  <div class="section">
    <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
-    <div class="section">
-      <h3 class="section-title">نسبة المدفوع مقابل المتبقي</h3>
-      <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
+   <p class="section-subtitle">عرض بصري مبسط لحالة الحساب</p>
 
       <div class="chart-wrap">
         <canvas id="chart"></canvas>
