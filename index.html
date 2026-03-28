@@ -917,22 +917,71 @@ function calculatePrediction(values){
   predicted = Math.max(0, Math.round(predicted))
   return predicted
 }
+  function addMonths(date, months){
+  const d = new Date(date)
+  d.setMonth(d.getMonth() + months)
+  return d
+}
+
+function getInstallmentStatus(contractDate, annualRent){
+  if(!contractDate) return null
+
+  const start = new Date(contractDate)
+  if(isNaN(start.getTime())) return null
+
+  const installment = annualRent / 3
+  const due1 = start
+  const due2 = addMonths(start, 4)
+  const due3 = addMonths(start, 8)
+  const today = new Date()
+
+  let required = 0
+  let currentInstallmentLabel = 'القسط الأول'
+
+  if(today >= due1) required += installment
+  if(today >= due2) required += installment
+  if(today >= due3) required += installment
+
+  if(today < due2){
+    currentInstallmentLabel = 'القسط الأول'
+  } else if(today < due3){
+    currentInstallmentLabel = 'القسط الثاني'
+  } else {
+    currentInstallmentLabel = 'القسط الثالث'
+  }
+
+  return {
+    required,
+    installment,
+    currentInstallmentLabel
+  }
+}
 function renderAccountingTip(debit, credit, balance){
   const box = document.getElementById('adviceBox')
   const tipEl = document.getElementById('adviceText')
   if(!box || !tipEl) return
 
-  if(balance <= 0){
-    tipEl.textContent = '✅ الحساب منتظم'
-  } else if(credit === 0){
-    tipEl.textContent = '🚫 ابدأ بالسداد فوراً'
-  } else if(balance > 2000){
-    const suggested = Math.round((balance || 0) * 0.25)
-    tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
-  } else {
-    const suggested = Math.round((balance || 0) * 0.15)
-    tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
-  }
+ if(balance <= 0){
+  tipEl.textContent = '✅ الحساب منتظم'
+}
+else if(credit === 0){
+  tipEl.textContent = '🚫 ابدأ بالسداد فوراً'
+}
+else if(installmentStatus){
+  const suggested = Math.max(0, Math.round((installmentStatus.required || 0) - (credit || 0)))
+
+  tipEl.textContent =
+    '📅 أنت في ' + installmentStatus.currentInstallmentLabel +
+    ' - يفضل دفع ' + suggested + ' د.أ على الأقل'
+}
+else if(balance > 2000){
+  const suggested = Math.round((balance || 0) * 0.25)
+  tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
+}
+else {
+  const suggested = Math.round((balance || 0) * 0.15)
+  tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
+}
 
   box.classList.remove('smart-green','smart-orange','smart-red','smart-blue')
 
@@ -1257,7 +1306,7 @@ if(trendDirection === 'صاعد' && currentBalance > 0){
   }
 }
 
-async function loadTenantSummary(code, year){
+async function loadTenantSummary(code, year, contractDate = null){
   document.getElementById('error').style.display = 'none'
 
   let query = supabase
@@ -1293,12 +1342,16 @@ async function loadTenantSummary(code, year){
   const paid = Math.max(credit, 0)
   const remaining = Math.max(balance, 0)
   const state = getAccountState(paid, remaining)
+  const currentYear = Number(year === 'all' ? new Date().getFullYear() : year)
+const currentYearRow = filtered.find(row => Number(new Date(row.date).getFullYear()) === currentYear && Number(row.debit || 0) > 0)
+const annualRent = Number(currentYearRow?.debit || 0)
+const installmentStatus = getInstallmentStatus(contractDate, annualRent)
 
   animateCount(document.getElementById('debit'), debit)
 animateCount(document.getElementById('credit'), credit)
 animateCount(document.getElementById('balance'), balance)
 animateCount(document.getElementById('rowsCount'), rowCount)
-renderAccountingTip(debit, credit, balance)
+renderAccountingTip(debit, credit, balance, installmentStatus)
   applySmartClass(document.getElementById('debitBox'), state)
   applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
   applySmartClass(document.getElementById('balanceBox'), state)
