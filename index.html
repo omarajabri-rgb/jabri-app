@@ -1420,16 +1420,18 @@ window.login = async function(){
   }
 
   const { data: tenant, error } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('tenant_code', code)
-    .maybeSingle()
+  .from('tenants')
+  .select('*')
+  .eq('tenant_code', code)
+  .maybeSingle()
 
   if(error || !tenant){
-    errorBox.innerText = 'رمز المستأجر غير صحيح'
-    errorBox.style.display = 'block'
-    return
-  }
+  errorBox.innerText = 'رمز المستأجر غير صحيح'
+  errorBox.style.display = 'block'
+  return
+}
+
+const contractDate = tenant.contract_date || null
 
   
 currentTenantCode = code
@@ -1461,7 +1463,7 @@ setTimeout(() => {
   document.getElementById('codeText').innerText = tenant.tenant_code || code
   document.getElementById('lastUpdated').innerText = 'آخر ظهور: ' + formatDateTime(nowIso)
 
-  await loadTenantSummary(code, selectedYear)
+  await loadTenantSummary(code, selectedYear, contractDate)
 }
 
 window.openStatement = function(){
@@ -1489,7 +1491,7 @@ document.getElementById('yearSelect').addEventListener('change', async function(
   localStorage.setItem('jabri_selected_year', selectedYear)
 
   if(currentTenantCode){
-    await loadTenantSummary(currentTenantCode, selectedYear)
+    await loadTenantSummary(currentTenantCode, selectedYear, contractDate)
   }
 })
 
