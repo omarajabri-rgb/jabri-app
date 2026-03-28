@@ -762,8 +762,8 @@ body[data-effect="stars"]{
       <button onclick="logout()" class="soft-btn">تسجيل خروج</button>
     </div>
 
-  </div>
-</div>
+  
+
 
 <script src="occasions.js"></script>
 <script type="module">
@@ -922,25 +922,18 @@ function renderAccountingTip(debit, credit, balance){
   const tipEl = document.getElementById('adviceText')
   if(!box || !tipEl) return
 
-  // 🧠 النص
   if(balance <= 0){
     tipEl.textContent = '✅ الحساب منتظم'
   } else if(credit === 0){
     tipEl.textContent = '🚫 ابدأ بالسداد فوراً'
   } else if(balance > 2000){
-  const suggested = Math.round(balance * 0.25)
-  tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
-}
-else {
-  const suggested = Math.round(balance * 0.15)
-  tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
-}
+    const suggested = Math.round(balance * 0.25)
+    tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
   } else {
-  const suggested = Math.round(balance * 0.15)
-  tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
-}
+    const suggested = Math.round(balance * 0.15)
+    tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
+  }
 
-  // 🎨 الألوان
   box.classList.remove('smart-green','smart-orange','smart-red','smart-blue')
 
   if(balance <= 0){
@@ -955,6 +948,7 @@ else {
 
   box.style.display = 'block'
 }
+
 async function loadNotifications(code){
   const notificationList = document.getElementById('notificationList')
   const emptyNotifications = document.getElementById('emptyNotifications')
@@ -1305,12 +1299,6 @@ animateCount(document.getElementById('credit'), credit)
 animateCount(document.getElementById('balance'), balance)
 animateCount(document.getElementById('rowsCount'), rowCount)
 renderAccountingTip(debit, credit, balance)
-  setTimeout(() => {
-  if(typeof loadCreditTrend === 'function'){
-    loadCreditTrend(code)
-  }
-}, 300)
-
   applySmartClass(document.getElementById('debitBox'), state)
   applySmartClass(document.getElementById('creditBox'), paid > 0 ? 'green' : 'red')
   applySmartClass(document.getElementById('balanceBox'), state)
