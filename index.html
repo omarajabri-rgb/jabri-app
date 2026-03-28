@@ -669,10 +669,7 @@ body[data-effect="stars"]{
         </select>
       </div>
     </div>
-<div id="adviceBox" class="section" style="display:none;">
-  <div class="section-title">نصيحة</div>
-  <div id="adviceText"></div>
-</div>
+
     <div class="section">
       <h3 class="section-title">الملخص المالي</h3>
       <p class="section-subtitle">عرض سريع لأهم أرقام الحساب</p>
@@ -702,7 +699,10 @@ body[data-effect="stars"]{
  </div>
  </div>
 
-
+<div id="adviceBox" class="section" style="display:none;">
+  <div class="section-title">نصيحة</div>
+  <div id="adviceText"></div>
+</div>
 
 
  <div class="section">
@@ -927,10 +927,10 @@ function renderAccountingTip(debit, credit, balance){
   } else if(credit === 0){
     tipEl.textContent = '🚫 ابدأ بالسداد فوراً'
   } else if(balance > 2000){
-    const suggested = Math.round(balance * 0.25)
+    const suggested = Math.round((balance || 0) * 0.25)
     tipEl.textContent = '⚠️ حاول دفع ' + suggested + ' د.أ لتحسين وضع الحساب'
   } else {
-    const suggested = Math.round(balance * 0.15)
+    const suggested = Math.round((balance || 0) * 0.15)
     tipEl.textContent = '👍 ادفع ' + suggested + ' د.أ وابقَ منتظم'
   }
 
