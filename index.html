@@ -18,6 +18,7 @@
             --border: rgba(255,255,255,0.1);
             --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
             --danger: #f87171;
+            --success: #10b981;
         }
 
         * {
@@ -126,19 +127,9 @@
             box-shadow: 0 10px 20px rgba(212,175,55,0.2);
         }
 
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px rgba(212,175,55,0.3);
-        }
-
-        .btn-login:active {
-            transform: scale(0.96);
-        }
-
         .btn-login:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            transform: none;
         }
 
         #error_msg { 
@@ -150,6 +141,22 @@
             padding: 10px;
             background: rgba(248,113,113,0.1);
             border-radius: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        #debug_msg { 
+            margin-top: 12px; 
+            color: var(--success); 
+            font-size: 11px; 
+            font-weight: 700; 
+            display: none;
+            padding: 10px;
+            background: rgba(16,185,129,0.1);
+            border-radius: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            text-align: right;
         }
 
         #loader { 
@@ -208,7 +215,8 @@
             <i data-lucide="log-in" size="18"></i>
         </button>
 
-        <div id="error_msg">عذراً، هذا الكود غير مسجل لدينا.</div>
+        <div id="error_msg"></div>
+        <div id="debug_msg"></div>
         
         <div style="margin-top: 40px; font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: 1px;">
             © 2026 JABRI INDUSTRIAL COMPLEX
@@ -218,12 +226,12 @@
     <script>
         const { createClient } = supabase;
 
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const SUPABASE_URL = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
 
-        window.onload = () => {
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        window.onload = async () => {
             document.body.style.opacity = "1";
             document.getElementById('loader').style.display = 'none';
 
@@ -241,16 +249,41 @@
                 if (e.key === 'Enter') handleLogin();
             });
 
-            // عطّلت الدخول التلقائي مؤقتاً حتى لا يعمل loop أثناء الاختبار
-            // const savedCode = localStorage.getItem('jabri_tenant_code');
-            // if (savedCode) {
-            //     window.location.href = "tenant.html";
-            // }
+            // مهم: لا يوجد تحويل تلقائي الآن
+            localStorage.removeItem('jabri_tenant_session');
+            localStorage.removeItem('jabri_tenant_code');
+            localStorage.removeItem('jabri_tenant_name');
+            localStorage.removeItem('jabri_tenant_unit');
+
+            await testConnection();
         };
+
+        async function testConnection() {
+            const debugEl = document.getElementById('debug_msg');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('tenants')
+                    .select('tenant_code, tenant_name, shop_no')
+                    .limit(1);
+
+                if (error) {
+                    debugEl.style.display = 'block';
+                    debugEl.innerText = 'فحص الاتصال فشل:\n' + error.message;
+                    return;
+                }
+
+                debugEl.style.display = 'block';
+                debugEl.innerText = 'الاتصال بقاعدة البيانات ناجح.';
+            } catch (err) {
+                debugEl.style.display = 'block';
+                debugEl.innerText = 'خطأ عام في الاتصال:\n' + err.message;
+            }
+        }
 
         async function handleLogin() {
             const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
             const errorEl = document.getElementById('error_msg');
+            const debugEl = document.getElementById('debug_msg');
             const loginBtn = document.getElementById('login_btn');
             const card = document.querySelector('.login-card');
 
@@ -271,11 +304,20 @@
                     .eq('tenant_code', code)
                     .maybeSingle();
 
-                if (error || !data) {
-                    showError("عذراً، هذا الكود غير مسجل لدينا.");
+                if (error) {
+                    showError("خطأ من قاعدة البيانات:\n" + error.message);
                     shakeCard(card);
                     return;
                 }
+
+                if (!data) {
+                    showError("لم يتم العثور على هذا الكود: " + code);
+                    shakeCard(card);
+                    return;
+                }
+
+                debugEl.style.display = 'block';
+                debugEl.innerText = `تم العثور على المستأجر:\n${data.tenant_name}\nالوحدة: ${data.shop_no || '-'}`;
 
                 localStorage.setItem('jabri_tenant_session', 'active');
                 localStorage.setItem('jabri_tenant_code', data.tenant_code);
@@ -286,7 +328,7 @@
 
             } catch (err) {
                 console.error(err);
-                showError("حدث خطأ في الاتصال. حاول مرة أخرى.");
+                showError("حدث خطأ في الاتصال:\n" + err.message);
                 shakeCard(card);
             } finally {
                 loginBtn.disabled = false;
