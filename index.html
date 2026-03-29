@@ -1,534 +1,422 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>مجمع الجبري | بوابة الدخول</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>مجمع الجبري | كشف الحساب التفصيلي</title>
 
-  <meta name="description" content="بوابة الدخول الرئيسية لنظام مجمع الجبري الصناعي التجاري" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="مجمع الجبري">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-  <style>
-    :root {
-      --navy: #0f172a;
-      --navy-2: #162235;
-      --gold: #d4af37;
-      --glass: rgba(255, 255, 255, 0.96);
-      --muted: #94a3b8;
-      --muted-2: #64748b;
-      --shadow: 0 25px 60px rgba(0,0,0,0.4);
-      --shadow-soft: 0 10px 30px rgba(15,23,42,.10);
-      --line: rgba(255,255,255,.12);
-    }
+    <style>
+        :root {
+            --bg: #08111f;
+            --navy: #0f172a;
+            --gold: #d4af37;
+            --text: #ffffff;
+            --muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            --success: #4ade80;
+            --danger: #f87171;
+        }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      font-family: "Tajawal", sans-serif;
-    }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.6s ease;
+        }
 
-    html {
-      scroll-behavior: smooth;
-    }
+        body.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-    body {
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top, rgba(212,175,55,.10), transparent 25%),
-        linear-gradient(135deg, #08111f 0%, #0f172a 52%, #162235 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      overflow-x: hidden;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: pageIn 0.8s ease forwards;
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      padding: 24px;
-    }
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
 
-    @keyframes pageIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    #loading-bar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      width: 0;
-      z-index: 9999;
-      transition: width 0.4s ease;
-    }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 1080px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      align-items: stretch;
-    }
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
 
-    .hero,
-    .login-card {
-      border: 1px solid var(--line);
-      border-radius: 34px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: var(--shadow);
-    }
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.1);
+        }
 
-    .hero {
-      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      padding: 34px 24px;
-      position: relative;
-      overflow: hidden;
-    }
+        .save-btn {
+            background: var(--gold);
+            color: var(--navy);
+            border: none;
+            font-weight: 900;
+        }
 
-    .hero::before {
-      content: "";
-      position: absolute;
-      width: 230px;
-      height: 230px;
-      border-radius: 50%;
-      background: rgba(212,175,55,.12);
-      top: -70px;
-      left: -70px;
-      filter: blur(8px);
-    }
+        .logout-btn {
+            color: var(--danger);
+            border-color: rgba(248, 113, 113, 0.2);
+        }
 
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 170px;
-      height: 170px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.06);
-      bottom: -50px;
-      right: -30px;
-      filter: blur(6px);
-    }
+        .statement-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 18px;
+            text-align: center;
+        }
 
-    .brand-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #e2e8f0;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      position: relative;
-      z-index: 1;
-    }
+        .statement-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+        }
 
-    .logo-glow {
-      width: 12px;
-      height: 12px;
-      background: var(--gold);
-      border-radius: 50%;
-      box-shadow: 0 0 22px var(--gold);
-      flex: 0 0 auto;
-    }
+        .statement-header h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+        }
 
-    .hero h1 {
-      position: relative;
-      z-index: 1;
-      font-size: clamp(2rem, 5vw, 3.7rem);
-      font-weight: 900;
-      margin: 20px 0 8px;
-      line-height: 1.08;
-      letter-spacing: -0.03em;
-    }
+        .statement-header p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.8;
+            font-weight: 700;
+        }
 
-    .sub-title {
-      position: relative;
-      z-index: 1;
-      color: #e2e8f0;
-      font-size: clamp(1rem, 2vw, 1.25rem);
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
+        .summary-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 18px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
 
-    .sub-desc {
-      position: relative;
-      z-index: 1;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.9;
-      margin: 0 0 20px;
-      max-width: 620px;
-    }
+        .summary-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 12px 10px;
+            text-align: center;
+        }
 
-    .hero-features {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
+        .summary-item span {
+            display: block;
+            font-size: 9px;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
 
-    .feature {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 18px;
-      padding: 14px 16px;
-      color: #e2e8f0;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: var(--shadow-soft);
-      transition: transform .2s ease, background .2s ease;
-    }
+        .summary-item b {
+            font-size: 12px;
+            font-weight: 900;
+            color: #fff;
+        }
 
-    .feature:hover {
-      transform: translateY(-2px);
-      background: rgba(255,255,255,.08);
-    }
+        .statement-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
 
-    .login-card {
-      background: var(--glass);
-      color: var(--navy);
-      padding: 28px 22px;
-    }
+        .table-wrap {
+            overflow-x: auto;
+        }
 
-    .login-card h2 {
-      margin: 0 0 8px;
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--navy);
-    }
+        table {
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
 
-    .login-desc {
-      margin: 0 0 24px;
-      color: var(--muted-2);
-      line-height: 1.8;
-      font-size: 14px;
-      font-weight: 700;
-    }
+        th {
+            background: rgba(255,255,255,0.05);
+            color: var(--gold);
+            text-align: right;
+            padding: 15px 12px;
+            font-weight: 800;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            white-space: nowrap;
+        }
 
-    .action-btn {
-      width: 100%;
-      padding: 18px;
-      border-radius: 24px;
-      border: 1px solid #e2e8f0;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      text-decoration: none;
-      margin-bottom: 14px;
-      transition:
-        transform .22s ease,
-        box-shadow .22s ease,
-        border-color .22s ease,
-        background .22s ease,
-        opacity .22s ease;
-      cursor: pointer;
-      box-shadow: var(--shadow-soft);
-      position: relative;
-      overflow: hidden;
-    }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #e2e8f0;
+            font-weight: 600;
+            white-space: nowrap;
+        }
 
-    .action-btn::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,.45) 50%, transparent 80%);
-      transform: translateX(-120%);
-      transition: transform .7s ease;
-    }
+        .amt-debit { color: var(--danger); font-weight: 800; }
+        .amt-credit { color: var(--success); font-weight: 800; }
+        .amt-balance { color: #fff; font-weight: 900; }
 
-    .action-btn:hover::before {
-      transform: translateX(120%);
-    }
+        .carry-row td {
+            background: rgba(255,255,255,0.02);
+            color: var(--muted);
+            font-style: italic;
+        }
 
-    .action-btn:hover {
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 0 25px 60px rgba(15,23,42,.18);
-      border-color: rgba(212,175,55,.45);
-    }
+        .row-animate {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 0.4s ease;
+        }
 
-    .action-btn:active {
-      transform: scale(0.96);
-    }
+        .row-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-    .action-admin:hover {
-      background: #f8fafc;
-    }
+        .empty-row td {
+            text-align: center;
+            color: var(--muted);
+            padding: 40px 12px;
+        }
 
-    .action-tenant:hover {
-      background: #fffdf8;
-    }
+        #loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
+        }
 
-    .action-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-      flex: 1;
-    }
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-    .btn-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      font-weight: 900;
-      flex: 0 0 auto;
-      transition: transform .2s ease;
-    }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-    .action-btn:hover .btn-icon {
-      transform: scale(1.06);
-    }
-
-    .icon-admin {
-      background: #f1f5f9;
-      color: var(--navy);
-    }
-
-    .icon-tenant {
-      background: #fffbeb;
-      color: #854d0e;
-    }
-
-    .btn-text {
-      text-align: right;
-      min-width: 0;
-    }
-
-    .btn-text b {
-      display: block;
-      font-size: 16px;
-      color: var(--navy);
-      margin-bottom: 4px;
-    }
-
-    .btn-text span {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.7;
-      font-weight: 700;
-    }
-
-    .btn-arrow {
-      color: #cbd5e1;
-      font-size: 22px;
-      font-weight: 900;
-      transition: transform .2s ease, color .2s ease, opacity .2s ease;
-      flex: 0 0 auto;
-    }
-
-    .action-btn:hover .btn-arrow {
-      transform: translateX(-4px);
-      color: var(--gold);
-    }
-
-    .action-btn.loading {
-      pointer-events: none;
-      opacity: .88;
-    }
-
-    .action-btn.loading .btn-arrow {
-      opacity: 0;
-    }
-
-    .action-btn.loading::after {
-      content: "";
-      position: absolute;
-      left: 18px;
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(15,23,42,.18);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      animation: spin .75s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .future-note {
-      margin-top: 18px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(15,23,42,.04);
-      border: 1px solid #e2e8f0;
-      color: var(--muted-2);
-      font-size: 12px;
-      line-height: 1.8;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .footer {
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid #e2e8f0;
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 800;
-      text-align: center;
-      line-height: 1.9;
-      text-transform: uppercase;
-    }
-
-    @media (max-width: 500px) {
-      .hero h1 {
-        font-size: 28px;
-      }
-
-      .sub-desc {
-        font-size: 14px;
-      }
-
-      .btn-text b {
-        font-size: 15px;
-      }
-    }
-
-    @media (min-width: 900px) {
-      .container {
-        grid-template-columns: 1.2fr .9fr;
-        gap: 28px;
-      }
-
-      .hero {
-        padding: 46px 38px;
-      }
-
-      .login-card {
-        padding: 34px 28px;
-      }
-
-      .hero-features {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-  </style>
+        @media print {
+            body { background: #fff; color: #000; padding: 0; opacity: 1 !important; transform: none !important; }
+            .header-actions, #loader { display: none !important; }
+            .statement-header, .statement-container, .summary-box { border: 1px solid #eee; background: #fff; box-shadow: none; }
+            th { background: #f8f8f8; color: #000; }
+            td, .amt-balance { color: #000 !important; }
+        }
+    </style>
 </head>
 <body>
 
-  <div id="loading-bar"></div>
+    <div id="loader"><div class="spinner"></div></div>
 
-  <div class="container">
-    <section class="hero">
-      <div class="brand-badge">
-        <span class="logo-glow"></span>
-        JABRI COMPLEX
-      </div>
-
-      <h1>مجمع الجبري الصناعي التجاري</h1>
-      <div class="sub-title">بوابة الدخول الرئيسية للنظام الإداري والمحاسبي</div>
-      <p class="sub-desc">
-        نظام داخلي فاخر لإدارة الحسابات، متابعة المستأجرين، عرض كشوفات الحساب،
-        تحليل الأرصدة، ومراقبة الحالة القانونية بشكل واضح واحترافي.
-      </p>
-
-      <div class="hero-features">
-        <div class="feature">لوحة إدارة احترافية للمجمع</div>
-        <div class="feature">صفحة خاصة لكل مستأجر</div>
-        <div class="feature">كشف حساب وطباعة PDF</div>
-        <div class="feature">تنبيهات ذكية ومتابعة قانونية</div>
-      </div>
-    </section>
-
-    <section class="login-card">
-      <h2>تسجيل الدخول</h2>
-      <p class="login-desc">
-        اختر نوع الدخول المناسب للوصول إلى الواجهة الخاصة بك داخل نظام مجمع الجبري.
-      </p>
-
-      <button class="action-btn action-admin" id="adminBtn" onclick="adminLogin(this)">
-        <div class="action-right">
-          <div class="btn-icon icon-admin">A</div>
-          <div class="btn-text">
-            <b>دخول الإدارة</b>
-            <span>التحكم الشامل، التقارير المالية، وإدارة المستأجرين</span>
-          </div>
+    <div class="wrap">
+        <div class="header-area">
+            <div class="header-actions">
+                <button class="back-btn" onclick="location.href='tenant.html'">
+                    <i data-lucide="arrow-right"></i> رجوع
+                </button>
+                <button class="back-btn save-btn" onclick="savePDF()">
+                    <i data-lucide="download"></i> حفظ PDF
+                </button>
+                <button class="back-btn logout-btn" onclick="logout()">
+                    <i data-lucide="log-out"></i> خروج
+                </button>
+            </div>
+            <div style="font-weight:900; font-size:12px; color:var(--gold);">JABRI COMPLEX</div>
         </div>
-        <div class="btn-arrow">←</div>
-      </button>
 
-      <button class="action-btn action-tenant" id="tenantBtn" onclick="tenantLogin(this)">
-        <div class="action-right">
-          <div class="btn-icon icon-tenant">T</div>
-          <div class="btn-text">
-            <b>دخول المستأجر</b>
-            <span>كشف الحساب، الإشعارات الشخصية، والحالة القانونية</span>
-          </div>
+        <div class="statement-header">
+            <h1>مجمع جبري الصناعي</h1>
+            <h2 id="statement_tenant_name">جارٍ التحميل...</h2>
+            <p id="statement_meta">-</p>
         </div>
-        <div class="btn-arrow">←</div>
-      </button>
 
-      <div class="future-note">
-        لاحقًا سيتم تطوير صفحة الدخول إلى نظام
-        <strong>اسم مستخدم + كلمة مرور</strong>
-        بشكل كامل وآمن.
-      </div>
+        <div class="summary-box">
+            <div class="summary-item">
+                <span>إجمالي المطالبات</span>
+                <b id="sum_due">0.000 د.أ</b>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي الواصل</span>
+                <b id="sum_paid">0.000 د.أ</b>
+            </div>
+            <div class="summary-item">
+                <span>الرصيد النهائي</span>
+                <b id="sum_balance" style="color:var(--gold)">0.000 د.أ</b>
+            </div>
+        </div>
 
-      <div class="footer">
-        JABRI INDUSTRIAL COMPLEX • INTERNAL SYSTEM<br>
-        جميع الحقوق محفوظة © مجمع الجبري الصناعي التجاري
-      </div>
-    </section>
-  </div>
+        <div class="statement-container">
+            <div class="table-wrap">
+                <table id="statement_table">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>واصل (دائن)</th>
+                            <th>مترتب (مدين)</th>
+                            <th>الرصيد</th>
+                            <th>البيان</th>
+                            <th>رقم السند</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statement_body"></tbody>
+                </table>
+            </div>
+        </div>
 
-  <script>
-    function adminLogin(button) {
-      localStorage.setItem('jabri_admin_session', 'true');
-      startButtonLoading(button);
-      goTo('admin.html');
-    }
+        <div class="footer-note" style="text-align:center; margin-top:30px; font-size:10px; color:var(--muted);">
+            هذا الكشف مستخرج آلياً ويعتبر مرجعاً مالياً للحركات المسجلة في النظام.
+            <br>
+            © <span id="footer_year"></span> JABRI INDUSTRIAL COMPLEX
+        </div>
+    </div>
 
-    function tenantLogin(button) {
-      localStorage.setItem('jabri_tenant_session', 'true');
-      localStorage.setItem('jabri_tenant_id', '1'); // مؤقت
-      startButtonLoading(button);
-      goTo('tenant.html');
-    }
+    <script>
+        // 1. فحص الجلسة فوراً
+        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        if (!tenantCode) {
+            window.location.href = "index.html"; 
+        }
 
-    function startButtonLoading(button) {
-      if (!button) return;
-      button.classList.add('loading');
-    }
+        const { createClient } = supabase;
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
 
-    function goTo(url) {
-      document.getElementById('loading-bar').style.width = '100%';
-      document.body.style.opacity = '0';
-      document.body.style.transform = 'scale(0.97)';
-      setTimeout(() => {
-        window.location.href = url;
-      }, 400);
-    }
+        function formatCurrency(v) {
+            return `${Number(v || 0).toLocaleString('en-US', {minimumFractionDigits: 3})} د.أ`;
+        }
 
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
-  </script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        function savePDF() {
+            const element = document.querySelector('.wrap');
+            const name = document.getElementById('statement_tenant_name').innerText;
+            const opt = {
+                margin: 10,
+                filename: `كشف_حساب_${name}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        window.onload = async () => {
+            try {
+                const [{ data: tenant }, { data: transactions }] = await Promise.all([
+                    supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).single(),
+                    supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true })
+                ]);
+
+                if (!tenant) throw new Error("المستأجر غير موجود");
+
+                document.getElementById('statement_tenant_name').innerText = tenant.name;
+                document.getElementById('statement_meta').innerText = `الوحدة: ${tenant.unit || '-'} | تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')}`;
+                document.getElementById('footer_year').innerText = new Date().getFullYear();
+
+                let runningBal = Number(tenant.previous_balance || 0);
+                let totalDeb = runningBal;
+                let totalCre = 0;
+                const tbody = document.getElementById('statement_body');
+
+                // إضافة الرصيد المدور
+                if (runningBal > 0) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'carry-row show';
+                    tr.innerHTML = `<td>-</td><td>-</td><td class="amt-debit">${formatCurrency(runningBal)}</td><td class="amt-balance">${formatCurrency(runningBal)}</td><td>رصيد مدور سابق</td><td>-</td>`;
+                    tbody.appendChild(tr);
+                }
+
+                transactions.forEach((tx, i) => {
+                    const deb = Number(tx.debit || 0);
+                    const cre = Number(tx.credit || 0);
+                    runningBal += (deb - cre);
+                    totalDeb += deb;
+                    totalCre += cre;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'row-animate';
+                    tr.innerHTML = `
+                        <td>${tx.date}</td>
+                        <td class="amt-credit">${cre > 0 ? formatCurrency(cre) : '-'}</td>
+                        <td class="amt-debit">${deb > 0 ? formatCurrency(deb) : '-'}</td>
+                        <td class="amt-balance">${formatCurrency(runningBal)}</td>
+                        <td>${tx.description || '-'}</td>
+                        <td>${tx.receipt_no || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                    setTimeout(() => tr.classList.add('show'), i * 50);
+                });
+
+                document.getElementById('sum_due').innerText = formatCurrency(totalDeb);
+                document.getElementById('sum_paid').innerText = formatCurrency(totalCre);
+                document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                if (window.lucide) lucide.createIcons();
+
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ في جلب البيانات");
+                logout();
+            }
+        };
+    </script>
 </body>
 </html>
