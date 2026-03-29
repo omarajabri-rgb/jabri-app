@@ -24,6 +24,11 @@
             --radius-xl:28px;
         }
 
+        .icon-chip,
+        i[data-lucide]{
+            display:none !important;
+        }
+
         *{
             box-sizing:border-box;
             -webkit-tap-highlight-color:transparent;
@@ -70,7 +75,6 @@
             border-radius:15px;
             background:linear-gradient(135deg, var(--gold), var(--gold-deep));
             box-shadow:0 12px 24px rgba(201,164,107,0.22);
-            flex-shrink:0;
         }
 
         .brand h1{
@@ -108,9 +112,7 @@
             text-decoration:none;
         }
 
-        .btn:hover{
-            transform:translateY(-2px);
-        }
+        .btn:hover{ transform:translateY(-2px); }
 
         .btn-gold{
             background:linear-gradient(135deg, var(--gold), var(--gold-deep));
@@ -163,16 +165,41 @@
             font-weight:700;
         }
 
-        .tenant-select-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:16px;
-            align-items:start;
+        .hero{
+            background:var(--card);
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.72);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius-xl);
+            padding:22px;
+            margin-bottom:18px;
         }
 
-        .tenant-stats-grid{
+        .hero-grid{
             display:grid;
-            grid-template-columns:1fr 1fr 1fr;
+            grid-template-columns:1.2fr .8fr;
+            gap:16px;
+            align-items:center;
+        }
+
+        .hero h2{
+            margin:0;
+            font-size:28px;
+            color:#4f3b22;
+            font-weight:900;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            line-height:1.8;
+            color:var(--muted);
+            font-weight:700;
+            font-size:14px;
+        }
+
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
             gap:12px;
         }
 
@@ -181,12 +208,6 @@
             border-radius:20px;
             padding:16px;
             transition:.25s ease;
-            aspect-ratio:1/1;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            text-align:center;
         }
 
         .mini-stat span{
@@ -202,8 +223,6 @@
             font-weight:900;
             color:#483621;
             display:block;
-            line-height:1.5;
-            word-break:break-word;
         }
 
         .mini-stat.good-card{
@@ -253,9 +272,8 @@
             font-size:20px;
             font-weight:900;
             color:#4b3720;
-            margin-top:8px;
+            margin-bottom:6px;
             line-height:1.4;
-            word-break:break-word;
         }
 
         .kpi-card.good-card{
@@ -321,7 +339,7 @@
             display:none;
             grid-template-columns:1fr;
             gap:12px;
-            margin-top:12px;
+            margin-bottom:18px;
         }
 
         .smart-item{
@@ -389,22 +407,810 @@
             animation:spin 1s linear infinite;
         }
 
-        #collectionRiskAlert{
-            display:none;
-            margin-bottom:12px;
-            padding:12px 14px;
-            border-radius:14px;
-            font-weight:900;
-            text-align:center;
-            font-size:13px;
+        @keyframes spin{ to{ transform:rotate(360deg); } }
+
+        @media (max-width: 1100px){
+            .chart-grid, .hero-grid{ grid-template-columns:1fr; }
+            .kpi-grid{ grid-template-columns:repeat(2,1fr); }
         }
 
-        .btn-danger-glow{
-            background:linear-gradient(135deg,#d14d4d,#a83232) !important;
-            color:#fff !important;
-            box-shadow:0 0 12px rgba(209,77,77,0.6);
-            animation:pulseGlow 1.5s infinite;
+        @media (max-width: 768px){
+            .tenant-select-grid{ grid-template-columns:1fr !important; }
+            .tenant-stats-grid{ grid-template-columns:1fr !important; }
+            .form-grid, .hero-stats{ grid-template-columns:1fr; }
+            .kpi-grid{ grid-template-columns:1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-badge"></div>
+                <div>
+                    <h1>إدارة مجمع الجبري</h1>
+                    <p>لوحة الإدارة الذكية للحركات والمستأجرين</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <button class="btn btn-soft" onclick="refreshDashboard()">تحديث</button>
+                <a class="btn btn-soft" href="index.html">بوابة المستأجر</a>
+                <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
+            </div>
+        </div>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <h3>اختيار المستأجر</h3>
+                    <p>اختر المستأجر لعرض بياناته وإرسال الإشعارات</p>
+                </div>
+            </div>
+
+            <div class="tenant-select-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
+                <div>
+                    <div class="field">
+                        <label>اختيار المستأجر</label>
+                        <select id="tenant_select">
+                            <option value="">جاري تحميل القائمة...</option>
+                        </select>
+                    </div>
+
+                    <div id="smart_strip" class="smart-strip" style="display:grid; margin-top:12px;">
+                        <div class="smart-item">
+                            <span>آخر دفعة</span>
+                            <b id="preview_last_payment">-</b>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tenant-stats-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                    <div class="mini-stat" id="selected_balance_card"><span>الرصيد الحالي</span><b id="selected_balance">0</b></div>
+                    <div class="mini-stat" id="selected_paid_card"><span>إجمالي المدفوع</span><b id="selected_paid">0</b></div>
+                    <div class="mini-stat" id="selected_tx_count_card"><span>عدد الحركات</span><b id="selected_tx_count">0</b></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <h2>نظرة شاملة على المجمع</h2>
+                    <p>من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، والرسوم البيانية.</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="mini-stat"><span>عدد المستأجرين</span><b id="hero_total_tenants">0</b></div>
+                    <div class="mini-stat"><span>الوحدات النشطة</span><b id="hero_active_units">0</b></div>
+                    <div class="mini-stat"><span>إجمالي المتبقي</span><b id="hero_total_balance">0 د.أ</b></div>
+                    <div class="mini-stat"><span>نسبة التحصيل</span><b id="hero_collection_rate">0%</b></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="kpi-grid">
+            <div class="kpi-card" id="kpi_card_debit">
+                <div class="kpi-head"><span>إجمالي المدين</span></div>
+                <div class="kpi-value" id="kpi_total_debit">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_credit">
+                <div class="kpi-head"><span>إجمالي الدائن</span></div>
+                <div class="kpi-value" id="kpi_total_credit">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_balance">
+                <div class="kpi-head"><span>الرصيد المتبقي</span></div>
+                <div class="kpi-value" id="kpi_total_balance">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_ratio">
+                <div class="kpi-head"><span>نسبة السداد</span></div>
+                <div class="kpi-value" id="kpi_total_ratio">0%</div>
+            </div>
+        </section>
+
+        <section class="chart-grid">
+            <div class="panel">
+                <div class="panel-head"><div class="panel-title"><h3>مقارنة التحصيل</h3></div></div>
+                <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <div class="panel-head"><div class="panel-title"><h3>الحركة الشهرية</h3></div></div>
+                <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <h3>توقع السداد</h3>
+                    <p>تحليل من نمط كشف حساب المستأجر عبر السنوات</p>
+                </div>
+            </div>
+
+            <div class="chart-wrap">
+                <canvas id="predictionChart"></canvas>
+            </div>
+
+            <div style="margin-top:12px; text-align:center; font-weight:900; color:#4b3720;" id="predictionText">
+                اختر مستأجرًا لعرض نمط السداد والتوقع
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <h3>إرسال إشعار للمستأجر</h3>
+                    <p>اختر نوع الإشعار ثم أرسله للمستأجر المختار</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label>نوع الإشعار</label>
+                    <select id="notification_type">
+                        <option value="">اختر نوع الإشعار</option>
+                        <option value="friendly">تذكير لطيف</option>
+                        <option value="due">تنبيه استحقاق</option>
+                        <option value="followup">تنبيه متابعة</option>
+                        <option value="final">إنذار نهائي</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>نص الإشعار</label>
+                    <input type="text" id="notification_message" placeholder="سيتم توليد الرسالة تلقائيًا" />
+                </div>
+            </div>
+
+            <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-gold" onclick="sendNotification()">إرسال الإشعار</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <h3>إدخال حركة مالية</h3>
+                    <p>سجل الحركة المالية للمستأجر المحدد</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field"><label>التاريخ</label><input type="date" id="tx_date" /></div>
+                <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt" placeholder="اختياري" /></div>
+            </div>
+
+            <div class="field" style="margin-top:12px;">
+                <label>البيان / الوصف</label>
+                <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" />
+            </div>
+
+            <div class="form-grid" style="margin-top:12px;">
+                <div class="field"><label>مدين</label><input type="number" id="tx_debit" placeholder="0.000" step="0.001" /></div>
+                <div class="field"><label>دائن</label><input type="number" id="tx_credit" placeholder="0.000" step="0.001" /></div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+                <button class="btn btn-gold" onclick="submitTransaction()">حفظ الحركة</button>
+                <button class="btn btn-soft" onclick="clearForm()">تفريغ الحقول</button>
+            </div>
+
+            <div id="status_msg" class="status-msg"></div>
+        </section>
+
+        <section style="margin-top:20px;">
+            <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; font-size:16px;" onclick="openTenantStatement()" disabled>
+                كشف حساب هذا المستأجر
+            </button>
+        </section>
+
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — لوحة الإدارة الذكية</div>
+    </div>
+
+    <script>
+        const { createClient } = supabase;
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        let allTenants = [], allTransactions = [], tenantBalances = [];
+        let collectionChart = null, monthlyChart = null, predictionChart = null;
+
+        function toNumber(v) {
+            const n = parseFloat(v);
+            return isNaN(n) ? 0 : n;
         }
 
-        .btn-warning-glow{
-            background:linear-gradient(135deg,#d7921f
+        function formatCurrency(v) {
+            return `${toNumber(v).toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })} د.أ`;
+        }
+
+        function getTenantStatusClass(tenant){
+            if (!tenant) return 'warn-card';
+
+            const balance = toNumber(tenant.currentBalance);
+            const debit = toNumber(tenant.totalDebit) + toNumber(tenant.previous_balance);
+            const paid = toNumber(tenant.totalCredit);
+
+            if (balance <= 0) return 'good-card';
+
+            if (debit > 0) {
+                const ratio = paid / debit;
+                if (ratio >= 0.7 && balance <= 500) return 'warn-card';
+            }
+
+            if (balance <= 500) return 'warn-card';
+
+            return 'bad-card';
+        }
+
+        function applyTenantCardColors(tenant){
+            const statusClass = getTenantStatusClass(tenant);
+
+            const cards = [
+                document.getElementById('kpi_card_debit'),
+                document.getElementById('kpi_card_credit'),
+                document.getElementById('kpi_card_balance'),
+                document.getElementById('kpi_card_ratio'),
+                document.getElementById('selected_balance_card'),
+                document.getElementById('selected_paid_card'),
+                document.getElementById('selected_tx_count_card')
+            ];
+
+            cards.forEach(card => {
+                if (!card) return;
+                card.classList.remove('good-card', 'warn-card', 'bad-card');
+                card.classList.add(statusClass);
+            });
+        }
+
+        async function loadData() {
+            try {
+                const [{ data: tenants, error: tenantsError }, { data: transactions, error: transactionsError }] = await Promise.all([
+                    supabaseClient.from('tenants').select('*').order('tenant_name'),
+                    supabaseClient.from('tenant_transactions').select('*').order('date')
+                ]);
+
+                if (tenantsError) throw tenantsError;
+                if (transactionsError) throw transactionsError;
+
+                allTenants = tenants || [];
+                allTransactions = transactions || [];
+                buildTenantBalances();
+
+            } catch (error) {
+                console.error(error);
+                alert('خطأ في تحميل البيانات: ' + error.message);
+            }
+        }
+
+        function buildTenantBalances() {
+            tenantBalances = allTenants.map(tenant => {
+                const tx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
+                const prev = toNumber(tenant.previous_balance);
+                const deb = tx.reduce((s, r) => s + toNumber(r.debit), 0);
+                const cre = tx.reduce((s, r) => s + toNumber(r.credit), 0);
+
+                return {
+                    ...tenant,
+                    totalDebit: deb,
+                    totalCredit: cre,
+                    currentBalance: Math.max(0, prev + deb - cre),
+                    lastPayment: [...tx]
+                        .filter(t => toNumber(t.credit) > 0)
+                        .sort((a,b) => new Date(b.date) - new Date(a.date))[0] || null
+                };
+            });
+        }
+
+        function populateTenantDropdown() {
+            const s = document.getElementById('tenant_select');
+            s.innerHTML = '<option value="">-- اختر المستأجر --</option>' +
+                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
+        }
+
+        function updateTenantKpis(tenant){
+            if(!tenant){
+                document.getElementById('kpi_total_debit').innerText = '0 د.أ';
+                document.getElementById('kpi_total_credit').innerText = '0 د.أ';
+                document.getElementById('kpi_total_balance').innerText = '0 د.أ';
+                document.getElementById('kpi_total_ratio').innerText = '0%';
+                applyTenantCardColors(null);
+                return;
+            }
+
+            const totalRequired = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
+            const totalPaid = toNumber(tenant.totalCredit);
+            const balance = Math.max(0, totalRequired - totalPaid);
+            const ratio = totalRequired > 0 ? Math.round((totalPaid / totalRequired) * 100) : 0;
+
+            document.getElementById('kpi_total_debit').innerText = formatCurrency(totalRequired);
+            document.getElementById('kpi_total_credit').innerText = formatCurrency(totalPaid);
+            document.getElementById('kpi_total_balance').innerText = formatCurrency(balance);
+            document.getElementById('kpi_total_ratio').innerText = `${Math.min(ratio, 100)}%`;
+
+            applyTenantCardColors(tenant);
+        }
+
+        function updateSelectedTenantStats(tenant){
+            if(!tenant){
+                document.getElementById('selected_balance').innerText = '0';
+                document.getElementById('selected_paid').innerText = '0';
+                document.getElementById('selected_tx_count').innerText = '0';
+                applyTenantCardColors(null);
+                return;
+            }
+
+            document.getElementById('selected_balance').innerText = formatCurrency(tenant.currentBalance);
+            document.getElementById('selected_paid').innerText = formatCurrency(tenant.totalCredit);
+            document.getElementById('selected_tx_count').innerText =
+                allTransactions.filter(t => t.tenant_code === tenant.tenant_code).length;
+
+            applyTenantCardColors(tenant);
+        }
+
+        async function loadTenantBalancePreview(code) {
+            const strip = document.getElementById('smart_strip');
+            const t = tenantBalances.find(x => x.tenant_code === code);
+
+            if (!code || !t) {
+                strip.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('preview_last_payment').innerText =
+                t.lastPayment ? formatCurrency(t.lastPayment.credit) : 'لا يوجد';
+
+            strip.style.display = 'grid';
+        }
+
+        function buildTenantYearlyPattern(tenant) {
+            if (!tenant) return [];
+
+            const tenantTx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
+            const yearlyMap = {};
+
+            tenantTx.forEach(tx => {
+                if (!tx.date) return;
+
+                const year = new Date(tx.date).getFullYear();
+
+                if (!yearlyMap[year]) {
+                    yearlyMap[year] = {
+                        year,
+                        debit: 0,
+                        credit: 0
+                    };
+                }
+
+                yearlyMap[year].debit += toNumber(tx.debit);
+                yearlyMap[year].credit += toNumber(tx.credit);
+            });
+
+            const years = Object.values(yearlyMap).sort((a, b) => a.year - b.year);
+
+            return years.map(item => {
+                const ratio = item.debit > 0 ? Math.round((item.credit / item.debit) * 100) : 0;
+                return {
+                    year: item.year,
+                    debit: item.debit,
+                    credit: item.credit,
+                    ratio: Math.min(ratio, 100)
+                };
+            });
+        }
+
+        function calculateNextYearPrediction(yearlyData) {
+            if (yearlyData.length < 2) return null;
+
+            const last = yearlyData[yearlyData.length - 1];
+            const prev = yearlyData[yearlyData.length - 2];
+
+            let predictedRatio = last.ratio + (last.ratio - prev.ratio);
+
+            if (predictedRatio < 0) predictedRatio = 0;
+            if (predictedRatio > 100) predictedRatio = 100;
+
+            return {
+                year: last.year + 1,
+                ratio: Math.round(predictedRatio)
+            };
+        }
+
+        function drawPredictionChart(tenant) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+
+            if (predictionChart) predictionChart.destroy();
+
+            if (!tenant) {
+                document.getElementById('predictionText').innerText = 'اختر مستأجرًا لعرض نمط السداد والتوقع';
+                return;
+            }
+
+            const yearlyData = buildTenantYearlyPattern(tenant);
+
+            if (!yearlyData.length) {
+                document.getElementById('predictionText').innerText = 'لا توجد بيانات كافية لهذا المستأجر';
+                return;
+            }
+
+            const prediction = calculateNextYearPrediction(yearlyData);
+
+            const labels = yearlyData.map(y => String(y.year));
+            const ratioData = yearlyData.map(y => y.ratio);
+
+            if (prediction) {
+                labels.push(String(prediction.year));
+                ratioData.push(prediction.ratio);
+            }
+
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'نسبة السداد %',
+                        data: ratioData,
+                        borderColor: '#159a6f',
+                        backgroundColor: 'rgba(21,154,111,0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                callback: v => v + '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (prediction) {
+                document.getElementById('predictionText').innerText =
+                    `توقع السنة ${prediction.year}: ${prediction.ratio}%`;
+            } else {
+                document.getElementById('predictionText').innerText =
+                    'تم عرض نمط السداد التاريخي للمستأجر';
+            }
+        }
+
+        function getNotificationMessage(type, tenant){
+            const balance = formatCurrency(tenant.currentBalance);
+
+            if(type === 'friendly'){
+                return `مرحباً ${tenant.tenant_name}، نود تذكيركم بلطف بمتابعة الحساب. الرصيد الحالي: ${balance}.`;
+            }
+
+            if(type === 'due'){
+                return `تنبيه من إدارة مجمع الجبري: يوجد مبلغ مستحق على حسابكم. الرصيد الحالي: ${balance}. يرجى المراجعة.`;
+            }
+
+            if(type === 'followup'){
+                return `متابعة من إدارة مجمع الجبري: ما زال يوجد رصيد قائم على الحساب بقيمة ${balance}. نرجو التواصل مع الإدارة.`;
+            }
+
+            if(type === 'final'){
+                return `إنذار نهائي من إدارة مجمع الجبري: الحساب يحمل رصيداً قائماً بقيمة ${balance}. نرجو التسوية بشكل عاجل.`;
+            }
+
+            return '';
+        }
+
+        async function sendNotification(){
+            const tenantCode = document.getElementById('tenant_select').value;
+            const type = document.getElementById('notification_type').value;
+            const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
+
+            if(!tenant){
+                alert('اختر المستأجر أولاً');
+                return;
+            }
+
+            if(!type){
+                alert('اختر نوع الإشعار');
+                return;
+            }
+
+            const message = getNotificationMessage(type, tenant);
+            document.getElementById('notification_message').value = message;
+
+            const { error } = await supabaseClient
+                .from('tenant_notifications')
+                .insert([{
+                    tenant_code: tenant.tenant_code,
+                    type: type,
+                    message: message,
+                    is_read: false
+                }]);
+
+            if(error){
+                alert('فشل إرسال الإشعار: ' + error.message);
+                return;
+            }
+
+            alert('تم إرسال الإشعار');
+        }
+
+        function openTenantStatement() {
+            const tenantCode = document.getElementById('tenant_select').value;
+
+            if (!tenantCode) {
+                alert('اختر المستأجر أولاً');
+                return;
+            }
+
+            localStorage.setItem('jabri_tenant_code', tenantCode);
+            window.open('statement.html', '_blank');
+        }
+
+        async function refreshDashboard() {
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                await loadData();
+                populateTenantDropdown();
+
+                const firstTenantCode = allTenants[0]?.tenant_code || '';
+
+                if (firstTenantCode) {
+                    document.getElementById('tenant_select').value = firstTenantCode;
+                    const firstTenant = tenantBalances.find(t => t.tenant_code === firstTenantCode);
+                    updateSelectedTenantStats(firstTenant);
+                    updateTenantKpis(firstTenant);
+                    await loadTenantBalancePreview(firstTenantCode);
+                    drawPredictionChart(firstTenant);
+                    document.getElementById('statementBtn').disabled = false;
+                } else {
+                    document.getElementById('statementBtn').disabled = true;
+                }
+
+                const prevTotal = allTenants.reduce((s, t) => s + toNumber(t.previous_balance), 0);
+                const debTotal = allTransactions.reduce((s, t) => s + toNumber(t.debit), 0);
+                const creTotal = allTransactions.reduce((s, t) => s + toNumber(t.credit), 0);
+                const totalDebit = prevTotal + debTotal;
+                const balTotal = Math.max(0, totalDebit - creTotal);
+                const collectionRate = totalDebit > 0 ? Math.round((creTotal / totalDebit) * 100) : 100;
+                const activeUnits = allTenants.filter(t => (t.tenant_code || '').trim() !== '').length;
+
+                document.getElementById('hero_total_tenants').innerText = allTenants.length;
+                document.getElementById('hero_active_units').innerText = activeUnits;
+                document.getElementById('hero_total_balance').innerText = formatCurrency(balTotal);
+                document.getElementById('hero_collection_rate').innerText = `${collectionRate}%`;
+
+                drawCollectionChart(creTotal, balTotal);
+                drawMonthlyChart();
+
+            } catch (error) {
+                console.error(error);
+                alert('تعذر تحديث اللوحة: ' + error.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        async function submitTransaction() {
+            const tenant_code = document.getElementById('tenant_select').value.trim();
+            const date = document.getElementById('tx_date').value;
+            const description = document.getElementById('tx_desc').value.trim();
+            const debitValue = document.getElementById('tx_debit').value;
+            const creditValue = document.getElementById('tx_credit').value;
+            const receipt_no = document.getElementById('tx_receipt').value.trim();
+            const msg = document.getElementById('status_msg');
+
+            if (!tenant_code || !description || !date) {
+                msg.style.display = 'block';
+                msg.style.background = 'rgba(209,77,77,0.12)';
+                msg.style.color = 'var(--danger)';
+                msg.style.border = '1px solid rgba(209,77,77,0.18)';
+                msg.innerText = 'يرجى اختيار المستأجر وكتابة البيان واختيار التاريخ.';
+                return;
+            }
+
+            const debit = debitValue !== '' ? Number(debitValue) : null;
+            const credit = creditValue !== '' ? Number(creditValue) : null;
+
+            if ((debit === null || debit === 0) && (credit === null || credit === 0)) {
+                msg.style.display = 'block';
+                msg.style.background = 'rgba(209,77,77,0.12)';
+                msg.style.color = 'var(--danger)';
+                msg.style.border = '1px solid rgba(209,77,77,0.18)';
+                msg.innerText = 'يرجى إدخال قيمة في المدين أو الدائن.';
+                return;
+            }
+
+            msg.style.display = 'block';
+            msg.style.background = 'rgba(201,164,107,0.12)';
+            msg.style.color = '#7d5f33';
+            msg.style.border = '1px solid rgba(201,164,107,0.18)';
+            msg.innerText = 'جاري حفظ الحركة...';
+
+            const { error } = await supabaseClient.from('tenant_transactions').insert([{
+                tenant_code,
+                date,
+                description,
+                debit: debit > 0 ? debit : null,
+                credit: credit > 0 ? credit : null,
+                receipt_no: receipt_no || null
+            }]);
+
+            if (error) {
+                msg.style.background = 'rgba(209,77,77,0.12)';
+                msg.style.color = 'var(--danger)';
+                msg.style.border = '1px solid rgba(209,77,77,0.18)';
+                msg.innerText = 'فشل الحفظ: ' + error.message;
+                return;
+            }
+
+            msg.style.background = 'rgba(21,154,111,0.12)';
+            msg.style.color = 'var(--success)';
+            msg.style.border = '1px solid rgba(21,154,111,0.18)';
+            msg.innerText = 'تم تسجيل الحركة بنجاح.';
+
+            clearForm();
+            await refreshDashboard();
+
+            document.getElementById('tenant_select').value = tenant_code;
+            const tenant = tenantBalances.find(t => t.tenant_code === tenant_code);
+            updateSelectedTenantStats(tenant);
+            updateTenantKpis(tenant);
+            await loadTenantBalancePreview(tenant_code);
+            drawPredictionChart(tenant);
+            document.getElementById('statementBtn').disabled = !tenant_code;
+        }
+
+        function drawCollectionChart(totalCredit, totalBalance) {
+            const ctx = document.getElementById('collectionChart').getContext('2d');
+
+            if (collectionChart) collectionChart.destroy();
+
+            collectionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مدفوع', 'متبقي'],
+                    datasets: [{
+                        data: [totalCredit, totalBalance],
+                        borderWidth: 6,
+                        borderColor: '#ffffff',
+                        backgroundColor: ['rgba(21,154,111,0.65)', 'rgba(209,77,77,0.45)'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '78%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Tajawal', weight: '700' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawMonthlyChart() {
+            const canvas = document.getElementById('monthlyChart');
+            const ctx = canvas.getContext('2d');
+            const labels = [], debits = [], credits = [];
+            const now = new Date();
+
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                labels.push(d.toLocaleDateString('ar-JO', { month: 'short' }));
+
+                const mTx = allTransactions.filter(tx => {
+                    const tD = new Date(tx.date);
+                    return tD.getFullYear() === d.getFullYear() && tD.getMonth() === d.getMonth();
+                });
+
+                debits.push(mTx.reduce((s, t) => s + toNumber(t.debit), 0));
+                credits.push(mTx.reduce((s, t) => s + toNumber(t.credit), 0));
+            }
+
+            if (monthlyChart) monthlyChart.destroy();
+
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'مدين',
+                            data: debits,
+                            tension: 0.4,
+                            fill: true,
+                            borderColor: '#c9a46b',
+                            backgroundColor: 'rgba(201,164,107,0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'دائن',
+                            data: credits,
+                            tension: 0.4,
+                            fill: true,
+                            borderColor: '#159a6f',
+                            backgroundColor: 'rgba(21,154,111,0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(0,0,0,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        window.onload = async () => {
+            document.body.style.opacity = '1';
+            document.getElementById('tx_date').valueAsDate = new Date();
+            await refreshDashboard();
+
+            document.getElementById('tenant_select').addEventListener('change', async function () {
+                await loadTenantBalancePreview(this.value);
+                const tenant = tenantBalances.find(t => t.tenant_code === this.value);
+                updateSelectedTenantStats(tenant);
+                updateTenantKpis(tenant);
+                drawPredictionChart(tenant);
+
+                const type = document.getElementById('notification_type')?.value;
+                if (type && tenant) {
+                    document.getElementById('notification_message').value = getNotificationMessage(type, tenant);
+                }
+
+                document.getElementById('statementBtn').disabled = !this.value;
+            });
+
+            document.addEventListener('change', function(e){
+                if(e.target.id === 'notification_type'){
+                    const tenantCode = document.getElementById('tenant_select').value;
+                    const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
+                    if(tenant){
+                        document.getElementById('notification_message').value = getNotificationMessage(e.target.value, tenant);
+                    }
+                }
+            });
+        };
+
+        function clearForm() {
+            document.getElementById('tx_desc').value = '';
+            document.getElementById('tx_debit').value = '';
+            document.getElementById('tx_credit').value = '';
+            document.getElementById('tx_receipt').value = '';
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('jabri_admin_session');
+            alert('تم الخروج');
+        }
+    </script>
+</body>
+</html>
