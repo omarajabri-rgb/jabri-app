@@ -51,15 +51,15 @@
             backdrop-filter: blur(10px);
         }
 
-        .logo-area {
-            margin-bottom: 35px;
-        }
+        .logo-area { margin-bottom: 35px; }
 
-        /* تنسيق الشعار المرفوع */
-        .logo-area img {
-            height: 60px;
-            width: auto;
-            margin-bottom: 15px;
+        .logo-area h1 { 
+            color: var(--gold); 
+            font-size: 30px; 
+            margin: 0; 
+            font-weight: 900; 
+            letter-spacing: 1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .logo-area p { 
@@ -124,9 +124,9 @@
             box-shadow: 0 10px 20px rgba(212,175,55,0.2);
         }
 
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px rgba(212,175,55,0.3);
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         #error_msg { 
@@ -139,13 +139,41 @@
             background: rgba(248,113,113,0.1);
             border-radius: 12px;
         }
+
+        #loader { 
+            position: fixed;
+            inset: 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            background: var(--bg);
+            z-index: 9999; 
+        }
+
+        .spinner { 
+            width: 35px;
+            height: 35px; 
+            border: 3px solid rgba(255,255,255,0.1); 
+            border-top-color: var(--gold); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
 
+    <div id="loader"><div class="spinner"></div></div>
+
     <div class="login-card">
         <div class="logo-area">
-            <img src="logo_complex.png" alt="Jabri Complex Logo">
+            <h1>JABRI COMPLEX</h1>
             <p>بوابة المستأجرين الرقمية</p>
         </div>
 
@@ -165,7 +193,7 @@
             <i data-lucide="log-in" size="18"></i>
         </button>
 
-        <div id="error_msg"></div>
+        <div id="error_msg">عذراً، هذا الكود غير مسجل لدينا.</div>
         
         <div style="margin-top: 40px; font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: 1px;">
             © 2026 JABRI INDUSTRIAL COMPLEX
@@ -175,7 +203,6 @@
     <script>
         const { createClient } = supabase;
 
-        // إعدادات Supabase الخاصة بمشروع Jabri Complex
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
@@ -183,51 +210,67 @@
 
         window.onload = () => {
             document.body.style.opacity = "1";
+            document.getElementById('loader').style.display = 'none';
+
             if (window.lucide) lucide.createIcons();
-            
-            // التحقق من وجود جلسة سابقة
-            const savedCode = localStorage.getItem('jabri_tenant_code');
-            if (savedCode) window.location.href = "tenant.html";
+
+            const input = document.getElementById('tenant_code_input');
+
+            input.addEventListener('input', function () {
+                this.value = this.value.toUpperCase().replace(/\s+/g, '');
+            });
+
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // عطلت التحويل التلقائي مؤقتاً حتى لا يعمل loop أثناء الاختبار
+            // const savedCode = localStorage.getItem('jabri_tenant_code');
+            // if (savedCode) window.location.href = "tenant.html";
         };
 
         async function handleLogin() {
-            const input = document.getElementById('tenant_code_input');
-            const code = input.value.trim().toUpperCase(); // تنظيف الكود وتحويله لحروف كبيرة
+            const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
             const errorEl = document.getElementById('error_msg');
             const loginBtn = document.getElementById('login_btn');
+            const card = document.querySelector('.login-card');
 
             if (!code) {
                 showError("يرجى إدخال كود الوحدة.");
+                shakeCard(card);
                 return;
             }
 
             errorEl.style.display = "none";
             loginBtn.disabled = true;
-            loginBtn.innerText = "جاري التحقق...";
+            loginBtn.innerHTML = `جاري التحقق...`;
 
             try {
-                // البحث باستخدام tenant_code المطابق للجدول
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, tenant_name') 
+                    .select('tenant_code, tenant_name, unit')
                     .eq('tenant_code', code)
-                    .maybeSingle(); // استخدام maybeSingle لتجنب أخطاء التكرار
+                    .maybeSingle();
 
                 if (error || !data) {
                     showError("عذراً، هذا الكود غير مسجل لدينا.");
-                } else {
-                    // حفظ بيانات المستأجر في التخزين المحلي
-                    localStorage.setItem('jabri_tenant_session', 'active');
-                    localStorage.setItem('jabri_tenant_code', data.tenant_code);
-                    localStorage.setItem('jabri_tenant_name', data.tenant_name); 
-
-                    window.location.href = "tenant.html";
+                    shakeCard(card);
+                    return;
                 }
+
+                localStorage.setItem('jabri_tenant_session', 'active');
+                localStorage.setItem('jabri_tenant_code', data.tenant_code);
+                localStorage.setItem('jabri_tenant_name', data.tenant_name || '');
+                localStorage.setItem('jabri_tenant_unit', data.unit || '');
+
+                window.location.href = "tenant.html";
             } catch (err) {
+                console.error(err);
                 showError("حدث خطأ في الاتصال. حاول مرة أخرى.");
+                shakeCard(card);
             } finally {
                 loginBtn.disabled = false;
-                loginBtn.innerText = "دخول للمنصة";
+                loginBtn.innerHTML = `دخول للمنصة <i data-lucide="log-in" size="18"></i>`;
                 if (window.lucide) lucide.createIcons();
             }
         }
@@ -238,10 +281,12 @@
             errorEl.style.display = "block";
         }
 
-        // تشغيل تسجيل الدخول عند ضغط مفتاح Enter
-        document.getElementById('tenant_code_input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
+        function shakeCard(card) {
+            card.style.animation = "shake 0.4s ease";
+            setTimeout(() => {
+                card.style.animation = "";
+            }, 400);
+        }
     </script>
 </body>
 </html>
