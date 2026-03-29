@@ -4,21 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>إدارة مجمع الجبري | دخول الإدارة</title>
+
     <script defer src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         :root {
             --bg: #f7f4ed;
             --bg-2: #fdfbf6;
-            --surface: rgba(255,255,255,0.78);
-            --border: rgba(201,164,107,0.22);
+            --surface: rgba(255,255,255,0.80);
+            --surface-strong: rgba(255,255,255,0.92);
+            --border: rgba(201,164,107,0.20);
             --text: #2f2a24;
             --muted: #7d7468;
             --gold: #c9a46b;
             --gold-deep: #b18a52;
             --danger: #cc5a50;
+            --success: #159a6f;
             --shadow: 0 18px 40px rgba(120,95,56,0.12);
         }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -32,9 +42,10 @@
                 radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 24%),
                 linear-gradient(135deg, var(--bg), var(--bg-2));
         }
+
         .card {
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
             padding: 34px 28px;
             border-radius: 32px;
             background: var(--surface);
@@ -42,35 +53,104 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            top: -50px;
+            left: -40px;
+            background: rgba(201,164,107,0.08);
+            pointer-events: none;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            bottom: -45px;
+            right: -30px;
+            background: rgba(177,138,82,0.07);
+            pointer-events: none;
+        }
+
+        .logo-badge {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            box-shadow: 0 12px 24px rgba(201,164,107,0.22);
+            position: relative;
+            z-index: 1;
+        }
+
         h1 {
             margin: 0;
             color: var(--gold-deep);
             font-size: 30px;
             font-weight: 900;
+            position: relative;
+            z-index: 1;
         }
-        p {
+
+        .subtext {
             margin: 10px 0 24px;
             color: var(--muted);
             font-size: 12px;
             font-weight: 800;
-            line-height: 1.8;
+            line-height: 1.9;
+            position: relative;
+            z-index: 1;
         }
-        .form-group { text-align: right; margin-bottom: 14px; }
-        label { display:block; margin-bottom:8px; color: var(--gold-deep); font-size:12px; font-weight:900; }
+
+        .form-group {
+            text-align: right;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gold-deep);
+            font-size: 12px;
+            font-weight: 900;
+            padding-right: 4px;
+        }
+
         input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 16px;
             border-radius: 16px;
             border: 1px solid var(--border);
-            background: rgba(255,255,255,0.82);
+            background: rgba(255,255,255,0.86);
             color: var(--text);
             font-size: 15px;
             font-weight: 700;
             outline: none;
+            transition: 0.22s ease;
         }
-        input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,164,107,0.10); }
-        button {
+
+        input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(201,164,107,0.10);
+            background: var(--surface-strong);
+        }
+
+        .btn-login {
             width: 100%;
             padding: 16px;
             border: none;
@@ -84,33 +164,83 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 8px;
+            margin-top: 10px;
+            transition: 0.22s ease;
+            position: relative;
+            z-index: 1;
         }
-        #error_msg {
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(201,164,107,0.20);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .msg {
             display: none;
             margin-top: 14px;
-            padding: 12px;
+            padding: 12px 14px;
             border-radius: 14px;
-            background: rgba(204,90,80,0.10);
-            color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.12);
             font-size: 12px;
             font-weight: 800;
             line-height: 1.7;
+            position: relative;
+            z-index: 1;
         }
+
+        .msg.error {
+            background: rgba(204,90,80,0.10);
+            color: var(--danger);
+            border: 1px solid rgba(204,90,80,0.12);
+        }
+
+        .msg.success {
+            background: rgba(21,154,111,0.10);
+            color: var(--success);
+            border: 1px solid rgba(21,154,111,0.14);
+        }
+
         .hint {
             margin-top: 18px;
             font-size: 11px;
             color: var(--muted);
             font-weight: 800;
-            line-height: 1.8;
+            line-height: 1.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hint b {
+            color: var(--gold-deep);
+        }
+
+        .footer-note {
+            margin-top: 16px;
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
 <body>
     <div class="card">
+        <div class="logo-badge">
+            <i data-lucide="shield-check"></i>
+        </div>
+
         <h1>JABRI ADMIN</h1>
-        <p>دخول الإدارة مستقل عن دخول المستأجرين. يمكنك تعديل اسم المستخدم وكلمة المرور داخل هذا الملف بسهولة.</p>
+        <div class="subtext">
+            دخول الإدارة مستقل عن بوابة المستأجرين.<br>
+            يمكنك تعديل اسم المستخدم وكلمة المرور من داخل هذا الملف.
+        </div>
 
         <div class="form-group">
             <label>اسم المستخدم</label>
@@ -122,17 +252,21 @@
             <input id="admin_pass" type="password" placeholder="Password" autocomplete="off">
         </div>
 
-        <button onclick="handleAdminLogin()">
-            <i data-lucide="shield-check"></i>
+        <button id="login_btn" class="btn-login" onclick="handleAdminLogin()">
+            <i data-lucide="log-in"></i>
             دخول الإدارة
         </button>
 
-        <div id="error_msg"></div>
+        <div id="msg" class="msg"></div>
 
         <div class="hint">
-            الافتراضي حالياً:<br>
+            الافتراضي حاليًا:<br>
             username: <b>admin</b><br>
             password: <b>1234</b>
+        </div>
+
+        <div class="footer-note">
+            © 2026 JABRI INDUSTRIAL COMPLEX
         </div>
     </div>
 
@@ -142,27 +276,58 @@
 
         window.onload = () => {
             if (window.lucide) lucide.createIcons();
+
             document.getElementById('admin_user').addEventListener('keypress', onEnter);
             document.getElementById('admin_pass').addEventListener('keypress', onEnter);
+
+            if (localStorage.getItem('jabri_admin_session') === 'active') {
+                window.location.href = 'admin.html';
+            }
         };
 
         function onEnter(e) {
             if (e.key === 'Enter') handleAdminLogin();
         }
 
+        function showMessage(text, type = 'error') {
+            const msg = document.getElementById('msg');
+            msg.className = `msg ${type}`;
+            msg.style.display = 'block';
+            msg.innerText = text;
+        }
+
         function handleAdminLogin() {
             const user = document.getElementById('admin_user').value.trim();
             const pass = document.getElementById('admin_pass').value.trim();
-            const err = document.getElementById('error_msg');
+            const btn = document.getElementById('login_btn');
 
-            if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
-                localStorage.setItem('jabri_admin_session', 'active');
-                window.location.href = 'admin.html';
+            if (!user || !pass) {
+                showMessage('يرجى إدخال اسم المستخدم وكلمة المرور.');
                 return;
             }
 
-            err.style.display = 'block';
-            err.innerText = 'بيانات الدخول غير صحيحة. عدّل القيم داخل admin-login.html إذا أردت تغيير بيانات الإدارة.';
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-circle"></i> جاري التحقق...`;
+            if (window.lucide) lucide.createIcons();
+
+            setTimeout(() => {
+                if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+                    localStorage.setItem('jabri_admin_session', 'active');
+                    localStorage.setItem('jabri_admin_user', user);
+                    showMessage('تم تسجيل الدخول بنجاح، جاري التحويل...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 450);
+                    return;
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="log-in"></i> دخول الإدارة`;
+                if (window.lucide) lucide.createIcons();
+
+                showMessage('بيانات الدخول غير صحيحة. عدّل القيم داخل admin-login.html إذا أردت تغيير بيانات الإدارة.', 'error');
+            }, 350);
         }
     </script>
 </body>
