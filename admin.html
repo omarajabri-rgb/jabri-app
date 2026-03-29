@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Jabri</title>
+<title>Jabri Admin</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,6 +16,7 @@ body{
   padding:15px;
 }
 
+/* Panels */
 .panel{
   background:#fff;
   padding:15px;
@@ -23,6 +24,7 @@ body{
   margin-bottom:15px;
 }
 
+/* KPI */
 .kpi-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -30,26 +32,31 @@ body{
 }
 
 .kpi{
-  padding:15px;
-  border-radius:12px;
+  padding:18px;
+  border-radius:14px;
   text-align:center;
   font-weight:bold;
+  transition:.3s;
 }
 
 .good{background:#e7f7ef;}
 .warn{background:#fff4cc;}
 .bad{background:#ffd6d6;}
 
+/* Buttons */
 button{
   width:100%;
-  padding:14px;
+  padding:15px;
   border:none;
-  border-radius:12px;
+  border-radius:14px;
   font-weight:bold;
+  cursor:pointer;
 }
 
+.btn-good{background:#159a6f;color:#fff;}
+.btn-warn{background:#d7921f;color:#fff;}
 .btn-danger{
-  background:red;
+  background:#d14d4d;
   color:#fff;
   animation:shake .4s infinite;
 }
@@ -60,9 +67,10 @@ button{
   100%{transform:translateX(0)}
 }
 
+/* Alert */
 .alert{
-  padding:10px;
-  border-radius:10px;
+  padding:12px;
+  border-radius:12px;
   text-align:center;
   font-weight:bold;
   margin-bottom:10px;
@@ -72,10 +80,12 @@ button{
 
 <body>
 
+<!-- Tenant -->
 <div class="panel">
 <select id="tenant_select"></select>
 </div>
 
+<!-- KPI -->
 <div class="kpi-grid">
 <div id="kpi_debit" class="kpi">0</div>
 <div id="kpi_credit" class="kpi">0</div>
@@ -83,15 +93,18 @@ button{
 <div id="kpi_ratio" class="kpi">0%</div>
 </div>
 
+<!-- Pie -->
 <div class="panel">
 <div id="collectionRiskAlert" class="alert"></div>
 <canvas id="collectionChart"></canvas>
 </div>
 
+<!-- Prediction -->
 <div class="panel">
 <canvas id="predictionChart"></canvas>
 </div>
 
+<!-- Notification -->
 <div class="panel">
 <select id="notification_type">
 <option value="">نوع الإشعار</option>
@@ -103,17 +116,18 @@ button{
 <button id="notifyBtn" onclick="sendNotification()">إرسال الإشعار</button>
 </div>
 
+<!-- Statement -->
 <button onclick="openStatement()">كشف الحساب</button>
 
 <script>
 const supabaseClient = supabase.createClient(
 'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' // نفس المفتاح تبعك
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
 );
 
 let tenants=[], transactions=[];
 
-/* تحميل */
+/* Load */
 async function load(){
 const {data:t}=await supabaseClient.from('tenants').select('*');
 const {data:tr}=await supabaseClient.from('tenant_transactions').select('*');
@@ -126,7 +140,7 @@ sel.innerHTML=t.map(x=>`<option value="${x.tenant_code}">${x.tenant_name}</optio
 selectTenant(t[0]?.tenant_code);
 }
 
-/* اختيار مستأجر */
+/* Select Tenant */
 function selectTenant(code){
 const tenant=tenants.find(t=>t.tenant_code==code);
 const tx=transactions.filter(t=>t.tenant_code==code);
@@ -134,74 +148,103 @@ const tx=transactions.filter(t=>t.tenant_code==code);
 let debit=tx.reduce((s,x)=>s+(x.debit||0),0);
 let credit=tx.reduce((s,x)=>s+(x.credit||0),0);
 let balance=(tenant.previous_balance||0)+debit-credit;
-
 let ratio=debit?Math.round((credit/debit)*100):0;
 
 /* KPI */
-document.getElementById('kpi_debit').innerText='مدين '+debit;
-document.getElementById('kpi_credit').innerText='دائن '+credit;
-document.getElementById('kpi_balance').innerText='رصيد '+balance;
-document.getElementById('kpi_ratio').innerText=ratio+'%';
+kpi_debit.innerText='مدين '+debit;
+kpi_credit.innerText='دائن '+credit;
+kpi_balance.innerText='رصيد '+balance;
+kpi_ratio.innerText=ratio+'%';
 
-/* لون */
+/* Colors */
 let cls=ratio>70?'good':ratio>40?'warn':'bad';
 document.querySelectorAll('.kpi').forEach(x=>x.className='kpi '+cls);
 
-/* charts */
-drawChart(credit,balance,ratio);
+/* Charts */
+drawPie(credit,balance,ratio);
 drawPrediction(tx);
 
-/* زر */
+/* Button */
 updateBtn(ratio);
 
+/* Save tenant */
 localStorage.setItem('jabri_tenant_code',code);
 }
 
 /* Pie */
-function drawChart(credit,balance,ratio){
-new Chart(collectionChart,{
+let pieChart;
+function drawPie(credit,balance,ratio){
+if(pieChart) pieChart.destroy();
+
+pieChart=new Chart(collectionChart,{
 type:'doughnut',
-data:{labels:['مدفوع','متبقي'],datasets:[{data:[credit,balance],backgroundColor:['green','red']}]},
-options:{cutout:'70%'}
+data:{
+labels:['مدفوع','متبقي'],
+datasets:[{
+data:[credit,balance],
+backgroundColor:['green','red']
+}]
+},
+options:{
+cutout:'70%',
+plugins:{
+title:{display:true,text:'نسبة التحصيل'}
+}
+}
 });
 
-const alert=document.getElementById('collectionRiskAlert');
-alert.innerText=ratio>70?'جيد':ratio>40?'متوسط':'خطر';
-alert.style.background=ratio>70?'#d4f5e1':ratio>40?'#fff4cc':'#ffd6d6';
+/* Alert */
+const a=collectionRiskAlert;
+a.innerText=ratio>70?'ممتاز':'متوسط';
+a.style.background=ratio>70?'#d4f5e1':ratio>40?'#fff4cc':'#ffd6d6';
 }
 
 /* Prediction */
+let predChart;
 function drawPrediction(tx){
+if(predChart) predChart.destroy();
+
 let years={};
+
 tx.forEach(t=>{
 let y=new Date(t.date).getFullYear();
-if(!years[y])years[y]={d:0,c:0};
+if(!years[y]) years[y]={d:0,c:0};
 years[y].d+=t.debit||0;
 years[y].c+=t.credit||0;
 });
 
 let labels=[],data=[];
+
 Object.keys(years).sort().forEach(y=>{
 labels.push(y);
 data.push(Math.round((years[y].c/years[y].d)*100)||0);
 });
 
-new Chart(predictionChart,{
+predChart=new Chart(predictionChart,{
 type:'line',
-data:{labels,datasets:[{data,borderColor:'green'}]}
+data:{
+labels,
+datasets:[{
+data,
+borderColor:'#159a6f',
+fill:true
+}]
+}
 });
 }
 
-/* زر */
+/* Button */
 function updateBtn(r){
 const b=document.getElementById('notifyBtn');
 
+b.className='';
+
 if(r>70){
-b.style.background='green';
+b.classList.add('btn-good');
 b.innerText='✔ إشعار';
 }
 else if(r>40){
-b.style.background='orange';
+b.classList.add('btn-warn');
 b.innerText='⚠ متابعة';
 }
 else{
@@ -210,23 +253,27 @@ b.innerText='🚨 إنذار';
 }
 }
 
-/* إشعار */
+/* Send */
 async function sendNotification(){
-const code=document.getElementById('tenant_select').value;
-const type=document.getElementById('notification_type').value;
+const code=tenant_select.value;
+const type=notification_type.value;
 
-await supabaseClient.from('tenant_notifications').insert([{tenant_code:code,type}]);
+await supabaseClient
+.from('tenant_notifications')
+.insert([{tenant_code:code,type}]);
 
 alert('تم الإرسال');
 }
 
-/* كشف */
+/* Statement */
 function openStatement(){
 window.open('statement.html');
 }
 
+/* Event */
 tenant_select.onchange=e=>selectTenant(e.target.value);
 
+/* Start */
 load();
 </script>
 
