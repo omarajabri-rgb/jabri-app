@@ -267,7 +267,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, name')
+                    .select('tenant_code, tenant_name')
                     .eq('tenant_code', code)
                     .single();
 
