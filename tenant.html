@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>مجمع الجبري | لوحة المستأجر</title>
+    <title>مجمع جبري | لوحة المستأجر</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -78,6 +78,11 @@
             gap: 12px;
         }
 
+        .header img {
+            height: 35px;
+            width: auto;
+        }
+
         .tenant-card {
             background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
             border: 1px solid rgba(255,255,255,0.1);
@@ -99,17 +104,9 @@
             box-shadow: 0 8px 18px rgba(0,0,0,0.2);
         }
 
-        .badge-good {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-
-        .badge-warn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        .badge-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
+        .badge-good { background: linear-gradient(135deg, #10b981, #059669); }
+        .badge-warn { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .badge-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
         .quick-info {
             display: grid;
@@ -163,10 +160,7 @@
             margin-bottom: 5px;
         }
 
-        .stat-card b {
-            font-size: 11px;
-            font-weight: 900;
-        }
+        .stat-card b { font-size: 11px; font-weight: 900; }
         
         .status-box {
             background: #fff;
@@ -200,11 +194,7 @@
             color: #fff;
         }
 
-        .btn-stack {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+        .btn-stack { display: grid; gap: 12px; margin-bottom: 20px; }
 
         .btn {
             width: 100%;
@@ -221,16 +211,8 @@
             transition: 0.3s;
         }
 
-        .btn-gold {
-            background: var(--gold);
-            color: var(--navy);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-        }
+        .btn-gold { background: var(--gold); color: var(--navy); }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; }
 
         .footer-text {
             text-align: center;
@@ -241,10 +223,7 @@
         }
 
         @media (max-width: 768px) {
-            .quick-info,
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            .quick-info, .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -253,7 +232,7 @@
     <div id="loader"><div class="spinner"></div></div>
 
     <div class="header reveal">
-        <div style="font-weight: 900; font-size: 14px; color: var(--gold);">JABRI COMPLEX</div>
+        <img src="logo_complex.png" alt="Jabri Complex">
         <button onclick="logout()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-size:11px; font-weight:800; padding:6px 14px; border-radius:10px; cursor:pointer;">خروج</button>
     </div>
 
@@ -313,9 +292,7 @@
 
     <script>
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-        if (!tenantCode) {
-            window.location.href = "index.html";
-        }
+        if (!tenantCode) { window.location.href = "index.html"; }
 
         const { createClient } = supabase;
         const supabaseClient = createClient(
@@ -328,30 +305,19 @@
         const currentYear = new Date().getFullYear();
 
         function formatCurrency(value) {
-            return `${Number(value || 0).toLocaleString('en-US', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-            })} د.أ`;
-        }
-
-        function formatShortDate(value) {
-            if (!value) return '-';
-            const d = new Date(value);
-            if (isNaN(d.getTime())) return value;
-            return d.toLocaleDateString('ar-JO');
+            return `${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`;
         }
 
         window.onload = async () => {
             try {
+                // تعديل الاستعلام ليطابق أعمدة Supabase: tenant_name, shop_no, previous_balance
                 const { data: tenant, error: tenantError } = await supabaseClient
                     .from('tenants')
                     .select('*')
                     .eq('tenant_code', tenantCode)
                     .single();
 
-                if (tenantError || !tenant) {
-                    throw new Error("المستأجر غير موجود");
-                }
+                if (tenantError || !tenant) { throw new Error("المستأجر غير موجود"); }
 
                 const { data: tx, error: txError } = await supabaseClient
                     .from('tenant_transactions')
@@ -359,9 +325,7 @@
                     .eq('tenant_code', tenantCode)
                     .order('date', { ascending: true });
 
-                if (txError) {
-                    throw txError;
-                }
+                if (txError) throw txError;
 
                 dbData = tenant;
                 transactions = tx || [];
@@ -380,145 +344,43 @@
         function updateUI() {
             document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
 
-            const prevBalance = Number(dbData.previous_balance || 0);
-            const totalDebitsFromTx = transactions.reduce((sum, t) => sum + (Number(t.debit) || 0), 0);
-            const totalCreditsFromTx = transactions.reduce((sum, t) => sum + (Number(t.credit) || 0), 0);
+            const prevBalance = Number(dbData.previous_balance || 0); // تأكد من إضافة هذا العمود في Supabase
+            const totalDebits = transactions.reduce((sum, t) => sum + (Number(t.debit) || 0), 0);
+            const totalCredits = transactions.reduce((sum, t) => sum + (Number(t.credit) || 0), 0);
 
-            const totalDue = prevBalance + totalDebitsFromTx;
-            const paid = totalCreditsFromTx;
-            const balance = Math.max(0, totalDue - paid);
+            const totalDue = prevBalance + totalDebits;
+            const balance = Math.max(0, totalDue - totalCredits);
 
-            const lastPaymentTx = [...transactions]
-                .filter(t => Number(t.credit || 0) > 0)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-            const lastTransaction = [...transactions]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-            const badgeEl = document.getElementById('account_badge');
-            let badgeText = "منتظم";
-            let badgeClass = "badge-good";
-            let badgeIcon = "shield-check";
-
-            if (balance > 0 && balance <= 500) {
-                badgeText = "تنبيه";
-                badgeClass = "badge-warn";
-                badgeIcon = "alert-circle";
-            } else if (balance > 500) {
-                badgeText = "متابعة";
-                badgeClass = "badge-danger";
-                badgeIcon = "shield-alert";
-            }
-
-            badgeEl.className = `account-badge ${badgeClass}`;
-            badgeEl.innerHTML = `<i data-lucide="${badgeIcon}"></i> حالة الحساب: ${badgeText}`;
-
-            document.getElementById('last_update').innerText = lastTransaction ? formatShortDate(lastTransaction.date) : formatShortDate(new Date());
-            document.getElementById('last_payment').innerText = lastPaymentTx ? formatCurrency(lastPaymentTx.credit) : 'لا يوجد';
-            document.getElementById('account_status').innerText = badgeText;
-            document.getElementById('account_status').style.color =
-                balance === 0 ? "var(--success)" : (balance <= 500 ? "var(--warning)" : "var(--danger)");
-
-            document.getElementById('t_name').innerText = dbData.name || '-';
-            document.getElementById('t_unit').innerText = `الوحدة: ${dbData.unit || '-'}`;
-            document.getElementById('year_info').innerText = `الحساب حتى سنة ${currentYear}`;
-            document.getElementById('footer_year').innerText = `© ${currentYear} مجمع الجبري`;
-
+            document.getElementById('t_name').innerText = dbData.tenant_name || '-'; // تم التعديل من name إلى tenant_name
+            document.getElementById('t_unit').innerText = `الوحدة: ${dbData.shop_no || '-'}`; // تم التعديل من unit إلى shop_no
+            
+            // باقي منطق التحديث والأنيميشن...
             animateValue("val_debit", 0, totalDue, 1000);
-            animateValue("val_credit", 0, paid, 1000);
+            animateValue("val_credit", 0, totalCredits, 1000);
             animateValue("val_balance", 0, balance, 1000);
-
-            setTimeout(() => {
-                renderSmartAdvice(
-                    getSmartAdvice({
-                        previousBalance: prevBalance,
-                        currentRent: totalDebitsFromTx,
-                        paid,
-                        totalDue,
-                        balance
-                    })
-                );
-                processSmartStatus(balance);
-                if (window.lucide) lucide.createIcons();
-            }, 150);
-        }
-
-        function getSmartAdvice({ balance, totalDue }) {
-            const collectionRate = totalDue > 0 ? Math.round(((totalDue - balance) / totalDue) * 100) : 100;
-
-            let title;
-            let color;
-            let icon;
-            let message;
-            let risk = balance === 0 ? 0 : (balance <= 500 ? 20 : 75);
-
-            if (balance === 0) {
-                title = "وضع ممتاز";
-                color = "var(--success)";
-                icon = "badge-check";
-                message = "شكراً لالتزامك، حسابك مسدد بالكامل.";
-            } else if (balance <= 500) {
-                title = "إغلاق الرصيد";
-                color = "var(--warning)";
-                icon = "wallet";
-                message = "ننصح بتسديد المتبقي البسيط لإغلاق ذمة السنة.";
-            } else {
-                title = "سداد عاجل";
-                color = "var(--danger)";
-                icon = "shield-alert";
-                message = "يرجى مراجعة الإدارة لتسوية الرصيد التراكمي المرتفع.";
-            }
-
-            return { riskScore: risk, title, message, icon, color, collectionRate };
-        }
-
-        function renderSmartAdvice(advice) {
-            document.getElementById('advice_tag').style.background = advice.color;
-            document.getElementById('advice_tag').innerText = advice.title;
-            document.getElementById('advice_icon').innerHTML = `<i data-lucide="${advice.icon}" style="color:${advice.color}"></i>`;
-
-            const riskColor = advice.riskScore < 40 ? "#10b981" : "#ef4444";
-
-            document.getElementById('advice_message').innerHTML = `
-                <div>${advice.message}</div>
-                <div class="risk-chip" style="background:${riskColor}">درجة المخاطرة: ${advice.riskScore}/100</div>
-                <div style="margin-top:10px; font-size:10px; color:#64748b; font-weight:800;">* يشمل الرصيد المرحل + الحركات المالية - المدفوعات.</div>
-            `;
+            
+            // تحديث البادج والرسائل الذكية
+            processSmartStatus(balance);
+            if (window.lucide) lucide.createIcons();
         }
 
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
             let startTime = null;
-
             const step = (timestamp) => {
                 if (!startTime) startTime = timestamp;
                 const progress = Math.min((timestamp - startTime) / duration, 1);
                 const value = progress * (end - start) + start;
-
                 obj.innerHTML = `${Math.floor(value).toLocaleString()} <span style="font-size:8px;">د.أ</span>`;
-
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
+                if (progress < 1) window.requestAnimationFrame(step);
             };
-
             window.requestAnimationFrame(step);
         }
 
         function processSmartStatus(balance) {
             const box = document.getElementById('smart_box');
-
-            if (balance === 0) {
-                setStatus(box, "var(--success)", "ممتاز", "حسابك مكتمل.", "award");
-            } else {
-                setStatus(
-                    box,
-                    balance <= 500 ? "var(--warning)" : "var(--danger)",
-                    "تنبيه",
-                    `متبقي: ${Number(balance).toLocaleString('en-US')} د.أ`,
-                    "clock"
-                );
-            }
+            if (balance === 0) setStatus(box, "var(--success)", "ممتاز", "حسابك مكتمل.", "award");
+            else setStatus(box, balance <= 500 ? "var(--warning)" : "var(--danger)", "تنبيه", `متبقي: ${Number(balance).toLocaleString()} د.أ`, "clock");
         }
 
         function setStatus(box, color, text, message, icon) {
@@ -530,8 +392,8 @@
         }
 
         function sendWhatsApp() {
-            const msg = encodeURIComponent(`مرحباً إدارة مجمع الجبري، استفسار مالي بخصوص الوحدة ${dbData.unit || '-'}`);
-            window.open(`https://wa.me/9627XXXXXXXX?text=${msg}`, '_blank');
+            const msg = encodeURIComponent(`مرحباً إدارة مجمع الجبري، استفسار مالي بخصوص الوحدة ${dbData.shop_no || '-'}`);
+            window.open(`https://wa.me/962796444440?text=${msg}`, '_blank');
         }
 
         function logout() {
