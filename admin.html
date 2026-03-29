@@ -377,13 +377,13 @@
         <section class="panel">
             <div class="panel-head">
                 <div class="panel-title">
-                    <h3>توقع السداد</h3>
-                    <p>تحليل من نمط كشف حساب المستأجر عبر السنوات</p>
+                    <h3>تحليل نمط السداد والتوقع</h3>
+                    <p>تقييم ذكي بناءً على البيانات التاريخية والاتجاهات الأخيرة</p>
                 </div>
             </div>
             <div class="chart-wrap"><canvas id="predictionChart"></canvas></div>
             <div style="margin-top:12px; text-align:center; font-weight:900; color:#4b3720; transition:all .35s ease;" id="predictionText">
-                اختر مستأجرًا لعرض نمط السداد والتوقع
+                اختر مستأجرًا لعرض التقييم الذكي
             </div>
         </section>
 
@@ -584,17 +584,111 @@
             applyTenantCardColors(tenant);
         }
 
+        function buildTenantYearlyPattern(tenant) {
+            if (!tenant) return [];
+            const tenantTx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
+            const yearlyMap = {};
+            tenantTx.forEach(tx => {
+                if (!tx.date) return;
+                const year = new Date(tx.date).getFullYear();
+                if (!yearlyMap[year]) {
+                    yearlyMap[year] = { year, debit: 0, credit: 0 };
+                }
+                yearlyMap[year].debit += toNumber(tx.debit);
+                yearlyMap[year].credit += toNumber(tx.credit);
+            });
+            const years = Object.values(yearlyMap).sort((a, b) => a.year - b.year);
+            return years.map(item => {
+                const ratio = item.debit > 0 ? Math.round((item.credit / item.debit) * 100) : 0;
+                return { year: item.year, ratio: Math.min(ratio, 100) };
+            });
+        }
+
+        function getSmartPrediction(yearlyData) {
+            if (!yearlyData || yearlyData.length < 2) {
+                return { label: 'غير كافٍ', trend: 'بيانات ناقصة', color: '#7a7469' };
+            }
+            const ratios = yearlyData.map(y => y.ratio);
+            const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+            const recent = yearlyData.slice(-3);
+            const recentRatios = recent.map(y => y.ratio);
+
+            let trend = 'مستقر';
+            if (recentRatios.length >= 2) {
+                const diff = recentRatios[recentRatios.length - 1] - recentRatios[0];
+                if (diff >= 10) trend = 'صاعد';
+                else if (diff <= -10) trend = 'هابط';
+                else if (Math.max(...recentRatios) - Math.min(...recentRatios) >= 20) trend = 'متذبذب';
+            }
+
+            let label = 'متوسط', color = '#d7921f';
+            if (avg >= 80 && (trend === 'مستقر' || trend === 'صاعد')) { label = 'ممتاز'; color = '#159a6f'; }
+            else if (avg < 55) { label = 'ضعيف'; color = '#d14d4d'; }
+            if (trend === 'هابط' && avg < 60) { label = 'خطر'; color = '#d14d4d'; }
+
+            return { label, trend, color };
+        }
+
+        function calculateNextYearPrediction(yearlyData) {
+            if (yearlyData.length < 2) return null;
+            const last = yearlyData[yearlyData.length - 1];
+            const prev = yearlyData[yearlyData.length - 2];
+            let predictedRatio = last.ratio + (last.ratio - prev.ratio);
+            return { year: last.year + 1, ratio: Math.min(100, Math.max(0, Math.round(predictedRatio))) };
+        }
+
         function drawPredictionChart(tenant) {
             const ctx = document.getElementById('predictionChart').getContext('2d');
             if (predictionChart) predictionChart.destroy();
-            if (!tenant) { document.getElementById('predictionText').innerText = 'اختر مستأجرًا'; return; }
-            const tenantTx = allTransactions.filter(x => x.tenant_code === tenant.tenant_code);
-            const yearly = {};
-            tenantTx.forEach(tx => { const y = new Date(tx.date).getFullYear(); if(!yearly[y]) yearly[y]={d:0,c:0}; yearly[y].d+=toNumber(tx.debit); yearly[y].c+=toNumber(tx.credit); });
-            const data = Object.keys(yearly).sort().map(y => ({ year: y, ratio: yearly[y].d > 0 ? Math.min(100, Math.round((yearly[y].c/yearly[y].d)*100)) : 0 }));
-            if(!data.length){ document.getElementById('predictionText').innerText = 'بيانات غير كافية'; return; }
-            predictionChart = new Chart(ctx, { type: 'line', data: { labels: data.map(d=>d.year), datasets: [{ label: 'نسبة السداد %', data: data.map(d=>d.ratio), borderColor: '#159a6f', tension: 0.4, fill: true, backgroundColor: 'rgba(21,154,111,0.1)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } } });
-            document.getElementById('predictionText').innerText = 'تم تحليل النمط التاريخي للسداد';
+            if (!tenant) return;
+
+            const yearlyData = buildTenantYearlyPattern(tenant);
+            const smart = getSmartPrediction(yearlyData);
+
+            if (!yearlyData.length) { document.getElementById('predictionText').innerText = 'بيانات غير كافية'; return; }
+
+            const prediction = calculateNextYearPrediction(yearlyData);
+            const ratioData = yearlyData.map(y => y.ratio);
+            const labelsSource = [...yearlyData];
+
+            if (prediction) {
+                labelsSource.push(prediction);
+                ratioData.push(prediction.ratio);
+            }
+
+            const labels = labelsSource.map((y, i) => i % 2 === 0 ? String(y.year) : '');
+
+            predictionChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        label: '', 
+                        data: ratioData, 
+                        borderColor: smart.color, 
+                        backgroundColor: 'transparent',
+                        tension: 0.4, 
+                        fill: false, 
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 5
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { 
+                            min: 0, 
+                            max: 100, 
+                            ticks: { stepSize: 20, callback: v => v + '%', font: { size: 10 } },
+                            grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false }
+                        },
+                        x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+                    } 
+                } 
+            });
+            document.getElementById('predictionText').innerText = `التقييم: ${smart.label} — الاتجاه: ${smart.trend}`;
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
