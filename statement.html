@@ -1,436 +1,303 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>مجمع الجبري | كشف الحساب التفصيلي</title>
+<script>
+    const adminSession = localStorage.getItem('jabri_admin_session');
+    const tenantSession = localStorage.getItem('jabri_tenant_session');
+    const tenantCode = localStorage.getItem('jabri_tenant_code');
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script defer src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    const isAdminViewer = adminSession === 'active';
+    const isTenantViewer = tenantSession === 'active';
 
-    <style>
-        :root {
-            --bg: #f7f4ed;
-            --bg-2: #fdfbf6;
-            --surface: rgba(255,255,255,0.78);
-            --surface-strong: rgba(255,255,255,0.92);
-            --border: rgba(201,164,107,0.22);
-            --text: #2f2a24;
-            --muted: #7d7468;
-            --gold: #c9a46b;
-            --gold-deep: #b18a52;
-            --success: #2f9e6f;
-            --danger: #cc5a50;
-            --shadow: 0 18px 40px rgba(120,95,56,0.10);
+    const { createClient } = supabase;
+    const supabaseClient = createClient(
+        'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+    );
+
+    function toNumber(value) {
+        const n = parseFloat(value);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function formatCurrency(v) {
+        return `${toNumber(v).toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        })} د.أ`;
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return value;
+        return d.toLocaleDateString('ar-JO');
+    }
+
+    function formatDateTime(value) {
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return '-';
+        return d.toLocaleString('ar-JO', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+
+    function goBack() {
+        if (isAdminViewer) {
+            window.location.href = 'admin.html';
+        } else {
+            window.location.href = 'tenant.html';
+        }
+    }
+
+    function savePDF() {
+        const element = document.querySelector('.wrap');
+        const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
+
+        html2pdf().set({
+            margin: 5,
+            filename: `كشف_حساب_${tenantName}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(element).save();
+    }
+
+    function getLastPayment(rows) {
+        const payments = rows
+            .filter(r => toNumber(r.credit) > 0)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        return payments.length ? payments[0] : null;
+    }
+
+    function daysSince(date) {
+        const d = new Date(date);
+        return Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24));
+    }
+
+    function getYearStatus(closingBalance, openingBalance, yearRows) {
+        const yearDebit = yearRows.reduce((s, r) => s + toNumber(r.debit), 0);
+        const yearCredit = yearRows.reduce((s, r) => s + toNumber(r.credit), 0);
+        const yearRequired = openingBalance + yearDebit;
+
+        if (closingBalance <= 0) {
+            return { text: 'مسدد', className: 'status-paid' };
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
+        if (yearRequired > 0 && yearCredit > 0) {
+            return { text: 'جزئي', className: 'status-partial' };
         }
 
-        body {
-            margin: 0;
-            color: var(--text);
-            padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
-            background:
-                radial-gradient(circle at top left, rgba(201,164,107,0.12), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 24%),
-                linear-gradient(135deg, var(--bg), var(--bg-2));
+        return { text: 'غير مسدد', className: 'status-unpaid' };
+    }
+
+    function txItemHTML({ date, description, debit, credit, balance, receipt_no, carry = false }) {
+        return `
+            <div class="tx-item ${carry ? 'carry-item' : ''}">
+                <div class="tx-main">
+                    <div class="tx-desc">${description || '-'}</div>
+                    <div class="tx-chips">
+                        <div class="chip">التاريخ: ${date || '-'}</div>
+                        <div class="chip">السند: ${receipt_no || '-'}</div>
+                    </div>
+                </div>
+                <div class="amt-box amt-credit">
+                    <span>دائن</span>
+                    <b>${credit ? formatCurrency(credit) : '-'}</b>
+                </div>
+                <div class="amt-box amt-debit">
+                    <span>مدين</span>
+                    <b>${debit ? formatCurrency(debit) : '-'}</b>
+                </div>
+                <div class="amt-box amt-balance">
+                    <span>الرصيد</span>
+                    <b>${formatCurrency(balance)}</b>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderYears(previousBalance, transactions) {
+        const yearsContainer = document.getElementById('years_container');
+        yearsContainer.innerHTML = '';
+
+        const rows = Array.isArray(transactions) ? transactions : [];
+        const grouped = {};
+
+        rows.forEach(row => {
+            if (!row.date) return;
+            const year = new Date(row.date).getFullYear();
+            if (!grouped[year]) grouped[year] = [];
+            grouped[year].push(row);
+        });
+
+        const years = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
+
+        if (!years.length && toNumber(previousBalance) === 0) {
+            yearsContainer.innerHTML = `<div class="empty-state glass">لا توجد حركات مالية متاحة حالياً.</div>`;
+            return;
         }
 
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        let carryBalance = toNumber(previousBalance);
+        const currentYear = new Date().getFullYear();
+        const displayYears = years.length ? years : [currentYear];
 
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-        }
+        displayYears.forEach((year, index) => {
+            const yearRows = (grouped[year] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+            const openingBalance = carryBalance;
+            const renderedItems = [];
 
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-
-        .statement-header {
-            border-radius: 26px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .statement-header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
-
-        .statement-header h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .statement-header p {
-            margin: 0;
-            font-size: 12px;
-            line-height: 1.8;
-            color: var(--gold-deep);
-            font-weight: 900;
-        }
-
-        #statement_date {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            margin-top: 6px;
-        }
-
-        .last-payment-box {
-            margin-top: 10px;
-            margin-bottom: 16px;
-            padding: 12px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            text-align: center;
-            background: rgba(201,164,107,0.10);
-            color: var(--text);
-        }
-
-        .summary-box {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .summary-item {
-            border-radius: 22px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .summary-item span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .summary-item b {
-            font-size: 18px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .summary-item.is-paid b { color: var(--success); }
-        .summary-item.is-balance b { color: var(--danger); }
-
-        .years-stack {
-            display: grid;
-            gap: 16px;
-        }
-
-        .year-card {
-            border-radius: 24px;
-            padding: 18px;
-            border-top: 1px solid rgba(201,164,107,0.20);
-        }
-
-        .year-card.current-year {
-            box-shadow: 0 0 20px rgba(201,164,107,0.22);
-            border: 1px solid rgba(201,164,107,0.35);
-        }
-
-        .year-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(201,164,107,0.16);
-        }
-
-        .year-title {
-            font-size: 21px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
-
-        .year-balance {
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(201,164,107,0.12);
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .year-status {
-            padding: 10px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .status-paid {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.18);
-        }
-
-        .status-partial {
-            background: rgba(201,164,107,0.12);
-            color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.20);
-        }
-
-        .status-unpaid {
-            background: rgba(204,90,80,0.12);
-            color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.18);
-        }
-
-        .tx-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .tx-item {
-            background: var(--surface-strong);
-            border: 1px solid rgba(201,164,107,0.14);
-            border-radius: 18px;
-            padding: 14px;
-            display: grid;
-            grid-template-columns: 1.2fr .8fr .8fr .9fr;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .tx-main {
-            min-width: 0;
-        }
-
-        .tx-desc {
-            font-size: 14px;
-            font-weight: 900;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
-        .tx-chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.14);
-            color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.18);
-        }
-
-        .amt-box {
-            text-align: center;
-            border-radius: 14px;
-            padding: 12px 10px;
-            background: rgba(255,255,255,0.75);
-        }
-
-        .amt-box span {
-            display: block;
-            font-size: 10px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .amt-box b {
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .amt-debit b { color: var(--danger); }
-        .amt-credit b { color: var(--success); }
-        .amt-balance b { color: var(--text); }
-
-        .carry-item {
-            background: rgba(201,164,107,0.10);
-            border: 1px dashed rgba(201,164,107,0.30);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 30px 16px;
-            color: var(--muted);
-            font-weight: 800;
-            border-radius: 22px;
-        }
-
-        .bottom-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 22px;
-        }
-
-        .back-btn {
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,0.74);
-            color: var(--text);
-            padding: 10px 15px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            min-width: 145px;
-        }
-
-        .save-btn {
-            color: #fff;
-            border: none;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 38px;
-            height: 38px;
-            border: 3px solid rgba(201,164,107,0.18);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .footer-note {
-            text-align: center;
-            margin-top: 22px;
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.9;
-            font-weight: 800;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 920px) {
-            .tx-item {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .summary-box {
-                grid-template-columns: 1fr;
+            if (openingBalance > 0) {
+                renderedItems.push({
+                    date: '-',
+                    description: `رصيد مرحل من سنة ${index === 0 ? 'سابقة' : Number(year) - 1}`,
+                    debit: openingBalance,
+                    credit: 0,
+                    balance: openingBalance,
+                    receipt_no: '-',
+                    carry: true
+                });
             }
 
-            .statement-header h1 { font-size: 24px; }
-            .statement-header h2 { font-size: 18px; }
+            let runningBal = openingBalance;
 
-            .bottom-actions {
-                flex-direction: column;
-                align-items: center;
+            yearRows.forEach(row => {
+                const debit = toNumber(row.debit);
+                const credit = toNumber(row.credit);
+                runningBal += debit - credit;
+
+                renderedItems.push({
+                    date: formatDate(row.date),
+                    description: row.description || '-',
+                    debit,
+                    credit,
+                    balance: Math.max(0, runningBal),
+                    receipt_no: row.receipt_no || '-',
+                    carry: false
+                });
+            });
+
+            const closingBalance = Math.max(0, runningBal);
+            const yearStatus = getYearStatus(closingBalance, openingBalance, yearRows);
+            carryBalance = closingBalance;
+
+            const card = document.createElement('section');
+            card.className = `year-card glass ${Number(year) === currentYear ? 'current-year' : ''}`;
+            card.innerHTML = `
+                <div class="year-head">
+                    <div class="year-title">${year}</div>
+                    <div class="year-balance">رصيد أول السنة: ${formatCurrency(openingBalance)}</div>
+                    <div class="year-balance">رصيد نهاية السنة: ${formatCurrency(closingBalance)}</div>
+                    <div class="year-status ${yearStatus.className}">حالة السنة: ${yearStatus.text}</div>
+                </div>
+                <div class="tx-list">
+                    ${renderedItems.length
+                        ? renderedItems.map(txItemHTML).join('')
+                        : '<div style="padding:10px; text-align:center; font-size:12px; color:var(--muted);">لا توجد حركات لهذا العام</div>'
+                    }
+                </div>
+            `;
+            yearsContainer.appendChild(card);
+        });
+    }
+
+    function showError(message, extra = '') {
+        document.getElementById('years_container').innerHTML = `
+            <div class="empty-state glass">
+                ${message}
+                ${extra ? `<br><br><span style="font-size:11px">${extra}</span>` : ''}
+            </div>
+        `;
+        document.getElementById('loader').style.display = 'none';
+        document.body.classList.add('loaded');
+    }
+
+    window.onload = async () => {
+        try {
+            console.log('adminSession =', adminSession);
+            console.log('tenantSession =', tenantSession);
+            console.log('tenantCode =', tenantCode);
+
+            if (!tenantCode) {
+                showError('لا يوجد كود مستأجر محفوظ.');
+                return;
             }
 
-            .bottom-actions .back-btn {
-                width: 100%;
-                max-width: 320px;
+            if (!isAdminViewer && !isTenantViewer) {
+                showError('لا توجد صلاحية لفتح الكشف.');
+                return;
             }
+
+            const { data: tenant, error: tenantError } = await supabaseClient
+                .from('tenants')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .maybeSingle();
+
+            console.log('tenant =', tenant);
+            console.log('tenantError =', tenantError);
+
+            if (tenantError) {
+                showError('خطأ في تحميل بيانات المستأجر.', tenantError.message);
+                return;
+            }
+
+            if (!tenant) {
+                showError('لم يتم العثور على المستأجر.', `tenant_code = ${tenantCode}`);
+                return;
+            }
+
+            const { data: transactions, error: txError } = await supabaseClient
+                .from('tenant_transactions')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .order('date', { ascending: true });
+
+            console.log('transactions =', transactions);
+            console.log('txError =', txError);
+
+            if (txError) {
+                showError('خطأ في تحميل الحركات المالية.', txError.message);
+                return;
+            }
+
+            const tenantName = tenant.tenant_name || 'مستأجر';
+            const previousBalance = toNumber(tenant.previous_balance);
+            const rows = Array.isArray(transactions) ? transactions : [];
+            const now = new Date();
+
+            const totalDebitsFromTx = rows.reduce((sum, r) => sum + toNumber(r.debit), 0);
+            const totalCreditsFromTx = rows.reduce((sum, r) => sum + toNumber(r.credit), 0);
+            const totalDue = previousBalance + totalDebitsFromTx;
+            const runningBal = Math.max(0, totalDue - totalCreditsFromTx);
+
+            document.getElementById('statement_tenant_name').innerText = tenantName;
+            document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(now)}`;
+            document.getElementById('footer_year').innerText = now.getFullYear();
+            document.getElementById('sum_due').innerText = formatCurrency(totalDue);
+            document.getElementById('sum_paid').innerText = formatCurrency(totalCreditsFromTx);
+            document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
+
+            const lastPayment = getLastPayment(rows);
+            const box = document.getElementById('last_payment_box');
+
+            if (lastPayment) {
+                const days = daysSince(lastPayment.date);
+                const dayText = days === 0 ? 'اليوم' : (days === 1 ? 'منذ يوم' : `منذ ${days} يوم`);
+                box.innerText = `آخر دفعة: ${dayText} — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
+            } else {
+                box.innerText = 'لا يوجد دفعات مسجلة';
+            }
+
+            renderYears(previousBalance, rows);
+
+            document.getElementById('loader').style.display = 'none';
+            document.body.classList.add('loaded');
+            if (window.lucide) lucide.createIcons();
+        } catch (e) {
+            console.error('statement crash =', e);
+            showError('تعذر تحميل بيانات الكشف.', e.message || 'Unknown error');
         }
-
-        @media print {
-            body {
-                background: #fff !important;
-                color: #000 !important;
-                padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            #loader,
-            .bottom-actions {
-                display: none !important;
-            }
-
-            .glass, .tx-item, .amt-box {
-                background: #fff !important;
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-            }
-
-            .statement-header h1,
-            .year-title,
-            #statement_date {
-                color: #000 !important;
-            }
-
-            .summary-item b,
-            .summary-item span,
-            .footer-note,
-            .tx-desc,
-            .chip,
-            .amt-box b,
-            .amt-box span,
-            .year-balance,
-            .last-payment-box,
-            .year-status {
-                color: #000 !important;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="loader"><div class="spinner"></div></div>
-
-    <div class="wrap">
-        <div class="statement-header glass" id="statement_export_area">
-            <h1>مجمع جبري الصناعي التجاري</h1>
-            <h2 id="statement_tenant_name">اسم المستأجر</h2>
-            <p id="statement_date">—</p>
-        </div>
-
-        <div id="last_payment_box" class="last-payment-box glass">—</div>
-
-        <div class="summary-box">
-            <div class="summary-item glass">
-                <span>إجمالي المستحق</span>
-                <b id="sum_due">0 د.أ</b>
-            </div
+    };
+</script>
