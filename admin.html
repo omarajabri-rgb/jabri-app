@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>إدارة مجمع الجبري | لوحة الإدارة الذكية</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -86,12 +86,6 @@
             font-weight:700;
         }
 
-        .top-actions{
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-        }
-
         .btn{
             border:none;
             cursor:pointer;
@@ -107,18 +101,10 @@
             text-decoration:none;
         }
 
-        .btn:hover{ transform:translateY(-2px); }
-
         .btn-gold{
             background:linear-gradient(135deg, var(--gold), var(--gold-deep));
             color:#fff;
             box-shadow:0 12px 24px rgba(201,164,107,0.22);
-        }
-
-        .btn-soft{
-            background:rgba(255,255,255,0.75);
-            color:#58472f;
-            border:1px solid var(--line);
         }
 
         .btn-danger{
@@ -143,7 +129,6 @@
             justify-content:space-between;
             gap:12px;
             margin-bottom:16px;
-            flex-wrap:wrap;
         }
 
         .panel-title h3{
@@ -194,7 +179,6 @@
             color:#4b3720;
             margin-bottom:6px;
             line-height:1.4;
-            word-break:break-word;
         }
 
         .kpi-card.good-card{ background:linear-gradient(135deg, rgba(21,154,111,0.16), rgba(255,255,255,0.90)); border-color:rgba(21,154,111,0.20); }
@@ -242,7 +226,6 @@
             padding:14px;
             font-size:13px;
             font-weight:800;
-            line-height:1.8;
         }
 
         .footer-note{ text-align:center; margin-top:20px; color:var(--muted); font-size:11px; font-weight:800; }
@@ -266,16 +249,6 @@
             animation:spin 1s linear infinite;
         }
 
-        #collectionRiskAlert{
-            display:none;
-            margin-bottom:12px;
-            padding:12px 14px;
-            border-radius:14px;
-            font-weight:900;
-            text-align:center;
-            font-size:13px;
-        }
-
         .btn-danger-glow{ background:linear-gradient(135deg,#d14d4d,#a83232) !important; color:#fff !important; box-shadow:0 0 12px rgba(209,77,77,0.6); animation:pulseGlow 1.5s infinite; }
         .btn-warning-glow{ background:linear-gradient(135deg,#d7921f,#b87412) !important; color:#fff !important; }
         .btn-good-glow{ background:linear-gradient(135deg,#159a6f,#0e7a58) !important; color:#fff !important; }
@@ -297,13 +270,11 @@
             <div class="brand">
                 <div class="brand-badge"></div>
                 <div>
-                    <h1>إدارة مجمع الجبري</h1>
-                    <p>لوحة الإدارة الذكية للحركات والمستأجرين</p>
+                    <h1>مجمع جبري الصناعي التجاري</h1>
+                    <p>لوحة الإدارة الذكية لإدارة المستأجرين والحسابات</p>
                 </div>
             </div>
             <div class="top-actions">
-                <button class="btn btn-soft" onclick="refreshDashboard()">تحديث</button>
-                <a class="btn btn-soft" href="index.html">بوابة المستأجر</a>
                 <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
             </div>
         </div>
@@ -346,7 +317,6 @@
 
         <section class="chart-grid">
             <div class="panel">
-                <div id="collectionRiskAlert"></div>
                 <div class="panel-head">
                     <div class="panel-title">
                         <h3>مقارنة التحصيل</h3>
@@ -428,7 +398,7 @@
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
                 <button class="btn btn-gold" onclick="submitTransaction()">حفظ الحركة</button>
-                <button class="btn btn-soft" onclick="clearForm()">تفريغ الحقول</button>
+                <button class="btn btn-soft" style="background:#fff; border:1px solid var(--line); color:var(--text);" onclick="clearForm()">تفريغ الحقول</button>
             </div>
             <div id="status_msg" class="status-msg"></div>
         </section>
@@ -479,7 +449,8 @@
             if (!btn) return;
             btn.classList.remove('btn-danger-glow','btn-warning-glow','btn-good-glow','btn-shake','btn-gold');
             if (!tenant) { btn.classList.add('btn-gold'); btn.innerText = 'إرسال الإشعار'; return; }
-            const ratio = (toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit)) > 0 ? (toNumber(tenant.totalCredit) / (toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit))) : 1;
+            const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
+            const ratio = totalReq > 0 ? (toNumber(tenant.totalCredit) / totalReq) : 1;
             if (ratio >= 0.7) { btn.classList.add('btn-good-glow'); btn.innerText = 'إرسال إشعار ✔'; }
             else if (ratio >= 0.4) { btn.classList.add('btn-warning-glow'); btn.innerText = 'إرسال متابعة ⚠️'; }
             else { btn.classList.add('btn-danger-glow','btn-shake'); btn.innerText = '🚨 إرسال إنذار فوري'; }
@@ -537,12 +508,10 @@
 
         function drawCollectionChart(paid, balance) {
             const ctx = document.getElementById('collectionChart').getContext('2d');
-            const alertBox = document.getElementById('collectionRiskAlert');
             if (collectionChart) collectionChart.destroy();
             const total = paid + balance;
             const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
             let color = ratio >= 70 ? '#159a6f' : (ratio >= 40 ? '#d7921f' : '#d14d4d');
-            if(alertBox){ alertBox.style.display = 'block'; alertBox.innerText = ratio >= 70 ? '✅ تحصيل جيد' : (ratio >= 40 ? '⚠️ يحتاج متابعة' : '🚨 تحصيل منخفض'); alertBox.style.color = color; alertBox.style.background = color+'1a'; alertBox.style.border = `1px solid ${color}33`; }
             collectionChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['المدفوع', 'المتبقي'], datasets: [{ data: [paid, balance], backgroundColor: [color, '#f0f0f0'], borderWidth: 0 }] }, options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
         }
 
@@ -596,7 +565,7 @@
             const cre = document.getElementById('tx_credit').value;
             if(!code || !desc || !date) return alert('أكمل البيانات');
             const { error } = await supabaseClient.from('tenant_transactions').insert([{ tenant_code: code, date, description: desc, debit: deb || null, credit: cre || null, receipt_no: document.getElementById('tx_receipt').value || null }]);
-            if(!error){ alert('تم الحفظ'); clearForm(); refreshDashboard(); }
+            if(!error){ alert('تم الحفظ بنجاح'); clearForm(); refreshDashboard(); }
         }
 
         function clearForm() { ['tx_desc', 'tx_debit', 'tx_credit', 'tx_receipt'].forEach(id => document.getElementById(id).value = ''); }
