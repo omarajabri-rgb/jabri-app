@@ -84,14 +84,6 @@
             color: var(--text);
         }
 
-        .statement-header p {
-            margin: 0;
-            font-size: 12px;
-            line-height: 1.8;
-            color: var(--gold-deep);
-            font-weight: 900;
-        }
-
         #statement_date {
             font-size: 13px;
             font-weight: 900;
@@ -141,52 +133,7 @@
         .summary-item.is-paid b { color: var(--success); }
         .summary-item.is-balance b { color: var(--danger); }
 
-        /* --- Updated Statement Table Styles --- */
-        .statement-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            background: rgba(255,255,255,0.96);
-            overflow: hidden;
-            border-radius: 20px;
-        }
-
-        .statement-table th {
-            background: linear-gradient(135deg, rgba(201,164,107,0.82), rgba(177,138,82,0.82));
-            color: #fffdf8;
-            padding: 12px 10px;
-            font-weight: 900;
-            border: 1px solid rgba(255,255,255,0.14);
-            white-space: nowrap;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .statement-table td {
-            padding: 10px 8px;
-            border: 1px solid rgba(201,164,107,0.10);
-            text-align: center;
-            color: var(--text);
-            background: rgba(255,255,255,0.90);
-            vertical-align: middle;
-        }
-
-        .statement-table tbody tr:nth-child(even) td {
-            background: rgba(201,164,107,0.05);
-        }
-
-        .statement-table tbody tr:hover td {
-            background: rgba(201,164,107,0.08);
-        }
-
-        .statement-table td:first-child { color: var(--gold-deep); font-weight: 900; }
-        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
-        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
-        .statement-table td:nth-child(4) { color: var(--text); font-weight: 900; }
-        .statement-table td:nth-child(5) { font-weight: 800; }
-        .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; }
-
-        /* --- Year Card & Footer Styles --- */
+        /* --- Updated Table & Year Card Styles --- */
         .year-card {
             border-radius: 26px;
             padding: 0;
@@ -236,6 +183,61 @@
             padding: 10px 16px 0;
         }
 
+        .statement-table {
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: rgba(255,255,255,0.96);
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .statement-table th {
+            background: linear-gradient(135deg, rgba(201,164,107,0.90), rgba(177,138,82,0.90));
+            color: #fffdf8;
+            padding: 12px 10px;
+            font-weight: 900;
+            border: 1px solid rgba(255,255,255,0.14);
+            white-space: nowrap;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+        }
+
+        .statement-table td {
+            padding: 10px 8px;
+            border: 1px solid rgba(201,164,107,0.10);
+            text-align: center;
+            color: var(--text);
+            background: rgba(255,255,255,0.90);
+            vertical-align: middle;
+        }
+
+        .statement-table tbody tr:nth-child(even) td {
+            background: rgba(201,164,107,0.05);
+        }
+
+        .statement-table td:first-child { color: var(--gold-deep); font-weight: 900; white-space: nowrap; }
+        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
+        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
+        .statement-table td:nth-child(4) { color: var(--text); font-weight: 900; }
+        .statement-table td:nth-child(5) { font-weight: 800; }
+        .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; white-space: nowrap; }
+
+        .table-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            background: rgba(201,164,107,0.12);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.18);
+            min-width: 118px;
+        }
+
         .year-footer {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -267,27 +269,6 @@
 
         .year-summary-box.debit-box b { color: var(--danger); }
         .year-summary-box.balance-box b { color: var(--text); }
-
-        .tx-chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.12);
-            color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.18);
-        }
 
         .bottom-actions {
             display: flex;
@@ -344,7 +325,7 @@
             body { background: #fff !important; color: #000 !important; padding: 0; opacity: 1 !important; transform: none !important; }
             #loader, .bottom-actions { display: none !important; }
             .year-card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
-            .statement-table th { background: #555 !important; color: #fff !important; }
+            .statement-table { min-width: auto; }
         }
     </style>
 </head>
@@ -445,12 +426,12 @@
         function txRowHTML({ date, description, debit, credit, balance, receipt_no }) {
             return `
                 <tr>
-                    <td>${date || '-'}</td>
+                    <td><span class="table-chip">${date || '-'}</span></td>
                     <td>${debit ? formatCurrency(debit) : ''}</td>
                     <td>${credit ? formatCurrency(credit) : ''}</td>
                     <td>${formatCurrency(balance)}</td>
                     <td style="text-align:right">${description || '-'}</td>
-                    <td>${receipt_no || '-'}</td>
+                    <td><span class="table-chip">${receipt_no || '-'}</span></td>
                 </tr>
             `;
         }
@@ -459,6 +440,7 @@
             const container = document.getElementById('years_container');
             container.innerHTML = '';
             const grouped = {};
+            
             transactions.forEach(r => {
                 const year = new Date(r.date).getFullYear();
                 if (!grouped[year]) grouped[year] = [];
@@ -476,7 +458,7 @@
 
                 if (openingBalance > 0) {
                     renderedItems.push({
-                        date: '-', description: `رصيد مرحل من سنة سابقة`,
+                        date: '-', description: `رصيد مدور من سنة سابقة`,
                         debit: openingBalance, credit: 0, balance: openingBalance, receipt_no: '-'
                     });
                 }
@@ -498,10 +480,7 @@
                         <div class="year-title">${year}</div>
                         <div class="year-status ${yearStatus.className}">حالة السنة: ${yearStatus.text}</div>
                     </div>
-                    <div class="tx-chips">
-                        <div class="chip">التاريخ / Date</div>
-                        <div class="chip">رقم السند / Receipt</div>
-                    </div>
+
                     <div class="table-wrapper">
                         <table class="statement-table">
                             <thead>
@@ -519,10 +498,11 @@
                             </tbody>
                         </table>
                     </div>
+
                     <div class="year-footer">
                         <div class="year-summary-box debit-box">
                             <span>إجمالي مدين</span>
-                            <b>${formatCurrency(yearRows.reduce((s,r) => s + toNumber(r.debit), 0) + openingBalance)}</b>
+                            <b>${formatCurrency(yearRows.reduce((s, r) => s + toNumber(r.debit), 0) + openingBalance)}</b>
                         </div>
                         <div class="year-summary-box balance-box">
                             <span>الرصيد</span>
@@ -543,27 +523,30 @@
 
         window.onload = async () => {
             if (!tenantCode) return;
-            const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-            if (!tenant) return;
+            try {
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                if (!tenant) return;
 
-            const { data: tx } = await supabaseClient.from('tenant_transactions')
-                .select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
+                const { data: tx } = await supabaseClient.from('tenant_transactions')
+                    .select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
 
-            const rows = tx || [];
-            const prev = toNumber(tenant.previous_balance);
-            const totalDue = prev + rows.reduce((s,r) => s + toNumber(r.debit), 0);
-            const totalPaid = rows.reduce((s,r) => s + toNumber(r.credit), 0);
+                const rows = tx || [];
+                const prev = toNumber(tenant.previous_balance);
+                const totalDebits = rows.reduce((s,r) => s + toNumber(r.debit), 0);
+                const totalCredits = rows.reduce((s,r) => s + toNumber(r.credit), 0);
+                const totalDue = prev + totalDebits;
 
-            document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
-            document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
-            document.getElementById('sum_due').innerText = formatCurrency(totalDue);
-            document.getElementById('sum_paid').innerText = formatCurrency(totalPaid);
-            document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalPaid);
+                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
+                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
+                document.getElementById('sum_due').innerText = formatCurrency(totalDue);
+                document.getElementById('sum_paid').innerText = formatCurrency(totalCredits);
+                document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalCredits);
 
-            renderYears(prev, rows);
-            document.getElementById('loader').style.display = 'none';
-            document.body.classList.add('loaded');
-            if (window.lucide) lucide.createIcons();
+                renderYears(prev, rows);
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                if (window.lucide) lucide.createIcons();
+            } catch (e) { console.error(e); }
         };
     </script>
 </body>
