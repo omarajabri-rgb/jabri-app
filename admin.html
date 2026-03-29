@@ -145,6 +145,20 @@
             font-weight:700;
         }
 
+        .last-seen-box{
+            width:100%;
+            min-height:52px;
+            border-radius:16px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,0.84);
+            padding:14px 15px;
+            font-size:14px;
+            font-weight:800;
+            display:flex;
+            align-items:center;
+            color:#4b3720;
+        }
+
         .kpi-grid{
             display:grid;
             grid-template-columns:repeat(2,1fr);
@@ -179,7 +193,12 @@
             color:#4b3720;
             margin-bottom:6px;
             line-height:1.4;
+            transition:all .35s ease;
         }
+
+        .number-good{ color:var(--success) !important; }
+        .number-warn{ color:var(--warning) !important; }
+        .number-bad{ color:var(--danger) !important; }
 
         .kpi-card.good-card{ background:linear-gradient(135deg, rgba(21,154,111,0.16), rgba(255,255,255,0.90)); border-color:rgba(21,154,111,0.20); }
         .kpi-card.warn-card{ background:linear-gradient(135deg, rgba(215,146,31,0.16), rgba(255,255,255,0.90)); border-color:rgba(215,146,31,0.20); }
@@ -249,6 +268,16 @@
             animation:spin 1s linear infinite;
         }
 
+        #collectionRiskAlert{
+            display:none;
+            margin-bottom:12px;
+            padding:12px 14px;
+            border-radius:14px;
+            font-weight:900;
+            text-align:center;
+            font-size:13px;
+        }
+
         .btn-danger-glow{ background:linear-gradient(135deg,#d14d4d,#a83232) !important; color:#fff !important; box-shadow:0 0 12px rgba(209,77,77,0.6); animation:pulseGlow 1.5s infinite; }
         .btn-warning-glow{ background:linear-gradient(135deg,#d7921f,#b87412) !important; color:#fff !important; }
         .btn-good-glow{ background:linear-gradient(135deg,#159a6f,#0e7a58) !important; color:#fff !important; }
@@ -259,7 +288,11 @@
         @keyframes pulseGlow{ 0%, 100%{ box-shadow:0 0 8px rgba(209,77,77,0.5); } 50%{ box-shadow:0 0 18px rgba(209,77,77,0.9); } }
 
         @media (max-width: 1100px){ .chart-grid{ grid-template-columns:1fr; } .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
-        @media (max-width: 768px){ .form-grid{ grid-template-columns:1fr; } .kpi-grid{ grid-template-columns:1fr 1fr; } }
+        @media (max-width: 768px){ 
+            .tenant-select-grid{ grid-template-columns:1fr !important; }
+            .form-grid{ grid-template-columns:1fr; } 
+            .kpi-grid{ grid-template-columns:1fr 1fr; } 
+        }
     </style>
 </head>
 <body>
@@ -286,12 +319,16 @@
                     <p>اختر المستأجر لعرض بياناته وإرسال الإشعارات</p>
                 </div>
             </div>
-            <div class="tenant-select-grid" style="display:grid; grid-template-columns:1fr; gap:16px;">
+            <div class="tenant-select-grid" style="display:grid; grid-template-columns:1.2fr .8fr; gap:12px; align-items:end;">
                 <div class="field">
                     <label>اختيار المستأجر</label>
                     <select id="tenant_select">
                         <option value="">جاري تحميل القائمة...</option>
                     </select>
+                </div>
+                <div class="field">
+                    <label>آخر ظهور</label>
+                    <div id="last_seen_box" class="last-seen-box">-</div>
                 </div>
             </div>
         </section>
@@ -317,6 +354,7 @@
 
         <section class="chart-grid">
             <div class="panel">
+                <div id="collectionRiskAlert"></div>
                 <div class="panel-head">
                     <div class="panel-title">
                         <h3>مقارنة التحصيل</h3>
@@ -344,7 +382,7 @@
                 </div>
             </div>
             <div class="chart-wrap"><canvas id="predictionChart"></canvas></div>
-            <div style="margin-top:12px; text-align:center; font-weight:900; color:#4b3720;" id="predictionText">
+            <div style="margin-top:12px; text-align:center; font-weight:900; color:#4b3720; transition:all .35s ease;" id="predictionText">
                 اختر مستأجرًا لعرض نمط السداد والتوقع
             </div>
         </section>
@@ -425,6 +463,34 @@
         function toNumber(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
         function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`; }
 
+        function animateValue(el, start, end, duration = 900, isPercent = false, isCurrency = false) {
+            if (!el) return;
+            const startTime = performance.now();
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const value = start + (end - start) * progress;
+                if (isPercent) el.innerText = `${Math.round(value)}%`;
+                else if (isCurrency) el.innerText = formatCurrency(value);
+                else el.innerText = Math.round(value).toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        function applySmartNumberColor(el, tenant){
+            if (!el) return;
+            el.classList.remove('number-good', 'number-warn', 'number-bad');
+            if (!tenant) return;
+            const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
+            const paid = toNumber(tenant.totalCredit);
+            const bal = Math.max(0, totalReq - paid);
+            const ratio = totalReq > 0 ? (paid / totalReq) : 0;
+            if (bal <= 0 || ratio >= 0.7) el.classList.add('number-good');
+            else if (ratio >= 0.4 || bal <= 500) el.classList.add('number-warn');
+            else el.classList.add('number-bad');
+        }
+
         function getTenantStatusClass(tenant){
             if (!tenant) return 'warn-card';
             const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
@@ -465,9 +531,16 @@
             allTransactions = transactions || [];
             tenantBalances = allTenants.map(t => {
                 const tx = allTransactions.filter(x => x.tenant_code === t.tenant_code);
+                const prev = toNumber(t.previous_balance);
                 const deb = tx.reduce((s, r) => s + toNumber(r.debit), 0);
                 const cre = tx.reduce((s, r) => s + toNumber(r.credit), 0);
-                return { ...t, totalDebit: deb, totalCredit: cre, currentBalance: Math.max(0, toNumber(t.previous_balance) + deb - cre) };
+                return { 
+                    ...t, 
+                    totalDebit: deb, 
+                    totalCredit: cre, 
+                    currentBalance: Math.max(0, prev + deb - cre),
+                    lastSeen: t.last_seen || t.last_login || t.updated_at || null
+                };
             });
         }
 
@@ -476,20 +549,38 @@
             s.innerHTML = '<option value="">-- اختر المستأجر --</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
         }
 
+        function updateLastSeen(tenant){
+            const box = document.getElementById('last_seen_box');
+            if (!box) return;
+            if (!tenant) { box.innerText = '-'; return; }
+            const raw = tenant.lastSeen;
+            if (!raw) { box.innerText = 'لا يوجد تسجيل دخول'; return; }
+            const d = new Date(raw);
+            box.innerText = isNaN(d.getTime()) ? raw : d.toLocaleString('ar-JO');
+        }
+
         function updateTenantKpis(tenant){
+            const debitEl = document.getElementById('kpi_total_debit');
+            const creditEl = document.getElementById('kpi_total_credit');
+            const balanceEl = document.getElementById('kpi_total_balance');
+            const ratioEl = document.getElementById('kpi_total_ratio');
+
             if(!tenant){
-                document.getElementById('kpi_total_debit').innerText = '0 د.أ'; document.getElementById('kpi_total_credit').innerText = '0 د.أ';
-                document.getElementById('kpi_total_balance').innerText = '0 د.أ'; document.getElementById('kpi_total_ratio').innerText = '0%';
+                debitEl.innerText = '0 د.أ'; creditEl.innerText = '0 د.أ';
+                balanceEl.innerText = '0 د.أ'; ratioEl.innerText = '0%';
                 applyTenantCardColors(null); return;
             }
             const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
             const paid = toNumber(tenant.totalCredit);
             const bal = Math.max(0, totalReq - paid);
             const ratio = totalReq > 0 ? Math.round((paid / totalReq) * 100) : 0;
-            document.getElementById('kpi_total_debit').innerText = formatCurrency(totalReq);
-            document.getElementById('kpi_total_credit').innerText = formatCurrency(paid);
-            document.getElementById('kpi_total_balance').innerText = formatCurrency(bal);
-            document.getElementById('kpi_total_ratio').innerText = `${Math.min(Math.max(ratio, 0), 100)}%`;
+
+            animateValue(debitEl, 0, totalReq, 900, false, true);
+            animateValue(creditEl, 0, paid, 900, false, true);
+            animateValue(balanceEl, 0, bal, 900, false, true);
+            animateValue(ratioEl, 0, Math.min(Math.max(ratio, 0), 100), 900, true, false);
+
+            [debitEl, creditEl, balanceEl, ratioEl].forEach(el => applySmartNumberColor(el, tenant));
             applyTenantCardColors(tenant);
         }
 
@@ -506,13 +597,41 @@
             document.getElementById('predictionText').innerText = 'تم تحليل النمط التاريخي للسداد';
         }
 
-        function drawCollectionChart(paid, balance) {
+        function drawCollectionChart(totalCredit, totalBalance) {
             const ctx = document.getElementById('collectionChart').getContext('2d');
+            const alertBox = document.getElementById('collectionRiskAlert');
             if (collectionChart) collectionChart.destroy();
-            const total = paid + balance;
+            const paid = toNumber(totalCredit), remaining = toNumber(totalBalance), total = paid + remaining;
             const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
+
             let color = ratio >= 70 ? '#159a6f' : (ratio >= 40 ? '#d7921f' : '#d14d4d');
-            collectionChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['المدفوع', 'المتبقي'], datasets: [{ data: [paid, balance], backgroundColor: [color, '#f0f0f0'], borderWidth: 0 }] }, options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            if(alertBox){ 
+                alertBox.style.display = 'block'; 
+                alertBox.innerText = ratio >= 70 ? '✅ نسبة التحصيل ممتازة' : (ratio >= 40 ? '⚠️ نسبة التحصيل متوسطة' : '🚨 نسبة التحصيل ضعيفة');
+                alertBox.style.color = color; alertBox.style.background = color+'1a'; alertBox.style.border = `1px solid ${color}33`; 
+            }
+
+            collectionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['المدفوع', 'المتبقي'], datasets: [{ data: [paid, remaining], backgroundColor: ['#159a6f', '#d14d4d'], borderColor: '#ffffff', borderWidth: 4, hoverOffset: 6 }] },
+                options: { 
+                    cutout: '64%', responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'المدفوع مقابل المتبقي', font: { size: 16, weight: 'bold' } } } 
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw(chart) {
+                        const meta = chart.getDatasetMeta(0);
+                        if (!meta || !meta.data[0]) return;
+                        const {x, y} = meta.data[0];
+                        const ctx = chart.ctx;
+                        ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#4b3720'; ctx.font = 'bold 26px Tajawal'; ctx.fillText(`${ratio}%`, x, y - 12);
+                        ctx.fillStyle = '#7a7469'; ctx.font = 'bold 12px Tajawal'; ctx.fillText(`مدفوع ${formatCurrency(paid)}`, x, y + 16);
+                        ctx.restore();
+                    }
+                }]
+            });
         }
 
         function drawMonthlyChart(tenant) {
@@ -550,7 +669,7 @@
                 if (code) {
                     document.getElementById('tenant_select').value = code;
                     const t = tenantBalances.find(x => x.tenant_code === code);
-                    updateTenantKpis(t); updateNotificationButton(t); drawPredictionChart(t);
+                    updateTenantKpis(t); updateNotificationButton(t); updateLastSeen(t); drawPredictionChart(t);
                     drawCollectionChart(toNumber(t.totalCredit), Math.max(0, (toNumber(t.previous_balance) + toNumber(t.totalDebit)) - toNumber(t.totalCredit)));
                     drawMonthlyChart(t); document.getElementById('statementBtn').disabled = false;
                 }
@@ -576,7 +695,7 @@
             await refreshDashboard();
             document.getElementById('tenant_select').addEventListener('change', function() {
                 const t = tenantBalances.find(x => x.tenant_code === this.value);
-                updateTenantKpis(t); updateNotificationButton(t); drawPredictionChart(t);
+                updateTenantKpis(t); updateNotificationButton(t); updateLastSeen(t); drawPredictionChart(t);
                 if(t){ drawCollectionChart(toNumber(t.totalCredit), Math.max(0, (toNumber(t.previous_balance) + toNumber(t.totalDebit)) - toNumber(t.totalCredit))); drawMonthlyChart(t); }
                 document.getElementById('statementBtn').disabled = !this.value;
             });
