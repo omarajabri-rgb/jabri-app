@@ -153,23 +153,55 @@
         .hero h2{ margin:0; font-size:28px; color:#4f3b22; font-weight:900; }
         .hero p{ margin:8px 0 0; line-height:1.8; color:var(--muted); font-weight:700; font-size:14px; }
 
-        .hero-stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
 
         .mini-stat{
             border:1px solid var(--line);
             border-radius:20px;
             padding:16px;
+            transition:.25s ease;
         }
 
-        .mini-stat:nth-child(1){ background:linear-gradient(135deg, rgba(201,164,107,0.15), rgba(255,255,255,0.92)); }
-        .mini-stat:nth-child(2){ background:linear-gradient(135deg, rgba(59,130,246,0.10), rgba(255,255,255,0.92)); }
-        .mini-stat:nth-child(3){ background:linear-gradient(135deg, rgba(209,77,77,0.09), rgba(255,255,255,0.92)); }
-        .mini-stat:nth-child(4){ background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.92)); }
+        .mini-stat span{
+            display:block;
+            color:var(--muted);
+            font-weight:700;
+            font-size:11px;
+            margin-bottom:8px;
+        }
 
-        .mini-stat span{ display:block; color:var(--muted); font-weight:700; font-size:11px; margin-bottom:8px; }
-        .mini-stat b{ font-size:20px; font-weight:900; color:#483621; display:block; }
+        .mini-stat b{
+            font-size:20px;
+            font-weight:900;
+            color:#483621;
+            display:block;
+        }
 
-        .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+        .mini-stat.good-card{
+            background:linear-gradient(135deg, rgba(21,154,111,0.16), rgba(255,255,255,0.92));
+            border-color:rgba(21,154,111,0.22);
+        }
+
+        .mini-stat.warn-card{
+            background:linear-gradient(135deg, rgba(215,146,31,0.16), rgba(255,255,255,0.92));
+            border-color:rgba(215,146,31,0.22);
+        }
+
+        .mini-stat.bad-card{
+            background:linear-gradient(135deg, rgba(209,77,77,0.14), rgba(255,255,255,0.92));
+            border-color:rgba(209,77,77,0.22);
+        }
+
+        .kpi-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:14px;
+            margin-bottom:18px;
+        }
 
         .kpi-card{
             backdrop-filter:blur(14px);
@@ -177,15 +209,43 @@
             box-shadow:0 18px 45px rgba(87,68,37,0.10);
             border-radius:24px;
             padding:18px;
+            aspect-ratio:1/1;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            text-align:center;
+            transition:.25s ease;
         }
 
-        .kpi-card:nth-child(1){ background:linear-gradient(135deg, rgba(201,164,107,0.18), rgba(255,255,255,0.88)); }
-        .kpi-card:nth-child(2){ background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.88)); }
-        .kpi-card:nth-child(3){ background:linear-gradient(135deg, rgba(209,77,77,0.10), rgba(255,255,255,0.88)); }
-        .kpi-card:nth-child(4){ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.88)); }
+        .kpi-head span{
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+        }
 
-        .kpi-head span{ font-size:11px; color:var(--muted); font-weight:800; }
-        .kpi-value{ font-size:24px; font-weight:900; color:#4b3720; margin-bottom:6px; }
+        .kpi-value{
+            font-size:20px;
+            font-weight:900;
+            color:#4b3720;
+            margin-bottom:6px;
+            line-height:1.4;
+        }
+
+        .kpi-card.good-card{
+            background:linear-gradient(135deg, rgba(21,154,111,0.16), rgba(255,255,255,0.90));
+            border-color:rgba(21,154,111,0.20);
+        }
+
+        .kpi-card.warn-card{
+            background:linear-gradient(135deg, rgba(215,146,31,0.16), rgba(255,255,255,0.90));
+            border-color:rgba(215,146,31,0.20);
+        }
+
+        .kpi-card.bad-card{
+            background:linear-gradient(135deg, rgba(209,77,77,0.15), rgba(255,255,255,0.90));
+            border-color:rgba(209,77,77,0.20);
+        }
 
         .panel{
             background:var(--card);
@@ -206,10 +266,26 @@
             flex-wrap:wrap;
         }
 
-        .panel-title h3{ margin:0; font-size:18px; color:#4e3c24; font-weight:900; }
-        .panel-title p{ margin:3px 0 0; font-size:11px; color:var(--muted); font-weight:700; }
+        .panel-title h3{
+            margin:0;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+        }
 
-        .chart-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:18px; margin-bottom:18px; }
+        .panel-title p{
+            margin:3px 0 0;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:700;
+        }
+
+        .chart-grid{
+            display:grid;
+            grid-template-columns:1.08fr .92fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
 
         .chart-wrap{
             background:rgba(255,255,255,0.76);
@@ -224,8 +300,18 @@
             height:280px !important;
         }
 
-        .field{ display:flex; flex-direction:column; gap:8px; }
-        .field label{ font-size:11px; font-weight:800; color:#8b6a3a; padding-right:4px; }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+
+        .field label{
+            font-size:11px;
+            font-weight:800;
+            color:#8b6a3a;
+            padding-right:4px;
+        }
 
         input, select{
             width:100%;
@@ -238,7 +324,13 @@
             outline:none;
         }
 
-        .smart-strip{ display:none; grid-template-columns:1fr; gap:12px; margin-bottom:18px; }
+        .smart-strip{
+            display:none;
+            grid-template-columns:1fr;
+            gap:12px;
+            margin-bottom:18px;
+        }
+
         .smart-item{
             background:linear-gradient(135deg, rgba(201,164,107,0.12), rgba(255,255,255,0.95));
             border:1px solid var(--line);
@@ -247,10 +339,25 @@
             text-align:center;
         }
 
-        .smart-item span{ display:block; font-size:11px; color:var(--muted); font-weight:800; margin-bottom:8px; }
-        .smart-item b{ font-size:14px; font-weight:900; color:#47341f; }
+        .smart-item span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:8px;
+        }
 
-        .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .smart-item b{
+            font-size:14px;
+            font-weight:900;
+            color:#47341f;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
 
         .status-msg{
             display:none;
@@ -300,7 +407,7 @@
             .tenant-select-grid{ grid-template-columns:1fr !important; }
             .tenant-stats-grid{ grid-template-columns:1fr !important; }
             .form-grid, .hero-stats{ grid-template-columns:1fr; }
-            .kpi-grid{ grid-template-columns:1fr; }
+            .kpi-grid{ grid-template-columns:1fr 1fr; }
         }
     </style>
 </head>
@@ -322,28 +429,6 @@
                 <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
             </div>
         </div>
-
-        <section class="hero">
-            <div class="hero-grid">
-                <div>
-                    <h2>نظرة شاملة على المجمع</h2>
-                    <p>من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، والرسوم البيانية.</p>
-                </div>
-                <div class="hero-stats">
-                    <div class="mini-stat"><span>عدد المستأجرين</span><b id="hero_total_tenants">0</b></div>
-                    <div class="mini-stat"><span>الوحدات النشطة</span><b id="hero_active_units">0</b></div>
-                    <div class="mini-stat"><span>إجمالي المتبقي</span><b id="hero_total_balance">0 د.أ</b></div>
-                    <div class="mini-stat"><span>نسبة التحصيل</span><b id="hero_collection_rate">0%</b></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-head"><span>إجمالي المدين</span></div><div class="kpi-value" id="kpi_total_debit">0 د.أ</div></div>
-            <div class="kpi-card"><div class="kpi-head"><span>إجمالي الدائن</span></div><div class="kpi-value" id="kpi_total_credit">0 د.أ</div></div>
-            <div class="kpi-card"><div class="kpi-head"><span>الرصيد المتبقي</span></div><div class="kpi-value" id="kpi_total_balance">0 د.أ</div></div>
-            <div class="kpi-card"><div class="kpi-head"><span>إجمالي الرصيد المستحق</span></div><div class="kpi-value" id="kpi_total_outstanding">0 د.أ</div></div>
-        </section>
 
         <section class="panel">
             <div class="panel-head">
@@ -368,18 +453,36 @@
                             <b id="preview_last_payment">-</b>
                         </div>
                     </div>
-
-                    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="btn btn-soft" onclick="openTenantStatement()">كشف حساب هذا المستأجر</button>
-                    </div>
                 </div>
 
                 <div class="tenant-stats-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-                    <div class="mini-stat"><span>الرصيد الحالي</span><b id="selected_balance">0</b></div>
-                    <div class="mini-stat"><span>إجمالي المدفوع</span><b id="selected_paid">0</b></div>
-                    <div class="mini-stat"><span>عدد الحركات</span><b id="selected_tx_count">0</b></div>
+                    <div class="mini-stat" id="selected_balance_card"><span>الرصيد الحالي</span><b id="selected_balance">0</b></div>
+                    <div class="mini-stat" id="selected_paid_card"><span>إجمالي المدفوع</span><b id="selected_paid">0</b></div>
+                    <div class="mini-stat" id="selected_tx_count_card"><span>عدد الحركات</span><b id="selected_tx_count">0</b></div>
                 </div>
             </div>
+        </section>
+
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <h2>نظرة شاملة على المجمع</h2>
+                    <p>من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، والرسوم البيانية.</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="mini-stat"><span>عدد المستأجرين</span><b id="hero_total_tenants">0</b></div>
+                    <div class="mini-stat"><span>الوحدات النشطة</span><b id="hero_active_units">0</b></div>
+                    <div class="mini-stat"><span>إجمالي المتبقي</span><b id="hero_total_balance">0 د.أ</b></div>
+                    <div class="mini-stat"><span>نسبة التحصيل</span><b id="hero_collection_rate">0%</b></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="kpi-grid">
+            <div class="kpi-card" id="kpi_card_debit"><div class="kpi-head"><span>إجمالي المدين</span></div><div class="kpi-value" id="kpi_total_debit">0 د.أ</div></div>
+            <div class="kpi-card" id="kpi_card_credit"><div class="kpi-head"><span>إجمالي الدائن</span></div><div class="kpi-value" id="kpi_total_credit">0 د.أ</div></div>
+            <div class="kpi-card" id="kpi_card_balance"><div class="kpi-head"><span>الرصيد المتبقي</span></div><div class="kpi-value" id="kpi_total_balance">0 د.أ</div></div>
+            <div class="kpi-card" id="kpi_card_outstanding"><div class="kpi-head"><span>إجمالي الرصيد المستحق</span></div><div class="kpi-value" id="kpi_total_outstanding">0 د.أ</div></div>
         </section>
 
         <section class="chart-grid">
@@ -453,6 +556,12 @@
             <div id="status_msg" class="status-msg"></div>
         </section>
 
+        <section style="margin-top:20px;">
+            <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; font-size:16px;" onclick="openTenantStatement()" disabled>
+                كشف حساب هذا المستأجر
+            </button>
+        </section>
+
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — لوحة الإدارة الذكية</div>
     </div>
 
@@ -468,6 +577,45 @@
 
         function toNumber(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
         function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`; }
+
+        function getTenantStatusClass(tenant){
+            if (!tenant) return 'warn-card';
+
+            const balance = toNumber(tenant.currentBalance);
+            const debit = toNumber(tenant.totalDebit) + toNumber(tenant.previous_balance);
+            const paid = toNumber(tenant.totalCredit);
+
+            if (balance <= 0) return 'good-card';
+
+            if (debit > 0) {
+                const ratio = paid / debit;
+                if (ratio >= 0.7 && balance <= 500) return 'warn-card';
+            }
+
+            if (balance <= 500) return 'warn-card';
+
+            return 'bad-card';
+        }
+
+        function applyTenantCardColors(tenant){
+            const statusClass = getTenantStatusClass(tenant);
+
+            const kpiCards = [
+                document.getElementById('kpi_card_debit'),
+                document.getElementById('kpi_card_credit'),
+                document.getElementById('kpi_card_balance'),
+                document.getElementById('kpi_card_outstanding'),
+                document.getElementById('selected_balance_card'),
+                document.getElementById('selected_paid_card'),
+                document.getElementById('selected_tx_count_card')
+            ];
+
+            kpiCards.forEach(card => {
+                if (!card) return;
+                card.classList.remove('good-card', 'warn-card', 'bad-card');
+                card.classList.add(statusClass);
+            });
+        }
 
         async function loadData() {
             try {
@@ -506,7 +654,29 @@
         function populateTenantDropdown() {
             const s = document.getElementById('tenant_select');
             s.innerHTML = '<option value="">-- اختر المستأجر --</option>' +
-                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name} (${t.shop_no || '-'})</option>`).join('');
+                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
+        }
+
+        function updateTenantKpis(tenant){
+            if(!tenant){
+                document.getElementById('kpi_total_debit').innerText = '0 د.أ';
+                document.getElementById('kpi_total_credit').innerText = '0 د.أ';
+                document.getElementById('kpi_total_balance').innerText = '0 د.أ';
+                document.getElementById('kpi_total_outstanding').innerText = '0 د.أ';
+                applyTenantCardColors(null);
+                return;
+            }
+
+            const totalRequired = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
+            const totalPaid = toNumber(tenant.totalCredit);
+            const balance = Math.max(0, totalRequired - totalPaid);
+
+            document.getElementById('kpi_total_debit').innerText = formatCurrency(totalRequired);
+            document.getElementById('kpi_total_credit').innerText = formatCurrency(totalPaid);
+            document.getElementById('kpi_total_balance').innerText = formatCurrency(balance);
+            document.getElementById('kpi_total_outstanding').innerText = formatCurrency(balance);
+
+            applyTenantCardColors(tenant);
         }
 
         function updateSelectedTenantStats(tenant){
@@ -514,11 +684,13 @@
                 document.getElementById('selected_balance').innerText = '0';
                 document.getElementById('selected_paid').innerText = '0';
                 document.getElementById('selected_tx_count').innerText = '0';
+                applyTenantCardColors(null);
                 return;
             }
             document.getElementById('selected_balance').innerText = formatCurrency(tenant.currentBalance);
             document.getElementById('selected_paid').innerText = formatCurrency(tenant.totalCredit);
             document.getElementById('selected_tx_count').innerText = allTransactions.filter(t => t.tenant_code === tenant.tenant_code).length;
+            applyTenantCardColors(tenant);
         }
 
         async function loadTenantBalancePreview(code) {
@@ -681,8 +853,12 @@
                     document.getElementById('tenant_select').value = firstTenantCode;
                     const firstTenant = tenantBalances.find(t => t.tenant_code === firstTenantCode);
                     updateSelectedTenantStats(firstTenant);
+                    updateTenantKpis(firstTenant);
                     await loadTenantBalancePreview(firstTenantCode);
                     drawPredictionChart(firstTenant);
+                    document.getElementById('statementBtn').disabled = false;
+                } else {
+                    document.getElementById('statementBtn').disabled = true;
                 }
 
                 const prevTotal = allTenants.reduce((s, t) => s + toNumber(t.previous_balance), 0);
@@ -690,14 +866,9 @@
                 const creTotal = allTransactions.reduce((s, t) => s + toNumber(t.credit), 0);
                 const totalDebit = prevTotal + debTotal;
                 const balTotal = Math.max(0, totalDebit - creTotal);
-                const totalOutstanding = tenantBalances.reduce((s, t) => s + (t.currentBalance > 0 ? t.currentBalance : 0), 0);
                 const collectionRate = totalDebit > 0 ? Math.round((creTotal / totalDebit) * 100) : 100;
                 const activeUnits = allTenants.filter(t => (t.tenant_code || '').trim() !== '').length;
 
-                document.getElementById('kpi_total_debit').innerText = formatCurrency(totalDebit);
-                document.getElementById('kpi_total_credit').innerText = formatCurrency(creTotal);
-                document.getElementById('kpi_total_balance').innerText = formatCurrency(balTotal);
-                document.getElementById('kpi_total_outstanding').innerText = formatCurrency(totalOutstanding);
                 document.getElementById('hero_total_tenants').innerText = allTenants.length;
                 document.getElementById('hero_active_units').innerText = activeUnits;
                 document.getElementById('hero_total_balance').innerText = formatCurrency(balTotal);
@@ -777,8 +948,10 @@
             document.getElementById('tenant_select').value = tenant_code;
             const tenant = tenantBalances.find(t => t.tenant_code === tenant_code);
             updateSelectedTenantStats(tenant);
+            updateTenantKpis(tenant);
             await loadTenantBalancePreview(tenant_code);
             drawPredictionChart(tenant);
+            document.getElementById('statementBtn').disabled = !tenant_code;
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
@@ -880,12 +1053,15 @@
                 await loadTenantBalancePreview(this.value);
                 const tenant = tenantBalances.find(t => t.tenant_code === this.value);
                 updateSelectedTenantStats(tenant);
+                updateTenantKpis(tenant);
                 drawPredictionChart(tenant);
 
                 const type = document.getElementById('notification_type')?.value;
                 if (type && tenant) {
                     document.getElementById('notification_message').value = getNotificationMessage(type, tenant);
                 }
+
+                document.getElementById('statementBtn').disabled = !this.value;
             });
 
             document.addEventListener('change', function(e){
