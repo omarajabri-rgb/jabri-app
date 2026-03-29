@@ -1,273 +1,1330 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة الإدارة</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>إدارة مجمع الجبري | لوحة الإدارة الذكية</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
 
-<style>
-body{
-  margin:0;
-  font-family:Tajawal;
-  background:#f8f5f0;
-}
+    <style>
+        :root{
+            --bg:#f7f4ec;
+            --bg-soft:#fcfaf6;
+            --card:rgba(255,255,255,0.72);
+            --card-strong:rgba(255,255,255,0.90);
+            --text:#1f2937;
+            --muted:#7a7469;
+            --gold:#c9a46b;
+            --gold-deep:#b78e54;
+            --gold-soft:rgba(201,164,107,0.14);
+            --line:rgba(91,73,42,0.10);
+            --success:#159a6f;
+            --warning:#d7921f;
+            --danger:#d14d4d;
+            --info:#3b82f6;
+            --shadow:0 18px 45px rgba(87,68,37,0.10);
+            --radius-xl:28px;
+            --radius-lg:22px;
+            --radius-md:16px;
+        }
 
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
-}
+        *{
+            box-sizing:border-box;
+            -webkit-tap-highlight-color:transparent;
+            font-family:'Tajawal',sans-serif;
+        }
 
-.panel{
-  background:#fff;
-  padding:15px;
-  border-radius:16px;
-  margin-bottom:15px;
-}
+        body{
+            margin:0;
+            color:var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                radial-gradient(circle at bottom left, rgba(201,164,107,0.08), transparent 20%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height:100vh;
+            opacity:0;
+            transition:opacity .45s ease;
+        }
 
-select{
-  width:100%;
-  height:45px;
-  border-radius:10px;
-  border:1px solid #ddd;
-}
+        .shell{
+            max-width:1400px;
+            margin:0 auto;
+            padding:18px;
+            padding-bottom:70px;
+        }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:10px;
-}
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            margin-bottom:18px;
+            flex-wrap:wrap;
+        }
 
-.mini-stat{
-  background:#fff;
-  padding:12px;
-  border-radius:12px;
-  text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,0.03);
-}
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
 
-.mini-stat span{
-  font-size:12px;
-  color:#777;
-}
+        .brand-badge{
+            width:46px;
+            height:46px;
+            border-radius:15px;
+            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 12px 24px rgba(201,164,107,0.22);
+        }
 
-.mini-stat b{
-  display:block;
-  font-size:18px;
-}
+        .brand h1{
+            margin:0;
+            font-size:24px;
+            font-weight:900;
+            color:#544128;
+        }
 
-.good{color:#159a6f}
-.warn{color:#c9a46b}
-.bad{color:#d14d4d}
+        .brand p{
+            margin:4px 0 0;
+            font-size:12px;
+            color:var(--muted);
+            font-weight:700;
+        }
 
-button{
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-}
+        .top-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+        }
 
-.btn-gold{background:#c9a46b;color:#fff}
-.btn-danger{background:#d14d4d;color:#fff}
+        .btn{
+            border:none;
+            cursor:pointer;
+            border-radius:16px;
+            padding:13px 18px;
+            font-size:14px;
+            font-weight:900;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.25s ease;
+            text-decoration:none;
+        }
 
-canvas{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-}
-</style>
+        .btn:hover{
+            transform:translateY(-2px);
+        }
+
+        .btn-gold{
+            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color:#fff;
+            box-shadow:0 12px 24px rgba(201,164,107,0.22);
+        }
+
+        .btn-soft{
+            background:rgba(255,255,255,0.75);
+            color:#58472f;
+            border:1px solid var(--line);
+        }
+
+        .btn-danger{
+            background:rgba(209,77,77,0.12);
+            color:var(--danger);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .hero{
+            background:var(--card);
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.72);
+            box-shadow:var(--shadow);
+            border-radius:var(--radius-xl);
+            padding:22px;
+            margin-bottom:18px;
+        }
+
+        .hero-grid{
+            display:grid;
+            grid-template-columns:1.2fr .8fr;
+            gap:16px;
+            align-items:center;
+        }
+
+        .hero h2{
+            margin:0;
+            font-size:28px;
+            color:#4f3b22;
+            font-weight:900;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            line-height:1.8;
+            color:var(--muted);
+            font-weight:700;
+            font-size:14px;
+        }
+
+        .hero-stats{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
+
+        .mini-stat{
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:16px;
+        }
+
+        .mini-stat:nth-child(1){
+            background:linear-gradient(135deg, rgba(201,164,107,0.15), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(2){
+            background:linear-gradient(135deg, rgba(59,130,246,0.10), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(3){
+            background:linear-gradient(135deg, rgba(209,77,77,0.09), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(4){
+            background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat span{
+            display:block;
+            color:var(--muted);
+            font-weight:700;
+            font-size:11px;
+            margin-bottom:8px;
+        }
+
+        .mini-stat b{
+            font-size:20px;
+            font-weight:900;
+            color:#483621;
+            display:block;
+        }
+
+        .mini-stat small{
+            display:block;
+            margin-top:6px;
+            color:var(--muted);
+            font-size:11px;
+            font-weight:700;
+            line-height:1.5;
+        }
+
+        .kpi-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:14px;
+            margin-bottom:18px;
+        }
+
+        .kpi-card{
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.75);
+            box-shadow:0 18px 45px rgba(87,68,37,0.10);
+            border-radius:24px;
+            padding:18px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .kpi-card:nth-child(1){
+            background:linear-gradient(135deg, rgba(201,164,107,0.18), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(2){
+            background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(3){
+            background:linear-gradient(135deg, rgba(209,77,77,0.10), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(4){
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card::after{
+            content:"";
+            position:absolute;
+            inset:auto -22px -28px auto;
+            width:88px;
+            height:88px;
+            border-radius:50%;
+            background:rgba(201,164,107,0.08);
+        }
+
+        .kpi-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:12px;
+        }
+
+        .kpi-head span{
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+        }
+
+        .icon-chip{
+            width:38px;
+            height:38px;
+            border-radius:13px;
+            background:var(--gold-soft);
+            color:var(--gold-deep);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .kpi-value{
+            font-size:24px;
+            font-weight:900;
+            color:#4b3720;
+            margin-bottom:6px;
+        }
+
+        .kpi-sub{
+            font-size:12px;
+            font-weight:700;
+            color:var(--muted);
+        }
+
+        .panel{
+            background:var(--card);
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.72);
+            box-shadow:var(--shadow);
+            border-radius:28px;
+            padding:20px;
+        }
+
+        .panel-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:16px;
+            flex-wrap:wrap;
+        }
+
+        .panel-title{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .panel-title h3{
+            margin:0;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+        }
+
+        .panel-title p{
+            margin:3px 0 0;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:700;
+        }
+
+        .chart-grid{
+            display:grid;
+            grid-template-columns:1.08fr .92fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+
+        .data-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+
+        .chart-wrap{
+            background:rgba(255,255,255,0.76);
+            border:1px solid var(--line);
+            border-radius:22px;
+            padding:16px;
+            min-height:320px;
+        }
+
+        .chart-wrap canvas{
+            width:100% !important;
+            height:280px !important;
+        }
+
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+
+        .field label{
+            font-size:11px;
+            font-weight:800;
+            color:#8b6a3a;
+            padding-right:4px;
+        }
+
+        input, select{
+            width:100%;
+            border-radius:16px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,0.84);
+            color:var(--text);
+            padding:14px 15px;
+            outline:none;
+            font-size:14px;
+            font-weight:700;
+            transition:.2s ease;
+        }
+
+        input:focus, select:focus{
+            border-color:rgba(201,164,107,0.6);
+            box-shadow:0 0 0 4px rgba(201,164,107,0.10);
+            background:#fff;
+        }
+
+        .smart-strip{
+            display:none;
+            grid-template-columns:1fr;
+            gap:12px;
+            margin-top:14px;
+            margin-bottom:18px;
+        }
+
+        .smart-item{
+            background:linear-gradient(135deg, rgba(201,164,107,0.12), rgba(255,255,255,0.95));
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:14px;
+            text-align:center;
+        }
+
+        .smart-item span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:8px;
+        }
+
+        .smart-item b{
+            font-size:14px;
+            font-weight:900;
+            color:#47341f;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
+
+        .status-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            border-radius:999px;
+            padding:7px 12px;
+            font-size:11px;
+            font-weight:900;
+        }
+
+        .good{
+            background:rgba(21,154,111,0.12);
+            color:var(--success);
+        }
+
+        .warn{
+            background:rgba(215,146,31,0.14);
+            color:var(--warning);
+        }
+
+        .bad{
+            background:rgba(209,77,77,0.12);
+            color:var(--danger);
+        }
+
+        .amount-danger{
+            color:var(--danger);
+            font-weight:900;
+        }
+
+        .amount-success{
+            color:var(--success);
+            font-weight:900;
+        }
+
+        .list-stack{
+            display:grid;
+            gap:12px;
+        }
+
+        .tenant-card-row{
+            border:1px solid var(--line);
+            transition:.25s ease;
+            border-radius:20px;
+            padding:14px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .tenant-card-row:hover{
+            transform:translateY(-2px);
+            box-shadow:0 14px 28px rgba(87,68,37,0.08);
+        }
+
+        .tenant-card-row.good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.08), rgba(255,255,255,0.92));
+        }
+
+        .tenant-card-row.warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.10), rgba(255,255,255,0.92));
+        }
+
+        .tenant-card-row.bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.08), rgba(255,255,255,0.92));
+        }
+
+        .tenant-main h4{
+            margin:0;
+            color:#4f3b22;
+            font-size:15px;
+            font-weight:900;
+        }
+
+        .tenant-main p{
+            margin:5px 0 0;
+            color:var(--muted);
+            font-size:12px;
+            font-weight:700;
+        }
+
+        .tenant-balance-side{
+            text-align:left;
+        }
+
+        .tenant-balance-side b{
+            display:block;
+            font-size:18px;
+            font-weight:900;
+        }
+
+        .muted-note{
+            color:var(--muted);
+            font-size:12px;
+            font-weight:700;
+        }
+
+        .status-msg{
+            display:none;
+            margin-top:14px;
+            border-radius:16px;
+            padding:14px;
+            font-size:13px;
+            font-weight:800;
+            line-height:1.8;
+        }
+
+        .empty{
+            text-align:center;
+            padding:26px 16px;
+            color:var(--muted);
+            font-weight:800;
+        }
+
+        .footer-note{
+            text-align:center;
+            margin-top:20px;
+            color:var(--muted);
+            font-size:11px;
+            font-weight:800;
+        }
+
+        #loader{
+            position:fixed;
+            inset:0;
+            background:linear-gradient(135deg, #f8f4ec, #f2ebde);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+        }
+
+        .spinner{
+            width:42px;
+            height:42px;
+            border:3px solid rgba(201,164,107,0.20);
+            border-top-color:var(--gold);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+        }
+
+        @keyframes spin{
+            to{ transform:rotate(360deg); }
+        }
+
+        @media (max-width: 1100px){
+            .chart-grid,
+            .data-grid,
+            .hero-grid{
+                grid-template-columns:1fr;
+            }
+
+            .kpi-grid{
+                grid-template-columns:repeat(2,1fr);
+            }
+        }
+
+        @media (max-width: 768px){
+            .form-grid,
+            .hero-stats{
+                grid-template-columns:1fr;
+            }
+
+            .kpi-grid{
+                grid-template-columns:1fr;
+            }
+
+            .brand h1{
+                font-size:20px;
+            }
+
+            .hero h2{
+                font-size:22px;
+            }
+
+            .chart-wrap canvas{
+                height:240px !important;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div id="loader"><div class="spinner"></div></div>
 
-<div class="container">
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-badge">
+                    <i data-lucide="building-2"></i>
+                </div>
+                <div>
+                    <h1>إدارة مجمع الجبري</h1>
+                    <p>لوحة الإدارة الذكية للحركات والمستأجرين</p>
+                </div>
+            </div>
 
-<h2>لوحة الإدارة</h2>
+            <div class="top-actions">
+                <button class="btn btn-soft" onclick="refreshDashboard()">
+                    <i data-lucide="refresh-cw"></i>
+                    تحديث
+                </button>
 
-<div class="panel">
-<select id="tenant_select"></select>
-</div>
+                <a class="btn btn-soft" href="index.html">
+                    <i data-lucide="house"></i>
+                    بوابة المستأجر
+                </a>
 
-<div class="panel grid">
+                <button class="btn btn-danger" onclick="logoutAdmin()">
+                    <i data-lucide="log-out"></i>
+                    خروج الإدارة
+                </button>
+            </div>
+        </div>
 
-<div class="mini-stat"><span>الرصيد</span><b id="selected_balance">0</b></div>
-<div class="mini-stat"><span>المدفوع</span><b id="selected_paid">0</b></div>
-<div class="mini-stat"><span>الحركات</span><b id="selected_tx_count">0</b></div>
-<div class="mini-stat"><span>التوقع</span><b id="selected_prediction">-</b></div>
-<div class="mini-stat"><span>الإجراء</span><b id="selected_action">-</b></div>
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <h2>نظرة شاملة على المجمع</h2>
+                    <p>
+                        من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، الرسوم البيانية،
+                        وتدخل أي حركة جديدة بعد اختيار المستأجر مباشرة.
+                    </p>
+                </div>
 
-</div>
+                <div class="hero-stats">
+                    <div class="mini-stat">
+                        <span>عدد المستأجرين</span>
+                        <b id="hero_total_tenants">0</b>
+                        <small>عدد السجلات الموجودة بجدول المستأجرين</small>
+                    </div>
+                    <div class="mini-stat">
+                        <span>الوحدات النشطة</span>
+                        <b id="hero_active_units">0</b>
+                        <small>عدد المستأجرين الذين لديهم كود ووحدة</small>
+                    </div>
+                    <div class="mini-stat">
+                        <span>إجمالي المتبقي</span>
+                        <b id="hero_total_balance">0 د.أ</b>
+                        <small>إجمالي المبالغ غير المسددة حاليًا</small>
+                    </div>
+                    <div class="mini-stat">
+                        <span>نسبة التحصيل</span>
+                        <b id="hero_collection_rate">0%</b>
+                        <small>المحصّل مقارنة بإجمالي المستحق</small>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<div class="panel">
-<button class="btn-gold" onclick="runSmartAction()">تنفيذ الإجراء الذكي</button>
-<button class="btn-danger" onclick="sendLegalWarning()">إنذار قانوني</button>
-</div>
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-head">
+                    <span>إجمالي المدين</span>
+                    <div class="icon-chip"><i data-lucide="arrow-up-right"></i></div>
+                </div>
+                <div class="kpi-value" id="kpi_total_debit">0 د.أ</div>
+                <div class="kpi-sub">مجموع جميع الحركات المدينة + الرصيد المرحل</div>
+            </div>
 
-<div class="panel">
-<canvas id="collectionChart"></canvas>
-</div>
+            <div class="kpi-card">
+                <div class="kpi-head">
+                    <span>إجمالي الدائن</span>
+                    <div class="icon-chip"><i data-lucide="arrow-down-left"></i></div>
+                </div>
+                <div class="kpi-value" id="kpi_total_credit">0 د.أ</div>
+                <div class="kpi-sub">مجموع جميع المدفوعات المسجلة</div>
+            </div>
 
-<div class="panel">
-<canvas id="monthlyChart"></canvas>
-</div>
+            <div class="kpi-card">
+                <div class="kpi-head">
+                    <span>الرصيد المتبقي</span>
+                    <div class="icon-chip"><i data-lucide="wallet"></i></div>
+                </div>
+                <div class="kpi-value" id="kpi_total_balance">0 د.أ</div>
+                <div class="kpi-sub">الرصيد الحالي على المجمع بالكامل</div>
+            </div>
 
-</div>
+            <div class="kpi-card">
+                <div class="kpi-head">
+                    <span>إجمالي الرصيد المستحق</span>
+                    <div class="icon-chip"><i data-lucide="badge-alert"></i></div>
+                </div>
+                <div class="kpi-value" id="kpi_total_outstanding">0 د.أ</div>
+                <div class="kpi-sub">إجمالي المبالغ القائمة غير المسددة</div>
+            </div>
+        </section>
 
-<script>
+        <section class="panel" style="margin-bottom:18px;">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <div class="icon-chip"><i data-lucide="user-round-search"></i></div>
+                    <div>
+                        <h3>اختيار المستأجر</h3>
+                        <p>اختر المستأجر قبل تسجيل الحركة المالية</p>
+                    </div>
+                </div>
+            </div>
 
-// 🔗 ضع بياناتك هنا
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU
+            <div class="field">
+                <label>اختيار المستأجر</label>
+                <select id="tenant_select">
+                    <option value="">جاري تحميل القائمة...</option>
+                </select>
+            </div>
 
-let allTransactions = [];
-let tenantBalances = [];
-let collectionChart;
+            <div id="smart_strip" class="smart-strip">
+                <div class="smart-item">
+                    <span>آخر دفعة</span>
+                    <b id="preview_last_payment">-</b>
+                </div>
+            </div>
+        </section>
 
-// utils
-const toNumber = x => parseFloat(x)||0;
-const formatCurrency = x => `${Math.round(x)} د.أ`;
+        <section class="chart-grid">
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <div class="icon-chip"><i data-lucide="pie-chart"></i></div>
+                        <div>
+                            <h3>مقارنة التحصيل</h3>
+                            <p>إجمالي المدفوع مقابل الرصيد المتبقي</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="collectionChart"></canvas>
+                </div>
+            </div>
 
-// 🔥 تحميل البيانات
-async function loadData(){
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <div class="icon-chip"><i data-lucide="line-chart"></i></div>
+                        <div>
+                            <h3>الحركة الشهرية</h3>
+                            <p>آخر 12 شهرًا - مدين مقابل دائن</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </section>
 
-  const { data: tx } = await supabaseClient
-    .from('tenant_transactions')
-    .select('*');
+        <section class="data-grid">
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <div class="icon-chip"><i data-lucide="plus-circle"></i></div>
+                        <div>
+                            <h3>إدخال حركة مالية</h3>
+                            <p>سجل الحركة المالية للمستأجر المحدد</p>
+                        </div>
+                    </div>
+                </div>
 
-  const { data: tenants } = await supabaseClient
-    .from('tenants')
-    .select('*');
+                <div class="form-grid">
+                    <div class="field">
+                        <label>التاريخ</label>
+                        <input type="date" id="tx_date" />
+                    </div>
+                    <div class="field">
+                        <label>رقم السند</label>
+                        <input type="text" id="tx_receipt" placeholder="اختياري" />
+                    </div>
+                </div>
 
-  allTransactions = tx || [];
+                <div class="field" style="margin-top:12px;">
+                    <label>البيان / الوصف</label>
+                    <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" />
+                </div>
 
-  tenantBalances = tenants.map(t => {
+                <div class="form-grid" style="margin-top:12px;">
+                    <div class="field">
+                        <label>مدين</label>
+                        <input type="number" id="tx_debit" placeholder="0.000" step="0.001" />
+                    </div>
+                    <div class="field">
+                        <label>دائن</label>
+                        <input type="number" id="tx_credit" placeholder="0.000" step="0.001" />
+                    </div>
+                </div>
 
-    const tenantTx = allTransactions.filter(x => x.tenant_code === t.tenant_code);
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+                    <button class="btn btn-gold" onclick="submitTransaction()">
+                        <i data-lucide="save"></i>
+                        حفظ الحركة
+                    </button>
 
-    const totalDebit = tenantTx.reduce((s,x)=>s+toNumber(x.debit),0);
-    const totalCredit = tenantTx.reduce((s,x)=>s+toNumber(x.credit),0);
+                    <button class="btn btn-soft" onclick="clearForm()">
+                        <i data-lucide="eraser"></i>
+                        تفريغ الحقول
+                    </button>
+                </div>
 
-    return {
-      ...t,
-      totalDebit,
-      totalCredit,
-      currentBalance: totalDebit - totalCredit
-    };
-  });
+                <div id="status_msg" class="status-msg"></div>
+            </div>
 
-  fillSelect();
-}
+            <div class="panel">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <div class="icon-chip"><i data-lucide="users-round"></i></div>
+                        <div>
+                            <h3>قائمة المستأجرين مع الرصيد</h3>
+                            <p>ملخص مباشر لكل مستأجر</p>
+                        </div>
+                    </div>
 
-// 🔽 dropdown
-function fillSelect(){
-  const select = document.getElementById('tenant_select');
+                    <div class="muted-note" id="tenant_balance_count">0 عنصر</div>
+                </div>
 
-  select.innerHTML = tenantBalances.map(t =>
-    `<option value="${t.tenant_code}">
-      ${t.tenant_name || t.tenant_code}
-    </option>`
-  ).join('');
+                <div id="tenant_balance_cards" class="list-stack">
+                    <div class="empty">جاري تحميل البيانات...</div>
+                </div>
+            </div>
+        </section>
 
-  select.addEventListener('change', ()=>{
-    const t = tenantBalances.find(x => x.tenant_code === select.value);
-    updateUI(t);
-  });
+        <div class="footer-note">
+            © 2026 JABRI INDUSTRIAL COMPLEX — لوحة الإدارة الذكية
+        </div>
+    </div>
 
-  // load first tenant
-  if(tenantBalances.length){
-    updateUI(tenantBalances[0]);
-  }
-}
+    <script>
+        // حماية إدارة بسيطة
+        // إذا عندك admin-login.html فعّل السطر داخل الشرط
+        if (localStorage.getItem('jabri_admin_session') !== 'active') {
+            // window.location.href = 'admin-login.html';
+        }
 
-// 🧠 prediction
-function calculatePrediction(t){
+        const { createClient } = supabase;
 
-  if(t.currentBalance <= 0) return {text:'منتظم',cls:'good'};
-  if(t.currentBalance < 300) return {text:'تنبيه',cls:'warn'};
-  return {text:'متعثر',cls:'bad'};
-}
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
 
-// تحديث
-function updateUI(t){
+        let allTenants = [];
+        let allTransactions = [];
+        let tenantBalances = [];
+        let collectionChart = null;
+        let monthlyChart = null;
 
-  document.getElementById('selected_balance').innerText = formatCurrency(t.currentBalance);
-  document.getElementById('selected_paid').innerText = formatCurrency(t.totalCredit);
+        function toNumber(value) {
+            const n = parseFloat(value);
+            return isNaN(n) ? 0 : n;
+        }
 
-  const txCount = allTransactions.filter(x=>x.tenant_code===t.tenant_code).length;
-  document.getElementById('selected_tx_count').innerText = txCount;
+        function formatCurrency(v) {
+            return `${toNumber(v).toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })} د.أ`;
+        }
 
-  const p = calculatePrediction(t);
+        function formatDate(value) {
+            if (!value) return '-';
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return value;
+            return d.toLocaleDateString('ar-JO');
+        }
 
-  const pred = document.getElementById('selected_prediction');
-  pred.innerText = p.text;
-  pred.className = p.cls;
+        function getStatusMeta(balance) {
+            if (balance <= 0) {
+                return { text: 'مسدد', cls: 'good', icon: 'check-circle' };
+            }
+            if (balance <= 500) {
+                return { text: 'تنبيه', cls: 'warn', icon: 'alert-circle' };
+            }
+            return { text: 'متأخر', cls: 'bad', icon: 'shield-alert' };
+        }
 
-  document.getElementById('selected_action').innerText =
-    p.cls === 'bad' ? 'إنذار' :
-    p.cls === 'warn' ? 'تذكير' : 'لا يوجد';
+        function showStatus(message, type='info') {
+            const msg = document.getElementById('status_msg');
+            msg.style.display = 'block';
+            msg.innerText = message;
 
-  drawChart(t);
-}
+            if (type === 'success') {
+                msg.style.background = 'rgba(21,154,111,0.12)';
+                msg.style.color = 'var(--success)';
+                msg.style.border = '1px solid rgba(21,154,111,0.18)';
+            } else if (type === 'error') {
+                msg.style.background = 'rgba(209,77,77,0.12)';
+                msg.style.color = 'var(--danger)';
+                msg.style.border = '1px solid rgba(209,77,77,0.18)';
+            } else {
+                msg.style.background = 'rgba(201,164,107,0.12)';
+                msg.style.color = '#7d5f33';
+                msg.style.border = '1px solid rgba(201,164,107,0.18)';
+            }
+        }
 
-// 📊 chart
-function drawChart(t){
+        function clearForm() {
+            document.getElementById('tx_desc').value = '';
+            document.getElementById('tx_debit').value = '';
+            document.getElementById('tx_credit').value = '';
+            document.getElementById('tx_receipt').value = '';
+        }
 
-  if(collectionChart) collectionChart.destroy();
+        function logoutAdmin() {
+            localStorage.removeItem('jabri_admin_session');
+            localStorage.removeItem('jabri_admin_user');
+            alert('تم تسجيل خروج الإدارة.');
+            // window.location.href = 'admin-login.html';
+        }
 
-  collectionChart = new Chart(document.getElementById('collectionChart'),{
-    type:'doughnut',
-    data:{
-      datasets:[{
-        data:[t.totalCredit, t.currentBalance],
-        backgroundColor:[
-          'rgba(21,154,111,0.6)',
-          'rgba(209,77,77,0.4)'
-        ],
-        borderColor:'#fff',
-        borderWidth:6
-      }]
-    },
-    options:{
-      cutout:'78%'
-    }
-  });
-}
+        async function loadData() {
+            const [{ data: tenants, error: tenantError }, { data: transactions, error: txError }] = await Promise.all([
+                supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .order('tenant_name', { ascending: true }),
+                supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .order('date', { ascending: true })
+            ]);
 
-// ⚡ smart action
-async function runSmartAction(){
+            if (tenantError) throw tenantError;
+            if (txError) throw txError;
 
-  const code = document.getElementById('tenant_select').value;
+            allTenants = tenants || [];
+            allTransactions = transactions || [];
+            buildTenantBalances();
+        }
 
-  await supabaseClient.from('notifications').insert([{
-    tenant_code:code,
-    message:'تذكير دفع',
-    is_read:false
-  }]);
+        function buildTenantBalances() {
+            tenantBalances = allTenants.map(tenant => {
+                const tx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
 
-  alert('تم الإرسال');
-}
+                const previousBalance = toNumber(tenant.previous_balance);
+                const totalDebit = tx.reduce((sum, row) => sum + toNumber(row.debit), 0);
+                const totalCredit = tx.reduce((sum, row) => sum + toNumber(row.credit), 0);
+                const currentBalance = Math.max(0, previousBalance + totalDebit - totalCredit);
 
-// ⚖️ legal
-async function sendLegalWarning(){
+                const lastPayment = [...tx]
+                    .filter(t => toNumber(t.credit) > 0)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
 
-  const code = document.getElementById('tenant_select').value;
+                return {
+                    ...tenant,
+                    previousBalance,
+                    totalDebit,
+                    totalCredit,
+                    currentBalance,
+                    lastPayment
+                };
+            }).sort((a, b) => b.currentBalance - a.currentBalance);
+        }
 
-  await supabaseClient.from('notifications').insert([{
-    tenant_code:code,
-    message:'إنذار قانوني',
-    is_legal:true,
-    is_read:false
-  }]);
+        function populateTenantDropdown() {
+            const select = document.getElementById('tenant_select');
+            select.innerHTML = '<option value="">-- اختر المستأجر --</option>';
 
-  alert('تم إرسال إنذار قانوني');
-}
+            if (!allTenants.length) {
+                select.innerHTML = '<option value="">لا يوجد مستأجرون</option>';
+                return;
+            }
 
-// 🚀 start
-loadData();
+            allTenants.forEach(tenant => {
+                const option = document.createElement('option');
+                option.value = tenant.tenant_code;
+                option.textContent = `${tenant.tenant_name || '-'}${tenant.shop_no ? ` (وحدة: ${tenant.shop_no})` : ''}`;
+                select.appendChild(option);
+            });
+        }
 
-</script>
+        function updateKpis() {
+            const previousTotal = allTenants.reduce((sum, t) => sum + toNumber(t.previous_balance), 0);
+            const totalDebitOnly = allTransactions.reduce((sum, t) => sum + toNumber(t.debit), 0);
+            const totalCredit = allTransactions.reduce((sum, t) => sum + toNumber(t.credit), 0);
 
+            const totalDebit = previousTotal + totalDebitOnly;
+            const totalBalance = Math.max(0, totalDebit - totalCredit);
+            const totalOutstanding = tenantBalances.reduce((sum, t) => {
+                return sum + (t.currentBalance > 0 ? t.currentBalance : 0);
+            }, 0);
+
+            const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 100;
+            const activeUnits = allTenants.filter(t => (t.tenant_code || '').trim() !== '').length;
+
+            document.getElementById('kpi_total_debit').innerText = formatCurrency(totalDebit);
+            document.getElementById('kpi_total_credit').innerText = formatCurrency(totalCredit);
+            document.getElementById('kpi_total_balance').innerText = formatCurrency(totalBalance);
+            document.getElementById('kpi_total_outstanding').innerText = formatCurrency(totalOutstanding);
+
+            document.getElementById('hero_total_tenants').innerText = allTenants.length;
+            document.getElementById('hero_active_units').innerText = activeUnits;
+            document.getElementById('hero_total_balance').innerText = formatCurrency(totalBalance);
+            document.getElementById('hero_collection_rate').innerText = `${collectionRate}%`;
+
+            drawCollectionChart(totalCredit, totalBalance);
+            drawMonthlyChart();
+        }
+
+        function drawCollectionChart(totalCredit, totalBalance) {
+            const ctx = document.getElementById('collectionChart').getContext('2d');
+
+            if (collectionChart) {
+                collectionChart.destroy();
+            }
+
+            collectionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['إجمالي المدفوع', 'الرصيد المتبقي'],
+                    datasets: [{
+                        data: [totalCredit, totalBalance],
+                        borderWidth: 0,
+                        backgroundColor: ['#159a6f', '#d14d4d'],
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12,
+                                    weight: '700'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `${ctx.label}: ${formatCurrency(ctx.raw)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+
+            const labels = [];
+            const debitSeries = [];
+            const creditSeries = [];
+
+            const now = new Date();
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const year = d.getFullYear();
+                const month = d.getMonth();
+
+                labels.push(d.toLocaleDateString('ar-JO', { month: 'short', year: '2-digit' }));
+
+                const monthTx = allTransactions.filter(tx => {
+                    const txDate = new Date(tx.date);
+                    return txDate.getFullYear() === year && txDate.getMonth() === month;
+                });
+
+                debitSeries.push(monthTx.reduce((sum, t) => sum + toNumber(t.debit), 0));
+                creditSeries.push(monthTx.reduce((sum, t) => sum + toNumber(t.credit), 0));
+            }
+
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'مدين',
+                            data: debitSeries,
+                            tension: 0.35,
+                            fill: false,
+                            borderColor: '#c9a46b',
+                            backgroundColor: '#c9a46b',
+                            borderWidth: 3,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'دائن',
+                            data: creditSeries,
+                            tension: 0.35,
+                            fill: false,
+                            borderColor: '#159a6f',
+                            backgroundColor: '#159a6f',
+                            borderWidth: 3,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12,
+                                    weight: '700'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return `${Number(value).toLocaleString('en-US')} د.أ`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTenantBalances() {
+            const wrap = document.getElementById('tenant_balance_cards');
+            const count = document.getElementById('tenant_balance_count');
+            const rows = [...tenantBalances];
+
+            count.innerText = `${rows.length} عنصر`;
+
+            if (!rows.length) {
+                wrap.innerHTML = `<div class="empty">لا توجد بيانات للمستأجرين.</div>`;
+                return;
+            }
+
+            wrap.innerHTML = rows.map(t => {
+                const status = getStatusMeta(t.currentBalance);
+                return `
+                    <div class="tenant-card-row ${status.cls}">
+                        <div class="tenant-main">
+                            <h4>${t.tenant_name || '-'}</h4>
+                            <p>
+                                الكود: ${t.tenant_code || '-'}
+                                ${t.shop_no ? ` | الوحدة: ${t.shop_no}` : ''}
+                            </p>
+                            <div style="margin-top:8px;">
+                                <span class="status-pill ${status.cls}">
+                                    <i data-lucide="${status.icon}"></i>
+                                    ${status.text}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="tenant-balance-side">
+                            <span class="muted-note">الرصيد الحالي</span>
+                            <b class="${t.currentBalance > 0 ? 'amount-danger' : 'amount-success'}">
+                                ${formatCurrency(t.currentBalance)}
+                            </b>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function loadTenantBalancePreview(tenantCode) {
+            try {
+                const smartStrip = document.getElementById('smart_strip');
+
+                if (!tenantCode) {
+                    smartStrip.style.display = 'none';
+                    return;
+                }
+
+                const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
+                if (!tenant) {
+                    smartStrip.style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('preview_last_payment').innerText =
+                    tenant.lastPayment ? formatCurrency(tenant.lastPayment.credit) : 'لا يوجد';
+
+                smartStrip.style.display = 'grid';
+
+                if (window.lucide) lucide.createIcons();
+
+            } catch (error) {
+                console.error(error);
+                showStatus('تعذر تحميل بيانات المستأجر: ' + error.message, 'error');
+            }
+        }
+
+        async function submitTransaction() {
+            const tenant_code = document.getElementById('tenant_select').value.trim();
+            const date = document.getElementById('tx_date').value;
+            const description = document.getElementById('tx_desc').value.trim();
+            const debitValue = document.getElementById('tx_debit').value;
+            const creditValue = document.getElementById('tx_credit').value;
+            const receipt_no = document.getElementById('tx_receipt').value.trim();
+
+            if (!tenant_code || !description || !date) {
+                showStatus('يرجى اختيار المستأجر وكتابة البيان واختيار التاريخ.', 'error');
+                return;
+            }
+
+            const debit = debitValue !== "" ? Number(debitValue) : null;
+            const credit = creditValue !== "" ? Number(creditValue) : null;
+
+            if ((debit === null || debit === 0) && (credit === null || credit === 0)) {
+                showStatus('يرجى إدخال قيمة في المدين أو الدائن.', 'error');
+                return;
+            }
+
+            showStatus('جاري حفظ الحركة في قاعدة البيانات...', 'info');
+
+            try {
+                const { error } = await supabaseClient
+                    .from('tenant_transactions')
+                    .insert([{
+                        tenant_code,
+                        date,
+                        description,
+                        debit: debit > 0 ? debit : null,
+                        credit: credit > 0 ? credit : null,
+                        receipt_no: receipt_no || null
+                    }]);
+
+                if (error) throw error;
+
+                showStatus('تم تسجيل الحركة بنجاح.', 'success');
+                clearForm();
+                await refreshDashboard();
+                document.getElementById('tenant_select').value = tenant_code;
+                await loadTenantBalancePreview(tenant_code);
+
+            } catch (error) {
+                console.error(error);
+                showStatus('فشل الحفظ: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshDashboard() {
+            try {
+                document.getElementById('loader').style.display = 'flex';
+                await loadData();
+                populateTenantDropdown();
+                updateKpis();
+                renderTenantBalances();
+                document.getElementById('loader').style.display = 'none';
+                if (window.lucide) lucide.createIcons();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loader').style.display = 'none';
+                showStatus('تعذر تحميل لوحة الإدارة: ' + error.message, 'error');
+            }
+        }
+
+        window.onload = async () => {
+            try {
+                document.body.style.opacity = '1';
+                document.getElementById('tx_date').valueAsDate = new Date();
+
+                await refreshDashboard();
+
+                document.getElementById('tenant_select').addEventListener('change', async function () {
+                    await loadTenantBalancePreview(this.value);
+                });
+
+                if (window.lucide) lucide.createIcons();
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loader').style.display = 'none';
+                showStatus('خطأ في الاتصال بقاعدة البيانات: ' + error.message, 'error');
+            }
+        };
+    </script>
 </body>
 </html>
