@@ -17,9 +17,14 @@
             --muted: #94a3b8;
             --border: rgba(255,255,255,0.1);
             --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            --danger: #f87171;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
         
         body {
             margin: 0;
@@ -46,7 +51,10 @@
             backdrop-filter: blur(10px);
         }
 
-        .logo-area { margin-bottom: 35px; }
+        .logo-area {
+            margin-bottom: 35px;
+        }
+
         .logo-area h1 { 
             color: var(--gold); 
             font-size: 30px; 
@@ -55,6 +63,7 @@
             letter-spacing: 1px;
             text-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
+
         .logo-area p { 
             color: var(--muted); 
             font-size: 11px; 
@@ -64,7 +73,11 @@
             letter-spacing: 2px;
         }
 
-        .form-group { margin-bottom: 25px; text-align: right; }
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
         label { 
             display: block; 
             font-size: 12px; 
@@ -88,6 +101,7 @@
             text-align: center;
             letter-spacing: 1px;
         }
+
         input:focus { 
             border-color: var(--gold); 
             background: rgba(255,255,255,0.08);
@@ -111,12 +125,25 @@
             gap: 12px;
             box-shadow: 0 10px 20px rgba(212,175,55,0.2);
         }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(212,175,55,0.3); }
-        .btn-login:active { transform: scale(0.96); }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(212,175,55,0.3);
+        }
+
+        .btn-login:active {
+            transform: scale(0.96);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         #error_msg { 
             margin-top: 20px; 
-            color: #f87171; 
+            color: var(--danger); 
             font-size: 13px; 
             font-weight: 800; 
             display: none;
@@ -126,18 +153,33 @@
         }
 
         #loader { 
-            position: fixed; inset: 0; 
-            display: flex; align-items: center; justify-content: center; 
-            background: var(--bg); z-index: 9999; 
+            position: fixed;
+            inset: 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            background: var(--bg);
+            z-index: 9999; 
         }
+
         .spinner { 
-            width: 35px; height: 35px; 
+            width: 35px;
+            height: 35px; 
             border: 3px solid rgba(255,255,255,0.1); 
             border-top-color: var(--gold); 
             border-radius: 50%; 
             animation: spin 1s linear infinite; 
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
@@ -152,11 +194,18 @@
 
         <div class="form-group">
             <label>أدخل كود الوحدة الخاص بك</label>
-            <input type="text" id="tenant_code_input" placeholder="مثلاً: JC-01" autocomplete="off" spellcheck="false">
+            <input
+                type="text"
+                id="tenant_code_input"
+                placeholder="مثلاً: JC-01"
+                autocomplete="off"
+                spellcheck="false"
+            >
         </div>
 
-        <button class="btn-login" onclick="handleLogin()">
-            دخول للمنصة <i data-lucide="log-in" size="18"></i>
+        <button class="btn-login" id="login_btn" onclick="handleLogin()">
+            دخول للمنصة
+            <i data-lucide="log-in" size="18"></i>
         </button>
 
         <div id="error_msg">عذراً، هذا الكود غير مسجل لدينا.</div>
@@ -168,53 +217,97 @@
 
     <script>
         const { createClient } = supabase;
-        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
+
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
 
         window.onload = () => {
             document.body.style.opacity = "1";
             document.getElementById('loader').style.display = 'none';
-            if (window.lucide) lucide.createIcons();
-            
-            // تحويل النص للكبير تلقائياً عند الكتابة
-            document.getElementById('tenant_code_input').addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            const input = document.getElementById('tenant_code_input');
+
+            input.addEventListener('input', function () {
+                this.value = this.value.toUpperCase().replace(/\s+/g, '');
             });
+
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // إذا الجلسة موجودة، ادخل مباشرة على لوحة المستأجر
+            const savedCode = localStorage.getItem('jabri_tenant_code');
+            if (savedCode) {
+                window.location.href = "tenant.html";
+            }
         };
 
         async function handleLogin() {
-            const code = document.getElementById('tenant_code_input').value.trim();
+            const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
             const errorEl = document.getElementById('error_msg');
-            
-            if (!code) return;
+            const loginBtn = document.getElementById('login_btn');
+            const card = document.querySelector('.login-card');
+
+            if (!code) {
+                showError("يرجى إدخال كود الوحدة.");
+                shakeCard(card);
+                return;
+            }
 
             errorEl.style.display = "none";
-            
-            const { data, error } = await supabaseClient
-                .from('tenants')
-                .select('tenant_code, name')
-                .eq('tenant_code', code)
-                .single();
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `جاري التحقق...`;
 
-            if (data) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('tenants')
+                    .select('tenant_code, name')
+                    .eq('tenant_code', code)
+                    .single();
+
+                if (error || !data) {
+                    showError("عذراً، هذا الكود غير مسجل لدينا.");
+                    shakeCard(card);
+                    return;
+                }
+
                 localStorage.setItem('jabri_tenant_session', 'active');
                 localStorage.setItem('jabri_tenant_code', data.tenant_code);
+                localStorage.setItem('jabri_tenant_name', data.name || '');
+
                 window.location.href = "tenant.html";
-            } else {
-                errorEl.style.display = "block";
-                // رجة خفيفة للكرت عند الخطأ
-                document.querySelector('.login-card').style.animation = "shake 0.4s ease";
-                setTimeout(() => document.querySelector('.login-card').style.animation = "", 400);
+
+            } catch (err) {
+                console.error(err);
+                showError("حدث خطأ في الاتصال. حاول مرة أخرى.");
+                shakeCard(card);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = `دخول للمنصة <i data-lucide="log-in" size="18"></i>`;
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }
         }
 
-        // إضافة أنيميشن "الرجة" للخطأ
-        const style = document.createElement('style');
-        style.innerHTML = `@keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }`;
-        document.head.appendChild(style);
+        function showError(message) {
+            const errorEl = document.getElementById('error_msg');
+            errorEl.innerText = message;
+            errorEl.style.display = "block";
+        }
 
-        document.getElementById('tenant_code_input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
+        function shakeCard(card) {
+            card.style.animation = "shake 0.4s ease";
+            setTimeout(() => {
+                card.style.animation = "";
+            }, 400);
+        }
     </script>
 </body>
 </html>
