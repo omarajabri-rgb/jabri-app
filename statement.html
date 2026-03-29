@@ -398,9 +398,9 @@
 
     <script>
         const tenantSession = localStorage.getItem('jabri_tenant_session');
-        const tenantId = localStorage.getItem('jabri_tenant_id');
+        const tenantCode = localStorage.getItem('jabri_tenant_code');
 
-        if (!tenantSession || !tenantId || isNaN(tenantId)) {
+        if (!tenantSession || !tenantCode) {
             localStorage.clear();
             window.location.href = "index.html";
         }
@@ -461,12 +461,12 @@
                     supabaseClient
                         .from('tenants')
                         .select('*')
-                        .eq('id', tenantId)
+                        .eq('tenant_code', tenantCode)
                         .single(),
                     supabaseClient
                         .from('tenant_transactions')
                         .select('*')
-                        .eq('tenant_id', tenantId)
+                        .eq('tenant_code', tenantCode)
                         .order('date', { ascending: true })
                 ]);
 
