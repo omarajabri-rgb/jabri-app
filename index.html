@@ -198,9 +198,20 @@
             white-space: nowrap;
         }
 
-        .amt-debit { color: var(--danger); font-weight: 800; }
-        .amt-credit { color: var(--success); font-weight: 800; }
-        .amt-balance { color: #fff; font-weight: 900; }
+        .amt-debit {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .amt-credit {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .amt-balance {
+            color: #fff;
+            font-weight: 900;
+        }
 
         .carry-row td {
             background: rgba(255,255,255,0.02);
@@ -244,35 +255,80 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .summary-box {
+                grid-template-columns: 1fr;
+            }
+        }
 
         @media print {
-            body { background: #fff; color: #000; padding: 0; opacity: 1 !important; transform: none !important; }
-            .header-actions, #loader { display: none !important; }
-            .statement-header, .statement-container, .summary-box { border: 1px solid #eee; background: #fff; box-shadow: none; }
-            th { background: #f8f8f8; color: #000; }
-            td, .amt-balance { color: #000 !important; }
+            body {
+                background: #fff;
+                color: #000;
+                padding: 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            .header-actions,
+            #loader {
+                display: none !important;
+            }
+
+            .statement-header,
+            .statement-container,
+            .summary-box {
+                border: 1px solid #eee;
+                background: #fff;
+                box-shadow: none;
+            }
+
+            th {
+                background: #f8f8f8;
+                color: #000;
+            }
+
+            td,
+            .amt-balance,
+            .amt-credit,
+            .amt-debit {
+                color: #000 !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div></div>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
 
     <div class="wrap">
         <div class="header-area">
             <div class="header-actions">
                 <button class="back-btn" onclick="location.href='tenant.html'">
-                    <i data-lucide="arrow-right"></i> رجوع
+                    <i data-lucide="arrow-right"></i>
+                    رجوع
                 </button>
+
                 <button class="back-btn save-btn" onclick="savePDF()">
-                    <i data-lucide="download"></i> حفظ PDF
+                    <i data-lucide="download"></i>
+                    حفظ PDF
                 </button>
+
                 <button class="back-btn logout-btn" onclick="logout()">
-                    <i data-lucide="log-out"></i> خروج
+                    <i data-lucide="log-out"></i>
+                    خروج
                 </button>
             </div>
-            <div style="font-weight:900; font-size:12px; color:var(--gold);">JABRI COMPLEX</div>
+
+            <div style="font-weight:900; font-size:12px; color:var(--gold);">
+                JABRI COMPLEX
+            </div>
         </div>
 
         <div class="statement-header">
@@ -286,10 +342,12 @@
                 <span>إجمالي المطالبات</span>
                 <b id="sum_due">0.000 د.أ</b>
             </div>
+
             <div class="summary-item">
                 <span>إجمالي الواصل</span>
                 <b id="sum_paid">0.000 د.أ</b>
             </div>
+
             <div class="summary-item">
                 <span>الرصيد النهائي</span>
                 <b id="sum_balance" style="color:var(--gold)">0.000 د.أ</b>
@@ -322,30 +380,54 @@
     </div>
 
     <script>
-        // 1. فحص الجلسة فوراً
         const tenantCode = localStorage.getItem('jabri_tenant_code');
+
         if (!tenantCode) {
-            window.location.href = "index.html"; 
+            window.location.href = "index.html";
         }
 
         const { createClient } = supabase;
+
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function formatCurrency(v) {
-            return `${Number(v || 0).toLocaleString('en-US', {minimumFractionDigits: 3})} د.أ`;
+        function formatCurrency(value) {
+            return `${Number(value || 0).toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })} د.أ`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return value;
+
+            return date.toLocaleDateString('ar-JO');
+        }
+
+        function formatDateTimeNow() {
+            return new Date().toLocaleString('ar-JO', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         function logout() {
-            localStorage.clear();
+            localStorage.removeItem('jabri_tenant_code');
             window.location.href = "index.html";
         }
 
         function savePDF() {
             const element = document.querySelector('.wrap');
-            const name = document.getElementById('statement_tenant_name').innerText;
+            const name = document.getElementById('statement_tenant_name').innerText || 'tenant';
+
             const opt = {
                 margin: 10,
                 filename: `كشف_حساب_${name}.pdf`,
@@ -353,67 +435,102 @@
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
+
             html2pdf().set(opt).from(element).save();
         }
 
         window.onload = async () => {
+            const loader = document.getElementById('loader');
+            const tbody = document.getElementById('statement_body');
+
             try {
-                const [{ data: tenant }, { data: transactions }] = await Promise.all([
-                    supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).single(),
-                    supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true })
-                ]);
+                const { data: tenant, error: tenantError } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .single();
 
-                if (!tenant) throw new Error("المستأجر غير موجود");
+                if (tenantError || !tenant) {
+                    throw new Error("المستأجر غير موجود");
+                }
 
-                document.getElementById('statement_tenant_name').innerText = tenant.name;
-                document.getElementById('statement_meta').innerText = `الوحدة: ${tenant.unit || '-'} | تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')}`;
+                const { data: transactions, error: txError } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true });
+
+                if (txError) {
+                    throw txError;
+                }
+
+                document.getElementById('statement_tenant_name').innerText = tenant.name || '-';
+                document.getElementById('statement_meta').innerText =
+                    `الوحدة: ${tenant.unit || '-'} | تاريخ الإصدار: ${formatDateTimeNow()}`;
                 document.getElementById('footer_year').innerText = new Date().getFullYear();
 
                 let runningBal = Number(tenant.previous_balance || 0);
-                let totalDeb = runningBal;
+                let totalDeb = Number(tenant.previous_balance || 0);
                 let totalCre = 0;
-                const tbody = document.getElementById('statement_body');
 
-                // إضافة الرصيد المدور
                 if (runningBal > 0) {
-                    const tr = document.createElement('tr');
-                    tr.className = 'carry-row show';
-                    tr.innerHTML = `<td>-</td><td>-</td><td class="amt-debit">${formatCurrency(runningBal)}</td><td class="amt-balance">${formatCurrency(runningBal)}</td><td>رصيد مدور سابق</td><td>-</td>`;
-                    tbody.appendChild(tr);
+                    const carryRow = document.createElement('tr');
+                    carryRow.className = 'carry-row show';
+                    carryRow.innerHTML = `
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="amt-debit">${formatCurrency(runningBal)}</td>
+                        <td class="amt-balance">${formatCurrency(runningBal)}</td>
+                        <td>رصيد مدور سابق</td>
+                        <td>-</td>
+                    `;
+                    tbody.appendChild(carryRow);
                 }
 
-                transactions.forEach((tx, i) => {
-                    const deb = Number(tx.debit || 0);
-                    const cre = Number(tx.credit || 0);
-                    runningBal += (deb - cre);
-                    totalDeb += deb;
-                    totalCre += cre;
+                if (!transactions || transactions.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-row';
+                    emptyRow.innerHTML = `<td colspan="6">لا توجد حركات مسجلة</td>`;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    transactions.forEach((tx, i) => {
+                        const deb = Number(tx.debit || 0);
+                        const cre = Number(tx.credit || 0);
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'row-animate';
-                    tr.innerHTML = `
-                        <td>${tx.date}</td>
-                        <td class="amt-credit">${cre > 0 ? formatCurrency(cre) : '-'}</td>
-                        <td class="amt-debit">${deb > 0 ? formatCurrency(deb) : '-'}</td>
-                        <td class="amt-balance">${formatCurrency(runningBal)}</td>
-                        <td>${tx.description || '-'}</td>
-                        <td>${tx.receipt_no || '-'}</td>
-                    `;
-                    tbody.appendChild(tr);
-                    setTimeout(() => tr.classList.add('show'), i * 50);
-                });
+                        runningBal += (deb - cre);
+                        totalDeb += deb;
+                        totalCre += cre;
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'row-animate';
+                        tr.innerHTML = `
+                            <td>${formatDate(tx.date)}</td>
+                            <td class="amt-credit">${cre > 0 ? formatCurrency(cre) : '-'}</td>
+                            <td class="amt-debit">${deb > 0 ? formatCurrency(deb) : '-'}</td>
+                            <td class="amt-balance">${formatCurrency(runningBal)}</td>
+                            <td>${tx.description || '-'}</td>
+                            <td>${tx.receipt_no || '-'}</td>
+                        `;
+
+                        tbody.appendChild(tr);
+                        setTimeout(() => tr.classList.add('show'), i * 50);
+                    });
+                }
 
                 document.getElementById('sum_due').innerText = formatCurrency(totalDeb);
                 document.getElementById('sum_paid').innerText = formatCurrency(totalCre);
                 document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
 
-                document.getElementById('loader').style.display = 'none';
+                loader.style.display = 'none';
                 document.body.classList.add('loaded');
-                if (window.lucide) lucide.createIcons();
 
-            } catch (err) {
-                console.error(err);
-                alert("حدث خطأ في جلب البيانات");
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ في تحميل كشف الحساب");
                 logout();
             }
         };
