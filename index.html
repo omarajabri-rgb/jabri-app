@@ -55,13 +55,11 @@
             margin-bottom: 35px;
         }
 
-        .logo-area h1 { 
-            color: var(--gold); 
-            font-size: 30px; 
-            margin: 0; 
-            font-weight: 900; 
-            letter-spacing: 1px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        /* تنسيق الشعار المرفوع */
+        .logo-area img {
+            height: 60px;
+            width: auto;
+            margin-bottom: 15px;
         }
 
         .logo-area p { 
@@ -131,16 +129,6 @@
             box-shadow: 0 15px 25px rgba(212,175,55,0.3);
         }
 
-        .btn-login:active {
-            transform: scale(0.96);
-        }
-
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         #error_msg { 
             margin-top: 20px; 
             color: var(--danger); 
@@ -188,7 +176,7 @@
 
     <div class="login-card">
         <div class="logo-area">
-            <h1>JABRI COMPLEX</h1>
+            <img src="logo_complex.png" alt="Jabri Complex Logo">
             <p>بوابة المستأجرين الرقمية</p>
         </div>
 
@@ -241,11 +229,11 @@
                 if (e.key === 'Enter') handleLogin();
             });
 
-            // إذا الجلسة موجودة، ادخل مباشرة على لوحة المستأجر
             const savedCode = localStorage.getItem('jabri_tenant_code');
-if (savedCode) {
-    window.location.href = "tenant.html";
-}
+            if (savedCode) {
+                window.location.href = "tenant.html";
+            }
+        };
 
         async function handleLogin() {
             const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
@@ -264,9 +252,10 @@ if (savedCode) {
             loginBtn.innerHTML = `جاري التحقق...`;
 
             try {
+                // تعديل الاستعلام ليتوافق مع أسماء الأعمدة في قاعدة البيانات (tenant_name)
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, tenant_name')
+                    .select('tenant_code, tenant_name') 
                     .eq('tenant_code', code)
                     .single();
 
@@ -278,7 +267,7 @@ if (savedCode) {
 
                 localStorage.setItem('jabri_tenant_session', 'active');
                 localStorage.setItem('jabri_tenant_code', data.tenant_code);
-                localStorage.setItem('jabri_tenant_name', data.name || '');
+                localStorage.setItem('jabri_tenant_name', data.tenant_name); // استخدام tenant_name المحدث
 
                 window.location.href = "tenant.html";
 
