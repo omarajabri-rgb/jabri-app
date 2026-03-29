@@ -123,8 +123,27 @@
             margin: 0;
             font-size: 12px;
             line-height: 1.8;
-            color: var(--muted);
-            font-weight: 800;
+            color: var(--gold-deep);
+            font-weight: 900;
+        }
+
+        #statement_date {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            margin-top: 6px;
+        }
+
+        .last-payment-box {
+            margin-top: 10px;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 900;
+            text-align: center;
+            background: rgba(201,164,107,0.10);
+            color: var(--text);
         }
 
         .summary-box {
@@ -230,12 +249,13 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 7px 10px;
+            padding: 8px 12px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 900;
-            background: rgba(201,164,107,0.11);
-            color: var(--muted);
+            background: rgba(201,164,107,0.14);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.18);
         }
 
         .amt-box {
@@ -263,7 +283,8 @@
         .amt-balance b { color: var(--text); }
 
         .carry-item {
-            background: rgba(201,164,107,0.08);
+            background: rgba(201,164,107,0.10);
+            border: 1px dashed rgba(201,164,107,0.30);
         }
 
         .empty-state {
@@ -327,14 +348,32 @@
                 opacity: 1 !important;
                 transform: none !important;
             }
+
             #loader, .header-actions { display: none !important; }
+
             .glass, .tx-item, .amt-box {
                 background: #fff !important;
                 box-shadow: none !important;
                 border: 1px solid #ddd !important;
             }
-            .statement-header h1, .year-title { color: #000 !important; }
-            .summary-item b, .summary-item span, .footer-note, .tx-desc, .chip, .amt-box b, .amt-box span, .year-balance { color: #000 !important; }
+
+            .statement-header h1,
+            .year-title,
+            #statement_date {
+                color: #000 !important;
+            }
+
+            .summary-item b,
+            .summary-item span,
+            .footer-note,
+            .tx-desc,
+            .chip,
+            .amt-box b,
+            .amt-box span,
+            .year-balance,
+            .last-payment-box {
+                color: #000 !important;
+            }
         }
     </style>
 </head>
@@ -351,10 +390,12 @@
         </div>
 
         <div class="statement-header glass" id="statement_export_area">
-            <h1>مجمع جبري الصناعي</h1>
+            <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">اسم المستأجر</h2>
-            <p id="statement_meta">التاريخ والوقت</p>
+            <p id="statement_date">—</p>
         </div>
+
+        <div id="last_payment_box" class="last-payment-box glass">—</div>
 
         <div class="summary-box">
             <div class="summary-item glass">
@@ -383,6 +424,7 @@
     <script>
         const tenantSession = localStorage.getItem('jabri_tenant_session');
         const tenantCode = localStorage.getItem('jabri_tenant_code');
+
         if (!tenantSession || !tenantCode) {
             localStorage.clear();
             window.location.href = 'index.html';
@@ -415,15 +457,22 @@
 
         function formatDateTime(value) {
             return new Date(value).toLocaleString('ar-JO', {
-                year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
             });
         }
 
-        function goBack() { window.location.href = 'tenant.html'; }
+        function goBack() {
+            window.location.href = 'tenant.html';
+        }
 
         function savePDF() {
             const element = document.querySelector('.wrap');
             const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
+
             html2pdf().set({
                 margin: 5,
                 filename: `كشف_حساب_${tenantName}.pdf`,
@@ -433,14 +482,27 @@
             }).from(element).save();
         }
 
+        function getLastPayment(rows) {
+            const payments = rows
+                .filter(r => toNumber(r.credit) > 0)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return payments.length ? payments[0] : null;
+        }
+
+        function daysSince(date) {
+            const d = new Date(date);
+            return Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24));
+        }
+
         function txItemHTML({ date, description, debit, credit, balance, receipt_no, carry = false }) {
             return `
                 <div class="tx-item ${carry ? 'carry-item' : ''}">
                     <div class="tx-main">
                         <div class="tx-desc">${description || '-'}</div>
                         <div class="tx-chips">
-                            <div class="chip"><i data-lucide="calendar-days"></i> ${date || '-'}</div>
-                            <div class="chip"><i data-lucide="receipt"></i> ${receipt_no || '-'}</div>
+                            <div class="chip">التاريخ: ${date || '-'}</div>
+                            <div class="chip">السند: ${receipt_no || '-'}</div>
                         </div>
                     </div>
                     <div class="amt-box amt-credit">
@@ -463,58 +525,72 @@
             const yearsContainer = document.getElementById('years_container');
             yearsContainer.innerHTML = '';
 
-            let runningBal = previousBalance;
+            const rows = Array.isArray(transactions) ? transactions : [];
             const grouped = {};
-            const rows = transactions || [];
-
-            if (previousBalance > 0) {
-                const firstYear = rows.length ? new Date(rows[0].date).getFullYear() : new Date().getFullYear();
-                grouped[firstYear] = grouped[firstYear] || [];
-                grouped[firstYear].push({
-                    date: '-',
-                    description: 'رصيد مدور سابق',
-                    debit: previousBalance,
-                    credit: 0,
-                    balance: runningBal,
-                    receipt_no: '-',
-                    carry: true
-                });
-            }
 
             rows.forEach(row => {
                 const year = new Date(row.date).getFullYear();
-                const debit = toNumber(row.debit);
-                const credit = toNumber(row.credit);
-                runningBal += debit - credit;
-                grouped[year] = grouped[year] || [];
-                grouped[year].push({
-                    date: formatDate(row.date),
-                    description: row.description || '-',
-                    debit,
-                    credit,
-                    balance: Math.max(0, runningBal),
-                    receipt_no: row.receipt_no || '-',
-                    carry: false
-                });
+                if (!grouped[year]) grouped[year] = [];
+                grouped[year].push(row);
             });
 
             const years = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
+
             if (!years.length) {
                 yearsContainer.innerHTML = `<div class="empty-state glass">لا توجد حركات مالية متاحة حالياً.</div>`;
                 return;
             }
 
-            years.forEach(year => {
-                const items = grouped[year];
-                const closingBalance = items[items.length - 1]?.balance || 0;
+            let carryBalance = toNumber(previousBalance);
+
+            years.forEach((year, index) => {
+                const yearRows = grouped[year].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const openingBalance = carryBalance;
+                const renderedItems = [];
+
+                if (openingBalance > 0) {
+                    renderedItems.push({
+                        date: '-',
+                        description: `رصيد مرحل من سنة ${index === 0 ? 'سابقة' : Number(year) - 1}`,
+                        debit: openingBalance,
+                        credit: 0,
+                        balance: openingBalance,
+                        receipt_no: '-',
+                        carry: true
+                    });
+                }
+
+                let runningBal = openingBalance;
+
+                yearRows.forEach(row => {
+                    const debit = toNumber(row.debit);
+                    const credit = toNumber(row.credit);
+
+                    runningBal += debit - credit;
+
+                    renderedItems.push({
+                        date: formatDate(row.date),
+                        description: row.description || '-',
+                        debit,
+                        credit,
+                        balance: Math.max(0, runningBal),
+                        receipt_no: row.receipt_no || '-',
+                        carry: false
+                    });
+                });
+
+                const closingBalance = Math.max(0, runningBal);
+                carryBalance = closingBalance;
+
                 const card = document.createElement('section');
                 card.className = 'year-card glass';
                 card.innerHTML = `
                     <div class="year-head">
                         <div class="year-title">${year}</div>
-                        <div class="year-balance">الرصيد حتى نهاية السنة: ${formatCurrency(closingBalance)}</div>
+                        <div class="year-balance">رصيد أول السنة: ${formatCurrency(openingBalance)}</div>
+                        <div class="year-balance">رصيد نهاية السنة: ${formatCurrency(closingBalance)}</div>
                     </div>
-                    <div class="tx-list">${items.map(txItemHTML).join('')}</div>
+                    <div class="tx-list">${renderedItems.map(txItemHTML).join('')}</div>
                 `;
                 yearsContainer.appendChild(card);
             });
@@ -531,7 +607,6 @@
                 if (txError) throw txError;
 
                 const tenantName = tenant?.tenant_name || 'مستأجر';
-                const tenantUnit = tenant?.shop_no || '-';
                 const previousBalance = toNumber(tenant?.previous_balance);
                 const rows = Array.isArray(transactions) ? transactions : [];
                 const now = new Date();
@@ -542,11 +617,28 @@
                 const runningBal = Math.max(0, totalDue - totalCreditsFromTx);
 
                 document.getElementById('statement_tenant_name').innerText = tenantName;
-                document.getElementById('statement_meta').innerText = `الوحدة: ${tenantUnit} | تاريخ الإصدار: ${formatDateTime(now)}`;
+                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(now)}`;
                 document.getElementById('footer_year').innerText = now.getFullYear();
                 document.getElementById('sum_due').innerText = formatCurrency(totalDue);
                 document.getElementById('sum_paid').innerText = formatCurrency(totalCreditsFromTx);
                 document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
+
+                const lastPayment = getLastPayment(rows);
+                const box = document.getElementById('last_payment_box');
+
+                if (lastPayment) {
+                    const days = daysSince(lastPayment.date);
+
+                    if (days === 0) {
+                        box.innerText = `آخر دفعة: اليوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
+                    } else if (days === 1) {
+                        box.innerText = `آخر دفعة: منذ يوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
+                    } else {
+                        box.innerText = `آخر دفعة منذ ${days} يوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
+                    }
+                } else {
+                    box.innerText = 'لا يوجد دفعات مسجلة';
+                }
 
                 renderYears(previousBalance, rows);
 
