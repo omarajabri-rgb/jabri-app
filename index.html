@@ -139,40 +139,9 @@
             background: rgba(248,113,113,0.1);
             border-radius: 12px;
         }
-
-        #loader { 
-            position: fixed;
-            inset: 0; 
-            display: flex;
-            align-items: center;
-            justify-content: center; 
-            background: var(--bg);
-            z-index: 9999; 
-        }
-
-        .spinner { 
-            width: 35px;
-            height: 35px; 
-            border: 3px solid rgba(255,255,255,0.1); 
-            border-top-color: var(--gold); 
-            border-radius: 50%; 
-            animation: spin 1s linear infinite; 
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
     </style>
 </head>
 <body>
-
-    <div id="loader"><div class="spinner"></div></div>
 
     <div class="login-card">
         <div class="logo-area">
@@ -196,7 +165,7 @@
             <i data-lucide="log-in" size="18"></i>
         </button>
 
-        <div id="error_msg">عذراً، هذا الكود غير مسجل لدينا.</div>
+        <div id="error_msg"></div>
         
         <div style="margin-top: 40px; font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: 1px;">
             © 2026 JABRI INDUSTRIAL COMPLEX
@@ -206,6 +175,7 @@
     <script>
         const { createClient } = supabase;
 
+        // إعدادات Supabase الخاصة بمشروع Jabri Complex
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
@@ -213,74 +183,52 @@
 
         window.onload = () => {
             document.body.style.opacity = "1";
-            document.getElementById('loader').style.display = 'none';
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-
-            const input = document.getElementById('tenant_code_input');
-
-            input.addEventListener('input', function () {
-                this.value = this.value.toUpperCase().replace(/\s+/g, '');
-            });
-
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') handleLogin();
-            });
-
+            if (window.lucide) lucide.createIcons();
+            
+            // التحقق من وجود جلسة سابقة
             const savedCode = localStorage.getItem('jabri_tenant_code');
-            if (savedCode) {
-                window.location.href = "tenant.html";
-            }
+            if (savedCode) window.location.href = "tenant.html";
         };
 
         async function handleLogin() {
-            const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
+            const input = document.getElementById('tenant_code_input');
+            const code = input.value.trim().toUpperCase(); // تنظيف الكود وتحويله لحروف كبيرة
             const errorEl = document.getElementById('error_msg');
             const loginBtn = document.getElementById('login_btn');
-            const card = document.querySelector('.login-card');
 
             if (!code) {
                 showError("يرجى إدخال كود الوحدة.");
-                shakeCard(card);
                 return;
             }
 
             errorEl.style.display = "none";
             loginBtn.disabled = true;
-            loginBtn.innerHTML = `جاري التحقق...`;
+            loginBtn.innerText = "جاري التحقق...";
 
             try {
-                // تعديل الاستعلام ليتوافق مع أسماء الأعمدة في قاعدة البيانات (tenant_name)
+                // البحث باستخدام tenant_code المطابق للجدول
                 const { data, error } = await supabaseClient
                     .from('tenants')
                     .select('tenant_code, tenant_name') 
                     .eq('tenant_code', code)
-                    .single();
+                    .maybeSingle(); // استخدام maybeSingle لتجنب أخطاء التكرار
 
                 if (error || !data) {
                     showError("عذراً، هذا الكود غير مسجل لدينا.");
-                    shakeCard(card);
-                    return;
+                } else {
+                    // حفظ بيانات المستأجر في التخزين المحلي
+                    localStorage.setItem('jabri_tenant_session', 'active');
+                    localStorage.setItem('jabri_tenant_code', data.tenant_code);
+                    localStorage.setItem('jabri_tenant_name', data.tenant_name); 
+
+                    window.location.href = "tenant.html";
                 }
-
-                localStorage.setItem('jabri_tenant_session', 'active');
-                localStorage.setItem('jabri_tenant_code', data.tenant_code);
-                localStorage.setItem('jabri_tenant_name', data.tenant_name); // استخدام tenant_name المحدث
-
-                window.location.href = "tenant.html";
-
             } catch (err) {
-                console.error(err);
                 showError("حدث خطأ في الاتصال. حاول مرة أخرى.");
-                shakeCard(card);
             } finally {
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = `دخول للمنصة <i data-lucide="log-in" size="18"></i>`;
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
+                loginBtn.innerText = "دخول للمنصة";
+                if (window.lucide) lucide.createIcons();
             }
         }
 
@@ -290,12 +238,10 @@
             errorEl.style.display = "block";
         }
 
-        function shakeCard(card) {
-            card.style.animation = "shake 0.4s ease";
-            setTimeout(() => {
-                card.style.animation = "";
-            }, 400);
-        }
+        // تشغيل تسجيل الدخول عند ضغط مفتاح Enter
+        document.getElementById('tenant_code_input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
     </script>
 </body>
 </html>
