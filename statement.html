@@ -55,13 +55,16 @@
             align-items: center;
             margin-bottom: 25px;
             gap: 12px;
-            flex-wrap: wrap;
+        }
+
+        .header-area img {
+            height: 35px;
+            width: auto;
         }
 
         .header-actions {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .back-btn {
@@ -80,11 +83,6 @@
             transition: 0.25s;
         }
 
-        .back-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(255,255,255,0.1);
-        }
-
         .save-btn {
             background: var(--gold);
             color: var(--navy);
@@ -101,11 +99,9 @@
             text-align: center;
         }
 
-        .statement-header h1 {
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--gold);
+        .statement-header img {
+            height: 60px;
+            margin-bottom: 15px;
         }
 
         .statement-header h2 {
@@ -141,14 +137,6 @@
             text-align: center;
         }
 
-        .summary-item span {
-            display: block;
-            font-size: 9px;
-            color: var(--muted);
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
         .summary-item b {
             font-size: 12px;
             font-weight: 900;
@@ -160,12 +148,9 @@
             border: 1px solid var(--border);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .table-wrap {
-            overflow-x: auto;
-        }
+        .table-wrap { overflow-x: auto; }
 
         table {
             width: 100%;
@@ -181,8 +166,6 @@
             padding: 15px 12px;
             font-weight: 800;
             border-bottom: 1px solid var(--border);
-            font-size: 11px;
-            white-space: nowrap;
         }
 
         td {
@@ -190,46 +173,11 @@
             border-bottom: 1px solid rgba(255,255,255,0.04);
             color: #e2e8f0;
             font-weight: 600;
-            white-space: nowrap;
         }
 
-        .amt-debit {
-            color: var(--danger);
-            font-weight: 800;
-        }
-
-        .amt-credit {
-            color: var(--success);
-            font-weight: 800;
-        }
-
-        .amt-balance {
-            color: #fff;
-            font-weight: 900;
-        }
-
-        .carry-row td {
-            background: rgba(255,255,255,0.02);
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        .row-animate {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: 0.4s ease;
-        }
-
-        .row-animate.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .empty-row td {
-            text-align: center;
-            color: var(--muted);
-            padding: 30px 12px;
-        }
+        .amt-debit { color: var(--danger); font-weight: 800; }
+        .amt-credit { color: var(--success); font-weight: 800; }
+        .amt-balance { color: #fff; font-weight: 900; }
 
         #loader {
             position: fixed;
@@ -250,84 +198,14 @@
             animation: spin 1s linear infinite;
         }
 
-        .footer-note {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 10px;
-            color: var(--muted);
-            line-height: 1.7;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 640px) {
-            .summary-box {
-                grid-template-columns: 1fr;
-            }
-
-            .statement-header h1 {
-                font-size: 20px;
-            }
-
-            .statement-header h2 {
-                font-size: 16px;
-            }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         @media print {
-            body {
-                background: #fff;
-                color: #000;
-                padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            .header-actions,
-            #loader {
-                display: none !important;
-            }
-
-            .statement-header,
-            .statement-container,
-            .summary-box {
-                border: 1px solid #ccc;
-                background: #fff;
-                box-shadow: none;
-            }
-
-            .statement-header h1,
-            .statement-header h2 {
-                color: #000 !important;
-            }
-
-            .statement-header p,
-            .footer-note,
-            .summary-item span,
-            .summary-item b {
-                color: #000 !important;
-            }
-
-            th {
-                background: #f2f2f2;
-                color: #000;
-            }
-
-            td,
-            .summary-item b,
-            .summary-item span,
-            .footer-note {
-                color: #000 !important;
-            }
-
-            .amt-debit,
-            .amt-credit,
-            .amt-balance {
-                color: #000 !important;
-                font-weight: bold;
-            }
+            body { background: #fff; color: #000; opacity: 1 !important; }
+            .header-actions, #loader { display: none !important; }
+            .statement-header, .statement-container, .summary-box { border: 1px solid #ccc; background: #fff; }
+            th { background: #f2f2f2; color: #000; }
+            td, .summary-item b { color: #000 !important; }
         }
     </style>
 </head>
@@ -338,37 +216,22 @@
     <div class="wrap">
         <div class="header-area">
             <div class="header-actions">
-                <button class="back-btn" onclick="goBack()">
-                    <i data-lucide="arrow-right"></i>
-                    رجوع
-                </button>
-                <button class="back-btn save-btn" onclick="savePDF()">
-                    <i data-lucide="download"></i>
-                    حفظ PDF
-                </button>
+                <button class="back-btn" onclick="goBack()"><i data-lucide="arrow-right"></i> رجوع</button>
+                <button class="back-btn save-btn" onclick="savePDF()"><i data-lucide="download"></i> حفظ PDF</button>
             </div>
-            <div style="font-weight:900; font-size:12px; color:var(--gold);">JABRI COMPLEX</div>
+            <img src="logo_complex.png" alt="Jabri Complex">
         </div>
 
         <div class="statement-header">
-            <h1>مجمع جبري الصناعي</h1>
+            <img src="logo_complex.png" alt="Jabri Complex Logo">
             <h2 id="statement_tenant_name">اسم المستأجر</h2>
             <p id="statement_meta">التاريخ والوقت</p>
         </div>
 
         <div class="summary-box">
-            <div class="summary-item">
-                <span>إجمالي المستحق</span>
-                <b id="sum_due">0 د.أ</b>
-            </div>
-            <div class="summary-item">
-                <span>إجمالي المدفوع</span>
-                <b id="sum_paid">0 د.أ</b>
-            </div>
-            <div class="summary-item">
-                <span>الرصيد المتبقي</span>
-                <b id="sum_balance">0 د.أ</b>
-            </div>
+            <div class="summary-item"><span>إجمالي المستحق</span><b id="sum_due">0 د.أ</b></div>
+            <div class="summary-item"><span>إجمالي المدفوع</span><b id="sum_paid">0 د.أ</b></div>
+            <div class="summary-item"><span>الرصيد المتبقي</span><b id="sum_balance">0 د.أ</b></div>
         </div>
 
         <div class="statement-container">
@@ -389,21 +252,16 @@
             </div>
         </div>
 
-        <div class="footer-note">
-            هذا الكشف مستخرج آليًا من نظام مجمع الجبري الرقمي لإدارة العقارات، ويعرض الحركات المالية بشكل تراكمي.
+        <div class="footer-note" style="text-align:center; margin-top:30px; font-size:10px; color:var(--muted);">
+            هذا الكشف مستخرج آليًا من نظام مجمع الجبري الرقمي لإدارة العقارات.
             <br>
             © <span id="footer_year"></span> JABRI INDUSTRIAL COMPLEX
         </div>
     </div>
 
     <script>
-        const tenantSession = localStorage.getItem('jabri_tenant_session');
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-
-        if (!tenantSession || !tenantCode) {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
+        if (!tenantCode) { window.location.href = "index.html"; }
 
         const { createClient } = supabase;
         const supabaseClient = createClient(
@@ -411,149 +269,61 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function formatCurrency(v) {
-            return `${Number(v || 0).toLocaleString('en-US')} د.أ`;
-        }
-
-        function formatDate(value) {
-            if (!value) return '-';
-            return new Date(value).toLocaleDateString('ar-JO');
-        }
-
-        function formatDateTime(value) {
-            return new Date(value).toLocaleString('ar-JO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit'
-            });
-        }
-
-        function goBack() {
-            window.location.href = 'tenant.html';
-        }
+        function formatCurrency(v) { return `${Number(v || 0).toLocaleString('en-US')} د.أ`; }
+        function formatDate(value) { return value ? new Date(value).toLocaleDateString('ar-JO') : '-'; }
+        function goBack() { window.location.href = 'tenant.html'; }
 
         function savePDF() {
             const element = document.body;
-            const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
-            const opt = {
+            const tName = document.getElementById('statement_tenant_name').innerText;
+            html2pdf().set({
                 margin: 5,
-                filename: `كشف_حساب_${tenantName}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
+                filename: `كشف_حساب_${tName}.pdf`,
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-
-        function addRow(tbody, html, delay, extraClass = '') {
-            const tr = document.createElement('tr');
-            tr.className = `row-animate ${extraClass}`.trim();
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
-            setTimeout(() => tr.classList.add('show'), delay);
+            }).from(element).save();
         }
 
         window.onload = async () => {
             try {
-                const [{ data: tenant, error: tenantError }, { data: transactions, error: txError }] = await Promise.all([
-                    supabaseClient
-                        .from('tenants')
-                        .select('*')
-                        .eq('tenant_code', tenantCode)
-                        .single(),
-                    supabaseClient
-                        .from('tenant_transactions')
-                        .select('*')
-                        .eq('tenant_code', tenantCode)
-                        .order('date', { ascending: true })
+                // MATCHED: tenant_name, shop_no, previous_balance from Supabase
+                const [{ data: tenant }, { data: transactions }] = await Promise.all([
+                    supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).single(),
+                    supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true })
                 ]);
 
-                if (tenantError) throw tenantError;
-                if (txError) throw txError;
-
-                const tenantName = tenant?.name || 'مستأجر';
-                const tenantUnit = tenant?.unit || '-';
+                const tenantName = tenant?.tenant_name || 'مستأجر';
+                const tenantUnit = tenant?.shop_no || '-';
                 const previousBalance = Number(tenant?.previous_balance) || 0;
-                const rows = Array.isArray(transactions) ? transactions : [];
-                const now = new Date();
 
                 document.getElementById('statement_tenant_name').innerText = tenantName;
-                document.getElementById('statement_meta').innerText = `الوحدة: ${tenantUnit} | تاريخ الإصدار: ${formatDateTime(now)}`;
-                document.getElementById('footer_year').innerText = now.getFullYear();
+                document.getElementById('statement_meta').innerText = `الوحدة: ${tenantUnit} | تاريخ الإصدار: ${new Date().toLocaleString('ar-JO')}`;
+                document.getElementById('footer_year').innerText = new Date().getFullYear();
 
                 let runningBal = previousBalance;
                 let totalDeb = previousBalance;
                 let totalCre = 0;
-
                 const tbody = document.getElementById('statement_body');
-                tbody.innerHTML = '';
 
                 if (previousBalance > 0) {
-                    addRow(
-                        tbody,
-                        `
-                        <td>-</td>
-                        <td>-</td>
-                        <td class="amt-debit">${formatCurrency(previousBalance)}</td>
-                        <td class="amt-balance">${formatCurrency(previousBalance)}</td>
-                        <td>رصيد مدور سابق</td>
-                        <td>-</td>
-                        `,
-                        30,
-                        'carry-row'
-                    );
+                    tbody.innerHTML += `<tr style="background:rgba(255,255,255,0.02)"><td>-</td><td>-</td><td class="amt-debit">${formatCurrency(previousBalance)}</td><td class="amt-balance">${formatCurrency(previousBalance)}</td><td>رصيد مدور سابق</td><td>-</td></tr>`;
                 }
 
-                rows.forEach((row, i) => {
+                transactions.forEach(row => {
                     const deb = Number(row.debit || 0);
                     const cre = Number(row.credit || 0);
-
                     runningBal += deb - cre;
-                    totalDeb += deb;
-                    totalCre += cre;
+                    totalDeb += deb; totalCre += cre;
 
-                    addRow(
-                        tbody,
-                        `
-                        <td>${formatDate(row.date)}</td>
-                        <td class="amt-credit">${cre ? formatCurrency(cre) : '-'}</td>
-                        <td class="amt-debit">${deb ? formatCurrency(deb) : '-'}</td>
-                        <td class="amt-balance">${formatCurrency(Math.max(0, runningBal))}</td>
-                        <td>${row.description || '-'}</td>
-                        <td>${row.receipt_no || '-'}</td>
-                        `,
-                        (i + 1) * 50
-                    );
+                    tbody.innerHTML += `<tr><td>${formatDate(row.date)}</td><td class="amt-credit">${cre ? formatCurrency(cre) : '-'}</td><td class="amt-debit">${deb ? formatCurrency(deb) : '-'}</td><td class="amt-balance">${formatCurrency(Math.max(0, runningBal))}</td><td>${row.description || '-'}</td><td>${row.receipt_no || '-'}</td></tr>`;
                 });
-
-                if (previousBalance === 0 && rows.length === 0) {
-                    tbody.innerHTML = `
-                        <tr class="empty-row">
-                            <td colspan="6">لا توجد حركات مالية متاحة حالياً.</td>
-                        </tr>
-                    `;
-                }
 
                 document.getElementById('sum_due').innerText = formatCurrency(totalDeb);
                 document.getElementById('sum_paid').innerText = formatCurrency(totalCre);
                 document.getElementById('sum_balance').innerText = formatCurrency(Math.max(0, runningBal));
-
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
                 if (window.lucide) lucide.createIcons();
-
-            } catch (e) {
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-                document.getElementById('statement_body').innerHTML = `
-                    <tr class="empty-row">
-                        <td colspan="6">تعذر تحميل بيانات الكشف.</td>
-                    </tr>
-                `;
-                alert("تعذر تحميل بيانات الكشف.");
-            }
+            } catch (e) { console.error(e); }
         };
     </script>
 </body>
