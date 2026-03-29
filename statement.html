@@ -1,1 +1,560 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>مجمع الجبري | كشف الحساب التفصيلي</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #08111f;
+            --navy: #0f172a;
+            --gold: #d4af37;
+            --text: #ffffff;
+            --muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            --success: #4ade80;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.6s ease;
+        }
+
+        body.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 9px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .save-btn {
+            background: var(--gold);
+            color: var(--navy);
+            border: none;
+            font-weight: 900;
+        }
+
+        .statement-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 20px;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .statement-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .statement-header h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .statement-header p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.8;
+            font-weight: 700;
+        }
+
+        .summary-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 18px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .summary-item span {
+            display: block;
+            font-size: 9px;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-item b {
+            font-size: 12px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .statement-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: rgba(255,255,255,0.05);
+            color: var(--gold);
+            text-align: right;
+            padding: 15px 12px;
+            font-weight: 800;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #e2e8f0;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .amt-debit {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .amt-credit {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .amt-balance {
+            color: #fff;
+            font-weight: 900;
+        }
+
+        .carry-row td {
+            background: rgba(255,255,255,0.02);
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .row-animate {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 0.4s ease;
+        }
+
+        .row-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .empty-row td {
+            text-align: center;
+            color: var(--muted);
+            padding: 30px 12px;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .summary-box {
+                grid-template-columns: 1fr;
+            }
+
+            .statement-header h1 {
+                font-size: 20px;
+            }
+
+            .statement-header h2 {
+                font-size: 16px;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+                padding: 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            .header-actions,
+            #loader {
+                display: none !important;
+            }
+
+            .statement-header,
+            .statement-container,
+            .summary-box {
+                border: 1px solid #ccc;
+                background: #fff;
+                box-shadow: none;
+            }
+
+            .statement-header h1,
+            .statement-header h2 {
+                color: #000 !important;
+            }
+
+            .statement-header p,
+            .footer-note,
+            .summary-item span,
+            .summary-item b {
+                color: #000 !important;
+            }
+
+            th {
+                background: #f2f2f2;
+                color: #000;
+            }
+
+            td,
+            .summary-item b,
+            .summary-item span,
+            .footer-note {
+                color: #000 !important;
+            }
+
+            .amt-debit,
+            .amt-credit,
+            .amt-balance {
+                color: #000 !important;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div class="wrap">
+        <div class="header-area">
+            <div class="header-actions">
+                <button class="back-btn" onclick="goBack()">
+                    <i data-lucide="arrow-right"></i>
+                    رجوع
+                </button>
+                <button class="back-btn save-btn" onclick="savePDF()">
+                    <i data-lucide="download"></i>
+                    حفظ PDF
+                </button>
+            </div>
+            <div style="font-weight:900; font-size:12px; color:var(--gold);">JABRI COMPLEX</div>
+        </div>
+
+        <div class="statement-header">
+            <h1>مجمع جبري الصناعي</h1>
+            <h2 id="statement_tenant_name">اسم المستأجر</h2>
+            <p id="statement_meta">التاريخ والوقت</p>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-item">
+                <span>إجمالي المستحق</span>
+                <b id="sum_due">0 د.أ</b>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي المدفوع</span>
+                <b id="sum_paid">0 د.أ</b>
+            </div>
+            <div class="summary-item">
+                <span>الرصيد المتبقي</span>
+                <b id="sum_balance">0 د.أ</b>
+            </div>
+        </div>
+
+        <div class="statement-container">
+            <div class="table-wrap">
+                <table id="statement_table">
+                    <thead>
+                        <tr>
+                            <th>تاريخ الدفعة</th>
+                            <th>دائن</th>
+                            <th>مدين</th>
+                            <th>الرصيد</th>
+                            <th>البيان</th>
+                            <th>رقم السند</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statement_body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            هذا الكشف مستخرج آليًا من نظام مجمع الجبري الرقمي لإدارة العقارات، ويعرض الحركات المالية بشكل تراكمي.
+            <br>
+            © <span id="footer_year"></span> JABRI INDUSTRIAL COMPLEX
+        </div>
+    </div>
+
+    <script>
+        const tenantSession = localStorage.getItem('jabri_tenant_session');
+        const tenantId = localStorage.getItem('jabri_tenant_id');
+
+        if (!tenantSession || !tenantId || isNaN(tenantId)) {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+        const { createClient } = supabase;
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        function formatCurrency(v) {
+            return `${Number(v || 0).toLocaleString('en-US')} د.أ`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+            return new Date(value).toLocaleDateString('ar-JO');
+        }
+
+        function formatDateTime(value) {
+            return new Date(value).toLocaleString('ar-JO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        function goBack() {
+            window.location.href = 'tenant.html';
+        }
+
+        function savePDF() {
+            const element = document.body;
+            const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
+            const opt = {
+                margin: 5,
+                filename: `كشف_حساب_${tenantName}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function addRow(tbody, html, delay, extraClass = '') {
+            const tr = document.createElement('tr');
+            tr.className = `row-animate ${extraClass}`.trim();
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+            setTimeout(() => tr.classList.add('show'), delay);
+        }
+
+        window.onload = async () => {
+            try {
+                const [{ data: tenant, error: tenantError }, { data: transactions, error: txError }] = await Promise.all([
+                    supabaseClient
+                        .from('tenants')
+                        .select('*')
+                        .eq('id', tenantId)
+                        .single(),
+                    supabaseClient
+                        .from('tenant_transactions')
+                        .select('*')
+                        .eq('tenant_id', tenantId)
+                        .order('date', { ascending: true })
+                ]);
+
+                if (tenantError) throw tenantError;
+                if (txError) throw txError;
+
+                const tenantName = tenant?.name || 'مستأجر';
+                const tenantUnit = tenant?.unit || '-';
+                const previousBalance = Number(tenant?.previous_balance) || 0;
+                const rows = Array.isArray(transactions) ? transactions : [];
+                const now = new Date();
+
+                document.getElementById('statement_tenant_name').innerText = tenantName;
+                document.getElementById('statement_meta').innerText = `الوحدة: ${tenantUnit} | تاريخ الإصدار: ${formatDateTime(now)}`;
+                document.getElementById('footer_year').innerText = now.getFullYear();
+
+                let runningBal = previousBalance;
+                let totalDeb = previousBalance;
+                let totalCre = 0;
+
+                const tbody = document.getElementById('statement_body');
+                tbody.innerHTML = '';
+
+                if (previousBalance > 0) {
+                    addRow(
+                        tbody,
+                        `
+                        <td>-</td>
+                        <td>-</td>
+                        <td class="amt-debit">${formatCurrency(previousBalance)}</td>
+                        <td class="amt-balance">${formatCurrency(previousBalance)}</td>
+                        <td>رصيد مدور سابق</td>
+                        <td>-</td>
+                        `,
+                        30,
+                        'carry-row'
+                    );
+                }
+
+                rows.forEach((row, i) => {
+                    const deb = Number(row.debit || 0);
+                    const cre = Number(row.credit || 0);
+
+                    runningBal += deb - cre;
+                    totalDeb += deb;
+                    totalCre += cre;
+
+                    addRow(
+                        tbody,
+                        `
+                        <td>${formatDate(row.date)}</td>
+                        <td class="amt-credit">${cre ? formatCurrency(cre) : '-'}</td>
+                        <td class="amt-debit">${deb ? formatCurrency(deb) : '-'}</td>
+                        <td class="amt-balance">${formatCurrency(Math.max(0, runningBal))}</td>
+                        <td>${row.description || '-'}</td>
+                        <td>${row.receipt_no || '-'}</td>
+                        `,
+                        (i + 1) * 50
+                    );
+                });
+
+                if (previousBalance === 0 && rows.length === 0) {
+                    tbody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="6">لا توجد حركات مالية متاحة حالياً.</td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById('sum_due').innerText = formatCurrency(totalDeb);
+                document.getElementById('sum_paid').innerText = formatCurrency(totalCre);
+                document.getElementById('sum_balance').innerText = formatCurrency(Math.max(0, runningBal));
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                if (window.lucide) lucide.createIcons();
+
+            } catch (e) {
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                document.getElementById('statement_body').innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="6">تعذر تحميل بيانات الكشف.</td>
+                    </tr>
+                `;
+                alert("تعذر تحميل بيانات الكشف.");
+            }
+        };
+    </script>
+</body>
+</html>
