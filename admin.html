@@ -179,10 +179,25 @@
         }
 
         .mini-stat{
-            background:rgba(255,255,255,0.84);
             border:1px solid var(--line);
             border-radius:20px;
             padding:16px;
+        }
+
+        .mini-stat:nth-child(1){
+            background:linear-gradient(135deg, rgba(201,164,107,0.15), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(2){
+            background:linear-gradient(135deg, rgba(59,130,246,0.10), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(3){
+            background:linear-gradient(135deg, rgba(209,77,77,0.09), rgba(255,255,255,0.92));
+        }
+
+        .mini-stat:nth-child(4){
+            background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.92));
         }
 
         .mini-stat span{
@@ -197,6 +212,16 @@
             font-size:20px;
             font-weight:900;
             color:#483621;
+            display:block;
+        }
+
+        .mini-stat small{
+            display:block;
+            margin-top:6px;
+            color:var(--muted);
+            font-size:11px;
+            font-weight:700;
+            line-height:1.5;
         }
 
         .kpi-grid{
@@ -207,14 +232,29 @@
         }
 
         .kpi-card{
-            background:var(--card);
             backdrop-filter:blur(14px);
-            border:1px solid rgba(255,255,255,0.72);
-            box-shadow:var(--shadow);
+            border:1px solid rgba(255,255,255,0.75);
+            box-shadow:0 18px 45px rgba(87,68,37,0.10);
             border-radius:24px;
             padding:18px;
             position:relative;
             overflow:hidden;
+        }
+
+        .kpi-card:nth-child(1){
+            background:linear-gradient(135deg, rgba(201,164,107,0.18), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(2){
+            background:linear-gradient(135deg, rgba(21,154,111,0.10), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(3){
+            background:linear-gradient(135deg, rgba(209,77,77,0.10), rgba(255,255,255,0.88));
+        }
+
+        .kpi-card:nth-child(4){
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.88));
         }
 
         .kpi-card::after{
@@ -265,13 +305,6 @@
             color:var(--muted);
         }
 
-        .dashboard-grid{
-            display:grid;
-            grid-template-columns:1.08fr .92fr;
-            gap:18px;
-            margin-bottom:18px;
-        }
-
         .panel{
             background:var(--card);
             backdrop-filter:blur(14px);
@@ -310,6 +343,20 @@
             font-weight:700;
         }
 
+        .chart-grid{
+            display:grid;
+            grid-template-columns:1.08fr .92fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+
+        .data-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+
         .chart-wrap{
             background:rgba(255,255,255,0.76);
             border:1px solid var(--line);
@@ -321,13 +368,6 @@
         .chart-wrap canvas{
             width:100% !important;
             height:280px !important;
-        }
-
-        .filters{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-            margin-bottom:16px;
         }
 
         .field{
@@ -362,49 +402,16 @@
             background:#fff;
         }
 
-        .tenant-balance-preview{
-            display:none;
-            grid-template-columns:repeat(4,1fr);
-            gap:12px;
-            margin:14px 0 18px;
-        }
-
-        .preview-card{
-            background:rgba(255,255,255,0.78);
-            border:1px solid var(--line);
-            border-radius:18px;
-            padding:14px;
-            text-align:center;
-            box-shadow:0 8px 18px rgba(0,0,0,0.04);
-        }
-
-        .preview-card span{
-            display:block;
-            font-size:11px;
-            font-weight:800;
-            color:#8a7d6a;
-            margin-bottom:8px;
-        }
-
-        .preview-card b{
-            font-size:15px;
-            font-weight:900;
-            color:#4c3922;
-        }
-
-        .preview-card.highlight{
-            background:linear-gradient(135deg, rgba(201,164,107,0.18), rgba(255,255,255,0.92));
-        }
-
         .smart-strip{
             display:none;
-            grid-template-columns:repeat(3,1fr);
+            grid-template-columns:1fr;
             gap:12px;
+            margin-top:14px;
             margin-bottom:18px;
         }
 
         .smart-item{
-            background:rgba(255,255,255,0.76);
+            background:linear-gradient(135deg, rgba(201,164,107,0.12), rgba(255,255,255,0.95));
             border:1px solid var(--line);
             border-radius:18px;
             padding:14px;
@@ -423,6 +430,12 @@
             font-size:14px;
             font-weight:900;
             color:#47341f;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
         }
 
         .status-pill{
@@ -450,53 +463,6 @@
             color:var(--danger);
         }
 
-        .form-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-        }
-
-        .table-card{
-            background:rgba(255,255,255,0.78);
-            border:1px solid var(--line);
-            border-radius:22px;
-            overflow:hidden;
-        }
-
-        .table-wrap{
-            overflow:auto;
-        }
-
-        table{
-            width:100%;
-            min-width:700px;
-            border-collapse:collapse;
-        }
-
-        th{
-            background:rgba(201,164,107,0.09);
-            color:#7b5b2d;
-            font-size:11px;
-            font-weight:900;
-            padding:14px 12px;
-            text-align:right;
-            border-bottom:1px solid var(--line);
-            white-space:nowrap;
-        }
-
-        td{
-            padding:13px 12px;
-            border-bottom:1px solid rgba(81,64,36,0.08);
-            font-size:13px;
-            font-weight:700;
-            color:#374151;
-            white-space:nowrap;
-        }
-
-        tr:hover td{
-            background:rgba(201,164,107,0.04);
-        }
-
         .amount-danger{
             color:var(--danger);
             font-weight:900;
@@ -507,19 +473,14 @@
             font-weight:900;
         }
 
-        .amount-gold{
-            color:#6e532b;
-            font-weight:900;
-        }
-
         .list-stack{
             display:grid;
             gap:12px;
         }
 
         .tenant-card-row{
-            background:rgba(255,255,255,0.78);
             border:1px solid var(--line);
+            transition:.25s ease;
             border-radius:20px;
             padding:14px;
             display:flex;
@@ -527,6 +488,23 @@
             justify-content:space-between;
             gap:12px;
             flex-wrap:wrap;
+        }
+
+        .tenant-card-row:hover{
+            transform:translateY(-2px);
+            box-shadow:0 14px 28px rgba(87,68,37,0.08);
+        }
+
+        .tenant-card-row.good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.08), rgba(255,255,255,0.92));
+        }
+
+        .tenant-card-row.warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.10), rgba(255,255,255,0.92));
+        }
+
+        .tenant-card-row.bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.08), rgba(255,255,255,0.92));
         }
 
         .tenant-main h4{
@@ -608,7 +586,8 @@
         }
 
         @media (max-width: 1100px){
-            .dashboard-grid,
+            .chart-grid,
+            .data-grid,
             .hero-grid{
                 grid-template-columns:1fr;
             }
@@ -616,18 +595,9 @@
             .kpi-grid{
                 grid-template-columns:repeat(2,1fr);
             }
-
-            .tenant-balance-preview{
-                grid-template-columns:repeat(2,1fr);
-            }
-
-            .smart-strip{
-                grid-template-columns:1fr;
-            }
         }
 
         @media (max-width: 768px){
-            .filters,
             .form-grid,
             .hero-stats{
                 grid-template-columns:1fr;
@@ -647,10 +617,6 @@
 
             .chart-wrap canvas{
                 height:240px !important;
-            }
-
-            .tenant-balance-preview{
-                grid-template-columns:1fr;
             }
         }
     </style>
@@ -693,8 +659,8 @@
                 <div>
                     <h2>نظرة شاملة على المجمع</h2>
                     <p>
-                        من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، قائمة المستأجرين، الرسوم البيانية،
-                        وتدخل أي حركة جديدة مع ظهور رصيد المستأجر فور اختياره من القائمة.
+                        من هنا تتابع إجمالي المدين والدائن، الرصيد المتبقي، الرسوم البيانية،
+                        وتدخل أي حركة جديدة بعد اختيار المستأجر مباشرة.
                     </p>
                 </div>
 
@@ -702,18 +668,22 @@
                     <div class="mini-stat">
                         <span>عدد المستأجرين</span>
                         <b id="hero_total_tenants">0</b>
+                        <small>عدد السجلات الموجودة بجدول المستأجرين</small>
                     </div>
                     <div class="mini-stat">
-                        <span>عدد الحركات</span>
-                        <b id="hero_total_tx">0</b>
+                        <span>الوحدات النشطة</span>
+                        <b id="hero_active_units">0</b>
+                        <small>عدد المستأجرين الذين لديهم كود ووحدة</small>
                     </div>
                     <div class="mini-stat">
                         <span>إجمالي المتبقي</span>
                         <b id="hero_total_balance">0 د.أ</b>
+                        <small>إجمالي المبالغ غير المسددة حاليًا</small>
                     </div>
                     <div class="mini-stat">
                         <span>نسبة التحصيل</span>
                         <b id="hero_collection_rate">0%</b>
+                        <small>المحصّل مقارنة بإجمالي المستحق</small>
                     </div>
                 </div>
             </div>
@@ -749,15 +719,41 @@
 
             <div class="kpi-card">
                 <div class="kpi-head">
-                    <span>المتأخرون</span>
-                    <div class="icon-chip"><i data-lucide="users"></i></div>
+                    <span>إجمالي الرصيد المستحق</span>
+                    <div class="icon-chip"><i data-lucide="badge-alert"></i></div>
                 </div>
-                <div class="kpi-value" id="kpi_late_count">0</div>
-                <div class="kpi-sub">عدد المستأجرين الذين لديهم رصيد قائم</div>
+                <div class="kpi-value" id="kpi_total_outstanding">0 د.أ</div>
+                <div class="kpi-sub">إجمالي المبالغ القائمة غير المسددة</div>
             </div>
         </section>
 
-        <section class="dashboard-grid">
+        <section class="panel" style="margin-bottom:18px;">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <div class="icon-chip"><i data-lucide="user-round-search"></i></div>
+                    <div>
+                        <h3>اختيار المستأجر</h3>
+                        <p>اختر المستأجر قبل تسجيل الحركة المالية</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>اختيار المستأجر</label>
+                <select id="tenant_select">
+                    <option value="">جاري تحميل القائمة...</option>
+                </select>
+            </div>
+
+            <div id="smart_strip" class="smart-strip">
+                <div class="smart-item">
+                    <span>آخر دفعة</span>
+                    <b id="preview_last_payment">-</b>
+                </div>
+            </div>
+        </section>
+
+        <section class="chart-grid">
             <div class="panel">
                 <div class="panel-head">
                     <div class="panel-title">
@@ -789,63 +785,15 @@
             </div>
         </section>
 
-        <section class="dashboard-grid">
+        <section class="data-grid">
             <div class="panel">
                 <div class="panel-head">
                     <div class="panel-title">
                         <div class="icon-chip"><i data-lucide="plus-circle"></i></div>
                         <div>
                             <h3>إدخال حركة مالية</h3>
-                            <p>اختر المستأجر أولًا ليظهر رصيده الذكي</p>
+                            <p>سجل الحركة المالية للمستأجر المحدد</p>
                         </div>
-                    </div>
-                </div>
-
-                <div class="filters">
-                    <div class="field">
-                        <label>اختيار المستأجر</label>
-                        <select id="tenant_select">
-                            <option value="">جاري تحميل القائمة...</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label>بحث سريع</label>
-                        <input type="text" id="tenant_search" placeholder="ابحث بالاسم أو الكود أو الوحدة" />
-                    </div>
-                </div>
-
-                <div id="tenant_balance_preview" class="tenant-balance-preview">
-                    <div class="preview-card">
-                        <span>الرصيد السابق</span>
-                        <b id="preview_previous_balance">0.000 د.أ</b>
-                    </div>
-                    <div class="preview-card">
-                        <span>إجمالي المدين</span>
-                        <b id="preview_total_debit">0.000 د.أ</b>
-                    </div>
-                    <div class="preview-card">
-                        <span>إجمالي الدائن</span>
-                        <b id="preview_total_credit">0.000 د.أ</b>
-                    </div>
-                    <div class="preview-card highlight">
-                        <span>الرصيد الحالي</span>
-                        <b id="preview_current_balance">0.000 د.أ</b>
-                    </div>
-                </div>
-
-                <div id="smart_strip" class="smart-strip">
-                    <div class="smart-item">
-                        <span>آخر دفعة</span>
-                        <b id="preview_last_payment">-</b>
-                    </div>
-                    <div class="smart-item">
-                        <span>آخر حركة</span>
-                        <b id="preview_last_tx_date">-</b>
-                    </div>
-                    <div class="smart-item">
-                        <span>حالة الحساب</span>
-                        <b id="preview_status_badge">-</b>
                     </div>
                 </div>
 
@@ -910,38 +858,6 @@
             </div>
         </section>
 
-        <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <div class="icon-chip"><i data-lucide="history"></i></div>
-                    <div>
-                        <h3>آخر الحركات المالية</h3>
-                        <p>آخر 10 قيود تمت إضافتها</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-card">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>المستأجر</th>
-                                <th>البيان</th>
-                                <th>مدين</th>
-                                <th>دائن</th>
-                                <th>رقم السند</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent_tx_body">
-                            <tr><td colspan="6" class="empty">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
         <div class="footer-note">
             © 2026 JABRI INDUSTRIAL COMPLEX — لوحة الإدارة الذكية
         </div>
@@ -949,7 +865,7 @@
 
     <script>
         // حماية إدارة بسيطة
-        // إذا عندك admin-login.html فعل هذا الشرط
+        // إذا عندك admin-login.html فعّل السطر داخل الشرط
         if (localStorage.getItem('jabri_admin_session') !== 'active') {
             // window.location.href = 'admin-login.html';
         }
@@ -1026,8 +942,8 @@
         function logoutAdmin() {
             localStorage.removeItem('jabri_admin_session');
             localStorage.removeItem('jabri_admin_user');
-            // window.location.href = 'admin-login.html';
             alert('تم تسجيل خروج الإدارة.');
+            // window.location.href = 'admin-login.html';
         }
 
         async function loadData() {
@@ -1036,7 +952,6 @@
                     .from('tenants')
                     .select('*')
                     .order('tenant_name', { ascending: true }),
-
                 supabaseClient
                     .from('tenant_transactions')
                     .select('*')
@@ -1064,18 +979,13 @@
                     .filter(t => toNumber(t.credit) > 0)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
 
-                const lastTx = [...tx]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
-
                 return {
                     ...tenant,
-                    tx,
                     previousBalance,
                     totalDebit,
                     totalCredit,
                     currentBalance,
-                    lastPayment,
-                    lastTx
+                    lastPayment
                 };
             }).sort((a, b) => b.currentBalance - a.currentBalance);
         }
@@ -1104,16 +1014,20 @@
 
             const totalDebit = previousTotal + totalDebitOnly;
             const totalBalance = Math.max(0, totalDebit - totalCredit);
-            const lateCount = tenantBalances.filter(t => t.currentBalance > 0).length;
+            const totalOutstanding = tenantBalances.reduce((sum, t) => {
+                return sum + (t.currentBalance > 0 ? t.currentBalance : 0);
+            }, 0);
+
             const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 100;
+            const activeUnits = allTenants.filter(t => (t.tenant_code || '').trim() !== '').length;
 
             document.getElementById('kpi_total_debit').innerText = formatCurrency(totalDebit);
             document.getElementById('kpi_total_credit').innerText = formatCurrency(totalCredit);
             document.getElementById('kpi_total_balance').innerText = formatCurrency(totalBalance);
-            document.getElementById('kpi_late_count').innerText = lateCount;
+            document.getElementById('kpi_total_outstanding').innerText = formatCurrency(totalOutstanding);
 
             document.getElementById('hero_total_tenants').innerText = allTenants.length;
-            document.getElementById('hero_total_tx').innerText = allTransactions.length;
+            document.getElementById('hero_active_units').innerText = activeUnits;
             document.getElementById('hero_total_balance').innerText = formatCurrency(totalBalance);
             document.getElementById('hero_collection_rate').innerText = `${collectionRate}%`;
 
@@ -1133,7 +1047,10 @@
                 data: {
                     labels: ['إجمالي المدفوع', 'الرصيد المتبقي'],
                     datasets: [{
-                        data: [totalCredit, totalBalance]
+                        data: [totalCredit, totalBalance],
+                        borderWidth: 0,
+                        backgroundColor: ['#159a6f', '#d14d4d'],
+                        hoverOffset: 6
                     }]
                 },
                 options: {
@@ -1200,13 +1117,21 @@
                             label: 'مدين',
                             data: debitSeries,
                             tension: 0.35,
-                            fill: false
+                            fill: false,
+                            borderColor: '#c9a46b',
+                            backgroundColor: '#c9a46b',
+                            borderWidth: 3,
+                            pointRadius: 3
                         },
                         {
                             label: 'دائن',
                             data: creditSeries,
                             tension: 0.35,
-                            fill: false
+                            fill: false,
+                            borderColor: '#159a6f',
+                            backgroundColor: '#159a6f',
+                            borderWidth: 3,
+                            pointRadius: 3
                         }
                     ]
                 },
@@ -1248,34 +1173,24 @@
         function renderTenantBalances() {
             const wrap = document.getElementById('tenant_balance_cards');
             const count = document.getElementById('tenant_balance_count');
-            const search = (document.getElementById('tenant_search').value || '').trim().toLowerCase();
-
-            let rows = [...tenantBalances];
-
-            if (search) {
-                rows = rows.filter(t =>
-                    (t.tenant_name || '').toLowerCase().includes(search) ||
-                    (t.tenant_code || '').toLowerCase().includes(search) ||
-                    String(t.shop_no || '').toLowerCase().includes(search)
-                );
-            }
+            const rows = [...tenantBalances];
 
             count.innerText = `${rows.length} عنصر`;
 
             if (!rows.length) {
-                wrap.innerHTML = `<div class="empty">لا توجد نتائج مطابقة.</div>`;
+                wrap.innerHTML = `<div class="empty">لا توجد بيانات للمستأجرين.</div>`;
                 return;
             }
 
             wrap.innerHTML = rows.map(t => {
                 const status = getStatusMeta(t.currentBalance);
                 return `
-                    <div class="tenant-card-row">
+                    <div class="tenant-card-row ${status.cls}">
                         <div class="tenant-main">
                             <h4>${t.tenant_name || '-'}</h4>
                             <p>
-                                الكود: ${t.tenant_code || '-'} 
-                                ${t.shop_no ? `| الوحدة: ${t.shop_no}` : ''}
+                                الكود: ${t.tenant_code || '-'}
+                                ${t.shop_no ? ` | الوحدة: ${t.shop_no}` : ''}
                             </p>
                             <div style="margin-top:8px;">
                                 <span class="status-pill ${status.cls}">
@@ -1298,79 +1213,31 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        function renderRecentTransactions() {
-            const body = document.getElementById('recent_tx_body');
-
-            const latest = [...allTransactions]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 10);
-
-            if (!latest.length) {
-                body.innerHTML = `<tr><td colspan="6" class="empty">لا توجد حركات حديثة.</td></tr>`;
-                return;
-            }
-
-            body.innerHTML = latest.map(row => {
-                const tenant = allTenants.find(t => t.tenant_code === row.tenant_code);
-                return `
-                    <tr>
-                        <td>${formatDate(row.date)}</td>
-                        <td>${tenant?.tenant_name || row.tenant_code || '-'}</td>
-                        <td>${row.description || '-'}</td>
-                        <td class="amount-danger">${toNumber(row.debit) ? formatCurrency(row.debit) : '-'}</td>
-                        <td class="amount-success">${toNumber(row.credit) ? formatCurrency(row.credit) : '-'}</td>
-                        <td>${row.receipt_no || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
         async function loadTenantBalancePreview(tenantCode) {
             try {
-                const previewBox = document.getElementById('tenant_balance_preview');
                 const smartStrip = document.getElementById('smart_strip');
 
                 if (!tenantCode) {
-                    previewBox.style.display = 'none';
                     smartStrip.style.display = 'none';
                     return;
                 }
 
                 const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
                 if (!tenant) {
-                    previewBox.style.display = 'none';
                     smartStrip.style.display = 'none';
                     return;
                 }
 
-                const status = getStatusMeta(tenant.currentBalance);
-
-                document.getElementById('preview_previous_balance').innerText = formatCurrency(tenant.previousBalance);
-                document.getElementById('preview_total_debit').innerText = formatCurrency(tenant.totalDebit);
-                document.getElementById('preview_total_credit').innerText = formatCurrency(tenant.totalCredit);
-                document.getElementById('preview_current_balance').innerText = formatCurrency(tenant.currentBalance);
-
                 document.getElementById('preview_last_payment').innerText =
                     tenant.lastPayment ? formatCurrency(tenant.lastPayment.credit) : 'لا يوجد';
 
-                document.getElementById('preview_last_tx_date').innerText =
-                    tenant.lastTx ? formatDate(tenant.lastTx.date) : 'لا يوجد';
-
-                document.getElementById('preview_status_badge').innerHTML = `
-                    <span class="status-pill ${status.cls}">
-                        <i data-lucide="${status.icon}"></i>
-                        ${status.text}
-                    </span>
-                `;
-
-                previewBox.style.display = 'grid';
                 smartStrip.style.display = 'grid';
 
                 if (window.lucide) lucide.createIcons();
 
             } catch (error) {
                 console.error(error);
-                showStatus('تعذر تحميل رصيد المستأجر: ' + error.message, 'error');
+                showStatus('تعذر تحميل بيانات المستأجر: ' + error.message, 'error');
             }
         }
 
@@ -1414,7 +1281,6 @@
                 showStatus('تم تسجيل الحركة بنجاح.', 'success');
                 clearForm();
                 await refreshDashboard();
-
                 document.getElementById('tenant_select').value = tenant_code;
                 await loadTenantBalancePreview(tenant_code);
 
@@ -1431,7 +1297,6 @@
                 populateTenantDropdown();
                 updateKpis();
                 renderTenantBalances();
-                renderRecentTransactions();
                 document.getElementById('loader').style.display = 'none';
                 if (window.lucide) lucide.createIcons();
             } catch (error) {
@@ -1450,22 +1315,6 @@
 
                 document.getElementById('tenant_select').addEventListener('change', async function () {
                     await loadTenantBalancePreview(this.value);
-                });
-
-                document.getElementById('tenant_search').addEventListener('input', function () {
-                    renderTenantBalances();
-
-                    const value = this.value.trim().toLowerCase();
-                    const matched = allTenants.find(t =>
-                        (t.tenant_name || '').toLowerCase().includes(value) ||
-                        (t.tenant_code || '').toLowerCase().includes(value) ||
-                        String(t.shop_no || '').toLowerCase().includes(value)
-                    );
-
-                    if (matched && value) {
-                        document.getElementById('tenant_select').value = matched.tenant_code;
-                        loadTenantBalancePreview(matched.tenant_code);
-                    }
                 });
 
                 if (window.lucide) lucide.createIcons();
