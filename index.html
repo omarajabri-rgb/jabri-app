@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>مجمع الجبري | كشف الحساب التفصيلي</title>
-
+    <title>مجمع الجبري | بوابة الدخول</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -18,522 +17,204 @@
             --muted: #94a3b8;
             --border: rgba(255,255,255,0.1);
             --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            --success: #4ade80;
-            --danger: #f87171;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        
         body {
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            padding: 15px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.6s ease;
-        }
-
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .wrap {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding-bottom: 60px;
-        }
-
-        .header-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .back-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 9px 15px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(255,255,255,0.1);
-        }
-
-        .save-btn {
-            background: var(--gold);
-            color: var(--navy);
-            border: none;
-            font-weight: 900;
-        }
-
-        .logout-btn {
-            color: var(--danger);
-            border-color: rgba(248, 113, 113, 0.2);
-        }
-
-        .statement-header {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 20px;
-            margin-bottom: 18px;
-            text-align: center;
-        }
-
-        .statement-header h1 {
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--gold);
-        }
-
-        .statement-header h2 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-            font-weight: 900;
-            color: #fff;
-        }
-
-        .statement-header p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.8;
-            font-weight: 700;
-        }
-
-        .summary-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 16px;
-            margin-bottom: 18px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .summary-item {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 12px 10px;
-            text-align: center;
-        }
-
-        .summary-item span {
-            display: block;
-            font-size: 9px;
-            color: var(--muted);
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .summary-item b {
-            font-size: 12px;
-            font-weight: 900;
-            color: #fff;
-        }
-
-        .statement-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            min-width: 760px;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th {
-            background: rgba(255,255,255,0.05);
-            color: var(--gold);
-            text-align: right;
-            padding: 15px 12px;
-            font-weight: 800;
-            border-bottom: 1px solid var(--border);
-            font-size: 11px;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            color: #e2e8f0;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .amt-debit {
-            color: var(--danger);
-            font-weight: 800;
-        }
-
-        .amt-credit {
-            color: var(--success);
-            font-weight: 800;
-        }
-
-        .amt-balance {
-            color: #fff;
-            font-weight: 900;
-        }
-
-        .carry-row td {
-            background: rgba(255,255,255,0.02);
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        .row-animate {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: 0.4s ease;
-        }
-
-        .row-animate.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .empty-row td {
-            text-align: center;
-            color: var(--muted);
-            padding: 40px 12px;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
         }
 
-        .spinner {
-            width: 35px;
-            height: 35px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 45px 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            backdrop-filter: blur(10px);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .logo-area { margin-bottom: 35px; }
+        .logo-area h1 { 
+            color: var(--gold); 
+            font-size: 30px; 
+            margin: 0; 
+            font-weight: 900; 
+            letter-spacing: 1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .logo-area p { 
+            color: var(--muted); 
+            font-size: 11px; 
+            margin-top: 8px; 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        @media (max-width: 768px) {
-            .summary-box {
-                grid-template-columns: 1fr;
-            }
+        .form-group { margin-bottom: 25px; text-align: right; }
+        label { 
+            display: block; 
+            font-size: 12px; 
+            color: var(--gold); 
+            margin-bottom: 10px; 
+            font-weight: 800; 
+            padding-right: 5px; 
+        }
+        
+        input {
+            width: 100%; 
+            padding: 18px; 
+            border-radius: 16px; 
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04); 
+            color: #fff; 
+            font-size: 18px; 
+            font-weight: 700;
+            outline: none; 
+            transition: 0.3s; 
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        input:focus { 
+            border-color: var(--gold); 
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 15px rgba(212,175,55,0.1);
         }
 
-        @media print {
-            body {
-                background: #fff;
-                color: #000;
-                padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            .header-actions,
-            #loader {
-                display: none !important;
-            }
-
-            .statement-header,
-            .statement-container,
-            .summary-box {
-                border: 1px solid #eee;
-                background: #fff;
-                box-shadow: none;
-            }
-
-            th {
-                background: #f8f8f8;
-                color: #000;
-            }
-
-            td,
-            .amt-balance,
-            .amt-credit,
-            .amt-debit {
-                color: #000 !important;
-            }
+        .btn-login {
+            width: 100%; 
+            padding: 18px; 
+            border-radius: 18px; 
+            border: none;
+            background: var(--gold); 
+            color: var(--navy); 
+            font-size: 17px; 
+            font-weight: 900;
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+            box-shadow: 0 10px 20px rgba(212,175,55,0.2);
         }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(212,175,55,0.3); }
+        .btn-login:active { transform: scale(0.96); }
+
+        #error_msg { 
+            margin-top: 20px; 
+            color: #f87171; 
+            font-size: 13px; 
+            font-weight: 800; 
+            display: none;
+            padding: 10px;
+            background: rgba(248,113,113,0.1);
+            border-radius: 12px;
+        }
+
+        #loader { 
+            position: fixed; inset: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            background: var(--bg); z-index: 9999; 
+        }
+        .spinner { 
+            width: 35px; height: 35px; 
+            border: 3px solid rgba(255,255,255,0.1); 
+            border-top-color: var(--gold); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-    </div>
+    <div id="loader"><div class="spinner"></div></div>
 
-    <div class="wrap">
-        <div class="header-area">
-            <div class="header-actions">
-                <button class="back-btn" onclick="location.href='tenant.html'">
-                    <i data-lucide="arrow-right"></i>
-                    رجوع
-                </button>
-
-                <button class="back-btn save-btn" onclick="savePDF()">
-                    <i data-lucide="download"></i>
-                    حفظ PDF
-                </button>
-
-                <button class="back-btn logout-btn" onclick="logout()">
-                    <i data-lucide="log-out"></i>
-                    خروج
-                </button>
-            </div>
-
-            <div style="font-weight:900; font-size:12px; color:var(--gold);">
-                JABRI COMPLEX
-            </div>
+    <div class="login-card">
+        <div class="logo-area">
+            <h1>JABRI COMPLEX</h1>
+            <p>بوابة المستأجرين الرقمية</p>
         </div>
 
-        <div class="statement-header">
-            <h1>مجمع جبري الصناعي</h1>
-            <h2 id="statement_tenant_name">جارٍ التحميل...</h2>
-            <p id="statement_meta">-</p>
+        <div class="form-group">
+            <label>أدخل كود الوحدة الخاص بك</label>
+            <input type="text" id="tenant_code_input" placeholder="مثلاً: JC-01" autocomplete="off" spellcheck="false">
         </div>
 
-        <div class="summary-box">
-            <div class="summary-item">
-                <span>إجمالي المطالبات</span>
-                <b id="sum_due">0.000 د.أ</b>
-            </div>
+        <button class="btn-login" onclick="handleLogin()">
+            دخول للمنصة <i data-lucide="log-in" size="18"></i>
+        </button>
 
-            <div class="summary-item">
-                <span>إجمالي الواصل</span>
-                <b id="sum_paid">0.000 د.أ</b>
-            </div>
-
-            <div class="summary-item">
-                <span>الرصيد النهائي</span>
-                <b id="sum_balance" style="color:var(--gold)">0.000 د.أ</b>
-            </div>
-        </div>
-
-        <div class="statement-container">
-            <div class="table-wrap">
-                <table id="statement_table">
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>واصل (دائن)</th>
-                            <th>مترتب (مدين)</th>
-                            <th>الرصيد</th>
-                            <th>البيان</th>
-                            <th>رقم السند</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statement_body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="footer-note" style="text-align:center; margin-top:30px; font-size:10px; color:var(--muted);">
-            هذا الكشف مستخرج آلياً ويعتبر مرجعاً مالياً للحركات المسجلة في النظام.
-            <br>
-            © <span id="footer_year"></span> JABRI INDUSTRIAL COMPLEX
+        <div id="error_msg">عذراً، هذا الكود غير مسجل لدينا.</div>
+        
+        <div style="margin-top: 40px; font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: 1px;">
+            © 2026 JABRI INDUSTRIAL COMPLEX
         </div>
     </div>
 
     <script>
-        const tenantCode = localStorage.getItem('jabri_tenant_code');
-
-        if (!tenantCode) {
-            window.location.href = "index.html";
-        }
-
         const { createClient } = supabase;
+        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
-
-        function formatCurrency(value) {
-            return `${Number(value || 0).toLocaleString('en-US', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-            })} د.أ`;
-        }
-
-        function formatDate(value) {
-            if (!value) return '-';
-
-            const date = new Date(value);
-            if (isNaN(date.getTime())) return value;
-
-            return date.toLocaleDateString('ar-JO');
-        }
-
-        function formatDateTimeNow() {
-            return new Date().toLocaleString('ar-JO', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+        window.onload = () => {
+            document.body.style.opacity = "1";
+            document.getElementById('loader').style.display = 'none';
+            if (window.lucide) lucide.createIcons();
+            
+            // تحويل النص للكبير تلقائياً عند الكتابة
+            document.getElementById('tenant_code_input').addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
             });
-        }
-
-        function logout() {
-            localStorage.removeItem('jabri_tenant_code');
-            window.location.href = "index.html";
-        }
-
-        function savePDF() {
-            const element = document.querySelector('.wrap');
-            const name = document.getElementById('statement_tenant_name').innerText || 'tenant';
-
-            const opt = {
-                margin: 10,
-                filename: `كشف_حساب_${name}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).save();
-        }
-
-        window.onload = async () => {
-            const loader = document.getElementById('loader');
-            const tbody = document.getElementById('statement_body');
-
-            try {
-                const { data: tenant, error: tenantError } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .single();
-
-                if (tenantError || !tenant) {
-                    throw new Error("المستأجر غير موجود");
-                }
-
-                const { data: transactions, error: txError } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
-
-                if (txError) {
-                    throw txError;
-                }
-
-                document.getElementById('statement_tenant_name').innerText = tenant.name || '-';
-                document.getElementById('statement_meta').innerText =
-                    `الوحدة: ${tenant.unit || '-'} | تاريخ الإصدار: ${formatDateTimeNow()}`;
-                document.getElementById('footer_year').innerText = new Date().getFullYear();
-
-                let runningBal = Number(tenant.previous_balance || 0);
-                let totalDeb = Number(tenant.previous_balance || 0);
-                let totalCre = 0;
-
-                if (runningBal > 0) {
-                    const carryRow = document.createElement('tr');
-                    carryRow.className = 'carry-row show';
-                    carryRow.innerHTML = `
-                        <td>-</td>
-                        <td>-</td>
-                        <td class="amt-debit">${formatCurrency(runningBal)}</td>
-                        <td class="amt-balance">${formatCurrency(runningBal)}</td>
-                        <td>رصيد مدور سابق</td>
-                        <td>-</td>
-                    `;
-                    tbody.appendChild(carryRow);
-                }
-
-                if (!transactions || transactions.length === 0) {
-                    const emptyRow = document.createElement('tr');
-                    emptyRow.className = 'empty-row';
-                    emptyRow.innerHTML = `<td colspan="6">لا توجد حركات مسجلة</td>`;
-                    tbody.appendChild(emptyRow);
-                } else {
-                    transactions.forEach((tx, i) => {
-                        const deb = Number(tx.debit || 0);
-                        const cre = Number(tx.credit || 0);
-
-                        runningBal += (deb - cre);
-                        totalDeb += deb;
-                        totalCre += cre;
-
-                        const tr = document.createElement('tr');
-                        tr.className = 'row-animate';
-                        tr.innerHTML = `
-                            <td>${formatDate(tx.date)}</td>
-                            <td class="amt-credit">${cre > 0 ? formatCurrency(cre) : '-'}</td>
-                            <td class="amt-debit">${deb > 0 ? formatCurrency(deb) : '-'}</td>
-                            <td class="amt-balance">${formatCurrency(runningBal)}</td>
-                            <td>${tx.description || '-'}</td>
-                            <td>${tx.receipt_no || '-'}</td>
-                        `;
-
-                        tbody.appendChild(tr);
-                        setTimeout(() => tr.classList.add('show'), i * 50);
-                    });
-                }
-
-                document.getElementById('sum_due').innerText = formatCurrency(totalDeb);
-                document.getElementById('sum_paid').innerText = formatCurrency(totalCre);
-                document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
-
-                loader.style.display = 'none';
-                document.body.classList.add('loaded');
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert("حدث خطأ في تحميل كشف الحساب");
-                logout();
-            }
         };
+
+        async function handleLogin() {
+            const code = document.getElementById('tenant_code_input').value.trim();
+            const errorEl = document.getElementById('error_msg');
+            
+            if (!code) return;
+
+            errorEl.style.display = "none";
+            
+            const { data, error } = await supabaseClient
+                .from('tenants')
+                .select('tenant_code, name')
+                .eq('tenant_code', code)
+                .single();
+
+            if (data) {
+                localStorage.setItem('jabri_tenant_session', 'active');
+                localStorage.setItem('jabri_tenant_code', data.tenant_code);
+                window.location.href = "tenant.html";
+            } else {
+                errorEl.style.display = "block";
+                // رجة خفيفة للكرت عند الخطأ
+                document.querySelector('.login-card').style.animation = "shake 0.4s ease";
+                setTimeout(() => document.querySelector('.login-card').style.animation = "", 400);
+            }
+        }
+
+        // إضافة أنيميشن "الرجة" للخطأ
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }`;
+        document.head.appendChild(style);
+
+        document.getElementById('tenant_code_input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
     </script>
 </body>
 </html>
