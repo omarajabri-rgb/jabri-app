@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>إدارة مجمع الجبري | دخول الإدارة</title>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #f7f4ed;
+            --bg-2: #fdfbf6;
+            --surface: rgba(255,255,255,0.78);
+            --border: rgba(201,164,107,0.22);
+            --text: #2f2a24;
+            --muted: #7d7468;
+            --gold: #c9a46b;
+            --gold-deep: #b18a52;
+            --danger: #cc5a50;
+            --shadow: 0 18px 40px rgba(120,95,56,0.12);
+        }
+        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(201,164,107,0.12), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 24%),
+                linear-gradient(135deg, var(--bg), var(--bg-2));
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 34px 28px;
+            border-radius: 32px;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            color: var(--gold-deep);
+            font-size: 30px;
+            font-weight: 900;
+        }
+        p {
+            margin: 10px 0 24px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.8;
+        }
+        .form-group { text-align: right; margin-bottom: 14px; }
+        label { display:block; margin-bottom:8px; color: var(--gold-deep); font-size:12px; font-weight:900; }
+        input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.82);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            outline: none;
+        }
+        input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,164,107,0.10); }
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 18px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        #error_msg {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(204,90,80,0.10);
+            color: var(--danger);
+            border: 1px solid rgba(204,90,80,0.12);
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.7;
+        }
+        .hint {
+            margin-top: 18px;
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 800;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>JABRI ADMIN</h1>
+        <p>دخول الإدارة مستقل عن دخول المستأجرين. يمكنك تعديل اسم المستخدم وكلمة المرور داخل هذا الملف بسهولة.</p>
+
+        <div class="form-group">
+            <label>اسم المستخدم</label>
+            <input id="admin_user" type="text" placeholder="Admin username" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>كلمة المرور</label>
+            <input id="admin_pass" type="password" placeholder="Password" autocomplete="off">
+        </div>
+
+        <button onclick="handleAdminLogin()">
+            <i data-lucide="shield-check"></i>
+            دخول الإدارة
+        </button>
+
+        <div id="error_msg"></div>
+
+        <div class="hint">
+            الافتراضي حالياً:<br>
+            username: <b>admin</b><br>
+            password: <b>1234</b>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = '1234';
+
+        window.onload = () => {
+            if (window.lucide) lucide.createIcons();
+            document.getElementById('admin_user').addEventListener('keypress', onEnter);
+            document.getElementById('admin_pass').addEventListener('keypress', onEnter);
+        };
+
+        function onEnter(e) {
+            if (e.key === 'Enter') handleAdminLogin();
+        }
+
+        function handleAdminLogin() {
+            const user = document.getElementById('admin_user').value.trim();
+            const pass = document.getElementById('admin_pass').value.trim();
+            const err = document.getElementById('error_msg');
+
+            if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+                localStorage.setItem('jabri_admin_session', 'active');
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            err.style.display = 'block';
+            err.innerText = 'بيانات الدخول غير صحيحة. عدّل القيم داخل admin-login.html إذا أردت تغيير بيانات الإدارة.';
+        }
+    </script>
+</body>
+</html>
