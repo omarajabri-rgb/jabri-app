@@ -3,219 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>مجمع جبري | بوابة الدخول</title>
+    <title>إدارة مجمع الجبري | تسجيل الحركات</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
-            --bg: #08111f;
-            --navy: #0f172a;
-            --gold: #d4af37;
-            --text: #ffffff;
-            --muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
+            --bg: #08111f; --navy: #0f172a; --gold: #d4af37; --text: #ffffff;
+            --muted: #94a3b8; --border: rgba(255,255,255,0.1);
             --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            --danger: #f87171;
+            --success: #10b981; --danger: #ef4444;
         }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
-        
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 45px 30px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .logo-area { margin-bottom: 35px; }
-
-        /* الشعار المرفوع */
-        .logo-area img {
-            height: 60px;
-            width: auto;
-            margin-bottom: 15px;
-        }
-
-        .logo-area p { 
-            color: var(--muted); 
-            font-size: 11px; 
-            margin-top: 8px; 
-            font-weight: 800; 
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-            text-align: right;
-        }
-
-        label { 
-            display: block; 
-            font-size: 12px; 
-            color: var(--gold); 
-            margin-bottom: 10px; 
-            font-weight: 800; 
-            padding-right: 5px; 
-        }
-        
-        input {
-            width: 100%; 
-            padding: 18px; 
-            border-radius: 16px; 
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,0.04); 
-            color: #fff; 
-            font-size: 18px; 
-            font-weight: 700;
-            outline: none; 
-            text-align: center;
-            letter-spacing: 1px;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--gold); background: rgba(255,255,255,0.08); }
-
-        .btn-login {
-            width: 100%; 
-            padding: 18px; 
-            border-radius: 18px; 
-            border: none;
-            background: var(--gold); 
-            color: var(--navy); 
-            font-size: 17px; 
-            font-weight: 900;
-            cursor: pointer; 
-            transition: 0.3s; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 12px;
-        }
-
-        .btn-login:hover { transform: translateY(-2px); }
-
-        #error_msg { 
-            margin-top: 20px; 
-            color: var(--danger); 
-            font-size: 13px; 
-            font-weight: 800; 
-            display: none;
-            padding: 10px;
-            background: rgba(248,113,113,0.1);
-            border-radius: 12px;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding: 15px; opacity: 0; transition: 0.5s; }
+        .wrap { max-width: 800px; margin: 0 auto; padding-bottom: 50px; }
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { color: var(--gold); font-size: 24px; margin: 0; font-weight: 900; }
+        .admin-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; color: var(--gold); margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; font-weight: 600; outline: none; transition: 0.3s; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-submit { width: 100%; padding: 18px; border-radius: 18px; border: none; background: var(--gold); color: var(--navy); font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .status-msg { margin-top: 20px; text-align: center; font-size: 13px; font-weight: 800; padding: 12px; border-radius: 12px; display: none; }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 35px; height: 35px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="logo-area">
-            <img src="logo_complex.png" alt="Jabri Complex Logo">
-            <p>بوابة المستأجرين الرقمية</p>
-        </div>
+    <div id="loader"><div class="spinner"></div></div>
 
-        <div class="form-group">
-            <label>أدخل كود الوحدة الخاص بك</label>
-            <input type="text" id="tenant_code_input" placeholder="مثلاً: JC-01" autocomplete="off">
-        </div>
+    <div class="wrap">
+        <header>
+            <div style="font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 5px;">ADMIN PANEL</div>
+            <h1>إدارة مجمع الجبري</h1>
+        </header>
 
-        <button class="btn-login" id="login_btn" onclick="handleLogin()">
-            دخول للمنصة
-            <i data-lucide="log-in" size="18"></i>
-        </button>
+        <section class="admin-card">
+            <div class="form-group">
+                <label><i data-lucide="user"></i> اختيار المستأجر</label>
+                <select id="tenant_select">
+                    <option value="">جاري تحميل القائمة...</option>
+                </select>
+            </div>
 
-        <div id="error_msg"></div>
-        
-        <div style="margin-top: 40px; font-size: 10px; color: var(--muted); font-weight: 800;">
-            © 2026 JABRI INDUSTRIAL COMPLEX
-        </div>
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label><i data-lucide="calendar"></i> التاريخ</label>
+                    <input type="date" id="tx_date">
+                </div>
+                <div class="form-group">
+                    <label><i data-lucide="hash"></i> رقم السند</label>
+                    <input type="text" id="tx_receipt" placeholder="اختياري">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i data-lucide="file-text"></i> البيان / الوصف</label>
+                <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار">
+            </div>
+
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label style="color: var(--danger);">مدين (Debit +)</label>
+                    <input type="number" id="tx_debit" placeholder="0.00" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--success);">دائن (Credit -)</label>
+                    <input type="number" id="tx_credit" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+
+            <button class="btn-submit" onclick="submitTransaction()">
+                <i data-lucide="save"></i>
+                حفظ الحركة المالية
+            </button>
+
+            <div id="status_msg" class="status-msg"></div>
+        </section>
     </div>
 
     <script>
         const { createClient } = supabase;
-
-        // إعدادات Supabase الخاصة بك
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        async function handleLogin() {
-            const input = document.getElementById('tenant_code_input');
-            const code = input.value.trim().toUpperCase(); // تنظيف وتحويل الحروف
-            const errorEl = document.getElementById('error_msg');
-            const loginBtn = document.getElementById('login_btn');
+        window.onload = async () => {
+            document.body.style.opacity = "1";
+            document.getElementById('tx_date').valueAsDate = new Date();
+            await loadTenants();
+            document.getElementById('loader').style.display = 'none';
+            if (window.lucide) lucide.createIcons();
+        };
 
-            if (!code) {
-                showError("يرجى إدخال كود الوحدة.");
-                return;
-            }
-
-            errorEl.style.display = "none";
-            loginBtn.disabled = true;
-            loginBtn.innerText = "جاري التحقق...";
+        async function loadTenants() {
+            const select = document.getElementById('tenant_select');
 
             try {
-                // البحث في عمود 'tenant_code' وجلب 'tenant_name'
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, tenant_name') 
-                    .eq('tenant_code', code)
-                    .single();
+                    .select('tenant_code, tenant_name, unit')
+                    .order('tenant_name', { ascending: true });
 
-                if (error || !data) {
-                    showError("عذراً، هذا الكود غير مسجل لدينا.");
+                if (error) throw error;
+
+                select.innerHTML = '<option value="">-- اختر المستأجر --</option>';
+
+                if (!data || data.length === 0) {
+                    select.innerHTML = '<option value="">لا يوجد مستأجرون</option>';
                     return;
                 }
 
-                // حفظ بيانات الجلسة
-                localStorage.setItem('jabri_tenant_code', data.tenant_code);
-                localStorage.setItem('jabri_tenant_name', data.tenant_name); 
-
-                window.location.href = "tenant.html";
-
-            } catch (err) {
-                showError("خطأ في الاتصال. حاول مرة أخرى.");
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.innerText = "دخول للمنصة";
-                if (window.lucide) lucide.createIcons();
+                data.forEach(tenant => {
+                    const unitText = tenant.unit ? ` (وحدة: ${tenant.unit})` : '';
+                    select.innerHTML += `<option value="${tenant.tenant_code}">${tenant.tenant_name}${unitText}</option>`;
+                });
+            } catch (error) {
+                select.innerHTML = '<option value="">فشل تحميل المستأجرين</option>';
+                showStatus('فشل تحميل قائمة المستأجرين: ' + error.message, 'error');
             }
         }
 
-        function showError(message) {
-            const errorEl = document.getElementById('error_msg');
-            errorEl.innerText = message;
-            errorEl.style.display = "block";
+        async function submitTransaction() {
+            const tenant_code = document.getElementById('tenant_select').value.trim();
+            const date = document.getElementById('tx_date').value;
+            const description = document.getElementById('tx_desc').value.trim();
+            const debitValue = document.getElementById('tx_debit').value;
+            const creditValue = document.getElementById('tx_credit').value;
+            const receipt_no = document.getElementById('tx_receipt').value.trim();
+
+            if (!tenant_code || !description || !date) {
+                alert("يرجى تحديد المستأجر وكتابة البيان واختيار التاريخ.");
+                return;
+            }
+
+            const debit = debitValue !== "" ? Number(debitValue) : null;
+            const credit = creditValue !== "" ? Number(creditValue) : null;
+
+            if ((debit === null || debit === 0) && (credit === null || credit === 0)) {
+                alert("يرجى إدخال قيمة في المدين أو الدائن.");
+                return;
+            }
+
+            showStatus("جاري الحفظ في قاعدة البيانات...", "loading");
+
+            try {
+                const { error } = await supabaseClient
+                    .from('tenant_transactions')
+                    .insert([{
+                        tenant_code,
+                        date,
+                        description,
+                        debit: debit > 0 ? debit : null,
+                        credit: credit > 0 ? credit : null,
+                        receipt_no: receipt_no || null
+                    }]);
+
+                if (error) throw error;
+
+                showStatus("تم تسجيل الحركة بنجاح!", "success");
+                document.getElementById('tx_desc').value = "";
+                document.getElementById('tx_debit').value = "";
+                document.getElementById('tx_credit').value = "";
+                document.getElementById('tx_receipt').value = "";
+            } catch (error) {
+                showStatus("فشل الحفظ: " + error.message, "error");
+            }
         }
 
-        // تسجيل الدخول عند ضغط Enter
-        document.getElementById('tenant_code_input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
+        function showStatus(message, type) {
+            const msg = document.getElementById('status_msg');
+            msg.style.display = "block";
+            msg.innerText = message;
+
+            if (type === "success") {
+                msg.style.background = "rgba(16,185,129,0.1)";
+                msg.style.color = "var(--success)";
+            } else if (type === "error") {
+                msg.style.background = "rgba(239,68,68,0.1)";
+                msg.style.color = "var(--danger)";
+            } else {
+                msg.style.background = "rgba(212,175,55,0.1)";
+                msg.style.color = "var(--gold)";
+            }
+        }
     </script>
 </body>
 </html>
