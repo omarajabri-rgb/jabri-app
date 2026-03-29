@@ -742,9 +742,30 @@
             } finally { document.getElementById('loader').style.display = 'none'; }
         }
 
-        function clearForm() { ['tx_desc', 'tx_debit', 'tx_credit', 'tx_receipt'].forEach(id => document.getElementById(id).value = ''); }
-        function logoutAdmin() { localStorage.removeItem('jabri_admin_session'); location.reload(); }
-        function openTenantStatement() { const code = document.getElementById('tenant_select').value; if (code) { localStorage.setItem('jabri_tenant_code', code); window.open('statement.html', '_blank'); } }
+  function clearForm() {
+    ['tx_desc', 'tx_debit', 'tx_credit', 'tx_receipt'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+}
+
+function logoutAdmin() {
+    localStorage.removeItem('jabri_admin_session');
+    location.reload();
+}
+
+function openTenantStatement() {
+    const code = document.getElementById('tenant_select').value;
+
+    if (!code) {
+        alert('اختر المستأجر أولاً');
+        return;
+    }
+
+    localStorage.setItem('jabri_tenant_code', code);
+    localStorage.setItem('jabri_admin_session', 'active');
+
+    window.open('statement.html', '_blank');
+} 
 
         window.onload = async () => {
             document.body.style.opacity = '1'; document.getElementById('tx_date').valueAsDate = new Date();
