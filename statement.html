@@ -422,11 +422,16 @@
     </div>
 
     <script>
+        // --- إدارة الجلسة والصلاحيات ---
+        const adminSession = localStorage.getItem('jabri_admin_session');
         const tenantSession = localStorage.getItem('jabri_tenant_session');
         const tenantCode = localStorage.getItem('jabri_tenant_code');
 
-        if (!tenantSession || !tenantCode) {
-            localStorage.clear();
+        const isAdminViewer = adminSession === 'active';
+        const isTenantViewer = tenantSession === 'active';
+
+        // التحقق من الصلاحية: يجب وجود كود مستأجر + (جلسة أدمن أو جلسة مستأجر)
+        if (!tenantCode || (!isAdminViewer && !isTenantViewer)) {
             window.location.href = 'index.html';
         }
 
@@ -465,8 +470,13 @@
             });
         }
 
+        // --- وظيفة الرجوع الذكية ---
         function goBack() {
-            window.location.href = 'tenant.html';
+            if (isAdminViewer) {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'tenant.html';
+            }
         }
 
         function savePDF() {
@@ -536,15 +546,18 @@
 
             const years = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
 
-            if (!years.length) {
+            if (!years.length && toNumber(previousBalance) === 0) {
                 yearsContainer.innerHTML = `<div class="empty-state glass">لا توجد حركات مالية متاحة حالياً.</div>`;
                 return;
             }
 
             let carryBalance = toNumber(previousBalance);
 
-            years.forEach((year, index) => {
-                const yearRows = grouped[year].sort((a, b) => new Date(a.date) - new Date(b.date));
+            // في حال عدم وجود حركات ولكن يوجد رصيد سابق، نعرض السنة الحالية كبداية
+            const displayYears = years.length ? years : [new Date().getFullYear()];
+
+            displayYears.forEach((year, index) => {
+                const yearRows = (grouped[year] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
                 const openingBalance = carryBalance;
                 const renderedItems = [];
 
@@ -565,7 +578,6 @@
                 yearRows.forEach(row => {
                     const debit = toNumber(row.debit);
                     const credit = toNumber(row.credit);
-
                     runningBal += debit - credit;
 
                     renderedItems.push({
@@ -590,7 +602,7 @@
                         <div class="year-balance">رصيد أول السنة: ${formatCurrency(openingBalance)}</div>
                         <div class="year-balance">رصيد نهاية السنة: ${formatCurrency(closingBalance)}</div>
                     </div>
-                    <div class="tx-list">${renderedItems.map(txItemHTML).join('')}</div>
+                    <div class="tx-list">${renderedItems.length ? renderedItems.map(txItemHTML).join('') : '<div style="padding:10px; text-align:center; font-size:12px; color:var(--muted);">لا توجد حركات لهذا العام</div>'}</div>
                 `;
                 yearsContainer.appendChild(card);
             });
@@ -628,14 +640,8 @@
 
                 if (lastPayment) {
                     const days = daysSince(lastPayment.date);
-
-                    if (days === 0) {
-                        box.innerText = `آخر دفعة: اليوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
-                    } else if (days === 1) {
-                        box.innerText = `آخر دفعة: منذ يوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
-                    } else {
-                        box.innerText = `آخر دفعة منذ ${days} يوم — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
-                    }
+                    let dayText = days === 0 ? "اليوم" : (days === 1 ? "منذ يوم" : `منذ ${days} يوم`);
+                    box.innerText = `آخر دفعة: ${dayText} — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
                 } else {
                     box.innerText = 'لا يوجد دفعات مسجلة';
                 }
@@ -650,7 +656,6 @@
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
                 document.getElementById('years_container').innerHTML = `<div class="empty-state glass">تعذر تحميل بيانات الكشف.</div>`;
-                alert('تعذر تحميل بيانات الكشف.');
             }
         };
     </script>
