@@ -47,11 +47,9 @@
             margin-bottom: 30px;
         }
 
-        header h1 {
-            color: var(--gold);
-            font-size: 24px;
-            margin: 0;
-            font-weight: 900;
+        header img {
+            height: 50px;
+            margin-bottom: 10px;
         }
 
         .admin-card {
@@ -62,9 +60,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
 
         label {
             display: block;
@@ -73,7 +69,6 @@
             margin-bottom: 8px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
         
         input, select {
@@ -86,12 +81,6 @@
             font-size: 14px;
             font-weight: 600;
             outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--gold);
-            background: rgba(255,255,255,0.1);
         }
 
         .grid-inputs {
@@ -110,78 +99,39 @@
             font-size: 16px;
             font-weight: 900;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .btn-submit:active {
-            transform: scale(0.98);
-        }
-
-        .status-msg {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 800;
-            padding: 12px;
-            border-radius: 12px;
-            display: none;
-        }
-
         #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
+            position: fixed; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg); z-index: 9999;
         }
 
         .spinner {
-            width: 35px;
-            height: 35px;
+            width: 35px; height: 35px;
             border: 3px solid rgba(255,255,255,0.1);
             border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 640px) {
-            .grid-inputs {
-                grid-template-columns: 1fr;
-            }
-
-            .admin-card {
-                padding: 18px;
-            }
-
-            header h1 {
-                font-size: 21px;
-            }
-        }
+        @media (max-width: 640px) { .grid-inputs { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-    </div>
+    <div id="loader"><div class="spinner"></div></div>
 
     <div class="wrap">
         <header>
-            <div style="font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 5px;">
-                ADMIN PANEL
-            </div>
-            <h1>إدارة مجمع الجبري</h1>
+            <img src="logo_complex.png" alt="Jabri Complex Logo">
+            <h1 style="color:var(--gold); font-size:24px; margin:0; font-weight:900;">إدارة مجمع الجبري</h1>
         </header>
 
         <section class="admin-card">
@@ -197,15 +147,14 @@
                     <label><i data-lucide="calendar"></i> التاريخ</label>
                     <input type="date" id="tx_date">
                 </div>
-
                 <div class="form-group">
-                    <label><i data-lucide="hash"></i> رقم السند (receipt_no)</label>
+                    <label><i data-lucide="hash"></i> رقم السند</label>
                     <input type="text" id="tx_receipt" placeholder="اختياري">
                 </div>
             </div>
 
             <div class="form-group">
-                <label><i data-lucide="file-text"></i> البيان / الوصف (description)</label>
+                <label><i data-lucide="file-text"></i> البيان / الوصف</label>
                 <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار">
             </div>
 
@@ -214,7 +163,6 @@
                     <label style="color: var(--danger);">مدين (Debit +)</label>
                     <input type="number" id="tx_debit" placeholder="0.00" step="0.01">
                 </div>
-
                 <div class="form-group">
                     <label style="color: var(--success);">دائن (Credit -)</label>
                     <input type="number" id="tx_credit" placeholder="0.00" step="0.01">
@@ -222,17 +170,15 @@
             </div>
 
             <button class="btn-submit" onclick="submitTransaction()">
-                <i data-lucide="save"></i>
-                حفظ الحركة المالية
+                <i data-lucide="save"></i> حفظ الحركة المالية
             </button>
 
-            <div id="status_msg" class="status-msg"></div>
+            <div id="status_msg" style="margin-top:20px; text-align:center; display:none; padding:12px; border-radius:12px; font-weight:800;"></div>
         </section>
     </div>
 
     <script>
         const { createClient } = supabase;
-
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
@@ -241,113 +187,49 @@
         window.onload = async () => {
             document.body.style.opacity = "1";
             document.getElementById('tx_date').valueAsDate = new Date();
-
             await loadTenants();
-
             document.getElementById('loader').style.display = 'none';
-
-            if (window.lucide) {
-                lucide.createIcons();
-            }
+            if (window.lucide) lucide.createIcons();
         };
 
         async function loadTenants() {
             const select = document.getElementById('tenant_select');
-
             try {
+                // MATCHED: fetching tenant_name and shop_no
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, name, unit')
-                    .order('name', { ascending: true });
+                    .select('tenant_code, tenant_name, shop_no')
+                    .order('tenant_name', { ascending: true });
 
                 if (error) throw error;
-
                 select.innerHTML = '<option value="">-- اختر المستأجر --</option>';
-
-                if (!data || data.length === 0) {
-                    select.innerHTML = '<option value="">لا يوجد مستأجرون</option>';
-                    return;
-                }
-
-                data.forEach(tenant => {
-                    const unitText = tenant.unit ? ` (وحدة: ${tenant.unit})` : '';
-                    select.innerHTML += `
-                        <option value="${tenant.tenant_code}">
-                            ${tenant.name}${unitText}
-                        </option>
-                    `;
+                data.forEach(t => {
+                    const unit = t.shop_no ? ` (وحدة: ${t.shop_no})` : '';
+                    select.innerHTML += `<option value="${t.tenant_code}">${t.tenant_name}${unit}</option>`;
                 });
-
-            } catch (error) {
-                select.innerHTML = '<option value="">فشل تحميل المستأجرين</option>';
-                showStatus('فشل تحميل قائمة المستأجرين: ' + error.message, 'error');
-            }
+            } catch (e) { select.innerHTML = '<option value="">فشل التحميل</option>'; }
         }
 
         async function submitTransaction() {
-            const tenant_code = document.getElementById('tenant_select').value.trim();
+            const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
-            const description = document.getElementById('tx_desc').value.trim();
-            const debitValue = document.getElementById('tx_debit').value;
-            const creditValue = document.getElementById('tx_credit').value;
-            const receipt_no = document.getElementById('tx_receipt').value.trim();
+            const desc = document.getElementById('tx_desc').value.trim();
+            const deb = Number(document.getElementById('tx_debit').value) || null;
+            const cre = Number(document.getElementById('tx_credit').value) || null;
+            const rec = document.getElementById('tx_receipt').value.trim();
 
-            if (!tenant_code || !description || !date) {
-                alert("يرجى تحديد المستأجر وكتابة البيان واختيار التاريخ.");
-                return;
-            }
-
-            const debit = debitValue !== "" ? Number(debitValue) : null;
-            const credit = creditValue !== "" ? Number(creditValue) : null;
-
-            if ((debit === null || debit === 0) && (credit === null || credit === 0)) {
-                alert("يرجى إدخال قيمة في المدين أو الدائن.");
-                return;
-            }
-
-            showStatus("جاري الحفظ في قاعدة البيانات...", "loading");
+            if (!code || !desc || !date) { alert("أكمل البيانات المطلوبة"); return; }
+            if (!deb && !cre) { alert("أدخل قيمة مالية"); return; }
 
             try {
                 const { error } = await supabaseClient
                     .from('tenant_transactions')
-                    .insert([{
-                        tenant_code: tenant_code,
-                        date: date,
-                        description: description,
-                        debit: debit > 0 ? debit : null,
-                        credit: credit > 0 ? credit : null,
-                        receipt_no: receipt_no || null
-                    }]);
+                    .insert([{ tenant_code: code, date, description: desc, debit: deb, credit: cre, receipt_no: rec }]);
 
                 if (error) throw error;
-
-                showStatus("تم تسجيل الحركة بنجاح وتحديث كشف حساب المستأجر!", "success");
-
-                document.getElementById('tx_desc').value = "";
-                document.getElementById('tx_debit').value = "";
-                document.getElementById('tx_credit').value = "";
-                document.getElementById('tx_receipt').value = "";
-
-            } catch (error) {
-                showStatus("فشل الحفظ: " + error.message, "error");
-            }
-        }
-
-        function showStatus(message, type) {
-            const msg = document.getElementById('status_msg');
-            msg.style.display = "block";
-            msg.innerText = message;
-
-            if (type === "success") {
-                msg.style.background = "rgba(16,185,129,0.1)";
-                msg.style.color = "var(--success)";
-            } else if (type === "error") {
-                msg.style.background = "rgba(239,68,68,0.1)";
-                msg.style.color = "var(--danger)";
-            } else {
-                msg.style.background = "rgba(212,175,55,0.1)";
-                msg.style.color = "var(--gold)";
-            }
+                alert("تم الحفظ بنجاح!");
+                location.reload();
+            } catch (e) { alert("فشل الحفظ: " + e.message); }
         }
     </script>
 </body>
