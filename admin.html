@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة إدارة مجمع جبري</title>
+<title>لوحة الإدارة</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,13 +16,9 @@ body{
 }
 
 .container{
-  max-width:1200px;
+  max-width:1100px;
   margin:auto;
   padding:20px;
-}
-
-h2{
-  margin-bottom:10px;
 }
 
 .panel{
@@ -37,8 +33,6 @@ select{
   height:45px;
   border-radius:10px;
   border:1px solid #ddd;
-  padding:0 10px;
-  font-size:15px;
 }
 
 .grid{
@@ -48,10 +42,11 @@ select{
 }
 
 .mini-stat{
-  background:#ffffff;
+  background:#fff;
+  padding:12px;
   border-radius:12px;
-  padding:10px;
   text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.03);
 }
 
 .mini-stat span{
@@ -62,7 +57,6 @@ select{
 .mini-stat b{
   display:block;
   font-size:18px;
-  margin-top:5px;
 }
 
 .good{color:#159a6f}
@@ -70,11 +64,10 @@ select{
 .bad{color:#d14d4d}
 
 button{
-  padding:10px 15px;
+  padding:10px;
   border:none;
   border-radius:10px;
   cursor:pointer;
-  font-size:14px;
 }
 
 .btn-gold{background:#c9a46b;color:#fff}
@@ -95,57 +88,37 @@ canvas{
 <h2>لوحة الإدارة</h2>
 
 <div class="panel">
-<select id="tenant_select">
-  <option value="">اختر مستأجر</option>
-</select>
+<select id="tenant_select"></select>
 </div>
 
 <div class="panel grid">
 
-<div class="mini-stat">
-  <span>الرصيد الحالي</span>
-  <b id="selected_balance">0</b>
-</div>
-
-<div class="mini-stat">
-  <span>إجمالي المدفوع</span>
-  <b id="selected_paid">0</b>
-</div>
-
-<div class="mini-stat">
-  <span>عدد الحركات</span>
-  <b id="selected_tx_count">0</b>
-</div>
-
-<div class="mini-stat">
-  <span>توقع السداد</span>
-  <b id="selected_prediction">-</b>
-</div>
-
-<div class="mini-stat">
-  <span>الإجراء المقترح</span>
-  <b id="selected_action">-</b>
-</div>
+<div class="mini-stat"><span>الرصيد</span><b id="selected_balance">0</b></div>
+<div class="mini-stat"><span>المدفوع</span><b id="selected_paid">0</b></div>
+<div class="mini-stat"><span>الحركات</span><b id="selected_tx_count">0</b></div>
+<div class="mini-stat"><span>التوقع</span><b id="selected_prediction">-</b></div>
+<div class="mini-stat"><span>الإجراء</span><b id="selected_action">-</b></div>
 
 </div>
 
 <div class="panel">
 <button class="btn-gold" onclick="runSmartAction()">تنفيذ الإجراء الذكي</button>
-<button class="btn-danger" onclick="sendLegalWarning()">إصدار إنذار قانوني</button>
+<button class="btn-danger" onclick="sendLegalWarning()">إنذار قانوني</button>
 </div>
 
 <div class="panel">
-<canvas id="collectionChart" height="200"></canvas>
+<canvas id="collectionChart"></canvas>
 </div>
 
 <div class="panel">
-<canvas id="monthlyChart" height="200"></canvas>
+<canvas id="monthlyChart"></canvas>
 </div>
 
 </div>
 
 <script>
 
+// 🔗 ضع بياناتك هنا
 const supabaseClient = supabase.createClient(
 'https://YOUR_PROJECT.supabase.co',
 'YOUR_ANON_KEY'
@@ -153,149 +126,96 @@ const supabaseClient = supabase.createClient(
 
 let allTransactions = [];
 let tenantBalances = [];
-let collectionChart, monthlyChart;
+let collectionChart;
 
-// =================== Utils ===================
+// utils
 const toNumber = x => parseFloat(x)||0;
 const formatCurrency = x => `${Math.round(x)} د.أ`;
 
-// =================== Prediction ===================
-function calculatePaymentScore(t){
-  const tx = allTransactions.filter(x=>x.tenant_code===t.tenant_code);
+// 🔥 تحميل البيانات
+async function loadData(){
 
-  if(!tx.length) return {status:'bad', text:'لا يوجد'};
+  const { data: tx } = await supabaseClient
+    .from('tenant_transactions')
+    .select('*');
 
-  const paid = tx.reduce((s,x)=>s+toNumber(x.credit),0);
-  const debit = tx.reduce((s,x)=>s+toNumber(x.debit),0);
+  const { data: tenants } = await supabaseClient
+    .from('tenants')
+    .select('*');
 
-  const ratio = debit>0 ? paid/debit : 1;
+  allTransactions = tx || [];
 
-  let score = ratio * 50;
+  tenantBalances = tenants.map(t => {
 
-  const last = [...tx]
-    .filter(x=>toNumber(x.credit)>0)
-    .sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const tenantTx = allTransactions.filter(x => x.tenant_code === t.tenant_code);
 
-  if(last){
-    const days = (new Date()-new Date(last.date))/(1000*60*60*24);
-    if(days<30) score+=30;
-    else if(days<90) score+=15;
+    const totalDebit = tenantTx.reduce((s,x)=>s+toNumber(x.debit),0);
+    const totalCredit = tenantTx.reduce((s,x)=>s+toNumber(x.credit),0);
+
+    return {
+      ...t,
+      totalDebit,
+      totalCredit,
+      currentBalance: totalDebit - totalCredit
+    };
+  });
+
+  fillSelect();
+}
+
+// 🔽 dropdown
+function fillSelect(){
+  const select = document.getElementById('tenant_select');
+
+  select.innerHTML = tenantBalances.map(t =>
+    `<option value="${t.tenant_code}">
+      ${t.tenant_name || t.tenant_code}
+    </option>`
+  ).join('');
+
+  select.addEventListener('change', ()=>{
+    const t = tenantBalances.find(x => x.tenant_code === select.value);
+    updateUI(t);
+  });
+
+  // load first tenant
+  if(tenantBalances.length){
+    updateUI(tenantBalances[0]);
   }
-
-  if(tx.length>10) score+=20;
-  else if(tx.length>5) score+=10;
-
-  if(score>=70) return {status:'good', text:'منتظم'};
-  if(score>=40) return {status:'warn', text:'متذبذب'};
-  return {status:'bad', text:'متعثر'};
 }
 
-// =================== Smart Action ===================
-function getSmartAction(t){
-  if(t.prediction.status==='bad') return {type:'danger', text:'إنذار', color:'bad'};
-  if(t.prediction.status==='warn') return {type:'reminder', text:'تذكير', color:'warn'};
-  return null;
+// 🧠 prediction
+function calculatePrediction(t){
+
+  if(t.currentBalance <= 0) return {text:'منتظم',cls:'good'};
+  if(t.currentBalance < 300) return {text:'تنبيه',cls:'warn'};
+  return {text:'متعثر',cls:'bad'};
 }
 
-// =================== Update UI ===================
-function updateSelectedTenantStats(t){
-  if(!t) return;
+// تحديث
+function updateUI(t){
 
   document.getElementById('selected_balance').innerText = formatCurrency(t.currentBalance);
   document.getElementById('selected_paid').innerText = formatCurrency(t.totalCredit);
 
-  const tx = allTransactions.filter(x=>x.tenant_code===t.tenant_code);
-  document.getElementById('selected_tx_count').innerText = tx.length;
+  const txCount = allTransactions.filter(x=>x.tenant_code===t.tenant_code).length;
+  document.getElementById('selected_tx_count').innerText = txCount;
 
-  t.prediction = calculatePaymentScore(t);
+  const p = calculatePrediction(t);
 
   const pred = document.getElementById('selected_prediction');
-  pred.innerText = t.prediction.text;
-  pred.className = t.prediction.status;
+  pred.innerText = p.text;
+  pred.className = p.cls;
 
-  const act = getSmartAction(t);
-  const actEl = document.getElementById('selected_action');
+  document.getElementById('selected_action').innerText =
+    p.cls === 'bad' ? 'إنذار' :
+    p.cls === 'warn' ? 'تذكير' : 'لا يوجد';
 
-  if(!act){
-    actEl.innerText = 'لا يوجد';
-  }else{
-    actEl.innerText = act.text;
-    actEl.className = act.color;
-  }
-
-  drawCharts(t);
+  drawChart(t);
 }
 
-// =================== Smart Action Execute ===================
-async function runSmartAction(){
-  const code = document.getElementById('tenant_select').value;
-  const t = tenantBalances.find(x=>x.tenant_code===code);
-
-  if(!t) return;
-
-  const act = getSmartAction(t);
-  if(!act) return;
-
-  const msg = act.type==='danger'
-    ? `تنبيه: يوجد رصيد ${formatCurrency(t.currentBalance)}`
-    : `تذكير: الرصيد ${formatCurrency(t.currentBalance)}`;
-
-  await supabaseClient.from('notifications').insert([{
-    tenant_code:code,
-    message:msg,
-    type:act.type,
-    is_read:false
-  }]);
-
-  alert('تم إرسال الإجراء');
-}
-
-// =================== Legal ===================
-function getLegalLevel(t){
-  const b = t.currentBalance;
-  if(b<=0) return 0;
-  if(b<300) return 1;
-  if(b<800) return 2;
-  if(b<2000) return 3;
-  return 4;
-}
-
-function getLegalMessage(level,t){
-  const a = formatCurrency(t.currentBalance);
-
-  if(level===1) return `تذكير: ${a}`;
-  if(level===2) return `إنذار أول: ${a}`;
-  if(level===3) return `إنذار ثاني: ${a}`;
-  if(level===4) return `إنذار نهائي: سيتم اتخاذ إجراء قانوني بخصوص ${a}`;
-
-  return '';
-}
-
-async function sendLegalWarning(){
-  const code = document.getElementById('tenant_select').value;
-  const t = tenantBalances.find(x=>x.tenant_code===code);
-
-  if(!t) return;
-
-  const level = getLegalLevel(t);
-  if(level===0) return;
-
-  const msg = getLegalMessage(level,t);
-
-  await supabaseClient.from('notifications').insert([{
-    tenant_code:code,
-    message:msg,
-    type:'legal',
-    level:level,
-    is_legal:true,
-    is_read:false
-  }]);
-
-  alert('تم إرسال إنذار قانوني ⚖️');
-}
-
-// =================== Charts ===================
-function drawCharts(t){
+// 📊 chart
+function drawChart(t){
 
   if(collectionChart) collectionChart.destroy();
 
@@ -305,40 +225,50 @@ function drawCharts(t){
       datasets:[{
         data:[t.totalCredit, t.currentBalance],
         backgroundColor:[
-          'rgba(21,154,111,0.65)',
-          'rgba(209,77,77,0.45)'
+          'rgba(21,154,111,0.6)',
+          'rgba(209,77,77,0.4)'
         ],
         borderColor:'#fff',
         borderWidth:6
       }]
     },
     options:{
-      cutout:'78%',
-      animation:{duration:600}
+      cutout:'78%'
     }
   });
 }
 
-// =================== Init Demo ===================
-function init(){
-  tenantBalances=[
-    {tenant_code:'T1', currentBalance:500, totalCredit:1500},
-    {tenant_code:'T2', currentBalance:100, totalCredit:2000}
-  ];
+// ⚡ smart action
+async function runSmartAction(){
 
-  const select = document.getElementById('tenant_select');
+  const code = document.getElementById('tenant_select').value;
 
-  select.innerHTML = tenantBalances.map(t=>
-    `<option value="${t.tenant_code}">${t.tenant_code}</option>`
-  ).join('');
+  await supabaseClient.from('notifications').insert([{
+    tenant_code:code,
+    message:'تذكير دفع',
+    is_read:false
+  }]);
 
-  select.addEventListener('change', function(){
-    const t = tenantBalances.find(x=>x.tenant_code===this.value);
-    updateSelectedTenantStats(t);
-  });
+  alert('تم الإرسال');
 }
 
-init();
+// ⚖️ legal
+async function sendLegalWarning(){
+
+  const code = document.getElementById('tenant_select').value;
+
+  await supabaseClient.from('notifications').insert([{
+    tenant_code:code,
+    message:'إنذار قانوني',
+    is_legal:true,
+    is_read:false
+  }]);
+
+  alert('تم إرسال إنذار قانوني');
+}
+
+// 🚀 start
+loadData();
 
 </script>
 
