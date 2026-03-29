@@ -145,18 +145,26 @@
             font-weight:700;
         }
 
-        .last-seen-box{
-            width:100%;
-            min-height:52px;
-            border-radius:16px;
-            border:1px solid var(--line);
-            background:rgba(255,255,255,0.84);
-            padding:14px 15px;
-            font-size:14px;
+        .tenant-select-grid{
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:10px;
+            align-items:end;
+        }
+
+        .last-seen-chip{
+            padding:10px 14px;
+            border-radius:999px;
+            font-size:12px;
             font-weight:800;
+            white-space:nowrap;
+            background:rgba(201,164,107,0.12);
+            color:#6b4f2b;
+            border:1px solid rgba(201,164,107,0.25);
+            min-height:44px;
             display:flex;
             align-items:center;
-            color:#4b3720;
+            margin-bottom:2px;
         }
 
         .kpi-grid{
@@ -287,11 +295,11 @@
         @keyframes shake{ 0%, 100%{ transform:translateX(0); } 25%{ transform:translateX(-2px); } 50%{ transform:translateX(2px); } 75%{ transform:translateX(-2px); } }
         @keyframes pulseGlow{ 0%, 100%{ box-shadow:0 0 8px rgba(209,77,77,0.5); } 50%{ box-shadow:0 0 18px rgba(209,77,77,0.9); } }
 
-        @media (max-width: 1100px){ .chart-grid{ grid-template-columns:1fr; } .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
         @media (max-width: 768px){ 
             .tenant-select-grid{ grid-template-columns:1fr !important; }
             .form-grid{ grid-template-columns:1fr; } 
             .kpi-grid{ grid-template-columns:1fr 1fr; } 
+            .chart-grid{ grid-template-columns:1fr; }
         }
     </style>
 </head>
@@ -319,17 +327,14 @@
                     <p>اختر المستأجر لعرض بياناته وإرسال الإشعارات</p>
                 </div>
             </div>
-            <div class="tenant-select-grid" style="display:grid; grid-template-columns:1.2fr .8fr; gap:12px; align-items:end;">
+            <div class="tenant-select-grid">
                 <div class="field">
-                    <label>اختيار المستأجر</label>
+                    <label>المستأجر</label>
                     <select id="tenant_select">
-                        <option value="">جاري تحميل القائمة...</option>
+                        <option value="">اختر المستأجر</option>
                     </select>
                 </div>
-                <div class="field">
-                    <label>آخر ظهور</label>
-                    <div id="last_seen_box" class="last-seen-box">-</div>
-                </div>
+                <div class="last-seen-chip" id="last_seen_chip">—</div>
             </div>
         </section>
 
@@ -546,17 +551,18 @@
 
         function populateTenantDropdown() {
             const s = document.getElementById('tenant_select');
-            s.innerHTML = '<option value="">-- اختر المستأجر --</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
+            s.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
         }
 
         function updateLastSeen(tenant){
-            const box = document.getElementById('last_seen_box');
-            if (!box) return;
-            if (!tenant) { box.innerText = '-'; return; }
-            const raw = tenant.lastSeen;
-            if (!raw) { box.innerText = 'لا يوجد تسجيل دخول'; return; }
+            const chip = document.getElementById('last_seen_chip');
+            if (!chip) return;
+            if (!tenant){ chip.innerText = '—'; return; }
+            const raw = tenant.lastSeen || tenant.last_seen || tenant.updated_at || null;
+            if (!raw){ chip.innerText = 'لا يوجد دخول'; return; }
             const d = new Date(raw);
-            box.innerText = isNaN(d.getTime()) ? raw : d.toLocaleString('ar-JO');
+            if (isNaN(d.getTime())){ chip.innerText = raw; return; }
+            chip.innerText = 'آخر ظهور: ' + d.toLocaleDateString('ar-JO');
         }
 
         function updateTenantKpis(tenant){
