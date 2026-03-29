@@ -1,1636 +1,181 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة إدارة مجمع الجبري</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root{
-      --navy:#0f172a;
-      --gold:#d4af37;
-      --bg:#f8fafc;
-      --card:#ffffff;
-      --line:#e5e7eb;
-      --muted:#64748b;
-      --text:#0f172a;
-      --danger:#dc2626;
-      --success:#059669;
-      --warn:#d97706;
-      --orange:#ea580c;
-      --red:#b91c1c;
-      --emerald-bg:#ecfdf5;
-      --amber-bg:#fffbeb;
-      --orange-bg:#fff7ed;
-      --red-bg:#fef2f2;
-      --shadow:0 10px 30px rgba(15,23,42,.08);
-      --shadow-strong:0 18px 50px rgba(15,23,42,.12);
-      --r1:20px;
-      --r2:28px;
-      --r3:42px;
-    }
-
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      font-family: "Tajawal", "Almarai", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    a{text-decoration:none;color:inherit}
-    button,select{
-      font:inherit;
-    }
-
-    .root-shell{
-      min-height:100vh;
-      padding-top:env(safe-area-inset-top);
-    }
-
-    .mobile-topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      background:var(--navy);
-      color:#fff;
-      padding:14px 16px;
-      box-shadow:var(--shadow);
-      position:sticky;
-      top:0;
-      z-index:40;
-    }
-
-    .mobile-topbar h1{
-      margin:0;
-      font-size:20px;
-      font-weight:900;
-      color:var(--gold);
-    }
-
-    .mobile-topbar .sub{
-      font-size:10px;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:#94a3b8;
-    }
-
-    .sidebar{
-      position:fixed;
-      top:0;
-      right:0;
-      width:288px;
-      height:100vh;
-      background:var(--navy);
-      color:#fff;
-      padding:32px;
-      display:none;
-      flex-direction:column;
-      z-index:50;
-      box-shadow:var(--shadow-strong);
-    }
-
-    .sidebar-brand{
-      text-align:center;
-      padding-bottom:28px;
-      margin-bottom:28px;
-      border-bottom:1px solid rgba(148,163,184,.18);
-    }
-
-    .sidebar-brand h1{
-      margin:0;
-      color:var(--gold);
-      font-size:30px;
-      font-weight:900;
-    }
-
-    .sidebar-brand p{
-      margin:8px 0 0;
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:.3em;
-      color:#64748b;
-      font-weight:700;
-    }
-
-    .nav{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    .nav-item{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      border-radius:18px;
-      padding:14px 16px;
-      color:#94a3b8;
-      background:transparent;
-      border:none;
-      cursor:pointer;
-      transition:.2s ease;
-      font-weight:800;
-      text-align:right;
-    }
-
-    .nav-item.active{
-      background:var(--gold);
-      color:var(--navy);
-      box-shadow:0 10px 24px rgba(212,175,55,.28);
-    }
-
-    .nav-item:not(.active):hover{
-      background:rgba(255,255,255,.05);
-    }
-
-    .main{
-      padding:16px;
-    }
-
-    .grid-3{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-
-    .grid-main{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:24px;
-    }
-
-    .left-col,.right-col{
-      display:flex;
-      flex-direction:column;
-      gap:24px;
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid #eef2f7;
-      border-radius:var(--r1);
-      box-shadow:var(--shadow);
-      padding:18px;
-      transition:transform .25s ease, box-shadow .25s ease;
-    }
-
-    .card:hover{
-      transform:translateY(-2px);
-      box-shadow:var(--shadow-strong);
-    }
-
-    .card.stat{
-      padding:20px;
-    }
-
-    .card.stat.highlight{
-      border-color:rgba(212,175,55,.55);
-    }
-
-    .card-header-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .stat-title{
-      font-size:11px;
-      font-weight:900;
-      color:#94a3b8;
-      letter-spacing:.2em;
-      text-transform:uppercase;
-      text-align:right;
-    }
-
-    .stat-icon{
-      width:48px;
-      height:48px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      background:#f8fafc;
-    }
-
-    .stat-value{
-      font-size:28px;
-      font-weight:900;
-      color:var(--text);
-      text-align:right;
-      letter-spacing:-.03em;
-    }
-
-    .selector-card label{
-      display:block;
-      margin-bottom:12px;
-      text-align:right;
-      font-size:12px;
-      color:#94a3b8;
-      font-weight:900;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-    }
-
-    .select{
-      width:100%;
-      border:2px solid #f1f5f9;
-      background:#f8fafc;
-      border-radius:18px;
-      padding:16px;
-      font-size:16px;
-      font-weight:800;
-      color:var(--text);
-      outline:none;
-    }
-
-    .select:focus{
-      border-color:var(--gold);
-      background:#fff;
-    }
-
-    .hero-balance{
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .hero-balance .eyebrow{
-      font-size:11px;
-      font-weight:900;
-      color:#94a3b8;
-      letter-spacing:.2em;
-      text-transform:uppercase;
-      margin-bottom:14px;
-    }
-
-    .hero-balance .balance{
-      font-size:42px;
-      font-weight:900;
-      letter-spacing:-.04em;
-      margin:0 0 18px;
-    }
-
-    .balance.red{color:var(--danger)}
-    .balance.green{color:var(--success)}
-
-    .badges{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:center;
-      margin-bottom:20px;
-    }
-
-    .badge{
-      border-radius:16px;
-      padding:10px 14px;
-      font-size:13px;
-      font-weight:900;
-      border:1px solid transparent;
-      box-shadow:0 6px 16px rgba(15,23,42,.05);
-    }
-
-    .badge-emerald{
-      color:#047857;
-      background:var(--emerald-bg);
-      border-color:#a7f3d0;
-    }
-
-    .badge-amber{
-      color:#b45309;
-      background:var(--amber-bg);
-      border-color:#fde68a;
-    }
-
-    .badge-orange{
-      color:#c2410c;
-      background:var(--orange-bg);
-      border-color:#fdba74;
-    }
-
-    .badge-red{
-      color:#b91c1c;
-      background:var(--red-bg);
-      border-color:#fecaca;
-    }
-
-    .risk-wrap{
-      max-width:520px;
-      margin:0 auto 22px;
-    }
-
-    .risk-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:8px;
-      font-size:12px;
-      font-weight:800;
-      color:#64748b;
-    }
-
-    .risk-bar{
-      width:100%;
-      height:12px;
-      background:#e2e8f0;
-      border-radius:999px;
-      overflow:hidden;
-    }
-
-    .risk-fill{
-      height:100%;
-      border-radius:999px;
-      width:0;
-      transition:width 1s ease;
-    }
-
-    .fill-emerald{background:#10b981}
-    .fill-amber{background:#f59e0b}
-    .fill-orange{background:#f97316}
-    .fill-red{background:#ef4444}
-
-    .action-box{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      background:rgba(212,175,55,.1);
-      border:1px solid rgba(212,175,55,.25);
-      border-radius:24px;
-      padding:16px;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
-    }
-
-    .action-info{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      text-align:right;
-    }
-
-    .action-icon{
-      width:48px;
-      height:48px;
-      background:#fff;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      box-shadow:0 8px 18px rgba(15,23,42,.08);
-      flex:0 0 auto;
-    }
-
-    .action-info p{
-      margin:0;
-    }
-
-    .action-info .mini{
-      font-size:11px;
-      font-weight:800;
-      color:#64748b;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-    }
-
-    .action-info .big{
-      font-size:20px;
-      font-weight:900;
-      color:var(--navy);
-      margin-top:2px;
-    }
-
-    .button-row{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      width:100%;
-    }
-
-    .btn{
-      min-height:48px;
-      border:none;
-      border-radius:18px;
-      padding:14px 22px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      cursor:pointer;
-      font-weight:900;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
-      width:100%;
-    }
-
-    .btn:active{
-      transform:scale(.98);
-    }
-
-    .btn:hover{
-      transform:scale(1.02);
-    }
-
-    .btn-dark{
-      background:var(--navy);
-      color:#fff;
-      box-shadow:0 14px 28px rgba(15,23,42,.18);
-    }
-
-    .btn-dark:hover{
-      background:#1e293b;
-    }
-
-    .btn-gold{
-      background:var(--gold);
-      color:var(--navy);
-      box-shadow:0 14px 28px rgba(212,175,55,.24);
-    }
-
-    .legal-box{
-      border:2px solid transparent;
-      border-radius:var(--r2);
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .grad-emerald{
-      background:linear-gradient(135deg, rgba(16,185,129,.08), rgba(5,150,105,.08));
-      border-color:#a7f3d0;
-      color:#065f46;
-    }
-
-    .grad-amber{
-      background:linear-gradient(135deg, rgba(245,158,11,.09), rgba(217,119,6,.09));
-      border-color:#fde68a;
-      color:#92400e;
-    }
-
-    .grad-orange{
-      background:linear-gradient(135deg, rgba(249,115,22,.09), rgba(234,88,12,.09));
-      border-color:#fdba74;
-      color:#9a3412;
-    }
-
-    .grad-red{
-      background:linear-gradient(135deg, rgba(239,68,68,.09), rgba(220,38,38,.09));
-      border-color:#fecaca;
-      color:#991b1b;
-    }
-
-    .legal-header{
-      display:flex;
-      align-items:flex-start;
-      gap:14px;
-    }
-
-    .legal-icon{
-      width:52px;
-      height:52px;
-      border-radius:18px;
-      background:rgba(255,255,255,.7);
-      display:grid;
-      place-items:center;
-      box-shadow:0 6px 16px rgba(15,23,42,.08);
-      flex:0 0 auto;
-    }
-
-    .legal-header h3{
-      margin:0 0 8px;
-      font-size:22px;
-      font-weight:900;
-      color:#0f172a;
-    }
-
-    .legal-header p{
-      margin:0;
-      font-size:18px;
-      line-height:1.9;
-      font-style:italic;
-      color:#0f172a;
-    }
-
-    .table-card{
-      overflow-x:auto;
-    }
-
-    .table-title{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:20px;
-      font-size:22px;
-      font-weight:900;
-      color:#0f172a;
-    }
-
-    table{
-      border-collapse:collapse;
-    }
-
-    .installments-table{
-      min-width:760px;
-      width:100%;
-    }
-
-    .installments-table thead th{
-      padding:0 0 18px;
-      font-size:12px;
-      color:#94a3b8;
-      font-weight:900;
-      border-bottom:1px solid #e2e8f0;
-    }
-
-    .installments-table tbody td{
-      padding:22px 0;
-      border-bottom:1px solid #f1f5f9;
-      font-weight:800;
-    }
-
-    .installments-table tbody tr:hover{
-      background:#f8fafc;
-    }
-
-    .text-center{text-align:center}
-    .text-right{text-align:right}
-    .text-emerald{color:#059669}
-    .text-red{color:#dc2626}
-    .text-slate{color:#64748b}
-    .strong{font-weight:900}
-
-    .status-pill{
-      display:inline-block;
-      border-radius:14px;
-      padding:9px 14px;
-      font-size:12px;
-      font-weight:900;
-    }
-
-    .status-paid{background:#dcfce7;color:#047857}
-    .status-late{background:#fee2e2;color:#b91c1c}
-    .status-future{background:#f1f5f9;color:#64748b}
-
-    .chart-card{
-      text-align:center;
-    }
-
-    .chart-title{
-      font-size:10px;
-      font-weight:900;
-      color:#94a3b8;
-      text-transform:uppercase;
-      letter-spacing:.28em;
-      margin-bottom:26px;
-    }
-
-    .ring{
-      position:relative;
-      width:180px;
-      height:180px;
-      margin:0 auto;
-    }
-
-    .ring svg{
-      width:100%;
-      height:100%;
-      transform:rotate(-90deg);
-    }
-
-    .ring-value{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:34px;
-      font-weight:900;
-      color:#0f172a;
-    }
-
-    .stats-dark{
-      background:var(--navy);
-      color:#fff;
-      border-radius:var(--r2);
-      padding:18px;
-      box-shadow:var(--shadow-strong);
-    }
-
-    .stats-dark h3{
-      margin:0 0 18px;
-      padding-bottom:14px;
-      border-bottom:1px solid rgba(148,163,184,.18);
-      color:var(--gold);
-      font-size:22px;
-      font-weight:900;
-    }
-
-    .stat-line{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      font-size:14px;
-      padding:0 0 10px;
-      margin-bottom:10px;
-      border-bottom:1px solid rgba(148,163,184,.16);
-    }
-
-    .stat-line .label{
-      color:#94a3b8;
-      font-size:12px;
-      font-weight:700;
-    }
-
-    .stat-line .value{
-      font-weight:800;
-    }
-
-    .statement-page{
-      min-height:100vh;
-      background:#fff;
-      color:#0f172a;
-      padding:24px;
-    }
-
-    .statement-shell{
-      max-width:1100px;
-      margin:0 auto;
-    }
-
-    .statement-head{
-      display:flex;
-      flex-direction:column;
-      gap:24px;
-      border-bottom:4px solid #0f172a;
-      padding-bottom:28px;
-      margin-bottom:32px;
-    }
-
-    .statement-head h1{
-      margin:0 0 8px;
-      font-size:36px;
-      font-weight:900;
-    }
-
-    .statement-head .small{
-      margin:0;
-      font-size:11px;
-      letter-spacing:.26em;
-      color:#64748b;
-      text-transform:uppercase;
-      font-weight:800;
-    }
-
-    .statement-brand h2{
-      margin:0 0 6px;
-      font-size:30px;
-      font-weight:900;
-      color:var(--gold);
-    }
-
-    .statement-brand p{
-      margin:0 0 4px;
-      color:#64748b;
-      font-size:14px;
-    }
-
-    .statement-info{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:20px;
-      background:#f8fafc;
-      border:1px solid #eef2f7;
-      border-radius:28px;
-      padding:22px;
-      margin-bottom:28px;
-    }
-
-    .statement-info .title{
-      font-size:11px;
-      font-weight:900;
-      color:#94a3b8;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-      margin-bottom:10px;
-    }
-
-    .statement-info .big{
-      font-size:28px;
-      font-weight:900;
-      color:#0f172a;
-    }
-
-    .statement-info .sub{
-      margin-top:6px;
-      color:#475569;
-      font-weight:700;
-    }
-
-    .statement-table-wrap{
-      border:1px solid #dbe2ea;
-      border-radius:24px;
-      overflow-x:auto;
-      margin-bottom:28px;
-    }
-
-    .statement-table{
-      min-width:780px;
-      width:100%;
-    }
-
-    .statement-table thead th{
-      background:#0f172a;
-      color:#fff;
-      padding:18px;
-      font-weight:900;
-      font-size:14px;
-    }
-
-    .statement-table tbody td{
-      padding:18px;
-      border-bottom:1px solid #eef2f7;
-      font-weight:700;
-    }
-
-    .statement-bottom{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:28px;
-      align-items:start;
-    }
-
-    .totals-box{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    .totals-line{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding-bottom:12px;
-      border-bottom:1px solid #eef2f7;
-      font-weight:800;
-      color:#475569;
-    }
-
-    .totals-line .val{
-      color:#0f172a;
-      font-weight:900;
-    }
-
-    .totals-final{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      background:#0f172a;
-      color:#fff;
-      padding:20px;
-      border-radius:22px;
-      box-shadow:var(--shadow-strong);
-    }
-
-    .totals-final .final-value{
-      font-size:32px;
-      font-weight:900;
-    }
-
-    .stamp{
-      border:2px dashed #e2e8f0;
-      border-radius:28px;
-      padding:28px;
-      text-align:center;
-      opacity:.6;
-    }
-
-    .stamp .caption{
-      font-size:11px;
-      font-weight:900;
-      color:#94a3b8;
-      text-transform:uppercase;
-      margin-bottom:42px;
-    }
-
-    .stamp .circle{
-      width:96px;
-      height:96px;
-      border-radius:50%;
-      margin:0 auto;
-      border:4px solid #e2e8f0;
-      display:grid;
-      place-items:center;
-      color:var(--gold);
-      font-weight:900;
-      font-size:20px;
-    }
-
-    .statement-actions{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      margin-top:36px;
-      padding-top:24px;
-      border-top:1px solid #e5e7eb;
-    }
-
-    .empty-state{
-      min-height:420px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      border:4px dashed #e2e8f0;
-      border-radius:32px;
-      color:#cbd5e1;
-      background:rgba(255,255,255,.45);
-    }
-
-    .empty-state .title{
-      margin-top:18px;
-      font-size:22px;
-      font-weight:900;
-    }
-
-    .fade-in{
-      animation:fadeUp .45s ease;
-    }
-
-    @keyframes fadeUp{
-      from{opacity:0;transform:translateY(12px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-
-    .no-print{}
-
-    @media (min-width: 640px){
-      .main{padding:24px}
-      .button-row{flex-direction:row}
-      .button-row .btn{width:auto}
-      .action-box{padding:20px}
-      .statement-actions{flex-direction:row}
-      .statement-head{flex-direction:row;align-items:flex-end;justify-content:space-between}
-      .statement-info{grid-template-columns:1fr 1fr}
-      .statement-bottom{grid-template-columns:1fr 1fr}
-    }
-
-    @media (min-width: 1024px){
-      .sidebar{display:flex}
-      .mobile-topbar{display:none}
-      .main{margin-right:288px;padding:40px}
-      .grid-3{grid-template-columns:repeat(3,1fr);gap:24px}
-      .grid-main{grid-template-columns:minmax(0,2fr) minmax(320px,1fr);gap:40px}
-      .card{padding:24px}
-      .card.stat{padding:28px}
-      .hero-balance .balance{font-size:54px}
-      .action-box{flex-direction:row;align-items:center;justify-content:space-between}
-      .button-row{width:auto}
-      .statement-page{padding:56px}
-    }
-
-    @media print{
-      .no-print,
-      .mobile-topbar,
-      .sidebar{
-        display:none !important;
-      }
-      body{
-        background:#fff !important;
-        margin:0 !important;
-        padding:0 !important;
-      }
-      .statement-page{
-        padding:0 !important;
-      }
-      @page{
-        margin:1cm;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>إدارة مجمع الجبري | تسجيل الحركات</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg: #08111f; --navy: #0f172a; --gold: #d4af37; --text: #ffffff;
+            --muted: #94a3b8; --border: rgba(255,255,255,0.1);
+            --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            --success: #10b981; --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding: 15px; opacity: 0; transition: 0.5s; }
+        .wrap { max-width: 800px; margin: 0 auto; padding-bottom: 50px; }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { color: var(--gold); font-size: 24px; margin: 0; font-weight: 900; }
+
+        .admin-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 24px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 11px; color: var(--gold); margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, select {
+            width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; font-weight: 600; outline: none; transition: 0.3s;
+        }
+
+        input:focus, select:focus { border-color: var(--gold); background: rgba(255,255,255,0.1); }
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .btn-submit {
+            width: 100%; padding: 18px; border-radius: 18px; border: none;
+            background: var(--gold); color: var(--navy); font-size: 16px; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .btn-submit:active { transform: scale(0.98); }
+
+        .status-msg { margin-top: 20px; text-align: center; font-size: 13px; font-weight: 800; padding: 12px; border-radius: 12px; display: none; }
+
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 35px; height: 35px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-  <div id="app"></div>
 
-  <script>
-    const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
-    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    <div id="loader"><div class="spinner"></div></div>
 
-    const fallbackTenants = [
-      {
-        id: 1,
-        name: 'شركة الأفق للتجارة والاستثمار',
-        phone: '962790000001',
-        contractDate: '2025-01-01',
-        annualRent: 12000,
-        totalPaid: 3500,
-        lastNoticeSeen: true,
-        seenAt: '2026-03-25'
-      },
-      {
-        id: 2,
-        name: 'مجموعة الجبري الصناعية',
-        phone: '962790000002',
-        contractDate: '2024-11-15',
-        annualRent: 9000,
-        totalPaid: 9000,
-        lastNoticeSeen: false,
-        seenAt: null
-      },
-      {
-        id: 3,
-        name: 'مؤسسة زهور الشميساني',
-        phone: '962790000003',
-        contractDate: '2025-02-10',
-        annualRent: 6000,
-        totalPaid: 1200,
-        lastNoticeSeen: true,
-        seenAt: '2026-03-28'
-      }
-    ];
+    <div class="wrap">
+        <header>
+            <div style="font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 5px;">ADMIN PANEL</div>
+            <h1>إدارة مجمع الجبري</h1>
+        </header>
 
-    let tenants = [];
-    let selectedTenant = null;
-    let currentView = 'dashboard';
-    let loadError = '';
-    let loading = true;
+        <section class="admin-card">
+            <div class="form-group">
+                <label><i data-lucide="user"></i> اختيار المستأجر</label>
+                <select id="tenant_select">
+                    <option value="">جاري تحميل القائمة...</option>
+                </select>
+            </div>
 
-    function formatCurrency(value) {
-      return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Number(value || 0));
-    }
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label><i data-lucide="calendar"></i> التاريخ</label>
+                    <input type="date" id="tx_date">
+                </div>
+                <div class="form-group">
+                    <label><i data-lucide="hash"></i> رقم السند (receipt_no)</label>
+                    <input type="text" id="tx_receipt" placeholder="اختياري">
+                </div>
+            </div>
 
-    function formatDate(value) {
-      if (!value) return '-';
-      return new Date(value).toLocaleDateString('ar-JO');
-    }
+            <div class="form-group">
+                <label><i data-lucide="file-text"></i> البيان / الوصف (description)</label>
+                <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار">
+            </div>
 
-    function normalizeTenant(row) {
-      return {
-        id: row.id,
-        name: row.name ?? row.full_name ?? row['اسم_المستأجر'] ?? 'مستأجر بدون اسم',
-        phone: row.phone ?? row.mobile ?? row['الهاتف'] ?? '',
-        contractDate: row.contract_date ?? row.contractDate ?? row['تاريخ_العقد'] ?? '2025-01-01',
-        annualRent: Number(row.annual_rent ?? row.annualRent ?? row['ايجار_السنة'] ?? 0),
-        totalPaid: Number(row.total_paid ?? row.totalPaid ?? row['اجمالي_الدائن'] ?? row.total_credit ?? 0),
-        lastNoticeSeen: row.last_notice_seen ?? row.lastNoticeSeen ?? row['تمت_الرؤية'] ?? false,
-        seenAt: row.seen_at ?? row.seenAt ?? row['تاريخ_الرؤية'] ?? null
-      };
-    }
+            <div class="grid-inputs">
+                <div class="form-group">
+                    <label style="color: var(--danger);">مدين (Debit +)</label>
+                    <input type="number" id="tx_debit" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--success);">دائن (Credit -)</label>
+                    <input type="number" id="tx_credit" placeholder="0.00">
+                </div>
+            </div>
 
-    function calculateRiskScore({ balance, totalDueSoFar, collectionRate, notificationStage, installments }) {
-      const overdueInstallments = installments.filter(i => i.status === 'متأخرة');
-      const overdueCount = overdueInstallments.length;
-      const maxDelayDays = overdueInstallments.length > 0
-        ? Math.max(...overdueInstallments.map(i => i.delayDays))
-        : 0;
+            <button class="btn-submit" onclick="submitTransaction()">
+                <i data-lucide="save"></i> حفظ الحركة المالية
+            </button>
 
-      let score = 0;
+            <div id="status_msg" class="status-msg"></div>
+        </section>
+    </div>
 
-      if (balance > 0 && totalDueSoFar > 0) {
-        const balanceRatio = Math.min(1, balance / totalDueSoFar);
-        score += balanceRatio * 35;
-      }
+    <script>
+        const { createClient } = supabase;
+        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
-      if (collectionRate < 100) {
-        score += ((100 - collectionRate) / 100) * 20;
-      }
-
-      score += Math.min(overdueCount * 12, 24);
-
-      if (maxDelayDays > 0) {
-        if (maxDelayDays <= 10) score += 6;
-        else if (maxDelayDays <= 30) score += 12;
-        else if (maxDelayDays <= 60) score += 18;
-        else score += 25;
-      }
-
-      if (notificationStage === 'إنذار 1') score += 8;
-      if (notificationStage === 'إنذار عدلي') score += 16;
-      if (notificationStage === 'إجراء قانوني') score += 25;
-
-      const finalScore = Math.min(100, Math.round(score));
-
-      let label = 'منخفض';
-      let colorClass = 'badge-emerald';
-      let barClass = 'fill-emerald';
-
-      if (finalScore >= 76) {
-        label = 'حرج';
-        colorClass = 'badge-red';
-        barClass = 'fill-red';
-      } else if (finalScore >= 51) {
-        label = 'مرتفع';
-        colorClass = 'badge-orange';
-        barClass = 'fill-orange';
-      } else if (finalScore >= 26) {
-        label = 'متوسط';
-        colorClass = 'badge-amber';
-        barClass = 'fill-amber';
-      }
-
-      return {
-        score: finalScore,
-        label,
-        colorClass,
-        barClass
-      };
-    }
-
-    function analyzeLegalStatus(tenant) {
-      if (!tenant) return null;
-
-      const today = new Date();
-      const contractDate = new Date(tenant.contractDate);
-      const installmentAmount = tenant.annualRent / 3;
-
-      const dueDates = [
-        new Date(contractDate),
-        new Date(new Date(contractDate).setMonth(contractDate.getMonth() + 4)),
-        new Date(new Date(contractDate).setMonth(contractDate.getMonth() + 8))
-      ];
-
-      let remainingPaid = tenant.totalPaid;
-
-      const installments = dueDates.map((dueDate, index) => {
-        const isDue = today >= dueDate;
-        const paidForThisInstallment = Math.min(remainingPaid, installmentAmount);
-        remainingPaid -= paidForThisInstallment;
-
-        const remainingForInstallment = Math.max(0, installmentAmount - paidForThisInstallment);
-
-        let status = 'مستقبلية';
-        let delayDays = 0;
-
-        if (isDue && remainingForInstallment === 0) {
-          status = 'مدفوعة';
-        } else if (isDue && remainingForInstallment > 0) {
-          status = 'متأخرة';
-          delayDays = Math.max(
-            0,
-            Math.floor((today - dueDate) / (1000 * 60 * 60 * 24))
-          );
-        }
-
-        return {
-          num: index + 1,
-          dueDate,
-          amount: installmentAmount,
-          paid: paidForThisInstallment,
-          remaining: remainingForInstallment,
-          status,
-          delayDays
+        window.onload = async () => {
+            document.body.style.opacity = "1";
+            document.getElementById('tx_date').valueAsDate = new Date();
+            await loadTenants();
+            document.getElementById('loader').style.display = 'none';
+            if (window.lucide) lucide.createIcons();
         };
-      });
 
-      const dueInstallments = installments.filter(i => today >= i.dueDate);
-      const totalDueSoFar = dueInstallments.reduce((sum, i) => sum + i.amount, 0);
-      const totalPaidSoFar = dueInstallments.reduce((sum, i) => sum + i.paid, 0);
-      const balance = Math.max(0, totalDueSoFar - totalPaidSoFar);
-
-      const collectionRate = totalDueSoFar > 0
-        ? Math.min(100, (totalPaidSoFar / totalDueSoFar) * 100)
-        : 0;
-
-      const overdueInstallments = installments.filter(i => i.status === 'متأخرة');
-      const maxDelayDays = overdueInstallments.length > 0
-        ? Math.max(...overdueInstallments.map(i => i.delayDays))
-        : 0;
-
-      let notificationStage = 'لا يوجد إنذار';
-      let statusLabel = 'منتظم';
-      let statusClass = 'badge-emerald';
-      let legalClass = 'grad-emerald';
-      let legalMessage = 'الوضع المالي الحالي منتظم ولا توجد دفعات متأخرة حتى تاريخه.';
-
-      if (overdueInstallments.length > 0) {
-        statusLabel = 'متأخر';
-        notificationStage = 'إشعار عادي';
-        statusClass = 'badge-amber';
-        legalClass = 'grad-amber';
-        legalMessage = 'المطالبة الأولى: يرجى المبادرة بتسديد الإيجارات المتراكمة في أقرب وقت ممكن.';
-
-        if (maxDelayDays > 10) {
-          notificationStage = 'إنذار 1';
-          legalMessage = 'المطالبة الثانية: نرجو منكم المبادرة بتسديد الإيجارات المتراكمة خلال مدة أقصاها 10 أيام من تاريخ هذا الإشعار.';
-        }
-
-        if (maxDelayDays > 30 || overdueInstallments.length >= 2) {
-          notificationStage = 'إنذار عدلي';
-          statusLabel = 'خطر';
-          statusClass = 'badge-orange';
-          legalClass = 'grad-orange';
-          legalMessage = 'إنذار عدلي: سيتم اتخاذ الإجراءات القانونية بحقكم ما لم يتم تسديد الإيجارات المتراكمة فوراً.';
-        }
-
-        if (maxDelayDays > 60 || overdueInstallments.length === 3) {
-          notificationStage = 'إجراء قانوني';
-          statusLabel = 'قانوني';
-          statusClass = 'badge-red';
-          legalClass = 'grad-red';
-          legalMessage = 'الإجراء القانوني: تحذير: سيتم البدء بإجراءات الإخلاء والمطالبة القضائية لدى المحكمة المختصة لتحصيل كافة المستحقات والتعويضات.';
-        }
-      }
-
-      const prefPayment = balance <= 0
-        ? 0
-        : Math.min(balance, Math.max(installmentAmount * 0.5, 400));
-
-      const risk = calculateRiskScore({
-        balance,
-        totalDueSoFar,
-        collectionRate,
-        notificationStage,
-        installments
-      });
-
-      return {
-        installments,
-        balance,
-        totalDueSoFar,
-        totalPaidSoFar,
-        statusLabel,
-        statusClass,
-        legalClass,
-        notificationStage,
-        prefPayment,
-        collectionRate,
-        legalMessage,
-        risk
-      };
-    }
-
-    function generateWhatsAppMessage(tenant, analysis) {
-      let message = `السادة / ${tenant.name}\n\n`;
-
-      if (analysis.statusLabel === 'منتظم') {
-        message += `نود إعلامكم بأن وضع حسابكم الحالي منتظم ولا توجد أي مستحقات متأخرة حتى تاريخه.\n\nنشكر لكم التزامكم ونتطلع لاستمرار التعاون.`;
-      } else if (analysis.statusLabel === 'متأخر') {
-        message += `نود تذكيركم بوجود مبلغ مستحق على حسابكم بقيمة ${formatCurrency(analysis.balance)} دينار أردني.\n\nويُنصح بالمبادرة بسداد مبلغ ${formatCurrency(analysis.prefPayment)} دينار أردني في هذه المرحلة.\n\n${analysis.legalMessage}`;
-      } else if (analysis.statusLabel === 'خطر') {
-        message += `نرجو منكم المبادرة بتسديد مبلغ ${formatCurrency(analysis.prefPayment)} دينار أردني كدفعة أولية لتخفيف التأخير القائم.\n\n${analysis.legalMessage}`;
-      } else {
-        message += `نحيطكم علمًا بأن الحساب قد دخل مرحلة قانونية نتيجة استمرار التأخير في السداد.\n\nيرجى مراجعة الإدارة أو المبادرة بتسديد المستحقات بشكل فوري.\n\n${analysis.legalMessage}`;
-      }
-
-      message += `\n\nمجمع جبري الصناعي التجاري`;
-      return encodeURIComponent(message);
-    }
-
-    function animateCountUp(element, value, suffix = '', duration = 1200) {
-      if (!element) return;
-      let start = 0;
-      const end = Number(value || 0);
-
-      if (end === 0) {
-        element.textContent = formatCurrency(0) + suffix;
-        return;
-      }
-
-      const incrementTime = 16;
-      const totalSteps = Math.max(1, Math.floor(duration / incrementTime));
-      const stepValue = end / totalSteps;
-
-      const timer = setInterval(() => {
-        start += stepValue;
-        if (start >= end) {
-          element.textContent = formatCurrency(end) + suffix;
-          clearInterval(timer);
-        } else {
-          element.textContent = formatCurrency(Math.floor(start)) + suffix;
-        }
-      }, incrementTime);
-    }
-
-    function renderStatementView() {
-      const analysis = analyzeLegalStatus(selectedTenant);
-      const app = document.getElementById('app');
-
-      app.innerHTML = `
-        <div class="statement-page">
-          <div class="statement-shell">
-            <div class="statement-head">
-              <div class="text-right">
-                <h1>كشف حساب مالي</h1>
-                <p class="small">Jabri Complex | Official Statement</p>
-              </div>
-
-              <div class="statement-brand text-right">
-                <h2>مجمع جبري الصناعي التجاري</h2>
-                <p>عمان، الأردن</p>
-                <p>تاريخ الإصدار: ${formatDate(new Date())}</p>
-              </div>
-            </div>
-
-            <div class="statement-info">
-              <div class="text-right">
-                <div class="title">السادة / المستأجر</div>
-                <div class="big">${selectedTenant.name}</div>
-                <div class="sub">تاريخ العقد: ${formatDate(selectedTenant.contractDate)}</div>
-              </div>
-
-              <div class="text-right">
-                <div class="title">الحالة القانونية</div>
-                <div class="big">${analysis.statusLabel}</div>
-                <div class="sub" style="color:#b91c1c">${analysis.notificationStage}</div>
-              </div>
-            </div>
-
-            <div class="statement-table-wrap">
-              <table class="statement-table">
-                <thead>
-                  <tr>
-                    <th>الوصف المالي</th>
-                    <th>تاريخ الاستحقاق</th>
-                    <th>القيمة</th>
-                    <th>المدفوع</th>
-                    <th>المتبقي</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${analysis.installments.map(inst => `
-                    <tr>
-                      <td>قسط الإيجار الدوري رقم (${inst.num})</td>
-                      <td class="text-center">${formatDate(inst.dueDate)}</td>
-                      <td class="text-center strong">${formatCurrency(inst.amount)} JOD</td>
-                      <td class="text-center strong" style="color:#059669">${formatCurrency(inst.paid)} JOD</td>
-                      <td class="text-center strong" style="color:#dc2626">${formatCurrency(inst.remaining)} JOD</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="statement-bottom">
-              <div class="totals-box">
-                <div class="totals-line">
-                  <span>مجموع المطالبات المستحقة</span>
-                  <span class="val">${formatCurrency(analysis.totalDueSoFar)} JOD</span>
-                </div>
-                <div class="totals-line">
-                  <span>إجمالي السداد</span>
-                  <span class="val" style="color:#059669">${formatCurrency(analysis.totalPaidSoFar)} JOD</span>
-                </div>
-                <div class="totals-final">
-                  <span>صافي الرصيد المطلوب سداده</span>
-                  <span class="final-value">${formatCurrency(analysis.balance)} JOD</span>
-                </div>
-              </div>
-
-              <div class="stamp">
-                <div class="caption">ختم وتوقيع الإدارة</div>
-                <div class="circle">JABRI</div>
-              </div>
-            </div>
-
-            <div class="statement-actions no-print">
-              <button class="btn btn-dark" id="backToDashboardBtn">
-                <i data-lucide="arrow-right"></i>
-                العودة للوحة التحكم
-              </button>
-              <button class="btn btn-gold" id="printStatementBtn">
-                <i data-lucide="printer"></i>
-                طباعة الكشف أو حفظ PDF
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      lucide.createIcons();
-
-      document.getElementById('backToDashboardBtn').addEventListener('click', () => {
-        currentView = 'dashboard';
-        renderDashboard();
-      });
-
-      document.getElementById('printStatementBtn').addEventListener('click', () => {
-        window.print();
-      });
-    }
-
-    function renderDashboard() {
-      const app = document.getElementById('app');
-      const analysis = analyzeLegalStatus(selectedTenant);
-
-      app.innerHTML = `
-        <div class="root-shell">
-          <div class="mobile-topbar no-print">
-            <h1>مجمع الجبري</h1>
-            <span class="sub">Control</span>
-          </div>
-
-          <aside class="sidebar no-print">
-            <div class="sidebar-brand">
-              <h1>مجمع الجبري</h1>
-              <p>Executive Control</p>
-            </div>
-
-            <div class="nav">
-              <button class="nav-item active" type="button">
-                <i data-lucide="users"></i>
-                <span>لوحة المستأجرين</span>
-              </button>
-              <button class="nav-item" type="button">
-                <i data-lucide="gavel"></i>
-                <span>السجلات القانونية</span>
-              </button>
-              <button class="nav-item" type="button">
-                <i data-lucide="trending-up"></i>
-                <span>التقارير المالية</span>
-              </button>
-            </div>
-          </aside>
-
-          <main class="main">
-            <div class="grid-3">
-              <div class="card stat">
-                <div class="card-header-row">
-                  <div class="stat-icon"><i data-lucide="arrow-up-right" style="color:#dc2626"></i></div>
-                  <div class="stat-title">إجمالي ذمم المجمع</div>
-                </div>
-                <div class="stat-value"><span class="countup" data-value="38150" data-suffix=" JOD"></span></div>
-              </div>
-
-              <div class="card stat">
-                <div class="card-header-row">
-                  <div class="stat-icon"><i data-lucide="arrow-down-left" style="color:#059669"></i></div>
-                  <div class="stat-title">إجمالي التحصيل</div>
-                </div>
-                <div class="stat-value"><span class="countup" data-value="22400" data-suffix=" JOD"></span></div>
-              </div>
-
-              <div class="card stat highlight">
-                <div class="card-header-row">
-                  <div class="stat-icon"><i data-lucide="wallet" style="color:#d4af37"></i></div>
-                  <div class="stat-title">صافي الرصيد</div>
-                </div>
-                <div class="stat-value"><span class="countup" data-value="15750" data-suffix=" JOD"></span></div>
-              </div>
-            </div>
-
-            ${loadError ? `
-              <div class="card" style="margin-top:18px;border-color:#fde68a;background:#fffbeb;color:#92400e;font-weight:900">
-                ${loadError}
-              </div>
-            ` : ''}
-
-            <div class="card selector-card" style="margin-top:18px">
-              <label>اختيار المستأجر للمراجعة</label>
-              <select class="select" id="tenantSelect" ${loading ? 'disabled' : ''}>
-                <option value="">${loading ? '-- جاري تحميل المستأجرين --' : '-- اضغط لاختيار المستأجر --'}</option>
-                ${tenants.map(t => `
-                  <option value="${t.id}" ${selectedTenant && String(selectedTenant.id) === String(t.id) ? 'selected' : ''}>
-                    ${t.name}
-                  </option>
-                `).join('')}
-              </select>
-            </div>
-
-            ${
-              selectedTenant && analysis
-              ? `
-                <div class="grid-main fade-in" style="margin-top:18px">
-                  <div class="left-col">
-                    <div class="card hero-balance">
-                      ${analysis.statusLabel === 'قانوني'
-                        ? `
-                          <span style="position:absolute;left:24px;top:24px;display:flex;width:16px;height:16px">
-                            <span style="position:absolute;width:100%;height:100%;border-radius:999px;background:#f87171;opacity:.7;animation:ping 1.2s cubic-bezier(0,0,.2,1) infinite"></span>
-                            <span style="position:relative;width:16px;height:16px;border-radius:999px;background:#ef4444"></span>
-                          </span>
-                        ` : ''}
-
-                      <div class="eyebrow">الوضع المالي للمستأجر</div>
-                      <h2 class="balance ${analysis.balance > 0 ? 'red' : 'green'}">
-                        <span class="countup" data-value="${analysis.balance}" data-suffix=" JOD"></span>
-                      </h2>
-
-                      <div class="badges">
-                        <span class="badge ${analysis.statusClass}">
-                          ${analysis.statusLabel} | ${analysis.notificationStage}
-                        </span>
-                        <span class="badge ${analysis.risk.colorClass}">
-                          درجة المخاطرة: ${analysis.risk.score}% — ${analysis.risk.label}
-                        </span>
-                      </div>
-
-                      <div class="risk-wrap">
-                        <div class="risk-head">
-                          <span>مؤشر المخاطرة</span>
-                          <span>${analysis.risk.score}%</span>
-                        </div>
-                        <div class="risk-bar">
-                          <div class="risk-fill ${analysis.risk.barClass}" style="width:${analysis.risk.score}%"></div>
-                        </div>
-                      </div>
-
-                      <div class="action-box">
-                        <div class="action-info">
-                          <div class="action-icon">
-                            <i data-lucide="trending-up" style="color:#d4af37"></i>
-                          </div>
-                          <div>
-                            <p class="mini">الإجراء المقترح الآن</p>
-                            <p class="big">مطالبة بمبلغ ${formatCurrency(analysis.prefPayment)} JOD</p>
-                          </div>
-                        </div>
-
-                        <div class="button-row">
-                          <button class="btn btn-dark" id="statementBtn">
-                            <i data-lucide="file-text"></i>
-                            كشف الحساب الفعلي
-                          </button>
-                          <a class="btn btn-gold" target="_blank" rel="noopener noreferrer"
-                             href="https://wa.me/${selectedTenant.phone}?text=${generateWhatsAppMessage(selectedTenant, analysis)}">
-                            <i data-lucide="send"></i>
-                            واتساب
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="legal-box ${analysis.legalClass}">
-                      <div class="legal-header">
-                        <div class="legal-icon">
-                          <i data-lucide="gavel"></i>
-                        </div>
-                        <div class="text-right">
-                          <h3>النصيحة القانونية</h3>
-                          <p>"${analysis.legalMessage}"</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="card table-card">
-                      <div class="table-title text-right">
-                        <i data-lucide="clock" style="color:#d4af37"></i>
-                        <span>تحليل الدفعات (0-4-8)</span>
-                      </div>
-
-                      <table class="installments-table">
-                        <thead>
-                          <tr>
-                            <th class="text-right">الدفعة</th>
-                            <th class="text-center">الاستحقاق</th>
-                            <th class="text-center">المستحق</th>
-                            <th class="text-center">المدفوع</th>
-                            <th class="text-center">المتبقي</th>
-                            <th class="text-center">الحالة</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${analysis.installments.map(inst => `
-                            <tr>
-                              <td class="text-right strong">الدفعة ${inst.num}</td>
-                              <td class="text-center text-slate">${formatDate(inst.dueDate)}</td>
-                              <td class="text-center strong">${formatCurrency(inst.amount)} JOD</td>
-                              <td class="text-center strong text-emerald">${formatCurrency(inst.paid)} JOD</td>
-                              <td class="text-center strong text-red">${formatCurrency(inst.remaining)} JOD</td>
-                              <td class="text-center">
-                                <span class="status-pill ${
-                                  inst.status === 'مدفوعة'
-                                    ? 'status-paid'
-                                    : inst.status === 'متأخرة'
-                                    ? 'status-late'
-                                    : 'status-future'
-                                }">
-                                  ${inst.status}${inst.delayDays > 0 ? ` (${inst.delayDays} يوم)` : ''}
-                                </span>
-                              </td>
-                            </tr>
-                          `).join('')}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <div class="right-col">
-                    <div class="card chart-card">
-                      <div class="chart-title">كفاءة التحصيل للعقد</div>
-                      <div class="ring">
-                        <svg viewBox="0 0 36 36">
-                          <circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" stroke-width="3"></circle>
-                          <circle cx="18" cy="18" r="16" fill="none" stroke="#d4af37" stroke-width="3"
-                            stroke-dasharray="${analysis.collectionRate}, 100" stroke-linecap="round"></circle>
-                        </svg>
-                        <div class="ring-value">${Math.round(analysis.collectionRate)}%</div>
-                      </div>
-                    </div>
-
-                    <div class="stats-dark">
-                      <h3>إحصائيات الملف</h3>
-
-                      <div class="stat-line">
-                        <span class="label">المدفوع حتى اليوم</span>
-                        <span class="value">${formatCurrency(analysis.totalPaidSoFar)} JOD</span>
-                      </div>
-
-                      <div class="stat-line">
-                        <span class="label">قيمة الإيجار السنوي</span>
-                        <span class="value">${formatCurrency(selectedTenant.annualRent)} JOD</span>
-                      </div>
-
-                      <div class="stat-line">
-                        <span class="label">الرصيد المتبقي</span>
-                        <span class="value" style="color:#d4af37">
-                          <span class="countup" data-value="${analysis.balance}" data-suffix=" JOD"></span>
-                        </span>
-                      </div>
-
-                      <div class="stat-line">
-                        <span class="label">الهاتف</span>
-                        <span class="value">+${selectedTenant.phone}</span>
-                      </div>
-
-                      <div class="stat-line" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
-                        <span class="label">آخر مشاهدة</span>
-                        <span class="value">
-                          ${selectedTenant.lastNoticeSeen ? formatDate(selectedTenant.seenAt) : 'لم تتم الرؤية'}
-                        </span>
-                      </div>
-
-                      <div style="margin-top:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);padding:16px;border-radius:18px">
-                        <div style="display:flex;align-items:center;gap:8px;color:#d4af37;margin-bottom:10px;font-weight:900">
-                          <i data-lucide="shield-alert" style="width:18px;height:18px"></i>
-                          <span>درجة المخاطرة</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;color:#cbd5e1;font-size:12px;font-weight:800;margin-bottom:8px">
-                          <span>${analysis.risk.label}</span>
-                          <span>${analysis.risk.score}%</span>
-                        </div>
-                        <div style="height:12px;background:#334155;border-radius:999px;overflow:hidden">
-                          <div class="${analysis.risk.barClass}" style="height:100%;width:${analysis.risk.score}%;border-radius:999px"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `
-              : `
-                <div class="empty-state fade-in" style="margin-top:18px">
-                  <i data-lucide="users" style="width:72px;height:72px;opacity:.2"></i>
-                  <div class="title">بانتظار اختيار المستأجر لبدء التحليل التنفيذي</div>
-                </div>
-              `
+        async function loadTenants() {
+            const { data, error } = await supabaseClient.from('tenants').select('id, name, unit').order('name');
+            const select = document.getElementById('tenant_select');
+            if (data) {
+                select.innerHTML = '<option value="">-- اختر من المستأجرين الـ 52 --</option>';
+                data.forEach(t => {
+                    select.innerHTML += `<option value="${t.id}">${t.name} (وحدة: ${t.unit})</option>`;
+                });
             }
-          </main>
-        </div>
-      `;
+        }
 
-      lucide.createIcons();
+        async function submitTransaction() {
+            const tenant_id = document.getElementById('tenant_select').value;
+            const date = document.getElementById('tx_date').value;
+            const description = document.getElementById('tx_desc').value;
+            const debit = document.getElementById('tx_debit').value;
+            const credit = document.getElementById('tx_credit').value;
+            const receipt_no = document.getElementById('tx_receipt').value;
+            const msg = document.getElementById('status_msg');
 
-      document.getElementById('tenantSelect').addEventListener('change', (e) => {
-        const tenantId = e.target.value;
-        selectedTenant = tenants.find(t => String(t.id) === String(tenantId)) || null;
-        renderDashboard();
-      });
+            if (!tenant_id || !description) {
+                alert("يرجى تحديد المستأجر وكتابة البيان.");
+                return;
+            }
 
-      const statementBtn = document.getElementById('statementBtn');
-      if (statementBtn) {
-        statementBtn.addEventListener('click', () => {
-          currentView = 'statement';
-          renderStatementView();
-        });
-      }
+            msg.style.display = "block";
+            msg.style.background = "rgba(212,175,55,0.1)";
+            msg.style.color = "var(--gold)";
+            msg.innerText = "جاري الحفظ في قاعدة البيانات...";
 
-      document.querySelectorAll('.countup').forEach((el) => {
-        animateCountUp(el, el.dataset.value, el.dataset.suffix || '');
-      });
-    }
+            // إرسال البيانات (مع تحويل الصفر إلى null ليبقى الجدول نظيفاً مثل الصورة)
+            const { error } = await supabaseClient.from('tenant_transactions').insert([{
+                tenant_id: tenant_id,
+                date: date,
+                description: description,
+                debit: debit > 0 ? Number(debit) : null,
+                credit: credit > 0 ? Number(credit) : null,
+                receipt_no: receipt_no || null
+            }]);
 
-    async function loadTenants() {
-      loading = true;
-      loadError = '';
-      renderDashboard();
-
-      const { data, error } = await supabaseClient.from('tenants').select('*');
-
-      if (error) {
-        console.error(error);
-        tenants = fallbackTenants;
-        loadError = 'تعذر تحميل البيانات من قاعدة البيانات. تم استخدام بيانات تجريبية.';
-      } else if (data && data.length > 0) {
-        tenants = data.map(normalizeTenant);
-      } else {
-        tenants = fallbackTenants;
-      }
-
-      loading = false;
-      renderDashboard();
-    }
-
-    function initApp() {
-      tenants = fallbackTenants;
-      selectedTenant = null;
-      currentView = 'dashboard';
-      renderDashboard();
-      loadTenants();
-    }
-
-    initApp();
-  </script>
+            if (error) {
+                msg.style.background = "rgba(239,68,68,0.1)";
+                msg.style.color = "var(--danger)";
+                msg.innerText = "فشل الحفظ: " + error.message;
+            } else {
+                msg.style.background = "rgba(16,185,129,0.1)";
+                msg.style.color = "var(--success)";
+                msg.innerText = "تم تسجيل الحركة بنجاح وتحديث كشف حساب المستأجر!";
+                
+                // تصفير الحقول بعد النجاح
+                document.getElementById('tx_desc').value = "";
+                document.getElementById('tx_debit').value = "";
+                document.getElementById('tx_credit').value = "";
+                document.getElementById('tx_receipt').value = "";
+            }
+        }
+    </script>
 </body>
 </html>
