@@ -141,6 +141,53 @@
         .summary-item.is-paid b { color: var(--success); }
         .summary-item.is-balance b { color: var(--danger); }
 
+        /* --- New Table Styles --- */
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 16px;
+        }
+
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .statement-table th {
+            background: linear-gradient(135deg, rgba(201,164,107,0.95), rgba(177,138,82,0.95));
+            color: #fff;
+            padding: 12px 10px;
+            font-weight: 900;
+            border: 1px solid rgba(201,164,107,0.18);
+            white-space: nowrap;
+        }
+
+        .statement-table td {
+            padding: 10px 8px;
+            border: 1px solid rgba(201,164,107,0.10);
+            text-align: center;
+            color: var(--text);
+            background: rgba(255,255,255,0.88);
+        }
+
+        .statement-table tbody tr:nth-child(even) td {
+            background: rgba(201,164,107,0.05);
+        }
+
+        .statement-table tbody tr:hover td {
+            background: rgba(201,164,107,0.10);
+        }
+
+        .carry-row td {
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.08) !important;
+        }
+        /* ------------------------ */
+
         .years-stack {
             display: grid;
             gap: 16px;
@@ -190,98 +237,9 @@
             font-weight: 900;
         }
 
-        .status-paid {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.18);
-        }
-
-        .status-partial {
-            background: rgba(201,164,107,0.12);
-            color: var(--warning);
-            border: 1px solid rgba(201,164,107,0.20);
-        }
-
-        .status-unpaid {
-            background: rgba(204,90,80,0.12);
-            color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.18);
-        }
-
-        .tx-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .tx-item {
-            background: var(--surface-strong);
-            border: 1px solid rgba(201,164,107,0.14);
-            border-radius: 18px;
-            padding: 14px;
-            display: grid;
-            grid-template-columns: 1.25fr .8fr .8fr .9fr;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .tx-main {
-            min-width: 0;
-        }
-
-        .tx-desc {
-            font-size: 14px;
-            font-weight: 900;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
-        .tx-chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.14);
-            color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.18);
-        }
-
-        .amt-box {
-            text-align: center;
-            border-radius: 14px;
-            padding: 12px 10px;
-            background: rgba(255,255,255,0.75);
-        }
-
-        .amt-box span {
-            display: block;
-            font-size: 10px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .amt-box b {
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .amt-debit b { color: var(--danger); }
-        .amt-credit b { color: var(--success); }
-        .amt-balance b { color: var(--text); }
-
-        .carry-item {
-            background: rgba(201,164,107,0.10);
-            border: 1px dashed rgba(201,164,107,0.30);
-        }
+        .status-paid { background: rgba(47,158,111,0.12); color: var(--success); border: 1px solid rgba(47,158,111,0.18); }
+        .status-partial { background: rgba(201,164,107,0.12); color: var(--warning); border: 1px solid rgba(201,164,107,0.20); }
+        .status-unpaid { background: rgba(204,90,80,0.12); color: var(--danger); border: 1px solid rgba(204,90,80,0.18); }
 
         .empty-state {
             text-align: center;
@@ -351,69 +309,11 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 920px) {
-            .tx-item {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .summary-box {
-                grid-template-columns: 1fr;
-            }
-
-            .statement-header h1 { font-size: 24px; }
-            .statement-header h2 { font-size: 18px; }
-
-            .bottom-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .bottom-actions .back-btn {
-                width: 100%;
-                max-width: 320px;
-            }
-        }
-
         @media print {
-            body {
-                background: #fff !important;
-                color: #000 !important;
-                padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
-            }
-
-            #loader,
-            .bottom-actions {
-                display: none !important;
-            }
-
-            .glass, .tx-item, .amt-box {
-                background: #fff !important;
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-            }
-
-            .statement-header h1,
-            .year-title,
-            #statement_date {
-                color: #000 !important;
-            }
-
-            .summary-item b,
-            .summary-item span,
-            .footer-note,
-            .tx-desc,
-            .chip,
-            .amt-box b,
-            .amt-box span,
-            .year-balance,
-            .last-payment-box,
-            .year-status {
-                color: #000 !important;
-            }
+            body { background: #fff !important; color: #000 !important; padding: 0; opacity: 1 !important; transform: none !important; }
+            #loader, .bottom-actions { display: none !important; }
+            .glass, .year-card, .statement-table td { background: #fff !important; box-shadow: none !important; border: 1px solid #ddd !important; }
+            .statement-table th { background: #444 !important; color: #fff !important; }
         }
     </style>
 </head>
@@ -496,26 +396,18 @@
             const d = new Date(value);
             if (isNaN(d.getTime())) return '-';
             return d.toLocaleString('ar-JO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit'
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: 'numeric', minute: '2-digit'
             });
         }
 
         function goBack() {
-            if (isAdminViewer) {
-                window.location.href = 'admin.html';
-            } else {
-                window.location.href = 'tenant.html';
-            }
+            window.location.href = isAdminViewer ? 'admin.html' : 'tenant.html';
         }
 
         function savePDF() {
             const element = document.querySelector('.wrap');
             const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
-
             html2pdf().set({
                 margin: 5,
                 filename: `كشف_حساب_${tenantName}.pdf`,
@@ -528,57 +420,16 @@
         window.goBack = goBack;
         window.savePDF = savePDF;
 
-        function getLastPayment(rows) {
-            const payments = rows
-                .filter(r => toNumber(r.credit) > 0)
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            return payments.length ? payments[0] : null;
-        }
-
-        function daysSince(date) {
-            const d = new Date(date);
-            return Math.floor((Date.now() - d) / (1000 * 60 * 60 * 24));
-        }
-
-        function getYearStatus(closingBalance, openingBalance, yearRows) {
-            const yearDebit = yearRows.reduce((s, r) => s + toNumber(r.debit), 0);
-            const yearCredit = yearRows.reduce((s, r) => s + toNumber(r.credit), 0);
-            const yearRequired = openingBalance + yearDebit;
-
-            if (closingBalance <= 0) {
-                return { text: 'مسدد', className: 'status-paid' };
-            }
-
-            if (yearRequired > 0 && yearCredit > 0) {
-                return { text: 'جزئي', className: 'status-partial' };
-            }
-
-            return { text: 'غير مسدد', className: 'status-unpaid' };
-        }
-
-        function txItemHTML({ date, description, debit, credit, balance, receipt_no, carry = false }) {
+        function txRowHTML({ date, description, debit, credit, balance, receipt_no, carry = false }) {
             return `
-                <div class="tx-item ${carry ? 'carry-item' : ''}">
-                    <div class="tx-main">
-                        <div class="tx-desc">${description || '-'}</div>
-                        <div class="tx-chips">
-                            <div class="chip">التاريخ: ${date || '-'}</div>
-                            <div class="chip">السند: ${receipt_no || '-'}</div>
-                        </div>
-                    </div>
-                    <div class="amt-box amt-credit">
-                        <span>دائن</span>
-                        <b>${credit ? formatCurrency(credit) : '-'}</b>
-                    </div>
-                    <div class="amt-box amt-debit">
-                        <span>مدين</span>
-                        <b>${debit ? formatCurrency(debit) : '-'}</b>
-                    </div>
-                    <div class="amt-box amt-balance">
-                        <span>الرصيد</span>
-                        <b>${formatCurrency(balance)}</b>
-                    </div>
-                </div>
+                <tr class="${carry ? 'carry-row' : ''}">
+                    <td>${date || '-'}</td>
+                    <td style="color:var(--danger)">${debit ? formatCurrency(debit) : ''}</td>
+                    <td style="color:var(--success)">${credit ? formatCurrency(credit) : ''}</td>
+                    <td style="font-weight:900">${formatCurrency(balance)}</td>
+                    <td style="text-align:right">${description || '-'}</td>
+                    <td>${receipt_no || '-'}</td>
+                </tr>
             `;
         }
 
@@ -588,7 +439,6 @@
 
             const rows = Array.isArray(transactions) ? transactions : [];
             const grouped = {};
-
             rows.forEach(row => {
                 if (!row.date) return;
                 const year = new Date(row.date).getFullYear();
@@ -597,12 +447,6 @@
             });
 
             const years = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
-
-            if (!years.length && toNumber(previousBalance) === 0) {
-                yearsContainer.innerHTML = `<div class="empty-state glass">لا توجد حركات مالية متاحة حالياً.</div>`;
-                return;
-            }
-
             let carryBalance = toNumber(previousBalance);
             const currentYear = new Date().getFullYear();
             const displayYears = years.length ? years : [currentYear];
@@ -616,34 +460,26 @@
                     renderedItems.push({
                         date: '-',
                         description: `رصيد مرحل من سنة ${index === 0 ? 'سابقة' : Number(year) - 1}`,
-                        debit: openingBalance,
-                        credit: 0,
-                        balance: openingBalance,
-                        receipt_no: '-',
-                        carry: true
+                        debit: openingBalance, credit: 0, balance: openingBalance,
+                        receipt_no: '-', carry: true
                     });
                 }
 
                 let runningBal = openingBalance;
-
                 yearRows.forEach(row => {
                     const debit = toNumber(row.debit);
                     const credit = toNumber(row.credit);
                     runningBal += debit - credit;
-
                     renderedItems.push({
                         date: formatDate(row.date),
                         description: row.description || '-',
-                        debit,
-                        credit,
-                        balance: Math.max(0, runningBal),
-                        receipt_no: row.receipt_no || '-',
-                        carry: false
+                        debit, credit, balance: Math.max(0, runningBal),
+                        receipt_no: row.receipt_no || '-', carry: false
                     });
                 });
 
                 const closingBalance = Math.max(0, runningBal);
-                const yearStatus = getYearStatus(closingBalance, openingBalance, yearRows);
+                const yearStatus = getStatus(closingBalance, openingBalance, yearRows);
                 carryBalance = closingBalance;
 
                 const card = document.createElement('section');
@@ -655,104 +491,64 @@
                         <div class="year-balance">رصيد نهاية السنة: ${formatCurrency(closingBalance)}</div>
                         <div class="year-status ${yearStatus.className}">حالة السنة: ${yearStatus.text}</div>
                     </div>
-                    <div class="tx-list">
-                        ${renderedItems.length
-                            ? renderedItems.map(txItemHTML).join('')
-                            : '<div style="padding:10px; text-align:center; font-size:12px; color:var(--muted);">لا توجد حركات لهذا العام</div>'
-                        }
+                    <div class="table-wrapper">
+                        <table class="statement-table">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>مدين (+)</th>
+                                    <th>دائن (-)</th>
+                                    <th>الرصيد</th>
+                                    <th>البيان</th>
+                                    <th>رقم السند</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${renderedItems.map(txRowHTML).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 `;
                 yearsContainer.appendChild(card);
             });
         }
 
-        function showError(message, extra = '') {
-            document.getElementById('years_container').innerHTML = `
-                <div class="empty-state glass">
-                    ${message}
-                    ${extra ? `<br><br><span style="font-size:11px">${extra}</span>` : ''}
-                </div>
-            `;
-            document.getElementById('loader').style.display = 'none';
-            document.body.classList.add('loaded');
+        function getStatus(closing, opening, rows) {
+            const yearCredit = rows.reduce((s, r) => s + toNumber(r.credit), 0);
+            if (closing <= 0) return { text: 'مسدد', className: 'status-paid' };
+            if (yearCredit > 0) return { text: 'جزئي', className: 'status-partial' };
+            return { text: 'غير مسدد', className: 'status-unpaid' };
         }
 
         window.onload = async () => {
             try {
-                if (!tenantCode) {
-                    showError('لا يوجد كود مستأجر محفوظ.');
-                    return;
-                }
+                if (!tenantCode) return;
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                if (!tenant) return;
 
-                if (!isAdminViewer && !isTenantViewer) {
-                    showError('لا توجد صلاحية لفتح الكشف.');
-                    return;
-                }
+                const { data: transactions } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
+                
+                const rows = transactions || [];
+                const totalDebits = rows.reduce((s, r) => s + toNumber(r.debit), 0);
+                const totalCredits = rows.reduce((s, r) => s + toNumber(r.credit), 0);
+                const totalDue = toNumber(tenant.previous_balance) + totalDebits;
 
-                const { data: tenant, error: tenantError } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                if (tenantError) {
-                    showError('خطأ في تحميل بيانات المستأجر.', tenantError.message);
-                    return;
-                }
-
-                if (!tenant) {
-                    showError('لم يتم العثور على المستأجر.', `tenant_code = ${tenantCode}`);
-                    return;
-                }
-
-                const { data: transactions, error: txError } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
-
-                if (txError) {
-                    showError('خطأ في تحميل الحركات المالية.', txError.message);
-                    return;
-                }
-
-                const tenantName = tenant.tenant_name || 'مستأجر';
-                const previousBalance = toNumber(tenant.previous_balance);
-                const rows = Array.isArray(transactions) ? transactions : [];
-                const now = new Date();
-
-                const totalDebitsFromTx = rows.reduce((sum, r) => sum + toNumber(r.debit), 0);
-                const totalCreditsFromTx = rows.reduce((sum, r) => sum + toNumber(r.credit), 0);
-                const totalDue = previousBalance + totalDebitsFromTx;
-                const runningBal = Math.max(0, totalDue - totalCreditsFromTx);
-
-                document.getElementById('statement_tenant_name').innerText = tenantName;
-                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(now)}`;
-                document.getElementById('footer_year').innerText = now.getFullYear();
+                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
+                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
                 document.getElementById('sum_due').innerText = formatCurrency(totalDue);
-                document.getElementById('sum_paid').innerText = formatCurrency(totalCreditsFromTx);
-                document.getElementById('sum_balance').innerText = formatCurrency(runningBal);
+                document.getElementById('sum_paid').innerText = formatCurrency(totalCredits);
+                document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalCredits);
 
-                const lastPayment = getLastPayment(rows);
-                const box = document.getElementById('last_payment_box');
+                const lastPayment = rows.filter(r => toNumber(r.credit) > 0).sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+                document.getElementById('last_payment_box').innerText = lastPayment 
+                    ? `آخر دفعة: ${formatDate(lastPayment.date)} — ${formatCurrency(lastPayment.credit)}`
+                    : 'لا يوجد دفعات مسجلة';
 
-                if (lastPayment) {
-                    const days = daysSince(lastPayment.date);
-                    const dayText = days === 0 ? 'اليوم' : (days === 1 ? 'منذ يوم' : `منذ ${days} يوم`);
-                    box.innerText = `آخر دفعة: ${dayText} — ${formatCurrency(lastPayment.credit)} — ${formatDate(lastPayment.date)}`;
-                } else {
-                    box.innerText = 'لا يوجد دفعات مسجلة';
-                }
-
-                renderYears(previousBalance, rows);
-
+                renderYears(tenant.previous_balance, rows);
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
                 if (window.lucide) lucide.createIcons();
-            } catch (e) {
-                console.error('statement crash =', e);
-                showError('تعذر تحميل بيانات الكشف.', e.message || 'Unknown error');
-            }
+            } catch (e) { console.error(e); }
         };
     </script>
 </body>
