@@ -4,19 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>مجمع الجبري | لوحة المستأجر</title>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
-            --navy: #0f172a;
-            --gold: #d4af37;
-            --bg: #08111f;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #38bdf8;
+            --bg: #f7f4ed;
+            --bg-2: #fdfbf6;
+            --surface: rgba(255,255,255,0.72);
+            --surface-strong: rgba(255,255,255,0.88);
+            --card-border: rgba(201, 164, 107, 0.22);
+            --text: #2f2a24;
+            --muted: #7d7468;
+            --gold: #c9a46b;
+            --gold-deep: #b18a52;
+            --success: #2f9e6f;
+            --warning: #c88a1e;
+            --danger: #cc5a50;
+            --info: #5f89c5;
+            --shadow: 0 18px 40px rgba(120, 95, 56, 0.10);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
         }
 
         * {
@@ -27,295 +38,481 @@
 
         body {
             margin: 0;
-            background: var(--bg);
-            color: #fff;
             min-height: 100vh;
-            padding: 15px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(201,164,107,0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 26%),
+                linear-gradient(135deg, var(--bg), var(--bg-2));
+            padding: 16px;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.45s ease;
             overflow-x: hidden;
         }
-        
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent 22%, transparent 78%, rgba(201,164,107,0.05));
+        }
+
         #loader {
             position: fixed;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #08111f;
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
             z-index: 9999;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.1);
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(201,164,107,0.18);
             border-top-color: var(--gold);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .app {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-bottom: 42px;
+            position: relative;
+            z-index: 1;
         }
 
         .reveal {
             opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(14px);
+            transition: all 0.55s cubic-bezier(.2,.8,.2,1);
         }
 
         .reveal.active {
             opacity: 1;
             transform: translateY(0);
         }
-        
-        .header {
+
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+        }
+
+        .topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
             gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
 
-        .tenant-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 28px;
-            padding: 25px;
-            margin-bottom: 20px;
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        
+
+        .brand small {
+            font-size: 11px;
+            letter-spacing: 1.8px;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .brand strong {
+            color: var(--gold-deep);
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .ghost-btn {
+            border: 1px solid var(--card-border);
+            background: rgba(255,255,255,0.55);
+            color: var(--muted);
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-card {
+            border-radius: var(--radius-xl);
+            padding: 26px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -40px -40px auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,164,107,0.16), transparent 68%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold-deep);
+        }
+
+        .hero-sub {
+            margin: 8px 0 0;
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .meta-chip,
         .account-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-top: 12px;
-            padding: 8px 16px;
+            padding: 10px 14px;
             border-radius: 999px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 900;
+        }
+
+        .meta-chip {
+            background: rgba(255,255,255,0.65);
+            color: var(--muted);
+            border: 1px solid rgba(201,164,107,0.16);
+        }
+
+        .account-badge {
+            margin-top: 14px;
             color: #fff;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
         }
 
-        .badge-good {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
+        .badge-good { background: linear-gradient(135deg, #39a97b, #2f9e6f); }
+        .badge-warn { background: linear-gradient(135deg, #d49a2d, #c88a1e); }
+        .badge-danger { background: linear-gradient(135deg, #d96a60, #cc5a50); }
 
-        .badge-warn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        .badge-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        .quick-info {
+        .mini-grid,
+        .stats-grid,
+        .chart-grid,
+        .smart-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 20px;
+            gap: 14px;
+            margin-bottom: 16px;
         }
 
-        .quick-info div {
-            background: rgba(255,255,255,0.05);
-            border-radius: 14px;
-            padding: 12px 5px;
-            text-align: center;
+        .mini-grid { grid-template-columns: repeat(3, 1fr); }
+        .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        .chart-grid { grid-template-columns: 1fr 1.35fr; }
+        .smart-grid { grid-template-columns: repeat(2, 1fr); }
+
+        .mini-card,
+        .stat-card,
+        .panel,
+        .smart-card {
+            border-radius: var(--radius-lg);
+            padding: 18px;
         }
 
-        .quick-info span {
+        .mini-card span,
+        .stat-card span,
+        .panel-label {
             display: block;
-            font-size: 9px;
-            color: #94a3b8;
-            font-weight: 700;
-            margin-bottom: 3px;
-        }
-
-        .quick-info b {
             font-size: 11px;
-            font-weight: 900;
-            color: var(--gold);
+            color: var(--muted);
+            font-weight: 800;
+            margin-bottom: 8px;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+        .mini-card b {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 900;
         }
 
         .stat-card {
-            background: #fff;
-            border-radius: 22px;
-            padding: 18px 5px;
+            background: var(--surface-strong);
+            border: 1px solid rgba(201,164,107,0.15);
+            box-shadow: var(--shadow);
             text-align: center;
-            color: var(--navy);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 9px;
-            font-weight: 800;
-            color: #64748b;
-            margin-bottom: 5px;
         }
 
         .stat-card b {
+            display: block;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--gold-deep);
+        }
+
+        .stat-card.is-paid b { color: var(--success); }
+        .stat-card.is-balance b { color: var(--danger); }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .panel-note {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .chart-wrap {
+            position: relative;
+            min-height: 290px;
+        }
+
+        .smart-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .smart-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-right: 5px solid var(--gold);
+            pointer-events: none;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .smart-body {
+            font-size: 14px;
+            line-height: 1.8;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .risk-chip {
+            display: inline-flex;
+            margin-top: 12px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            color: #fff;
             font-size: 11px;
             font-weight: 900;
         }
-        
-        .status-box {
-            background: #fff;
-            border-radius: 28px;
-            padding: 22px;
-            color: var(--navy);
-            margin-bottom: 20px;
-            border-right: 10px solid var(--gold);
-            position: relative;
-        }
 
-        .legal-tag {
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            background: var(--gold);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 900;
-        }
-        
-        .risk-chip {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 900;
-            color: #fff;
-        }
-
-        .btn-stack {
+        .actions {
             display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .btn {
             width: 100%;
-            padding: 18px;
-            border-radius: 22px;
+            padding: 17px 18px;
+            border-radius: 18px;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
+        .btn:active { transform: scale(0.985); }
 
         .btn-gold {
-            background: var(--gold);
-            color: var(--navy);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.1);
             color: #fff;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            box-shadow: 0 14px 24px rgba(201,164,107,0.22);
         }
 
-        .footer-text {
+        .btn-soft {
+            background: rgba(255,255,255,0.62);
+            border: 1px solid var(--card-border);
+            color: var(--text);
+        }
+
+        .footer {
             text-align: center;
-            font-size: 10px;
-            color: #64748b;
-            margin-top: 20px;
+            font-size: 11px;
+            color: var(--muted);
             font-weight: 800;
+            margin-top: 8px;
         }
 
-        @media (max-width: 768px) {
-            .quick-info,
+        @media (max-width: 900px) {
+            .chart-grid,
+            .smart-grid,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .mini-grid,
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .hero-card {
+                padding: 22px;
+            }
+
+            .hero-title {
+                font-size: 24px;
+            }
+
+            .chart-wrap {
+                min-height: 250px;
             }
         }
     </style>
 </head>
 <body>
-
     <div id="loader"><div class="spinner"></div></div>
 
-    <div class="header reveal">
-        <div style="font-weight: 900; font-size: 14px; color: var(--gold);">JABRI COMPLEX</div>
-        <button onclick="logout()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; font-size:11px; font-weight:800; padding:6px 14px; border-radius:10px; cursor:pointer;">خروج</button>
-    </div>
-
-    <section class="tenant-card reveal">
-        <h1 id="t_name" style="margin:0; font-size:22px; font-weight:900; color:var(--gold);">...</h1>
-        <p id="t_unit" style="margin:5px 0 0; font-size:11px; font-weight:700; color:#94a3b8;"></p>
-        <p id="year_info" style="font-size:10px; color:var(--gold); font-weight:800; margin-top:5px;"></p>
-
-        <div id="account_badge" class="account-badge">جاري التحميل...</div>
-
-        <div class="quick-info">
-            <div><span>آخر تحديث</span><b id="last_update">-</b></div>
-            <div><span>آخر دفعة</span><b id="last_payment">-</b></div>
-            <div><span>حالة الحساب</span><b id="account_status">-</b></div>
+    <div class="app">
+        <div class="topbar reveal">
+            <div class="brand">
+                <small>MANAGED BUSINESS SPACES FOR LEASE</small>
+                <strong>JABRI COMPLEX</strong>
+            </div>
+            <button class="ghost-btn" onclick="logout()">
+                <i data-lucide="log-out"></i>
+                خروج
+            </button>
         </div>
-    </section>
 
-    <div class="stats-grid">
-        <div class="stat-card reveal" style="transition-delay:0.1s;">
-            <span>إجمالي المستحق</span>
-            <b id="val_debit">0</b>
+        <section class="hero-card glass reveal">
+            <h1 id="t_name" class="hero-title">...</h1>
+            <p id="t_unit" class="hero-sub">...</p>
+
+            <div class="meta-row">
+                <div class="meta-chip"><i data-lucide="calendar-range"></i><span id="year_info">الحساب حتى سنة ...</span></div>
+                <div class="meta-chip"><i data-lucide="clock-3"></i><span id="last_update">-</span></div>
+            </div>
+
+            <div id="account_badge" class="account-badge badge-good">جاري التحميل...</div>
+        </section>
+
+        <div class="mini-grid reveal">
+            <div class="mini-card glass"><span>آخر دفعة</span><b id="last_payment">-</b></div>
+            <div class="mini-card glass"><span>نسبة السداد</span><b id="collection_rate">-</b></div>
+            <div class="mini-card glass"><span>حالة الحساب</span><b id="account_status">-</b></div>
         </div>
-        <div class="stat-card reveal" style="transition-delay:0.2s;">
-            <span>المدفوعات</span>
-            <b id="val_credit" style="color:var(--success);">0</b>
+
+        <div class="stats-grid">
+            <div class="stat-card reveal">
+                <span>إجمالي المستحق</span>
+                <b id="val_debit">0</b>
+            </div>
+            <div class="stat-card reveal is-paid">
+                <span>إجمالي المدفوع</span>
+                <b id="val_credit">0</b>
+            </div>
+            <div class="stat-card reveal is-balance">
+                <span>الرصيد المتبقي</span>
+                <b id="val_balance">0</b>
+            </div>
         </div>
-        <div class="stat-card reveal" style="transition-delay:0.3s;">
-            <span>الرصيد المتبقي</span>
-            <b id="val_balance" style="color:var(--danger);">0</b>
+
+        <div class="chart-grid">
+            <section class="panel glass reveal">
+                <div class="panel-head">
+                    <div>
+                        <span class="panel-label">Pie Chart</span>
+                        <div class="panel-title">حالة الحساب</div>
+                    </div>
+                    <div class="panel-note">المدفوع مقابل المتبقي</div>
+                </div>
+                <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
+            </section>
+
+            <section class="panel glass reveal">
+                <div class="panel-head">
+                    <div>
+                        <span class="panel-label">Line Chart</span>
+                        <div class="panel-title">حركة الدفعات</div>
+                    </div>
+                    <div class="panel-note">آخر العمليات حسب التاريخ</div>
+                </div>
+                <div class="chart-wrap"><canvas id="paymentLineChart"></canvas></div>
+            </section>
         </div>
-    </div>
 
-    <div class="status-box reveal" id="smart_box" style="transition-delay:0.4s;">
-        <div class="legal-tag" id="status_tag">الحالة المالية</div>
-        <div id="smart_icon" style="margin-bottom:10px;"></div>
-        <div id="smart_message" style="font-size:13px; font-weight:700; color:#1e293b; line-height:1.5;">جاري التحليل...</div>
-    </div>
+        <div class="smart-grid">
+            <section class="smart-card glass reveal" id="smart_box">
+                <div class="tag" id="status_tag">الحالة المالية</div>
+                <div id="smart_icon" style="margin-bottom:10px;"></div>
+                <div id="smart_message" class="smart-body">جاري التحليل...</div>
+            </section>
 
-    <div class="status-box reveal" id="advice_box" style="transition-delay:0.45s; border-right-color:var(--info);">
-        <div class="legal-tag" id="advice_tag" style="background:var(--info);">التوصية المالية</div>
-        <div id="advice_icon" style="margin-bottom:10px;"></div>
-        <div id="advice_message" style="font-size:13px; font-weight:700; color:#1e293b; line-height:1.7;">جاري إعداد التوصية...</div>
-    </div>
+            <section class="smart-card glass reveal" id="advice_box">
+                <div class="tag" id="advice_tag">التوصية المالية</div>
+                <div id="advice_icon" style="margin-bottom:10px;"></div>
+                <div id="advice_message" class="smart-body">جاري إعداد التوصية...</div>
+            </section>
+        </div>
 
-    <div class="btn-stack reveal" style="transition-delay:0.5s;">
-        <button class="btn btn-gold" onclick="window.location.href='statement.html'">
-            <i data-lucide="file-text"></i>
-            كشف الحساب
-        </button>
-        <button class="btn btn-outline" onclick="sendWhatsApp()">
-            <i data-lucide="message-circle"></i>
-            واتساب الإدارة
-        </button>
-    </div>
+        <div class="actions reveal">
+            <button class="btn btn-gold" onclick="window.location.href='statement.html'">
+                <i data-lucide="file-text"></i>
+                كشف الحساب
+            </button>
+            <button class="btn btn-soft" onclick="sendWhatsApp()">
+                <i data-lucide="message-circle"></i>
+                واتساب الإدارة
+            </button>
+        </div>
 
-    <div class="footer-text reveal" id="footer_year"></div>
+        <div class="footer reveal" id="footer_year"></div>
+    </div>
 
     <script>
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-        if (!tenantCode) {
-            window.location.href = "index.html";
-        }
+        if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
         const supabaseClient = createClient(
@@ -325,6 +522,8 @@
 
         let dbData = {};
         let transactions = [];
+        let pieChart = null;
+        let lineChart = null;
         const currentYear = new Date().getFullYear();
 
         function toNumber(value) {
@@ -346,196 +545,236 @@
             return d.toLocaleDateString('ar-JO');
         }
 
-        window.onload = async () => {
-            try {
-                const { data: tenant, error: tenantError } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
+        function animateValue(id, end) {
+            const el = document.getElementById(id);
+            const start = 0;
+            const duration = 900;
+            let startTime = null;
 
-                if (tenantError || !tenant) {
-                    throw new Error("المستأجر غير موجود");
-                }
-
-                const { data: tx, error: txError } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
-
-                if (txError) {
-                    throw txError;
-                }
-
-                dbData = tenant;
-                transactions = tx || [];
-
-                document.getElementById('loader').style.display = 'none';
-                document.body.style.opacity = "1";
-                updateUI();
-
-            } catch (e) {
-                console.error(e);
-                alert("خطأ في الاتصال بقاعدة البيانات.");
-                logout();
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const current = start + (end - start) * progress;
+                el.textContent = formatCurrency(current);
+                if (progress < 1) requestAnimationFrame(step);
             }
-        };
+
+            requestAnimationFrame(step);
+        }
+
+        function getCollectionRate(totalDue, balance) {
+            if (totalDue <= 0) return 100;
+            return Math.max(0, Math.min(100, Math.round(((totalDue - balance) / totalDue) * 100)));
+        }
+
+        function destroyCharts() {
+            if (pieChart) pieChart.destroy();
+            if (lineChart) lineChart.destroy();
+        }
+
+        function buildCharts(totalDue, paid, balance) {
+            destroyCharts();
+
+            const pieCtx = document.getElementById('balancePieChart');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['المدفوع', 'المتبقي'],
+                    datasets: [{
+                        data: [paid, Math.max(0, balance)],
+                        backgroundColor: ['#c9a46b', '#e7d7bd'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 10,
+                                color: '#5d5347',
+                                font: { family: 'Tajawal', weight: '700' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${formatCurrency(ctx.raw)}`
+                            }
+                        }
+                    }
+                }
+            });
+
+            const creditTx = [...transactions]
+                .filter(t => toNumber(t.credit) > 0)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = creditTx.length ? creditTx.map(t => formatShortDate(t.date)) : ['لا توجد دفعات'];
+            const values = creditTx.length ? creditTx.map(t => toNumber(t.credit)) : [0];
+
+            const lineCtx = document.getElementById('paymentLineChart');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'قيمة الدفعة',
+                        data: values,
+                        borderColor: '#c9a46b',
+                        backgroundColor: 'rgba(201,164,107,0.14)',
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#b18a52',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => formatCurrency(ctx.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#7d7468', font: { family: 'Tajawal', weight: '700' } },
+                            grid: { color: 'rgba(177,138,82,0.10)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#7d7468',
+                                font: { family: 'Tajawal', weight: '700' },
+                                callback: (value) => `${value} د.أ`
+                            },
+                            grid: { color: 'rgba(177,138,82,0.10)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setStatus(box, color, text, message, icon) {
+            box.querySelector('.tag').style.background = color;
+            document.getElementById('smart_message').innerText = message;
+            document.getElementById('smart_icon').innerHTML = `<i data-lucide="${icon}" style="color:${color}"></i>`;
+            document.getElementById('status_tag').innerText = text;
+        }
+
+        function renderAdvice(advice) {
+            document.getElementById('advice_tag').style.background = advice.color;
+            document.getElementById('advice_tag').innerText = advice.title;
+            document.getElementById('advice_icon').innerHTML = `<i data-lucide="${advice.icon}" style="color:${advice.color}"></i>`;
+            const riskColor = advice.riskScore < 40 ? '#2f9e6f' : '#cc5a50';
+            document.getElementById('advice_message').innerHTML = `
+                <div>${advice.message}</div>
+                <div class="risk-chip" style="background:${riskColor}">درجة المخاطرة: ${advice.riskScore}/100</div>
+                <div style="margin-top:10px; font-size:11px; color:var(--muted); font-weight:800;">يشمل الرصيد المرحل + الحركات المالية - الدفعات المسجلة.</div>
+            `;
+        }
+
+        function getAdvice(balance, totalDue) {
+            let title = 'وضع ممتاز';
+            let color = '#2f9e6f';
+            let icon = 'badge-check';
+            let message = 'شكراً لالتزامك، حسابك منظم ولا يوجد عليك رصيد مستحق حالياً.';
+            let riskScore = 0;
+
+            if (balance > 0 && balance <= 500) {
+                title = 'إغلاق الرصيد';
+                color = '#c88a1e';
+                icon = 'wallet';
+                message = 'المتبقي بسيط، وتسديده الآن يعطيك ملفاً مالياً أنظف ويغلق السنة الحالية بشكل مرتب.';
+                riskScore = 28;
+            } else if (balance > 500) {
+                title = 'سداد عاجل';
+                color = '#cc5a50';
+                icon = 'shield-alert';
+                message = 'يرجى مراجعة الإدارة في أقرب وقت لتسوية الرصيد المتراكم وتجنب زيادة الذمم في السنوات التالية.';
+                riskScore = Math.min(95, Math.round((balance / Math.max(totalDue, 1)) * 100));
+            }
+
+            return { title, color, icon, message, riskScore };
+        }
+
+        function processSmartStatus(balance) {
+            if (balance === 0) {
+                setStatus(document.getElementById('smart_box'), '#2f9e6f', 'ممتاز', 'حسابك مكتمل ولا يوجد رصيد متبقٍ حتى الآن.', 'award');
+            } else if (balance <= 500) {
+                setStatus(document.getElementById('smart_box'), '#c88a1e', 'تنبيه', `هناك رصيد بسيط متبقٍ بقيمة ${formatCurrency(balance)}.`, 'clock-3');
+            } else {
+                setStatus(document.getElementById('smart_box'), '#cc5a50', 'متابعة', `الرصيد المتبقي الحالي هو ${formatCurrency(balance)} ويحتاج متابعة مع الإدارة.`, 'alert-triangle');
+            }
+        }
 
         function updateUI() {
-            document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
+            document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), 50 + (i * 40)));
 
             const prevBalance = toNumber(dbData.previous_balance);
             const totalDebitsFromTx = transactions.reduce((sum, t) => sum + toNumber(t.debit), 0);
             const totalCreditsFromTx = transactions.reduce((sum, t) => sum + toNumber(t.credit), 0);
-
             const totalDue = prevBalance + totalDebitsFromTx;
             const paid = totalCreditsFromTx;
             const balance = Math.max(0, totalDue - paid);
+            const collectionRate = getCollectionRate(totalDue, balance);
 
             const lastPaymentTx = [...transactions]
                 .filter(t => toNumber(t.credit) > 0)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-            const lastTransaction = [...transactions]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            const lastTransaction = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
             const badgeEl = document.getElementById('account_badge');
-            let badgeText = "منتظم";
-            let badgeClass = "badge-good";
-            let badgeIcon = "shield-check";
+            let badgeText = 'منتظم';
+            let badgeClass = 'badge-good';
+            let badgeIcon = 'shield-check';
 
             if (balance > 0 && balance <= 500) {
-                badgeText = "تنبيه";
-                badgeClass = "badge-warn";
-                badgeIcon = "alert-circle";
+                badgeText = 'تنبيه';
+                badgeClass = 'badge-warn';
+                badgeIcon = 'alert-circle';
             } else if (balance > 500) {
-                badgeText = "متابعة";
-                badgeClass = "badge-danger";
-                badgeIcon = "shield-alert";
+                badgeText = 'متابعة';
+                badgeClass = 'badge-danger';
+                badgeIcon = 'shield-alert';
             }
 
             badgeEl.className = `account-badge ${badgeClass}`;
             badgeEl.innerHTML = `<i data-lucide="${badgeIcon}"></i> حالة الحساب: ${badgeText}`;
 
-            document.getElementById('last_update').innerText = lastTransaction ? formatShortDate(lastTransaction.date) : formatShortDate(new Date());
+            document.getElementById('t_name').innerText = dbData.tenant_name || '-';
+            document.getElementById('t_unit').innerText = `الوحدة: ${dbData.shop_no || '-'} • رمز المستأجر: ${dbData.tenant_code || tenantCode}`;
+            document.getElementById('year_info').innerText = `الحساب حتى سنة ${currentYear}`;
+            document.getElementById('last_update').innerText = `آخر تحديث: ${lastTransaction ? formatShortDate(lastTransaction.date) : formatShortDate(new Date())}`;
             document.getElementById('last_payment').innerText = lastPaymentTx ? formatCurrency(lastPaymentTx.credit) : 'لا يوجد';
             document.getElementById('account_status').innerText = badgeText;
-            document.getElementById('account_status').style.color =
-                balance === 0 ? "var(--success)" : (balance <= 500 ? "var(--warning)" : "var(--danger)");
+            document.getElementById('account_status').style.color = balance === 0 ? 'var(--success)' : (balance <= 500 ? 'var(--warning)' : 'var(--danger)');
+            document.getElementById('collection_rate').innerText = `${collectionRate}%`;
+            document.getElementById('footer_year').innerText = `© ${currentYear} مجمع الجبري الصناعي التجاري`;
 
-            document.getElementById('t_name').innerText = dbData.tenant_name || '-';
-            document.getElementById('t_unit').innerText = `الوحدة: ${dbData.shop_no || '-'}`;
-            document.getElementById('year_info').innerText = `الحساب حتى سنة ${currentYear}`;
-            document.getElementById('footer_year').innerText = `© ${currentYear} مجمع الجبري`;
+            animateValue('val_debit', totalDue);
+            animateValue('val_credit', paid);
+            animateValue('val_balance', balance);
+            buildCharts(totalDue, paid, balance);
+            renderAdvice(getAdvice(balance, totalDue));
+            processSmartStatus(balance);
 
-            animateValue("val_debit", 0, totalDue, 1000);
-            animateValue("val_credit", 0, paid, 1000);
-            animateValue("val_balance", 0, balance, 1000);
-
-            setTimeout(() => {
-                renderSmartAdvice(
-                    getSmartAdvice({
-                        previousBalance: prevBalance,
-                        currentRent: totalDebitsFromTx,
-                        paid,
-                        totalDue,
-                        balance
-                    })
-                );
-                processSmartStatus(balance);
-                if (window.lucide) lucide.createIcons();
-            }, 150);
-        }
-
-        function getSmartAdvice({ balance, totalDue }) {
-            const collectionRate = totalDue > 0 ? Math.round(((totalDue - balance) / totalDue) * 100) : 100;
-
-            let title;
-            let color;
-            let icon;
-            let message;
-            let risk = balance === 0 ? 0 : (balance <= 500 ? 20 : 75);
-
-            if (balance === 0) {
-                title = "وضع ممتاز";
-                color = "var(--success)";
-                icon = "badge-check";
-                message = "شكراً لالتزامك، حسابك مسدد بالكامل.";
-            } else if (balance <= 500) {
-                title = "إغلاق الرصيد";
-                color = "var(--warning)";
-                icon = "wallet";
-                message = "ننصح بتسديد المتبقي البسيط لإغلاق ذمة السنة.";
-            } else {
-                title = "سداد عاجل";
-                color = "var(--danger)";
-                icon = "shield-alert";
-                message = "يرجى مراجعة الإدارة لتسوية الرصيد التراكمي المرتفع.";
-            }
-
-            return { riskScore: risk, title, message, icon, color, collectionRate };
-        }
-
-        function renderSmartAdvice(advice) {
-            document.getElementById('advice_tag').style.background = advice.color;
-            document.getElementById('advice_tag').innerText = advice.title;
-            document.getElementById('advice_icon').innerHTML = `<i data-lucide="${advice.icon}" style="color:${advice.color}"></i>`;
-
-            const riskColor = advice.riskScore < 40 ? "#10b981" : "#ef4444";
-
-            document.getElementById('advice_message').innerHTML = `
-                <div>${advice.message}</div>
-                <div class="risk-chip" style="background:${riskColor}">درجة المخاطرة: ${advice.riskScore}/100</div>
-                <div style="margin-top:10px; font-size:10px; color:#64748b; font-weight:800;">* يشمل الرصيد المرحل + الحركات المالية - المدفوعات.</div>
-            `;
-        }
-
-        function animateValue(id, start, end, duration) {
-            const obj = document.getElementById(id);
-            let startTime = null;
-
-            const step = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const progress = Math.min((timestamp - startTime) / duration, 1);
-                const value = progress * (end - start) + start;
-
-                obj.innerHTML = `${Math.floor(value).toLocaleString()} <span style="font-size:8px;">د.أ</span>`;
-
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-
-            window.requestAnimationFrame(step);
-        }
-
-        function processSmartStatus(balance) {
-            const box = document.getElementById('smart_box');
-
-            if (balance === 0) {
-                setStatus(box, "var(--success)", "ممتاز", "حسابك مكتمل.", "award");
-            } else {
-                setStatus(
-                    box,
-                    balance <= 500 ? "var(--warning)" : "var(--danger)",
-                    "تنبيه",
-                    `متبقي: ${Number(balance).toLocaleString('en-US')} د.أ`,
-                    "clock"
-                );
-            }
-        }
-
-        function setStatus(box, color, text, message, icon) {
-            box.style.borderRightColor = color;
-            document.getElementById('status_tag').style.background = color;
-            document.getElementById('status_tag').innerText = text;
-            document.getElementById('smart_message').innerText = message;
-            document.getElementById('smart_icon').innerHTML = `<i data-lucide="${icon}" style="color:${color}"></i>`;
+            if (window.lucide) lucide.createIcons();
         }
 
         function sendWhatsApp() {
-            const msg = encodeURIComponent(`مرحباً إدارة مجمع الجبري، استفسار مالي بخصوص الوحدة ${dbData.shop_no || '-'}`);
+            const msg = encodeURIComponent(`مرحباً إدارة مجمع الجبري، لدي استفسار بخصوص حساب الوحدة ${dbData.shop_no || '-'} ورمز المستأجر ${dbData.tenant_code || tenantCode}.`);
             window.open(`https://wa.me/9627XXXXXXXX?text=${msg}`, '_blank');
         }
 
@@ -544,8 +783,41 @@
             localStorage.removeItem('jabri_tenant_code');
             localStorage.removeItem('jabri_tenant_name');
             localStorage.removeItem('jabri_tenant_unit');
-            window.location.href = "index.html";
+            window.location.href = 'index.html';
         }
+
+        window.onload = async () => {
+            try {
+                const { data: tenant, error: tenantError } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                if (tenantError || !tenant) throw new Error('المستأجر غير موجود');
+
+                const { data: tx, error: txError } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true });
+
+                if (txError) throw txError;
+
+                dbData = tenant;
+                transactions = tx || [];
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.style.opacity = '1';
+                updateUI();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').style.display = 'none';
+                document.body.style.opacity = '1';
+                alert('خطأ في الاتصال بقاعدة البيانات.');
+                logout();
+            }
+        };
     </script>
 </body>
 </html>
