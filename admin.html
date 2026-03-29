@@ -11,7 +11,6 @@
     <style>
         :root{
             --bg:#f7f4ec;
-            --bg-soft:#fcfaf6;
             --card:rgba(255,255,255,0.72);
             --text:#1f2937;
             --muted:#7a7469;
@@ -23,11 +22,6 @@
             --danger:#d14d4d;
             --shadow:0 18px 45px rgba(87,68,37,0.10);
             --radius-xl:28px;
-        }
-
-        .icon-chip,
-        i[data-lucide]{
-            display:none !important;
         }
 
         *{
@@ -133,6 +127,39 @@
             border:1px solid rgba(209,77,77,0.18);
         }
 
+        .panel{
+            background:var(--card);
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.72);
+            box-shadow:var(--shadow);
+            border-radius:28px;
+            padding:20px;
+            margin-bottom:18px;
+        }
+
+        .panel-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:16px;
+            flex-wrap:wrap;
+        }
+
+        .panel-title h3{
+            margin:0;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+        }
+
+        .panel-title p{
+            margin:3px 0 0;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:700;
+        }
+
         .hero{
             background:var(--card);
             backdrop-filter:blur(14px);
@@ -150,8 +177,20 @@
             align-items:center;
         }
 
-        .hero h2{ margin:0; font-size:28px; color:#4f3b22; font-weight:900; }
-        .hero p{ margin:8px 0 0; line-height:1.8; color:var(--muted); font-weight:700; font-size:14px; }
+        .hero h2{
+            margin:0;
+            font-size:28px;
+            color:#4f3b22;
+            font-weight:900;
+        }
+
+        .hero p{
+            margin:8px 0 0;
+            line-height:1.8;
+            color:var(--muted);
+            font-weight:700;
+            font-size:14px;
+        }
 
         .hero-stats{
             display:grid;
@@ -245,39 +284,6 @@
         .kpi-card.bad-card{
             background:linear-gradient(135deg, rgba(209,77,77,0.15), rgba(255,255,255,0.90));
             border-color:rgba(209,77,77,0.20);
-        }
-
-        .panel{
-            background:var(--card);
-            backdrop-filter:blur(14px);
-            border:1px solid rgba(255,255,255,0.72);
-            box-shadow:var(--shadow);
-            border-radius:28px;
-            padding:20px;
-            margin-bottom:18px;
-        }
-
-        .panel-head{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-            margin-bottom:16px;
-            flex-wrap:wrap;
-        }
-
-        .panel-title h3{
-            margin:0;
-            font-size:18px;
-            color:#4e3c24;
-            font-weight:900;
-        }
-
-        .panel-title p{
-            margin:3px 0 0;
-            font-size:11px;
-            color:var(--muted);
-            font-weight:700;
         }
 
         .chart-grid{
@@ -479,22 +485,40 @@
         </section>
 
         <section class="kpi-grid">
-            <div class="kpi-card" id="kpi_card_debit"><div class="kpi-head"><span>إجمالي المدين</span></div><div class="kpi-value" id="kpi_total_debit">0 د.أ</div></div>
-            <div class="kpi-card" id="kpi_card_credit"><div class="kpi-head"><span>إجمالي الدائن</span></div><div class="kpi-value" id="kpi_total_credit">0 د.أ</div></div>
-            <div class="kpi-card" id="kpi_card_balance"><div class="kpi-head"><span>الرصيد المتبقي</span></div><div class="kpi-value" id="kpi_total_balance">0 د.أ</div></div>
-            <div class="kpi-card" id="kpi_card_outstanding"><div class="kpi-head"><span>إجمالي الرصيد المستحق</span></div><div class="kpi-value" id="kpi_total_outstanding">0 د.أ</div></div>
+            <div class="kpi-card" id="kpi_card_debit">
+                <div class="kpi-head"><span>إجمالي المدين</span></div>
+                <div class="kpi-value" id="kpi_total_debit">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_credit">
+                <div class="kpi-head"><span>إجمالي الدائن</span></div>
+                <div class="kpi-value" id="kpi_total_credit">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_balance">
+                <div class="kpi-head"><span>الرصيد المتبقي</span></div>
+                <div class="kpi-value" id="kpi_total_balance">0 د.أ</div>
+            </div>
+            <div class="kpi-card" id="kpi_card_ratio">
+                <div class="kpi-head"><span>نسبة السداد</span></div>
+                <div class="kpi-value" id="kpi_total_ratio">0%</div>
+            </div>
         </section>
 
         <section class="chart-grid">
-            <div class="panel"><div class="panel-head"><div class="panel-title"><h3>مقارنة التحصيل</h3></div></div><div class="chart-wrap"><canvas id="collectionChart"></canvas></div></div>
-            <div class="panel"><div class="panel-head"><div class="panel-title"><h3>الحركة الشهرية</h3></div></div><div class="chart-wrap"><canvas id="monthlyChart"></canvas></div></div>
+            <div class="panel">
+                <div class="panel-head"><div class="panel-title"><h3>مقارنة التحصيل</h3></div></div>
+                <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <div class="panel-head"><div class="panel-title"><h3>الحركة الشهرية</h3></div></div>
+                <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
+            </div>
         </section>
 
         <section class="panel">
             <div class="panel-head">
                 <div class="panel-title">
                     <h3>توقع السداد</h3>
-                    <p>قراءة سريعة لاحتمال انتظام السداد للمستأجر المختار</p>
+                    <p>تحليل من نمط كشف حساب المستأجر عبر السنوات</p>
                 </div>
             </div>
 
@@ -503,7 +527,7 @@
             </div>
 
             <div style="margin-top:12px; text-align:center; font-weight:900; color:#4b3720;" id="predictionText">
-                اختر مستأجرًا لعرض التوقع
+                اختر مستأجرًا لعرض نمط السداد والتوقع
             </div>
         </section>
 
@@ -539,20 +563,33 @@
         </section>
 
         <section class="panel">
-            <div class="panel-head"><div class="panel-title"><h3>إدخال حركة مالية</h3><p>سجل الحركة المالية للمستأجر المحدد</p></div></div>
+            <div class="panel-head">
+                <div class="panel-title">
+                    <h3>إدخال حركة مالية</h3>
+                    <p>سجل الحركة المالية للمستأجر المحدد</p>
+                </div>
+            </div>
+
             <div class="form-grid">
                 <div class="field"><label>التاريخ</label><input type="date" id="tx_date" /></div>
                 <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt" placeholder="اختياري" /></div>
             </div>
-            <div class="field" style="margin-top:12px;"><label>البيان / الوصف</label><input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" /></div>
+
+            <div class="field" style="margin-top:12px;">
+                <label>البيان / الوصف</label>
+                <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" />
+            </div>
+
             <div class="form-grid" style="margin-top:12px;">
                 <div class="field"><label>مدين</label><input type="number" id="tx_debit" placeholder="0.000" step="0.001" /></div>
                 <div class="field"><label>دائن</label><input type="number" id="tx_credit" placeholder="0.000" step="0.001" /></div>
             </div>
+
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
                 <button class="btn btn-gold" onclick="submitTransaction()">حفظ الحركة</button>
                 <button class="btn btn-soft" onclick="clearForm()">تفريغ الحقول</button>
             </div>
+
             <div id="status_msg" class="status-msg"></div>
         </section>
 
@@ -575,8 +612,17 @@
         let allTenants = [], allTransactions = [], tenantBalances = [];
         let collectionChart = null, monthlyChart = null, predictionChart = null;
 
-        function toNumber(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
-        function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`; }
+        function toNumber(v) {
+            const n = parseFloat(v);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function formatCurrency(v) {
+            return `${toNumber(v).toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })} د.أ`;
+        }
 
         function getTenantStatusClass(tenant){
             if (!tenant) return 'warn-card';
@@ -600,17 +646,17 @@
         function applyTenantCardColors(tenant){
             const statusClass = getTenantStatusClass(tenant);
 
-            const kpiCards = [
+            const cards = [
                 document.getElementById('kpi_card_debit'),
                 document.getElementById('kpi_card_credit'),
                 document.getElementById('kpi_card_balance'),
-                document.getElementById('kpi_card_outstanding'),
+                document.getElementById('kpi_card_ratio'),
                 document.getElementById('selected_balance_card'),
                 document.getElementById('selected_paid_card'),
                 document.getElementById('selected_tx_count_card')
             ];
 
-            kpiCards.forEach(card => {
+            cards.forEach(card => {
                 if (!card) return;
                 card.classList.remove('good-card', 'warn-card', 'bad-card');
                 card.classList.add(statusClass);
@@ -623,11 +669,14 @@
                     supabaseClient.from('tenants').select('*').order('tenant_name'),
                     supabaseClient.from('tenant_transactions').select('*').order('date')
                 ]);
+
                 if (tenantsError) throw tenantsError;
                 if (transactionsError) throw transactionsError;
+
                 allTenants = tenants || [];
                 allTransactions = transactions || [];
                 buildTenantBalances();
+
             } catch (error) {
                 console.error(error);
                 alert('خطأ في تحميل البيانات: ' + error.message);
@@ -646,7 +695,9 @@
                     totalDebit: deb,
                     totalCredit: cre,
                     currentBalance: Math.max(0, prev + deb - cre),
-                    lastPayment: [...tx].filter(t => toNumber(t.credit) > 0).sort((a,b) => new Date(b.date) - new Date(a.date))[0] || null
+                    lastPayment: [...tx]
+                        .filter(t => toNumber(t.credit) > 0)
+                        .sort((a,b) => new Date(b.date) - new Date(a.date))[0] || null
                 };
             });
         }
@@ -662,7 +713,7 @@
                 document.getElementById('kpi_total_debit').innerText = '0 د.أ';
                 document.getElementById('kpi_total_credit').innerText = '0 د.أ';
                 document.getElementById('kpi_total_balance').innerText = '0 د.أ';
-                document.getElementById('kpi_total_outstanding').innerText = '0 د.أ';
+                document.getElementById('kpi_total_ratio').innerText = '0%';
                 applyTenantCardColors(null);
                 return;
             }
@@ -670,11 +721,12 @@
             const totalRequired = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
             const totalPaid = toNumber(tenant.totalCredit);
             const balance = Math.max(0, totalRequired - totalPaid);
+            const ratio = totalRequired > 0 ? Math.round((totalPaid / totalRequired) * 100) : 0;
 
             document.getElementById('kpi_total_debit').innerText = formatCurrency(totalRequired);
             document.getElementById('kpi_total_credit').innerText = formatCurrency(totalPaid);
             document.getElementById('kpi_total_balance').innerText = formatCurrency(balance);
-            document.getElementById('kpi_total_outstanding').innerText = formatCurrency(balance);
+            document.getElementById('kpi_total_ratio').innerText = `${Math.min(ratio, 100)}%`;
 
             applyTenantCardColors(tenant);
         }
@@ -687,45 +739,81 @@
                 applyTenantCardColors(null);
                 return;
             }
+
             document.getElementById('selected_balance').innerText = formatCurrency(tenant.currentBalance);
             document.getElementById('selected_paid').innerText = formatCurrency(tenant.totalCredit);
-            document.getElementById('selected_tx_count').innerText = allTransactions.filter(t => t.tenant_code === tenant.tenant_code).length;
+            document.getElementById('selected_tx_count').innerText =
+                allTransactions.filter(t => t.tenant_code === tenant.tenant_code).length;
+
             applyTenantCardColors(tenant);
         }
 
         async function loadTenantBalancePreview(code) {
             const strip = document.getElementById('smart_strip');
             const t = tenantBalances.find(x => x.tenant_code === code);
-            if (!code || !t) { strip.style.display = 'none'; return; }
-            document.getElementById('preview_last_payment').innerText = t.lastPayment ? formatCurrency(t.lastPayment.credit) : 'لا يوجد';
+
+            if (!code || !t) {
+                strip.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('preview_last_payment').innerText =
+                t.lastPayment ? formatCurrency(t.lastPayment.credit) : 'لا يوجد';
+
             strip.style.display = 'grid';
         }
 
-        function calculatePrediction(tenant) {
-            if (!tenant) return { score: 0, label: 'غير متوفر' };
+        function buildTenantYearlyPattern(tenant) {
+            if (!tenant) return [];
 
-            const balance = toNumber(tenant.currentBalance);
-            const paid = toNumber(tenant.totalCredit);
-            const debit = toNumber(tenant.totalDebit);
+            const tenantTx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
+            const yearlyMap = {};
 
-            let score = 0;
+            tenantTx.forEach(tx => {
+                if (!tx.date) return;
 
-            if (debit > 0) {
-                const ratio = paid / debit;
-                if (ratio >= 0.9) score += 50;
-                else if (ratio >= 0.6) score += 35;
-                else if (ratio >= 0.3) score += 20;
-                else score += 10;
-            }
+                const year = new Date(tx.date).getFullYear();
 
-            if (balance <= 0) score += 50;
-            else if (balance <= 500) score += 30;
-            else if (balance <= 2000) score += 15;
-            else score += 5;
+                if (!yearlyMap[year]) {
+                    yearlyMap[year] = {
+                        year,
+                        debit: 0,
+                        credit: 0
+                    };
+                }
 
-            if (score >= 80) return { score, label: 'منتظم' };
-            if (score >= 50) return { score, label: 'متوسط' };
-            return { score, label: 'ضعيف' };
+                yearlyMap[year].debit += toNumber(tx.debit);
+                yearlyMap[year].credit += toNumber(tx.credit);
+            });
+
+            const years = Object.values(yearlyMap).sort((a, b) => a.year - b.year);
+
+            return years.map(item => {
+                const ratio = item.debit > 0 ? Math.round((item.credit / item.debit) * 100) : 0;
+                return {
+                    year: item.year,
+                    debit: item.debit,
+                    credit: item.credit,
+                    ratio: Math.min(ratio, 100)
+                };
+            });
+        }
+
+        function calculateNextYearPrediction(yearlyData) {
+            if (yearlyData.length < 2) return null;
+
+            const last = yearlyData[yearlyData.length - 1];
+            const prev = yearlyData[yearlyData.length - 2];
+
+            let predictedRatio = last.ratio + (last.ratio - prev.ratio);
+
+            if (predictedRatio < 0) predictedRatio = 0;
+            if (predictedRatio > 100) predictedRatio = 100;
+
+            return {
+                year: last.year + 1,
+                ratio: Math.round(predictedRatio)
+            };
         }
 
         function drawPredictionChart(tenant) {
@@ -734,42 +822,67 @@
             if (predictionChart) predictionChart.destroy();
 
             if (!tenant) {
-                document.getElementById('predictionText').innerText = 'اختر مستأجرًا لعرض التوقع';
+                document.getElementById('predictionText').innerText = 'اختر مستأجرًا لعرض نمط السداد والتوقع';
                 return;
             }
 
-            const prediction = calculatePrediction(tenant);
-            const remaining = Math.max(0, 100 - prediction.score);
+            const yearlyData = buildTenantYearlyPattern(tenant);
+
+            if (!yearlyData.length) {
+                document.getElementById('predictionText').innerText = 'لا توجد بيانات كافية لهذا المستأجر';
+                return;
+            }
+
+            const prediction = calculateNextYearPrediction(yearlyData);
+
+            const labels = yearlyData.map(y => String(y.year));
+            const ratioData = yearlyData.map(y => y.ratio);
+
+            if (prediction) {
+                labels.push(String(prediction.year));
+                ratioData.push(prediction.ratio);
+            }
 
             predictionChart = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'line',
                 data: {
-                    labels: ['مؤشر السداد', 'المتبقي للتقييم الكامل'],
+                    labels,
                     datasets: [{
-                        data: [prediction.score, remaining],
-                        backgroundColor: [
-                            'rgba(21,154,111,0.70)',
-                            'rgba(201,164,107,0.18)'
-                        ],
-                        borderColor: '#ffffff',
-                        borderWidth: 6,
-                        hoverOffset: 2
+                        label: 'نسبة السداد %',
+                        data: ratioData,
+                        borderColor: '#159a6f',
+                        backgroundColor: 'rgba(21,154,111,0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '78%',
                     plugins: {
-                        legend: {
-                            position: 'bottom'
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                callback: v => v + '%'
+                            }
                         }
                     }
                 }
             });
 
-            document.getElementById('predictionText').innerText =
-                `التوقع الحالي: ${prediction.label} — ${prediction.score}%`;
+            if (prediction) {
+                document.getElementById('predictionText').innerText =
+                    `توقع السنة ${prediction.year}: ${prediction.ratio}%`;
+            } else {
+                document.getElementById('predictionText').innerText =
+                    'تم عرض نمط السداد التاريخي للمستأجر';
+            }
         }
 
         function getNotificationMessage(type, tenant){
@@ -813,7 +926,7 @@
             document.getElementById('notification_message').value = message;
 
             const { error } = await supabaseClient
-                .from('notifications')
+                .from('tenant_notifications')
                 .insert([{
                     tenant_code: tenant.tenant_code,
                     type: type,
@@ -849,6 +962,7 @@
                 populateTenantDropdown();
 
                 const firstTenantCode = allTenants[0]?.tenant_code || '';
+
                 if (firstTenantCode) {
                     document.getElementById('tenant_select').value = firstTenantCode;
                     const firstTenant = tenantBalances.find(t => t.tenant_code === firstTenantCode);
@@ -945,6 +1059,7 @@
 
             clearForm();
             await refreshDashboard();
+
             document.getElementById('tenant_select').value = tenant_code;
             const tenant = tenantBalances.find(t => t.tenant_code === tenant_code);
             updateSelectedTenantStats(tenant);
@@ -956,7 +1071,9 @@
 
         function drawCollectionChart(totalCredit, totalBalance) {
             const ctx = document.getElementById('collectionChart').getContext('2d');
+
             if (collectionChart) collectionChart.destroy();
+
             collectionChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -994,15 +1111,18 @@
             for (let i = 11; i >= 0; i--) {
                 const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
                 labels.push(d.toLocaleDateString('ar-JO', { month: 'short' }));
+
                 const mTx = allTransactions.filter(tx => {
                     const tD = new Date(tx.date);
                     return tD.getFullYear() === d.getFullYear() && tD.getMonth() === d.getMonth();
                 });
+
                 debits.push(mTx.reduce((s, t) => s + toNumber(t.debit), 0));
                 credits.push(mTx.reduce((s, t) => s + toNumber(t.credit), 0));
             }
 
             if (monthlyChart) monthlyChart.destroy();
+
             monthlyChart = new Chart(ctx, {
                 type: 'line',
                 data: {
