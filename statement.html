@@ -110,18 +110,21 @@
         }
 
         .year-card {
-            border-radius: 26px;
-            margin-bottom: 24px;
-            overflow: hidden;
-            border: 1px solid rgba(201,164,107,0.18);
-            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-            transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(247,244,237,0.78)
-            );
-        }
+    border-radius: 26px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(201,164,107,0.18);
+    box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+    transition: all 0.25s ease;
+    
+    /* 🎨 هذا التعديل سيغير "خلفية" جميع السنوات معاً */
+    background: linear-gradient(
+        135deg,
+        rgba(252, 251, 246, 0.98), 
+        rgba(247, 244, 237, 0.85)
+    );
+}
+
 
         .year-card.status-paid {
             border-color: rgba(47,158,111,0.18);
