@@ -81,6 +81,7 @@
 .statement-table th:nth-child(6), .statement-table td:nth-child(6) { width: 14%; }
 
 /* Header الأساسي */
+/* 🔥 Header موحّد */
 .statement-table th {
     background: linear-gradient(
         135deg,
@@ -96,39 +97,9 @@
     letter-spacing: 0.4px;
 }
 
-/* 🔥 تلوين خفيف لكل عمود (بدون تغيير النص) */
+/* ❌ حذف كل th:nth-child (لا تستخدمها) */
 
-/* التاريخ */
-.statement-table th:nth-child(1) {
-    background: linear-gradient(135deg, rgba(201,164,107,0.65), rgba(177,138,82,0.65));
-}
-
-/* مدين */
-.statement-table th:nth-child(2) {
-    background: linear-gradient(135deg, rgba(176,65,62,0.70), rgba(150,50,48,0.70));
-}
-
-/* دائن */
-.statement-table th:nth-child(3) {
-    background: linear-gradient(135deg, rgba(46,160,67,0.70), rgba(30,120,50,0.70));
-}
-
-/* الرصيد */
-.statement-table th:nth-child(4) {
-    background: linear-gradient(135deg, rgba(140,60,55,0.70), rgba(110,45,42,0.70));
-}
-
-/* البيان */
-.statement-table th:nth-child(5) {
-    background: linear-gradient(135deg, rgba(120,100,80,0.70), rgba(90,75,60,0.70));
-}
-
-/* رقم السند */
-.statement-table th:nth-child(6) {
-    background: linear-gradient(135deg, rgba(201,164,107,0.75), rgba(177,138,82,0.75));
-}
-
-/* Cells */
+/* 🔥 Cells */
 .statement-table td {
     padding: 8px 4px;
     border: 1px solid rgba(201,164,107,0.10);
@@ -141,25 +112,53 @@
     background: rgba(247,244,237,0.6);
 }
 
-/* تأكيد إزالة zebra */
-.statement-table tr:nth-child(even),
-.statement-table tr:nth-child(odd) {
-    background: transparent !important;
-}
-}
-
-/* 🔥 تأكيد إزالة zebra لو موجود */
+/* 🔥 إزالة zebra */
 .statement-table tr:nth-child(even),
 .statement-table tr:nth-child(odd) {
     background: transparent !important;
 }
 
-/* 🔥 ألوان الأعمدة */
-.statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
-.statement-table td:nth-child(3) { color: var(--success); font-weight: 900; font-size: 9.5px; }
-.statement-table td:nth-child(4) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
+/* 🔥 تلوين النص حسب الأعمدة */
 
-.balance-zero { color: var(--success) !important; }
+/* رقم السند */
+.statement-table td:nth-child(1) {
+    color: #8a673c;
+    font-weight: 900;
+}
+
+/* البيان */
+.statement-table td:nth-child(2) {
+    color: #5f5345;
+}
+
+/* الرصيد */
+.statement-table td:nth-child(3) {
+    color: #b0413e;
+    font-weight: 900;
+}
+
+/* دائن */
+.statement-table td:nth-child(4) {
+    color: #2f9e6f;
+    font-weight: 900;
+}
+
+/* مدين */
+.statement-table td:nth-child(5) {
+    color: #cc5a50;
+    font-weight: 900;
+}
+
+/* التاريخ */
+.statement-table td:nth-child(6) {
+    color: #7b6a55;
+    font-weight: 900;
+}
+
+/* الرصيد صفر */
+.balance-zero {
+    color: var(--success) !important;
+}
 
 /* 🔥 Chips */
 .table-chip {
