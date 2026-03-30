@@ -315,9 +315,7 @@
             color: var(--success);
         }
 
-        .balance-partial {
-            color: var(--warning);
-        }
+      
 
         .balance-late {
             color: var(--danger);
@@ -590,11 +588,11 @@
         }
 
         function getBalanceClass(balance) {
-            const v = toNumber(balance);
-            if (v <= 0) return 'balance-paid';
-            if (v <= 1000) return 'balance-partial';
-            return 'balance-late';
-        }
+    const v = toNumber(balance);
+    if (v <= 0) return 'balance-paid';
+    return 'balance-late';
+}
+        
 
         function getCreditBoxClass(totalCredit) {
             const c = toNumber(totalCredit);
