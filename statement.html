@@ -37,51 +37,62 @@
 
         .statement-header { border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: center; }
         .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
-        
+
         /* 🎯 CHIP STYLE */
         .chip {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 999px;
             font-size: 10px;
             font-weight: 900;
-            white-space: nowrap;
-        }
-
-        .date-chip {
+            max-width: 100%;
             background: rgba(201,164,107,0.15);
             color: var(--gold-deep);
             border: 1px solid rgba(201,164,107,0.25);
         }
 
-        .receipt-chip {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.25);
+        /* 🏅 YEAR CHIP */
+        .year-chip {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 900;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            letter-spacing: 1px;
+            transition: all 0.25s ease;
+            cursor: default;
         }
 
-        .receipt-empty {
-            background: rgba(120,120,120,0.08);
-            color: #999;
-            border: 1px solid rgba(120,120,120,0.15);
+        .year-chip.paid {
+            color: var(--success);
+            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(47,158,111,0.35);
+        }
+
+        .year-chip.late {
+            color: var(--danger);
+            background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25));
+            border: 1px solid rgba(204,90,80,0.30);
+        }
+
+        .year-chip.partial {
+            color: var(--warning);
+            background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(195,138,46,0.30);
+        }
+
+        .year-chip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
         }
 
         /* 🔥 أنيميشن الدفعات الجديدة */
         @keyframes paymentHighlight {
-            0% {
-                background: rgba(47,158,111,0.25);
-                transform: scale(1.01);
-                box-shadow: 0 0 0 rgba(47,158,111,0.0);
-            }
-            50% {
-                background: rgba(47,158,111,0.12);
-                box-shadow: 0 0 12px rgba(47,158,111,0.25);
-            }
-            100% {
-                background: transparent;
-                transform: scale(1);
-                box-shadow: 0 0 0 rgba(47,158,111,0.0);
-            }
+            0% { background: rgba(47,158,111,0.25); transform: scale(1.01); box-shadow: 0 0 0 rgba(47,158,111,0.0); }
+            50% { background: rgba(47,158,111,0.12); box-shadow: 0 0 12px rgba(47,158,111,0.25); }
+            100% { background: transparent; transform: scale(1); box-shadow: 0 0 0 rgba(47,158,111,0.0); }
         }
 
         @keyframes pulseGreen {
@@ -98,15 +109,40 @@
         .status-partial { background: rgba(195,138,46,0.12); color: #c38a2e; border: 1px solid rgba(195,138,46,0.22); }
         .status-late { background: rgba(204,90,80,0.12); color: #cc5a50; border: 1px solid rgba(204,90,80,0.22); }
 
-        .statement-table { width: 100%; border-collapse: collapse; font-size: 11px; background: rgba(255,255,255,0.9); table-layout: fixed; }
-        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; }
-        .statement-table td { padding: 10px 4px; border: 1px solid rgba(201,164,107,0.15); text-align: center; word-break: break-word; }
+        /* 🔥 TABLE STYLES */
+        .statement-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed; 
+            background: transparent; 
+        }
+        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; font-size: 11px; }
+        
+        .statement-table td { 
+            padding: 10px 6px; 
+            text-align: center; 
+            vertical-align: middle; 
+            font-size: 11px; 
+            border: 1px solid rgba(201,164,107,0.15); 
+            background: rgba(247,244,237,0.60); 
+        }
 
+        /* تلوين الأعمدة */
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
         .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
         .statement-table td:nth-child(4) { font-weight: 900; color: #b0413e; }
-        .balance-zero { color: var(--success) !important; }
+        
+        /* 🔥 التحكم في نص البيان */
+        .statement-table td:nth-child(5) {
+            text-align: right;
+            word-break: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            direction: rtl;
+        }
 
+        .balance-zero { color: var(--success) !important; }
         .carry-row td { background: rgba(201,164,107,0.05); font-style: italic; }
         .main-row td { background: rgba(177,138,82,0.03); font-weight: 700; }
         .last-row td { border-bottom: 2px solid var(--gold); }
@@ -121,8 +157,6 @@
         }
 
         .year-head { padding: 20px; position: relative; text-align: center; }
-        .year-title { font-size: 32px; font-weight: 900; color: var(--gold-deep); }
-
         .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         
         .year-summary-box {
@@ -133,21 +167,14 @@
             box-shadow: 0 8px 20px rgba(120,95,56,0.08); transition: all 0.25s ease;
         }
 
-        .year-summary-box:hover { transform: translateY(-2px) scale(1.01); }
-        .year-summary-box::before { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent); opacity: 0; transition: 0.3s; }
-        .year-summary-box:hover::before { opacity: 1; }
-
         .year-summary-box.credit-box {
             border-color: rgba(47,158,111,0.25);
             background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
         }
-        .year-summary-box.credit-box b { color: var(--success); font-size: 16px; }
-
         .year-summary-box.balance-box {
             border-color: rgba(204,90,80,0.25);
             background: linear-gradient(135deg, rgba(204,90,80,0.10), rgba(255,255,255,0.25));
         }
-        .year-summary-box.balance-box b { color: var(--danger); font-size: 16px; }
 
         .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
         .back-btn { padding: 12px 20px; border-radius: 14px; font-weight: 900; cursor: pointer; border: 1px solid var(--border); background: #fff; }
@@ -256,7 +283,11 @@
                 card.innerHTML = `
                     <div class="year-head">
                         <div class="year-status ${status.className}">${status.text}</div>
-                        <div class="year-title">${year}</div>
+                        <div class="year-title">
+                            <span class="year-chip ${status.className.replace('status-', '')}">
+                                ${year}
+                            </span>
+                        </div>
                     </div>
                     <table class="statement-table">
                         <thead><tr><th>التاريخ</th><th>مدين</th><th>دائن</th><th>الرصيد</th><th>البيان</th><th>سند</th></tr></thead>
@@ -279,12 +310,12 @@
                     if (isLastPayment) { tr.classList.add('payment-new'); setTimeout(() => tr.classList.remove('payment-new'), 1500); }
 
                     tr.innerHTML = `
-                        <td>${item.date !== '-' ? `<span class="chip date-chip">${new Date(item.date).toLocaleDateString('en-GB')}</span>` : '-'}</td>
+                        <td>${item.date !== '-' ? `<span class="chip">${new Date(item.date).toLocaleDateString('en-GB')}</span>` : '-'}</td>
                         <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
                         <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
                         <td class="${toNumber(item.balance) === 0 ? 'balance-zero' : ''}">${formatCurrency(item.balance)}</td>
-                        <td style="text-align:right">${item.description || ''}</td>
-                        <td>${item.receipt_no && item.receipt_no !== '-' ? `<span class="chip receipt-chip">${item.receipt_no}</span>` : `<span class="chip receipt-empty">—</span>`}</td>
+                        <td title="${item.description || ''}">${item.description || ''}</td>
+                        <td>${item.receipt_no && item.receipt_no !== '-' ? `<span class="chip">${item.receipt_no}</span>` : `<span class="chip" style="opacity:0.5">—</span>`}</td>
                     `;
                     tbody.appendChild(tr);
                 });
