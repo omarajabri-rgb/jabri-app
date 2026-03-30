@@ -44,16 +44,9 @@
                 linear-gradient(135deg, var(--bg), var(--bg-2));
         }
 
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body.loaded { opacity: 1; transform: translateY(0); }
 
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; }
 
         .glass {
             background: var(--surface);
@@ -63,301 +56,109 @@
             box-shadow: var(--shadow);
         }
 
-        .statement-header {
-            border-radius: 26px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .statement-header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
-
-        .statement-header h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        #statement_date {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            margin-top: 6px;
-        }
+        .statement-header { border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: center; }
+        .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+        .statement-header h2 { margin: 0 0 8px; font-size: 20px; font-weight: 900; color: var(--text); }
+        #statement_date { font-size: 13px; font-weight: 900; color: var(--gold-deep); margin-top: 6px; }
 
         .last-payment-box {
-            margin-top: 10px;
-            margin-bottom: 16px;
-            padding: 12px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            text-align: center;
-            background: rgba(201,164,107,0.10);
-            color: var(--text);
+            margin: 10px 0 16px; padding: 12px; border-radius: 14px;
+            font-size: 13px; font-weight: 900; text-align: center;
+            background: rgba(201,164,107,0.10); color: var(--text);
         }
 
-        .summary-box {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .summary-item {
-            border-radius: 22px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .summary-item span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .summary-item b {
-            font-size: 18px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
+        .summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+        .summary-item { border-radius: 22px; padding: 16px; text-align: center; }
+        .summary-item span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 8px; }
+        .summary-item b { font-size: 18px; font-weight: 900; color: var(--text); }
         .summary-item.is-paid b { color: var(--success); }
         .summary-item.is-balance b { color: var(--danger); }
 
-        /* --- Updated Table & Year Card Styles --- */
-        .year-card {
-            border-radius: 26px;
-            padding: 0;
-            overflow: hidden;
-            background: rgba(255,255,255,0.84);
-            border: 1px solid rgba(201,164,107,0.22);
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-        }
-
-        .year-card.current-year {
-            box-shadow: 0 0 20px rgba(201,164,107,0.18);
-            border: 1px solid rgba(201,164,107,0.35);
-        }
-
-        .year-head {
-            padding: 18px 18px 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .year-title {
-            font-size: 34px;
-            font-weight: 900;
-            color: #a88349;
-            line-height: 1;
-        }
-
-        .year-status {
-            padding: 10px 16px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.10);
-            border: 1px solid rgba(201,164,107,0.18);
-        }
-
-        .status-paid { color: var(--success); }
-        .status-partial { color: var(--warning); }
-        .status-unpaid { color: var(--danger); }
-
-        .table-wrapper {
-            overflow-x: auto;
-            padding: 10px 16px 0;
-        }
-
+        /* --- Updated Table Styles --- */
+        .table-wrapper { overflow-x: auto; padding: 10px 16px 0; }
+        
         .statement-table {
-            width: 100%;
-            min-width: 760px;
-            border-collapse: collapse;
-            font-size: 13px;
-            background: rgba(255,255,255,0.96);
-            overflow: hidden;
-            border-radius: 20px;
+            width: 100%; min-width: 680px; border-collapse: collapse;
+            font-size: 12px; table-layout: fixed;
+            background: rgba(255,255,255,0.96); overflow: hidden; border-radius: 20px;
         }
 
         .statement-table th {
             background: linear-gradient(135deg, rgba(201,164,107,0.90), rgba(177,138,82,0.90));
-            color: #fffdf8;
-            padding: 12px 10px;
-            font-weight: 900;
-            border: 1px solid rgba(255,255,255,0.14);
-            white-space: nowrap;
-            font-size: 13px;
-            letter-spacing: 0.2px;
+            color: #fffdf8; padding: 10px 6px; font-weight: 900; font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.14); white-space: nowrap;
         }
 
         .statement-table td {
-            padding: 10px 8px;
-            border: 1px solid rgba(201,164,107,0.10);
-            text-align: center;
-            color: var(--text);
-            background: rgba(255,255,255,0.90);
-            vertical-align: middle;
+            padding: 8px 6px; border: 1px solid rgba(201,164,107,0.10);
+            text-align: center; color: var(--text); background: rgba(255,255,255,0.90);
+            vertical-align: middle; font-size: 11px; line-height: 1.5; word-break: break-word;
         }
 
-        .statement-table tbody tr:nth-child(even) td {
-            background: rgba(201,164,107,0.05);
-        }
+        .statement-table tbody tr:nth-child(even) td { background: rgba(201,164,107,0.05); }
 
-        .statement-table td:first-child { color: var(--gold-deep); font-weight: 900; white-space: nowrap; }
+        /* Column Specifics */
+        .statement-table td:first-child { color: var(--gold-deep); font-weight: 900; }
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
         .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
         .statement-table td:nth-child(4) { color: var(--text); font-weight: 900; }
         .statement-table td:nth-child(5) { font-weight: 800; }
-        .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; white-space: nowrap; }
+        .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; }
 
         .table-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 7px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.12);
-            color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.18);
-            min-width: 118px;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 900;
+            background: rgba(201,164,107,0.12); color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.18); min-width: 96px;
         }
 
-        .year-footer {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 16px;
-        }
+        .carry-row td { background: rgba(201,164,107,0.08) !important; font-weight: 900; }
 
-        .year-summary-box {
-            background: rgba(201,164,107,0.08);
-            border: 1px solid rgba(201,164,107,0.16);
-            border-radius: 18px;
-            padding: 14px;
-            text-align: center;
+        /* --- Year Container --- */
+        .year-card {
+            border-radius: 26px; padding: 0; overflow: hidden;
+            background: rgba(255,255,255,0.84); border: 1px solid rgba(201,164,107,0.22);
+            box-shadow: var(--shadow); margin-bottom: 24px;
         }
+        .year-title { font-size: 30px; font-weight: 900; color: #a88349; line-height: 1; }
+        .year-status { padding: 10px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; background: rgba(201,164,107,0.10); }
 
-        .year-summary-box span {
-            display: block;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-            margin-bottom: 7px;
-        }
-
-        .year-summary-box b {
-            display: block;
-            font-size: 18px;
-            font-weight: 900;
-        }
-
+        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+        .year-summary-box { background: rgba(201,164,107,0.08); border: 1px solid rgba(201,164,107,0.16); border-radius: 18px; padding: 12px; text-align: center; }
+        .year-summary-box span { display: block; color: var(--muted); font-size: 11px; font-weight: 800; margin-bottom: 7px; }
+        .year-summary-box b { display: block; font-size: 16px; font-weight: 900; }
         .year-summary-box.debit-box b { color: var(--danger); }
-        .year-summary-box.balance-box b { color: var(--text); }
 
-        .bottom-actions {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 25px;
-        }
+        .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
+        .back-btn { border: 1px solid var(--border); background: rgba(255,255,255,0.74); padding: 10px 15px; border-radius: 14px; font-size: 13px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .save-btn { color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); border: none; }
 
-        .back-btn {
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,0.74);
-            color: var(--text);
-            padding: 10px 15px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            min-width: 145px;
-        }
-
-        .save-btn {
-            color: #fff;
-            border: none;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 38px;
-            height: 38px;
-            border: 3px solid rgba(201,164,107,0.18);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg), var(--bg-2)); z-index: 9999; }
+        .spinner { width: 38px; height: 38px; border: 3px solid rgba(201,164,107,0.18); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media print {
-            body { background: #fff !important; color: #000 !important; padding: 0; opacity: 1 !important; transform: none !important; }
+            body { background: #fff !important; padding: 0; opacity: 1 !important; transform: none !important; }
             #loader, .bottom-actions { display: none !important; }
             .year-card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
-            .statement-table { min-width: auto; }
         }
     </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
-
     <div class="wrap">
         <div class="statement-header glass">
             <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">اسم المستأجر</h2>
             <p id="statement_date">—</p>
         </div>
-
         <div id="last_payment_box" class="last-payment-box glass">—</div>
-
         <div class="summary-box">
-            <div class="summary-item glass">
-                <span>إجمالي المستحق</span>
-                <b id="sum_due">0 د.أ</b>
-            </div>
-            <div class="summary-item glass is-paid">
-                <span>إجمالي المدفوع</span>
-                <b id="sum_paid">0 د.أ</b>
-            </div>
-            <div class="summary-item glass is-balance">
-                <span>الرصيد المتبقي</span>
-                <b id="sum_balance">0 د.أ</b>
-            </div>
+            <div class="summary-item glass"><span>إجمالي المستحق</span><b id="sum_due">0 د.أ</b></div>
+            <div class="summary-item glass is-paid"><span>إجمالي المدفوع</span><b id="sum_paid">0 د.أ</b></div>
+            <div class="summary-item glass is-balance"><span>الرصيد المتبقي</span><b id="sum_balance">0 د.أ</b></div>
         </div>
-
         <div id="years_container" class="years-stack"></div>
-
         <div class="bottom-actions">
             <button class="back-btn" onclick="goBack()"><i data-lucide="arrow-right"></i> رجوع</button>
             <button class="back-btn save-btn" onclick="savePDF()"><i data-lucide="download"></i> حفظ PDF</button>
@@ -367,65 +168,28 @@
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-        const adminSession = localStorage.getItem('jabri_admin_session');
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-        const isAdminViewer = adminSession === 'active';
-
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function toNumber(value) {
-            const n = parseFloat(value);
-            return isNaN(n) ? 0 : n;
-        }
+        function toNumber(v) { return parseFloat(v) || 0; }
+        function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`; }
+        function formatDate(v) { return v ? new Date(v).toLocaleDateString('en-GB') : '-'; }
+        function formatDateTime(v) { return v ? new Date(v).toLocaleString('en-GB', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '-'; }
 
-        function formatCurrency(v) {
-            return `${toNumber(v).toLocaleString('en-US', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-            })} د.أ`;
-        }
-
-        function formatDate(value) {
-            if (!value) return '-';
-            const d = new Date(value);
-            if (isNaN(d.getTime())) return value;
-            return d.toLocaleDateString('en-GB');
-        }
-
-        function formatDateTime(value) {
-            const d = new Date(value);
-            if (isNaN(d.getTime())) return '-';
-            return d.toLocaleString('en-GB', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: 'numeric', minute: '2-digit'
-            });
-        }
-
-        function goBack() {
-            window.location.href = isAdminViewer ? 'admin.html' : 'tenant.html';
-        }
-
+        function goBack() { window.history.back(); }
         function savePDF() {
             const element = document.querySelector('.wrap');
-            const tenantName = (document.getElementById('statement_tenant_name').innerText || 'مستأجر').replace(/\s+/g, '_');
-            html2pdf().set({
-                margin: 5,
-                filename: `كشف_حساب_${tenantName}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(element).save();
+            const name = document.getElementById('statement_tenant_name').innerText.replace(/\s+/g, '_');
+            html2pdf().set({ margin: 5, filename: `كشف_حساب_${name}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }}).from(element).save();
         }
+        window.goBack = goBack; window.savePDF = savePDF;
 
-        window.goBack = goBack;
-        window.savePDF = savePDF;
-
-        function txRowHTML({ date, description, debit, credit, balance, receipt_no }) {
+        function txRowHTML({ date, description, debit, credit, balance, receipt_no, isCarry = false }) {
             return `
-                <tr>
+                <tr class="${isCarry ? 'carry-row' : ''}">
                     <td><span class="table-chip">${date || '-'}</span></td>
                     <td>${debit ? formatCurrency(debit) : ''}</td>
                     <td>${credit ? formatCurrency(credit) : ''}</td>
@@ -440,38 +204,51 @@
             const container = document.getElementById('years_container');
             container.innerHTML = '';
             const grouped = {};
-            
             transactions.forEach(r => {
                 const year = new Date(r.date).getFullYear();
-                if (!grouped[year]) grouped[year] = [];
-                grouped[year].push(r);
+                if (!grouped[year]) grouped[year] = []; grouped[year].push(r);
             });
 
             const years = Object.keys(grouped).sort((a,b) => a - b);
-            let carryBalance = toNumber(previousBalance);
+            let totalRunningCarry = toNumber(previousBalance);
             const currentYear = new Date().getFullYear();
 
-            (years.length ? years : [currentYear]).forEach((year, idx) => {
-                const yearRows = (grouped[year] || []).sort((a,b) => new Date(a.date) - new Date(b.date));
-                const openingBalance = carryBalance;
+            (years.length ? years : [currentYear]).forEach((year) => {
+                const yearRows = (grouped[year] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
+                const openingBalance = totalRunningCarry;
                 const renderedItems = [];
+                let running = 0;
+
+                const openingRows = [];
+                const normalRows = [];
+
+                yearRows.forEach(row => {
+                    const desc = (row.description || '').trim();
+                    const rowDate = formatDate(row.date);
+                    const isOpeningYearItem = rowDate === `01/01/${year}` && (desc.includes('الإيجار') || desc.includes('ايجار') || desc.includes('معارف'));
+                    if (isOpeningYearItem) openingRows.push(row); else normalRows.push(row);
+                });
+
+                openingRows.forEach(row => {
+                    const d = toNumber(row.debit); const c = toNumber(row.credit);
+                    running += d - c;
+                    renderedItems.push({ date: formatDate(row.date), description: row.description, debit: d, credit: c, balance: Math.max(0, running), receipt_no: row.receipt_no });
+                });
 
                 if (openingBalance > 0) {
-                    renderedItems.push({
-                        date: '-', description: `رصيد مدور من سنة سابقة`,
-                        debit: openingBalance, credit: 0, balance: openingBalance, receipt_no: '-'
-                    });
+                    running += openingBalance;
+                    renderedItems.push({ date: '-', description: `رصيد متراكم`, debit: openingBalance, credit: 0, balance: Math.max(0, running), receipt_no: '-', isCarry: true });
                 }
 
-                let running = openingBalance;
-                yearRows.forEach(r => {
-                    running += toNumber(r.debit) - toNumber(r.credit);
-                    renderedItems.push({...r, date: formatDate(r.date), balance: Math.max(0, running)});
+                normalRows.forEach(row => {
+                    const d = toNumber(row.debit); const c = toNumber(row.credit);
+                    running += d - c;
+                    renderedItems.push({ date: formatDate(row.date), description: row.description, debit: d, credit: c, balance: Math.max(0, running), receipt_no: row.receipt_no });
                 });
 
                 const closingBalance = Math.max(0, running);
-                const yearStatus = getStatus(closingBalance, yearRows);
-                carryBalance = closingBalance;
+                totalRunningCarry = closingBalance;
+                const yearStatus = closingBalance <= 0 ? {text:'مسدد', className:'status-paid'} : {text:'غير مسدد', className:'status-unpaid'};
 
                 const card = document.createElement('section');
                 card.className = `year-card ${Number(year) === currentYear ? 'current-year' : ''}`;
@@ -480,73 +257,42 @@
                         <div class="year-title">${year}</div>
                         <div class="year-status ${yearStatus.className}">حالة السنة: ${yearStatus.text}</div>
                     </div>
-
                     <div class="table-wrapper">
                         <table class="statement-table">
-                            <thead>
-                                <tr>
-                                    <th>التاريخ</th>
-                                    <th>مدين (+)</th>
-                                    <th>دائن (-)</th>
-                                    <th>الرصيد</th>
-                                    <th>البيان</th>
-                                    <th>رقم السند</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${renderedItems.length ? renderedItems.map(txRowHTML).join('') : '<tr><td colspan="6">لا توجد حركات</td></tr>'}
-                            </tbody>
+                            <thead><tr><th>التاريخ</th><th>مدين (+)</th><th>دائن (-)</th><th>الرصيد</th><th>البيان</th><th>رقم السند</th></tr></thead>
+                            <tbody>${renderedItems.map(txRowHTML).join('')}</tbody>
                         </table>
                     </div>
-
                     <div class="year-footer">
-                        <div class="year-summary-box debit-box">
-                            <span>إجمالي مدين</span>
-                            <b>${formatCurrency(yearRows.reduce((s, r) => s + toNumber(r.debit), 0) + openingBalance)}</b>
-                        </div>
-                        <div class="year-summary-box balance-box">
-                            <span>الرصيد</span>
-                            <b>${formatCurrency(closingBalance)}</b>
-                        </div>
+                        <div class="year-summary-box debit-box"><span>مدين</span><b>${formatCurrency(renderedItems.reduce((s, r) => s + toNumber(r.debit), 0))}</b></div>
+                        <div class="year-summary-box balance-box"><span>الرصيد</span><b>${formatCurrency(closingBalance)}</b></div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function getStatus(closing, rows) {
-            const hasPayment = rows.some(r => toNumber(r.credit) > 0);
-            if (closing <= 0) return { text: 'مسدد', className: 'status-paid' };
-            if (hasPayment) return { text: 'جزئي', className: 'status-partial' };
-            return { text: 'غير مسدد', className: 'status-unpaid' };
-        }
-
         window.onload = async () => {
             if (!tenantCode) return;
-            try {
-                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-                if (!tenant) return;
+            const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+            if (!tenant) return;
+            const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
+            
+            const rows = tx || [];
+            const prev = toNumber(tenant.previous_balance);
+            const totalDue = prev + rows.reduce((s,r) => s + toNumber(r.debit), 0);
+            const totalPaid = rows.reduce((s,r) => s + toNumber(r.credit), 0);
 
-                const { data: tx } = await supabaseClient.from('tenant_transactions')
-                    .select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
+            document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
+            document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
+            document.getElementById('sum_due').innerText = formatCurrency(totalDue);
+            document.getElementById('sum_paid').innerText = formatCurrency(totalPaid);
+            document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalPaid);
 
-                const rows = tx || [];
-                const prev = toNumber(tenant.previous_balance);
-                const totalDebits = rows.reduce((s,r) => s + toNumber(r.debit), 0);
-                const totalCredits = rows.reduce((s,r) => s + toNumber(r.credit), 0);
-                const totalDue = prev + totalDebits;
-
-                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
-                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
-                document.getElementById('sum_due').innerText = formatCurrency(totalDue);
-                document.getElementById('sum_paid').innerText = formatCurrency(totalCredits);
-                document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalCredits);
-
-                renderYears(prev, rows);
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-                if (window.lucide) lucide.createIcons();
-            } catch (e) { console.error(e); }
+            renderYears(prev, rows);
+            document.getElementById('loader').style.display = 'none';
+            document.body.classList.add('loaded');
+            if (window.lucide) lucide.createIcons();
         };
     </script>
 </body>
