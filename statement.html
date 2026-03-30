@@ -15,7 +15,6 @@
             --surface: rgba(255,255,255,0.80);
             --border: rgba(201,164,107,0.20);
             --text: #2f2a24;
-            --text-soft: #6f665a;
             --gold: #c9a46b;
             --gold-deep: #b18a52;
             --success: #2f9e6f;
@@ -24,540 +23,115 @@
             --shadow: 0 18px 40px rgba(120,95,56,0.10);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
 
         body {
-            margin: 0;
-            color: var(--text);
-            padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
+            margin: 0; color: var(--text); padding: 16px; opacity: 0;
+            transform: translateY(8px); transition: all 0.45s ease;
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
         }
 
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-        }
-
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
+        body.loaded { opacity: 1; transform: translateY(0); }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; }
 
         .statement-header {
-            border-radius: 26px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
+            border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: center;
+            background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+            border: 1px solid rgba(201,164,107,0.18); box-shadow: 0 12px 28px rgba(120,95,56,0.08);
         }
 
-        .statement-header.glass {
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.90),
-                rgba(247,244,237,0.82)
-            );
-            border: 1px solid rgba(201,164,107,0.18);
-            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-        }
-
-        .statement-header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
-
-        .statement-header h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        #statement_date {
-            margin: 0;
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 700;
-        }
+        .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+        #statement_date { color: #7a6c59; font-size: 13px; font-weight: 700; }
 
         .chip {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 900;
-            white-space: nowrap;
-            background: rgba(201,164,107,0.14);
-            color: var(--text);
-            border: 1px solid rgba(201,164,107,0.24);
+            display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 900;
+            background: rgba(201,164,107,0.14); color: var(--text); border: 1px solid rgba(201,164,107,0.24);
         }
 
         .year-card {
-    border-radius: 26px;
-    margin-bottom: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(201,164,107,0.18);
-    box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-    transition: all 0.25s ease;
-    
-    /* 🎨 هذا التعديل سيغير "خلفية" جميع السنوات معاً */
-    background: linear-gradient(
-        135deg,
-        rgba(252, 251, 246, 0.98), 
-        rgba(247, 244, 237, 0.85)
-    );
-}
-
-
-        .year-card.status-paid {
-            border-color: rgba(47,158,111,0.18);
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(236,249,242,0.82)
-            );
+            border-radius: 26px; margin-bottom: 24px; overflow: hidden;
+            border: 1px solid rgba(201,164,107,0.18); box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            background: linear-gradient(135deg, rgba(252, 251, 246, 0.98), rgba(247, 244, 237, 0.85));
         }
 
-        .year-card.status-partial {
-            border-color: rgba(195,138,46,0.18);
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(252,247,236,0.86)
-            );
-        }
+        .year-head { padding: 18px 20px; text-align: center; }
+        .year-chip { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 20px; font-weight: 900; backdrop-filter: blur(8px); }
+        .year-chip.paid { color: var(--success); background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25)); border: 1px solid rgba(47,158,111,0.35); }
+        .year-chip.late { color: var(--danger); background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25)); border: 1px solid rgba(204,90,80,0.30); }
 
-        .year-card.status-late {
-            border-color: rgba(204,90,80,0.16);
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(255,245,242,0.84)
-            );
-        }
+        .statement-table { width: 100%; border-collapse: collapse; table-layout: auto; background: transparent; }
+        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 10px; font-weight: 900; font-size: 11px; }
+        .statement-table td { padding: 6px 6px; font-size: 11px; border: 1px solid rgba(201,164,107,0.15); text-align: center; vertical-align: middle; }
 
-        .year-head {
-            padding: 18px 20px;
-            position: relative;
-            text-align: center;
-        }
+        .statement-table tbody tr:nth-child(odd) td { background: rgba(253,251,246,0.70); }
+        .statement-table tbody tr:nth-child(even) td { background: rgba(201,164,107,0.04); }
 
-        .year-status {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            line-height: 1;
-            white-space: nowrap;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
-        }
-
-        .status-paid {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.24);
-        }
-
-        .status-partial {
-            background: rgba(195,138,46,0.12);
-            color: var(--warning);
-            border: 1px solid rgba(195,138,46,0.24);
-        }
-
-        .status-late {
-            background: rgba(204,90,80,0.12);
-            color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.22);
-        }
-
-        .year-title {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .year-chip {
-            display: inline-block;
-            padding: 8px 18px;
-            border-radius: 999px;
-            font-size: 20px;
-            font-weight: 900;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            letter-spacing: 1px;
-            transition: all 0.25s ease;
-        }
-
-        .year-chip.paid {
-            color: var(--success);
-            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
-            border: 1px solid rgba(47,158,111,0.35);
-        }
-
-        .year-chip.partial {
-            color: var(--warning);
-            background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25));
-            border: 1px solid rgba(195,138,46,0.30);
-        }
-
-        .year-chip.late {
-            color: var(--danger);
-            background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25));
-            border: 1px solid rgba(204,90,80,0.30);
-        }
-
-        .statement-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: auto;
-            background: transparent;
-        }
-
-        .statement-table th,
-        .statement-table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .statement-table th {
-            background: #e9e2d5;
-            color: #5f5345;
-            padding: 12px 10px;
-            font-weight: 900;
-            font-size: 11px;
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(201,164,107,0.18);
-        }
-
-        .statement-table td {
-            padding: 6px 6px;
-            line-height: 1.3;
-            font-size: 11px;
-            border: 1px solid rgba(201,164,107,0.15);
-        }
-
-        /* zebra softer across all rows */
-        .statement-table tbody tr:nth-child(odd) td {
-            background: rgba(253,251,246,0.78);
-        }
-
-        .statement-table tbody tr:nth-child(even) td {
-            background: rgba(201,164,107,0.045);
-        }
-
-        .statement-table tbody tr:hover td {
-            background: rgba(201,164,107,0.12);
-            transition: 0.2s;
-        }
-
-        .statement-table th:nth-child(1),
-        .statement-table td:nth-child(1),
-        .statement-table th:nth-child(2),
-        .statement-table td:nth-child(2),
-        .statement-table th:nth-child(3),
-        .statement-table td:nth-child(3),
-        .statement-table th:nth-child(4),
-        .statement-table td:nth-child(4),
-        .statement-table th:nth-child(6),
-        .statement-table td:nth-child(6) {
-            font-weight: 900;
-        }
-
-        .statement-table th:nth-child(5),
-        .statement-table td:nth-child(5) {
-            font-weight: 800;
-            color: var(--text);
-        }
-
-        .statement-table td:nth-child(1),
-        .statement-table td:nth-child(5),
-        .statement-table td:nth-child(6) {
-            color: var(--text);
-        }
-
-        .statement-table td:nth-child(2),
-        .statement-table td:nth-child(3),
-        .statement-table td:nth-child(4) {
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 0.5px;
-        }
-
-        .statement-table td:nth-child(2) {
-            color: var(--danger);
-        }
-
-        .statement-table td:nth-child(3) {
-            color: var(--success);
-        }
-
-        .statement-table td:nth-child(4) {
-            font-size: 12px;
-        }
-
-        .statement-table td:nth-child(4),
-        .statement-table th:nth-child(4) {
-            border-left: 1px solid rgba(201,164,107,0.24);
-        }
-
-        .statement-table td:nth-child(5),
-        .statement-table th:nth-child(5) {
-            white-space: normal;
-        }
-
-        .statement-table td .chip {
-            display: inline-block;
-            margin: auto;
-        }
-
-        .balance-zero {
-            color: var(--success) !important;
-        }
-
-        .balance-paid {
-            color: var(--success);
-        }
-
-        .balance-late {
-            color: var(--danger);
-        }
-
-        .carry-row td {
-            font-style: italic;
-        }
-
-        .main-row td {
-            font-weight: 900;
+        /* 🔥 تعديلات الحدود النهائية التي طلبتها */
+        .statement-table tbody tr:last-child td {
+            border-bottom: 2px solid var(--gold) !important;
+            box-shadow: inset 0 -1px 0 rgba(201,164,107,0.35);
         }
 
         .last-row td {
-            border-bottom: 2px solid var(--gold);
+            border-bottom: 2px solid var(--gold) !important;
         }
 
-        .year-footer {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 15px;
-        }
+        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
+        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
+        .statement-table td:nth-child(4) { font-size: 12px; font-weight: 900; color: #b0413e; border-left: 1px solid rgba(201,164,107,0.24); }
 
+        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .year-summary-box {
-            padding: 14px;
-            border-radius: 18px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(201,164,107,0.18);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
-            transition: all 0.25s ease;
+            padding: 14px; border-radius: 18px; text-align: center; border: 1px solid rgba(201,164,107,0.18);
+            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.25));
+            backdrop-filter: blur(12px); box-shadow: 0 8px 18px rgba(120,95,56,0.08);
         }
 
-        .year-summary-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 26px rgba(120,95,56,0.12);
+        .year-summary-box b { display: block; font-size: 18px; font-weight: 900; }
+        .year-summary-box.credit-box b { color: var(--success); }
+        .year-summary-box.balance-box.paid b { color: var(--success); }
+        .year-summary-box.balance-box.late b { color: var(--danger); }
+
+        .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
+        .back-btn { padding: 12px 20px; border-radius: 14px; font-weight: 900; cursor: pointer; border: 1px solid var(--border); background: #fff; }
+        .save-btn { background: #7a6c59; color: white; border: none; }
+
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 🔥 تحسينات التصدير الجديدة */
+        body.pdf-export .wrap {
+            width: 1200px !important;
+            margin: auto !important;
         }
 
-        .year-summary-box span {
-            display: block;
-            color: #7a6c59;
-            font-size: 11px;
-            font-weight: 800;
-            margin-bottom: 6px;
+        body.pdf-export .statement-table td, 
+        body.pdf-export .statement-table th {
+            font-size: 12px !important;
         }
 
-        .year-summary-box b {
-            display: block;
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        /* smart credit box: green only */
-        .year-summary-box.credit-box.zero {
-            background: linear-gradient(135deg, rgba(47,158,111,0.08), rgba(255,255,255,0.24));
-            border-color: rgba(47,158,111,0.18);
-        }
-
-        .year-summary-box.credit-box.low,
-        .year-summary-box.credit-box.good {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
-            border-color: rgba(47,158,111,0.25);
-        }
-
-        .year-summary-box.credit-box.zero b,
-        .year-summary-box.credit-box.zero span,
-        .year-summary-box.credit-box.low b,
-        .year-summary-box.credit-box.low span,
-        .year-summary-box.credit-box.good b,
-        .year-summary-box.credit-box.good span {
-            color: var(--success);
-        }
-
-        /* smart balance box: green if 0, red if >0 */
-        .year-summary-box.balance-box.paid {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
-            border-color: rgba(47,158,111,0.25);
-        }
-
-        .year-summary-box.balance-box.partial,
-        .year-summary-box.balance-box.late {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-            border-color: rgba(204,90,80,0.22);
-        }
-
-        .year-summary-box.balance-box.paid b,
-        .year-summary-box.balance-box.paid span {
-            color: var(--success);
-        }
-
-        .year-summary-box.balance-box.partial b,
-        .year-summary-box.balance-box.partial span,
-        .year-summary-box.balance-box.late b,
-        .year-summary-box.balance-box.late span {
-            color: var(--danger);
-        }
-
-        @keyframes paymentHighlight {
-            0% {
-                background: rgba(47,158,111,0.25);
-                transform: scale(1.01);
-            }
-            100% {
-                background: transparent;
-                transform: scale(1);
-            }
-        }
-
-        .payment-new {
-            animation: paymentHighlight 1.5s ease forwards;
-        }
-
-        .bottom-actions {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        .back-btn {
-            padding: 12px 20px;
-            border-radius: 14px;
-            font-weight: 900;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            background: #fff;
-        }
-
-        .save-btn {
-            background: var(--gold-deep);
-            color: white;
-            border: none;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #eee;
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        body.pdf-export,
         body.pdf-export * {
             animation: none !important;
             transition: none !important;
-        }
-
-        body.pdf-export {
-            opacity: 1 !important;
-            transform: none !important;
-            background: #ffffff !important;
-        }
-
-        body.pdf-export .glass,
-        body.pdf-export .statement-header,
-        body.pdf-export .year-card,
-        body.pdf-export .year-summary-box,
-        body.pdf-export .year-chip,
-        body.pdf-export .year-status {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
             box-shadow: none !important;
         }
 
-        body.pdf-export .statement-header {
-            background: #ffffff !important;
-        }
-
-        body.pdf-export .year-card {
-            background: #ffffff !important;
-            border: 1px solid #d8c9af !important;
-        }
-
-        body.pdf-export .statement-table tbody tr:nth-child(even) td,
-        body.pdf-export .statement-table tbody tr:nth-child(odd) td,
-        body.pdf-export .statement-table tbody tr:hover td,
-        body.pdf-export .carry-row td,
-        body.pdf-export .main-row td {
-            background: #ffffff !important;
-        }
-
-        body.pdf-export #loader,
-        body.pdf-export .bottom-actions {
-            display: none !important;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        body.pdf-export .year-card { background: #ffffff !important; border: 1px solid #d8c9af !important; }
+        body.pdf-export .bottom-actions, body.pdf-export #loader { display: none !important; }
     </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
-
     <div class="wrap">
-        <div class="statement-header glass">
+        <div class="statement-header">
             <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">-</h2>
             <p id="statement_date">-</p>
         </div>
-
         <div id="years_container"></div>
-
         <div class="bottom-actions">
             <button class="back-btn" onclick="window.history.back()">رجوع</button>
             <button class="back-btn save-btn" onclick="savePDF()">حفظ</button>
@@ -566,333 +140,124 @@
 
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-        const supabase = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const supabase = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
-        function toNumber(v) {
-            return parseFloat(v) || 0;
-        }
+        function toNumber(v) { return parseFloat(String(v).replace(/,/g, '')) || 0; }
+        function formatCurrency(v) { return Math.round(v).toLocaleString(); }
 
-        function formatCurrency(v) {
-            return Math.round(v).toLocaleString();
-        }
-
-        function formatShortDate(dateValue) {
-            const d = new Date(dateValue);
-            if (isNaN(d)) return '-';
-            const day = d.getDate();
-            const month = d.getMonth() + 1;
-            const year = d.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
-
-        function isRentRow(desc) {
-            const d = (desc || '').trim();
-            return d.includes('ايجار') || d.includes('الإيجار');
-        }
-
-        function isFeesRow(desc) {
-            const d = (desc || '').trim();
-            return d.includes('معارف');
-        }
-
-        function isCarryRow(desc) {
-            const d = (desc || '').trim();
-            return d.includes('رصيد سابق') || d.includes('رصيد مدور');
-        }
-
-        function getBalanceClass(balance) {
-            const v = toNumber(balance);
-            if (v <= 0) return 'balance-paid';
-            return 'balance-late';
-        }
-
-        function getCreditBoxClass(totalCredit) {
-            const c = toNumber(totalCredit);
-            if (c <= 0) return 'zero';
-            if (c < 500) return 'low';
-            return 'good';
-        }
-
-        function getBalanceBoxClass(closingBalance) {
-            const b = toNumber(closingBalance);
-            if (b <= 0) return 'paid';
-            return 'late';
-        }
-
-        function formatLastUpdate() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-GB');
-            const timeStr = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
+        // 🔥 منطق حساب الرصيد الجاري المحدث كما في Excel
+        function calculateRunningBalance(rows, initialBalance = 0) {
+            let running = initialBalance;
+            return rows.sort((a, b) => new Date(a.date) - new Date(b.date)).map(row => {
+                const debit = toNumber(row.debit);
+                const credit = toNumber(row.credit);
+                running = running - credit + debit; // معادلة إكسيل
+                return { ...row, debit, credit, balance: running };
             });
-            return `Last update: ${dateStr} - ${timeStr}`;
         }
 
         async function init() {
             if (!tenantCode) return;
-
             try {
-                const { data: tenant } = await supabase
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .single();
-
-                const { data: tx } = await supabase
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
-
+                const { data: tenant } = await supabase.from('tenants').select('*').eq('tenant_code', tenantCode).single();
+                const { data: tx } = await supabase.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
                 document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
-                document.getElementById('statement_date').innerText = formatLastUpdate();
-
+                document.getElementById('statement_date').innerText = `Last update: ${new Date().toLocaleDateString('en-GB')} - ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
                 render(toNumber(tenant?.previous_balance), tx || []);
-
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-            }
+            } catch (e) { console.error(e); }
         }
 
         function render(prevBal, transactions) {
             const container = document.getElementById('years_container');
             container.innerHTML = '';
-
             const grouped = {};
             transactions.forEach(t => {
                 const y = new Date(t.date).getFullYear();
                 if (!grouped[y]) grouped[y] = [];
                 grouped[y].push(t);
             });
-
             const years = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-            let carryBalance = toNumber(prevBal);
+            let carryBalance = prevBal;
 
             years.forEach(year => {
-                const yearRows = grouped[year].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                const rentRows = [];
-                const feesRows = [];
-                const carryRowsFromDb = [];
-                const paymentRows = [];
+                const yearRows = grouped[year];
+                const openingRent = [], openingFees = [], other = [];
 
                 yearRows.forEach(r => {
-                    const desc = (r.description || '').trim();
-                    const rowDate = formatShortDate(r.date);
-                    const isOpeningDate = rowDate === `1/1/${year}`;
-
-                    if (isOpeningDate && isRentRow(desc)) {
-                        rentRows.push(r);
-                    } else if (isOpeningDate && isFeesRow(desc)) {
-                        feesRows.push(r);
-                    } else if (isCarryRow(desc)) {
-                        carryRowsFromDb.push(r);
-                    } else {
-                        paymentRows.push(r);
-                    }
+                    const d = (r.description || '').trim();
+                    const isOp = new Date(r.date).toLocaleDateString('en-GB') === `01/01/${year}`;
+                    if (isOp && (d.includes('ايجار') || d.includes('الإيجار'))) openingRent.push(r);
+                    else if (isOp && d.includes('معارف')) openingFees.push(r);
+                    else other.push(r);
                 });
 
-                rentRows.sort((a, b) => new Date(a.date) - new Date(b.date));
-                feesRows.sort((a, b) => new Date(a.date) - new Date(b.date));
-                carryRowsFromDb.sort((a, b) => new Date(a.date) - new Date(b.date));
-                paymentRows.sort((a, b) => new Date(a.date) - new Date(b.date));
+                // تجميع ومعالجة الصفوف بترتيب إكسيل
+                let itemsRaw = [...openingRent, ...openingFees];
+                if (carryBalance > 0) itemsRaw.push({ date: `${year}-01-01`, description: `رصيد سابق عام ${year-1}`, debit: carryBalance, credit: 0, isCarry: true });
+                itemsRaw = [...itemsRaw, ...other];
 
-                let running = 0;
-                const items = [];
-
-                rentRows.forEach(r => {
-                    running += toNumber(r.debit) - toNumber(r.credit);
-                    items.push({
-                        ...r,
-                        balance: running,
-                        isMain: true
-                    });
-                });
-
-                feesRows.forEach(r => {
-                    running += toNumber(r.debit) - toNumber(r.credit);
-                    items.push({
-                        ...r,
-                        balance: running,
-                        isMain: true
-                    });
-                });
-
-                if (carryRowsFromDb.length > 0) {
-                    carryRowsFromDb.forEach(r => {
-                        running += toNumber(r.debit) - toNumber(r.credit);
-                        items.push({
-                            ...r,
-                            date: r.date || `${year}-01-01`,
-                            description: `رصيد سابق عام ${year - 1}`,
-                            receipt_no: r.receipt_no || '-',
-                            balance: running,
-                            isCarry: true
-                        });
-                    });
-                } else if (carryBalance > 0) {
-                    running += carryBalance;
-                    items.push({
-                        date: `${year}-01-01`,
-                        description: `رصيد سابق عام ${year - 1}`,
-                        debit: carryBalance,
-                        credit: 0,
-                        balance: running,
-                        receipt_no: '-',
-                        isCarry: true
-                    });
-                }
-
-                paymentRows.forEach(r => {
-                    running += toNumber(r.debit) - toNumber(r.credit);
-                    items.push({
-                        ...r,
-                        balance: running
-                    });
-                });
-
-                const closingBalance = running;
-                carryBalance = closingBalance;
-
-                const totalCreditYear = items.reduce((sum, row) => {
-                    return sum + (row.isCarry ? 0 : toNumber(row.credit));
-                }, 0);
-
-                let status = { text: 'متأخر', className: 'status-late' };
-                if (closingBalance <= 0) {
-                    status = { text: 'مسدد', className: 'status-paid' };
-                } else if (totalCreditYear > 0) {
-                    status = { text: 'جزئي', className: 'status-partial' };
-                }
-
-                const creditBoxClass = getCreditBoxClass(totalCreditYear);
-                const balanceBoxClass = getBalanceBoxClass(closingBalance);
+                const items = calculateRunningBalance(itemsRaw, 0);
+                const finalBalance = items.length > 0 ? items[items.length - 1].balance : carryBalance;
+                const totalCredit = items.reduce((s, r) => s + (r.isCarry ? 0 : toNumber(r.credit)), 0);
+                const isPaid = finalBalance <= 0;
 
                 const card = document.createElement('div');
-                card.className = `year-card ${status.className}`;
+                card.className = `year-card ${isPaid ? 'status-paid' : 'status-late'}`;
                 card.innerHTML = `
-                    <div class="year-head">
-                        <div class="year-status ${status.className}">
-                            ${status.text}
-                        </div>
-                        <div class="year-title">
-                            <span class="year-chip ${status.className.replace('status-', '')}">
-                                ${year}
-                            </span>
-                        </div>
-                    </div>
-
+                    <div class="year-head"><div class="year-title"><span class="year-chip ${isPaid?'paid':'late'}">${year}</span></div></div>
                     <table class="statement-table">
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>مدين</th>
-                                <th>دائن</th>
-                                <th>الرصيد</th>
-                                <th>البيان</th>
-                                <th>سند</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>التاريخ</th><th>مدين</th><th>دائن</th><th>الرصيد</th><th>البيان</th><th>سند</th></tr></thead>
                         <tbody id="body-${year}"></tbody>
                     </table>
-
                     <div class="year-footer">
-                        <div class="year-summary-box credit-box ${creditBoxClass}">
-                            <span>دائن</span>
-                            <b>${formatCurrency(totalCreditYear)}</b>
-                        </div>
-                        <div class="year-summary-box balance-box ${balanceBoxClass}">
-                            <span>رصيد السنة</span>
-                            <b>${formatCurrency(closingBalance)}</b>
-                        </div>
+                        <div class="year-summary-box credit-box"><span>دائن</span><b>${formatCurrency(totalCredit)}</b></div>
+                        <div class="year-summary-box balance-box ${isPaid?'paid':'late'}"><span>رصيد السنة</span><b>${formatCurrency(finalBalance)}</b></div>
                     </div>
                 `;
-
                 container.appendChild(card);
                 const tbody = document.getElementById(`body-${year}`);
-
-                items.forEach((item, index) => {
+                items.forEach((item, idx) => {
                     const tr = document.createElement('tr');
-
-                    if (item.isCarry) tr.classList.add('carry-row');
-                    if (item.isMain) tr.classList.add('main-row');
-                    if (index === items.length - 1) tr.classList.add('last-row');
-
-                    const isLastPayment = index === items.length - 1 && toNumber(item.credit) > 0;
-                    if (isLastPayment) {
-                        tr.classList.add('payment-new');
-                    }
-
+                    if (idx === items.length - 1) tr.className = 'last-row';
                     tr.innerHTML = `
-                        <td>
-                            ${item.date !== '-'
-                                ? `<span class="chip">${formatShortDate(item.date)}</span>`
-                                : '-'}
-                        </td>
-                        <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
-                        <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
-                        <td class="${toNumber(item.balance) === 0 ? 'balance-zero' : getBalanceClass(item.balance)}">
-                            ${formatCurrency(item.balance)}
-                        </td>
+                        <td><span class="chip">${new Date(item.date).toLocaleDateString('en-GB')}</span></td>
+                        <td>${item.debit?formatCurrency(item.debit):''}</td>
+                        <td>${item.credit?formatCurrency(item.credit):''}</td>
+                        <td style="color:${item.balance<=0?'var(--success)':'#b0413e'}">${formatCurrency(item.balance)}</td>
                         <td>${item.description || ''}</td>
-                        <td>
-                            <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : ''}">
-                                ${item.receipt_no || '—'}
-                            </span>
-                        </td>
+                        <td><span class="chip" style="opacity:${!item.receipt_no||item.receipt_no==='-'?'0.4':'1'}">${item.receipt_no||'—'}</span></td>
                     `;
-
                     tbody.appendChild(tr);
                 });
+                carryBalance = finalBalance;
             });
         }
 
         window.savePDF = async () => {
             const element = document.querySelector('.wrap');
-            const fileNameBase = document.getElementById('statement_tenant_name')?.innerText?.trim() || 'statement';
-
             document.body.classList.add('pdf-export');
+            
+            // 🔥 إعدادات التحسين الفائق للجودة
+            const opt = {
+                margin: 10,
+                filename: 'Jabri_Statement.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 3, // دقة عالية جداً
+                    dpi: 300,
+                    letterRendering: true,
+                    useCORS: true,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
 
-            await new Promise(resolve => setTimeout(resolve, 250));
-
-            try {
-                await html2pdf()
-                    .set({
-                        margin: 10,
-                        filename: `${fileNameBase}.pdf`,
-                        html2canvas: {
-                            scale: 2,
-                            useCORS: true,
-                            scrollY: 0
-                        },
-                        jsPDF: {
-                            unit: 'mm',
-                            format: 'a4',
-                            orientation: 'portrait'
-                        },
-                        pagebreak: {
-                            mode: ['css', 'legacy']
-                        }
-                    })
-                    .from(element)
-                    .save();
-            } catch (e) {
-                console.error(e);
-            } finally {
-                document.body.classList.remove('pdf-export');
-            }
+            await html2pdf().set(opt).from(element).save();
+            document.body.classList.remove('pdf-export');
         };
-
         init();
     </script>
 </body>
