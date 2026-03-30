@@ -40,73 +40,140 @@
 
         /* 🎯 CHIP STYLE */
         .chip {
-            display: inline-block; padding: 4px 8px; border-radius: 999px;
-            font-size: 10px; font-weight: 900; max-width: 100%;
-            background: rgba(201,164,107,0.15); color: var(--gold-deep); border: 1px solid rgba(201,164,107,0.25);
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 900;
+            max-width: 100%;
+            background: rgba(201,164,107,0.15);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.25);
         }
 
         /* 🏅 YEAR CHIP */
         .year-chip {
-            display: inline-block; padding: 8px 18px; border-radius: 999px;
-            font-size: 20px; font-weight: 900; backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px); letter-spacing: 1px; transition: all 0.25s ease;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 900;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            letter-spacing: 1px;
+            transition: all 0.25s ease;
+            cursor: default;
         }
-        .year-chip.paid { color: var(--success); background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25)); border: 1px solid rgba(47,158,111,0.35); }
-        .year-chip.late { color: var(--danger); background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25)); border: 1px solid rgba(204,90,80,0.30); }
-        .year-chip.partial { color: var(--warning); background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25)); border: 1px solid rgba(195,138,46,0.30); }
-        .year-chip:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+
+        .year-chip.paid {
+            color: var(--success);
+            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(47,158,111,0.35);
+        }
+
+        .year-chip.late {
+            color: var(--danger);
+            background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25));
+            border: 1px solid rgba(204,90,80,0.30);
+        }
+
+        .year-chip.partial {
+            color: var(--warning);
+            background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(195,138,46,0.30);
+        }
+
+        .year-chip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        /* 🔥 أنيميشن الدفعات الجديدة */
+        @keyframes paymentHighlight {
+            0% { background: rgba(47,158,111,0.25); transform: scale(1.01); box-shadow: 0 0 0 rgba(47,158,111,0.0); }
+            50% { background: rgba(47,158,111,0.12); box-shadow: 0 0 12px rgba(47,158,111,0.25); }
+            100% { background: transparent; transform: scale(1); box-shadow: 0 0 0 rgba(47,158,111,0.0); }
+        }
+
+        @keyframes pulseGreen {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .payment-new { animation: paymentHighlight 1.5s ease forwards; z-index: 10; position: relative; }
+        .payment-new td:nth-child(3) { animation: pulseGreen 1s ease; text-shadow: 0 0 6px rgba(46,160,67,0.5); }
+
+        .year-status { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 900; }
+        .status-paid { background: rgba(47,158,111,0.12); color: #2f9e6f; border: 1px solid rgba(47,158,111,0.22); }
+        .status-partial { background: rgba(195,138,46,0.12); color: #c38a2e; border: 1px solid rgba(195,138,46,0.22); }
+        .status-late { background: rgba(204,90,80,0.12); color: #cc5a50; border: 1px solid rgba(204,90,80,0.22); }
 
         /* 🔥 TABLE STYLES */
         .statement-table { 
-            width: 100%; border-collapse: collapse; 
-            table-layout: fixed; /* 🔥 ثابت كما طلبت */
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed; 
             background: transparent; 
         }
-
-        /* 📏 تعديل عرض الأعمدة (تاريخ ومدين) */
-        .statement-table th:nth-child(1), .statement-table td:nth-child(1) { width: 110px; }
-        .statement-table th:nth-child(2), .statement-table td:nth-child(2) { width: 62px; }
-
         .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; font-size: 11px; }
-        .statement-table td { padding: 10px 6px; text-align: center; vertical-align: middle; font-size: 11px; border: 1px solid rgba(201,164,107,0.15); background: rgba(247,244,237,0.60); }
-
-        /* 📝 التحكم في عمود البيان والمسافات */
-        .statement-table th:nth-child(5), .statement-table td:nth-child(5) {
-            text-align: right;
-            padding-right: 14px; /* 🔥 مسافة يمين */
-            padding-left: 10px;  /* 🔥 مسافة يسار */
-            word-break: normal;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            direction: rtl;
+        
+        .statement-table td { 
+            padding: 10px 6px; 
+            text-align: center; 
+            vertical-align: middle; 
+            font-size: 11px; 
+            border: 1px solid rgba(201,164,107,0.15); 
+            background: rgba(247,244,237,0.60); 
         }
 
+        /* تلوين الأعمدة */
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
         .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
         .statement-table td:nth-child(4) { font-weight: 900; color: #b0413e; }
+        
+        /* 🔥 التحكم في نص البيان */
+        .statement-table td:nth-child(5) {
+            text-align: right;
+            word-break: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            direction: rtl;
+        }
+
         .balance-zero { color: var(--success) !important; }
+        .carry-row td { background: rgba(201,164,107,0.05); font-style: italic; }
+        .main-row td { background: rgba(177,138,82,0.03); font-weight: 700; }
+        .last-row td { border-bottom: 2px solid var(--gold); }
 
         .year-card {
-            border-radius: 26px; margin-bottom: 24px;
-            /* 🔥 التدرج اللوني الجديد للبطاقة */
+            border-radius: 26px;
+            margin-bottom: 24px;
             background: linear-gradient(135deg, rgba(253,251,246,0.95), rgba(247,244,237,0.90));
-            border: 1px solid rgba(201,164,107,0.18); overflow: hidden; box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            border: 1px solid rgba(201,164,107,0.18);
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
         }
-
-        /* 💫 الأنيميشن */
-        @keyframes paymentHighlight {
-            0% { background: rgba(47,158,111,0.25); transform: scale(1.01); }
-            100% { background: transparent; transform: scale(1); }
-        }
-        .payment-new { animation: paymentHighlight 1.5s ease forwards; }
 
         .year-head { padding: 20px; position: relative; text-align: center; }
         .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        
         .year-summary-box {
-            padding: 14px; border-radius: 18px; text-align: center;
+            padding: 14px; border-radius: 18px; text-align: center; position: relative; overflow: hidden;
             background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.25));
-            border: 1px solid rgba(201,164,107,0.18); backdrop-filter: blur(10px);
+            border: 1px solid rgba(201,164,107,0.18);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(120,95,56,0.08); transition: all 0.25s ease;
+        }
+
+        .year-summary-box.credit-box {
+            border-color: rgba(47,158,111,0.25);
+            background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
+        }
+        .year-summary-box.balance-box {
+            border-color: rgba(204,90,80,0.25);
+            background: linear-gradient(135deg, rgba(204,90,80,0.10), rgba(255,255,255,0.25));
         }
 
         .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
@@ -190,7 +257,7 @@
 
                 if (carryBalance > 0) {
                     running += carryBalance;
-                    items.push({ date: '-', description: `رصيد مدور من سنوات سابقة`, debit: carryBalance, credit: 0, balance: running, receipt_no: '-', isCarry: true });
+                    items.push({ date: '-', description: `رصيد سابق ${year - 1}`, debit: carryBalance, credit: 0, balance: running, receipt_no: '-', isCarry: true });
                 }
 
                 openingRows.forEach(r => {
@@ -215,8 +282,11 @@
                 card.className = 'year-card';
                 card.innerHTML = `
                     <div class="year-head">
+                        <div class="year-status ${status.className}">${status.text}</div>
                         <div class="year-title">
-                            <span class="year-chip ${status.className.replace('status-', '')}">${year}</span>
+                            <span class="year-chip ${status.className.replace('status-', '')}">
+                                ${year}
+                            </span>
                         </div>
                     </div>
                     <table class="statement-table">
@@ -224,8 +294,8 @@
                         <tbody id="body-${year}"></tbody>
                     </table>
                     <div class="year-footer">
-                        <div class="year-summary-box"><span>إجمالي الدائن</span><br><b>${formatCurrency(totalCreditYear)}</b></div>
-                        <div class="year-summary-box"><span>رصيد السنة</span><br><b>${formatCurrency(closingBalance)}</b></div>
+                        <div class="year-summary-box credit-box"><span>دائن</span><br><b>${formatCurrency(totalCreditYear)}</b></div>
+                        <div class="year-summary-box balance-box"><span>رصيد السنة</span><br><b>${formatCurrency(closingBalance)}</b></div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -233,16 +303,19 @@
 
                 items.forEach((item, index) => {
                     const tr = document.createElement('tr');
-                    if (index === items.length - 1 && toNumber(item.credit) > 0) {
-                        tr.classList.add('payment-new');
-                    }
+                    if (item.isCarry) tr.classList.add('carry-row');
+                    if (item.isMain) tr.classList.add('main-row');
+                    if (index === items.length - 1) tr.classList.add('last-row');
+                    const isLastPayment = index === items.length - 1 && toNumber(item.credit) > 0;
+                    if (isLastPayment) { tr.classList.add('payment-new'); setTimeout(() => tr.classList.remove('payment-new'), 1500); }
+
                     tr.innerHTML = `
                         <td>${item.date !== '-' ? `<span class="chip">${new Date(item.date).toLocaleDateString('en-GB')}</span>` : '-'}</td>
                         <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
                         <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
                         <td class="${toNumber(item.balance) === 0 ? 'balance-zero' : ''}">${formatCurrency(item.balance)}</td>
                         <td title="${item.description || ''}">${item.description || ''}</td>
-                        <td><span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : ''}">${item.receipt_no || '—'}</span></td>
+                        <td>${item.receipt_no && item.receipt_no !== '-' ? `<span class="chip">${item.receipt_no}</span>` : `<span class="chip" style="opacity:0.5">—</span>`}</td>
                     `;
                     tbody.appendChild(tr);
                 });
