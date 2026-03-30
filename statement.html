@@ -48,7 +48,6 @@
         .statement-header h2 { margin: 0 0 8px; font-size: 20px; font-weight: 900; color: var(--text); }
         #statement_date { font-size: 13px; font-weight: 900; color: var(--gold-deep); margin-top: 6px; }
 
-        /* --- Updated Year Head Layout --- */
         .year-head {
             padding: 18px 18px 10px;
             position: relative;
@@ -80,7 +79,6 @@
         .table-wrapper { padding: 8px 12px 0; overflow: hidden; }
         .statement-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11px; background: rgba(255,255,255,0.96); border-radius: 18px; overflow: hidden; }
 
-        /* Column Widths */
         .statement-table th:nth-child(1), .statement-table td:nth-child(1) { width: 18%; }
         .statement-table th:nth-child(2), .statement-table td:nth-child(2) { width: 16%; }
         .statement-table th:nth-child(3), .statement-table td:nth-child(3) { width: 16%; }
@@ -94,19 +92,21 @@
         .statement-table td:nth-child(1) { color: var(--gold-deep); font-weight: 900; }
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
         .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; font-size: 9.5px; }
-        
-        /* Balance Styling */
         .statement-table td:nth-child(4) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
         .balance-zero { color: var(--success) !important; }
 
         .statement-table td:nth-child(5) { font-weight: 800; }
         .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; }
 
-        /* Row Highlights */
+        /* --- Updated Main Row Styles --- */
         .main-row td { background: rgba(201,164,107,0.10) !important; font-weight: 900; }
+        .main-row td:nth-child(5) {
+            font-weight: 900;
+            color: #2f2a24;
+        }
+
         .carry-row td { background: rgba(201,164,107,0.08) !important; font-weight: 900; }
 
-        /* --- Updated Last Row Highlight --- */
         .last-row td {
             background: rgba(201,164,107,0.15) !important;
             font-weight: 900;
@@ -180,7 +180,6 @@
         }
         window.goBack = goBack; window.savePDF = savePDF;
 
-        // --- Updated txRowHTML with isLast Logic ---
         function txRowHTML({ date, description, debit, credit, balance, receipt_no, isCarry = false, isLast = false }) {
             const isMain = description?.includes('ايجار') || description?.includes('الإيجار') || description?.includes('معارف');
             const isZero = Math.round(balance) === 0;
@@ -222,6 +221,7 @@
                 yearRows.forEach(row => {
                     const desc = (row.description || '').trim();
                     const rowDate = formatDate(row.date);
+                    // 1- logical grouping (kept as requested)
                     const isOpeningYearItem = rowDate === `01/01/${year}` && (desc.includes('الإيجار') || desc.includes('ايجار') || desc.includes('معارف'));
                     if (isOpeningYearItem) openingRows.push(row); else normalRows.push(row);
                 });
@@ -232,9 +232,18 @@
                     renderedItems.push({ date: formatDate(row.date), description: row.description, debit: d, credit: c, balance: running, receipt_no: row.receipt_no });
                 });
 
+                // 2- Edited "رصيد متراكم" insertion
                 if (openingBalance > 0) {
                     running += openingBalance;
-                    renderedItems.push({ date: '-', description: `رصيد متراكم`, debit: openingBalance, credit: 0, balance: running, receipt_no: '-', isCarry: true });
+                    renderedItems.push({
+                        date: '-',
+                        description: `رصيد متراكم`,
+                        debit: openingBalance,
+                        credit: 0,
+                        balance: running,
+                        receipt_no: '-',
+                        isCarry: true
+                    });
                 }
 
                 normalRows.forEach(row => {
