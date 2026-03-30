@@ -80,24 +80,139 @@
 }
 
         /* تمييز الصفوف */
-        .carry-row td { background: rgba(201,164,107,0.05); font-style: italic; }
-        .main-row td { background: rgba(177,138,82,0.03); font-weight: 700; }
-        .last-row td { border-bottom: 2px solid var(--gold); }
+        .carry-row td { 
+    background: rgba(201,164,107,0.05); 
+    font-style: italic; 
+}
 
-        .year-card { border-radius: 26px; margin-bottom: 24px; background: #fff; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
-        .year-head { padding: 20px; position: relative; text-align: center; }
-        .year-title { font-size: 32px; font-weight: 900; color: var(--gold-deep); }
+.main-row td { 
+    background: rgba(177,138,82,0.03); 
+    font-weight: 700; 
+}
 
-        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; background: #fdfbf6; }
-        .year-summary-box { padding: 12px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
-        
-        .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
-        .back-btn { padding: 12px 20px; border-radius: 14px; font-weight: 900; cursor: pointer; border: 1px solid var(--border); background: #fff; }
-        .save-btn { background: var(--gold-deep); color: white; border: none; }
+.last-row td { 
+    border-bottom: 2px solid var(--gold); 
+}
 
-        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+.year-card { 
+    border-radius: 26px; 
+    margin-bottom: 24px; 
+    background: #fff; 
+    border: 1px solid var(--border); 
+    overflow: hidden; 
+    box-shadow: var(--shadow); 
+}
+
+.year-head { 
+    padding: 20px; 
+    position: relative; 
+    text-align: center; 
+}
+
+.year-title { 
+    font-size: 32px; 
+    font-weight: 900; 
+    color: var(--gold-deep); 
+}
+
+.year-footer { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+    padding: 15px; 
+    background: #fdfbf6; 
+}
+
+.year-summary-box { 
+    padding: 14px; 
+    border-radius: 16px; 
+    text-align: center; 
+    border: 1px solid rgba(201,164,107,0.22); 
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.65),
+        rgba(255,255,255,0.25)
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 6px 18px rgba(120,95,56,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.year-summary-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+}
+
+.year-summary-box span { 
+    display: block; 
+    color: #7d7468; 
+    font-size: 11px; 
+    font-weight: 800; 
+    margin-bottom: 6px; 
+}
+
+.year-summary-box b { 
+    display: block; 
+    font-size: 26px; 
+    font-weight: 900; 
+    line-height: 1.1; 
+}
+
+/* دائن */
+.year-summary-box.credit-box b { 
+    color: var(--success); 
+}
+
+/* رصيد السنة */
+.year-summary-box.balance-box b { 
+    color: var(--danger); 
+}
+
+.bottom-actions { 
+    display: flex; 
+    justify-content: center; 
+    gap: 12px; 
+    margin-top: 25px; 
+}
+
+.back-btn { 
+    padding: 12px 20px; 
+    border-radius: 14px; 
+    font-weight: 900; 
+    cursor: pointer; 
+    border: 1px solid var(--border); 
+    background: #fff; 
+}
+
+.save-btn { 
+    background: var(--gold-deep); 
+    color: white; 
+    border: none; 
+}
+
+#loader { 
+    position: fixed; 
+    inset: 0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    background: var(--bg); 
+    z-index: 9999; 
+}
+
+.spinner { 
+    width: 40px; 
+    height: 40px; 
+    border: 4px solid #eee; 
+    border-top-color: var(--gold); 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
+}
+
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
+}
     </style>
 </head>
 <body>
@@ -251,11 +366,26 @@
                 card.className = 'year-card';
                 card.innerHTML = `
                     <div class="year-head">
-                        <div class="year-status ${status.className}">${status.text}</div>
-                        <div class="year-title">${year}</div>
-                    </div>
-                    <table class="statement-table">
-                        <thead>
+    <div class="year-status ${status.className}">
+        ${status.text}
+    </div>
+
+    <div class="year-title">
+        ${year}
+    </div>
+</div>
+
+<table class="statement-table">
+    <thead>
+        <tr>
+            <th>التاريخ</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>الرصيد</th>
+            <th>البيان</th>
+            <th>رقم السند</th>
+        </tr>
+    </thead>
                             <tr><th>التاريخ</th><th>مدين</th><th>دائن</th><th>الرصيد</th><th>البيان</th><th>رقم السند</th></tr>
                         </thead>
                         <tbody id="body-${year}"></tbody>
