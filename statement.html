@@ -316,7 +316,43 @@
         .year-summary-box.balance-box b {
             color: var(--danger);
         }
+.year-summary-box {
+    padding: 14px;
+    border-radius: 16px;
+    text-align: center;
 
+    background: rgba(255,255,255,0.28);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(201,164,107,0.18);
+
+    box-shadow: 0 4px 12px rgba(120,95,56,0.05);
+
+    transition: all 0.2s ease;
+}
+
+/* ✨ hover */
+.year-summary-box:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+}
+
+/* ✨ خط ذهبي */
+.year-summary-box::before {
+    content: "";
+    display: block;
+    height: 2px;
+    width: 40%;
+    margin: 0 auto 8px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(201,164,107,0.6),
+        transparent
+    );
+}
         .bottom-actions {
             display: flex;
             justify-content: center;
