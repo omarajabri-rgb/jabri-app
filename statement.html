@@ -56,10 +56,28 @@
         .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; }
         .statement-table td { padding: 10px 4px; border: 1px solid rgba(201,164,107,0.15); text-align: center; word-break: break-word; }
 
-        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
-        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
-        .statement-table td:nth-child(4) { font-weight: 900; color: #b0413e; }
-        .balance-zero { color: var(--success) !important; }
+        /* مدين 🔴 */
+.statement-table td:nth-child(2) { 
+    color: var(--danger); 
+    font-weight: 900; 
+}
+
+/* دائن 🟢 */
+.statement-table td:nth-child(3) { 
+    color: var(--success); 
+    font-weight: 900; 
+}
+
+/* الرصيد 🔴 */
+.statement-table td:nth-child(4) { 
+    color: #b0413e; 
+    font-weight: 900; 
+}
+
+/* إذا صفر 🟢 */
+.balance-zero { 
+    color: var(--success) !important; 
+}
 
         /* تمييز الصفوف */
         .carry-row td { background: rgba(201,164,107,0.05); font-style: italic; }
