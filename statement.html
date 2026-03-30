@@ -41,7 +41,7 @@
         /* 🎯 CHIP STYLE */
         .chip {
             display: inline-block; padding: 4px 8px; border-radius: 999px;
-            font-size: 10px; font-weight: 900; max-width: 100%;
+            font-size: 10px; font-weight: 900; white-space: nowrap;
             background: rgba(201,164,107,0.15); color: var(--gold-deep); border: 1px solid rgba(201,164,107,0.25);
         }
 
@@ -55,43 +55,53 @@
         .year-chip.late { color: var(--danger); background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25)); border: 1px solid rgba(204,90,80,0.30); }
         .year-chip.partial { color: var(--warning); background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25)); border: 1px solid rgba(195,138,46,0.30); }
 
-        /* 🔥 TABLE STYLES */
-        .statement-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: transparent; }
-        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; font-size: 11px; }
-        .statement-table td { padding: 10px 6px; text-align: center; vertical-align: middle; font-size: 11px; border: 1px solid rgba(201,164,107,0.15); background: rgba(247,244,237,0.60); }
+        /* 🔥 TABLE STYLES (Updated to Auto) */
+        .statement-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: auto; /* 🔥 تم التعديل لتوزيع تلقائي */
+            background: transparent; 
+        }
+        
+        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 10px; font-weight: 900; font-size: 11px; white-space: nowrap; }
+        .statement-table td { padding: 10px 8px; vertical-align: middle; font-size: 11px; border: 1px solid rgba(201,164,107,0.15); background: rgba(247,244,237,0.60); }
 
-        /* 📏 تعديل عرض الأعمدة كما طلبت */
-        .statement-table th:nth-child(1), .statement-table td:nth-child(1) { width: 125px; } /* التاريخ */
-        .statement-table th:nth-child(2), .statement-table td:nth-child(2) { width: 50px; }  /* مدين */
-        .statement-table th:nth-child(5), .statement-table td:nth-child(5) { width: 45%; text-align: right; padding-right: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* البيان */
+        /* 🔢 ضبط اصطفاف الأرقام */
+        .statement-table td:nth-child(2),
+        .statement-table td:nth-child(3),
+        .statement-table td:nth-child(4) {
+            text-align: center;
+            font-variant-numeric: tabular-nums; /* 🔥 لضمان تناسق الأرقام محاسبياً */
+            font-weight: 900;
+        }
 
-        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
-        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
-        .statement-table td:nth-child(4) { font-weight: 900; color: #b0413e; }
+        /* 📝 محاذاة البيان لليمين */
+        .statement-table td:nth-child(5),
+        .statement-table th:nth-child(5) {
+            text-align: right;
+            padding-right: 14px;
+            white-space: nowrap; /* 🔥 الحفاظ على السطر الواحد */
+        }
+
+        .statement-table td:nth-child(2) { color: var(--danger); }
+        .statement-table td:nth-child(3) { color: var(--success); }
+        .statement-table td:nth-child(4) { color: #b0413e; }
         .balance-zero { color: var(--success) !important; }
 
-        /* 🗂 YEAR CARD STYLE (Updated) */
+        /* 🗂 YEAR CARD STYLE */
         .year-card {
-            position: relative;
-            border-radius: 26px;
-            margin-bottom: 24px;
-            background: #fff;
-            border: 1px solid rgba(201,164,107,0.18);
-            overflow: hidden;
-            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            position: relative; border-radius: 26px; margin-bottom: 24px;
+            background: #fff; border: 1px solid rgba(201,164,107,0.18);
+            overflow: hidden; box-shadow: 0 12px 28px rgba(120,95,56,0.08);
         }
 
         .year-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
+            content: ""; position: absolute; inset: 0;
             background: linear-gradient(135deg, rgba(253,251,246,0.55), rgba(247,244,237,0.38));
-            pointer-events: none;
-            z-index: 0;
+            pointer-events: none; z-index: 0;
         }
 
         .year-card > * { position: relative; z-index: 1; }
-
         .year-head { padding: 20px; text-align: center; }
         .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         
@@ -101,11 +111,9 @@
             border: 1px solid rgba(201,164,107,0.18); backdrop-filter: blur(10px);
         }
 
-        /* 🟢 دائن & 🔴 رصيد */
         .year-summary-box.credit-box b { color: var(--success); font-size: 16px; }
         .year-summary-box.balance-box b { color: var(--danger); font-size: 16px; }
 
-        /* 💫 الأنيميشن */
         @keyframes paymentHighlight {
             0% { background: rgba(47,158,111,0.25); transform: scale(1.01); }
             100% { background: transparent; transform: scale(1); }
@@ -227,8 +235,8 @@
                         <tbody id="body-${year}"></tbody>
                     </table>
                     <div class="year-footer">
-                        <div class="year-summary-box credit-box"><span>دائن</span><br><b>${formatCurrency(totalCreditYear)}</b></div>
-                        <div class="year-summary-box balance-box"><span>رصيد السنة</span><br><b>${formatCurrency(closingBalance)}</b></div>
+                        <div class="year-summary-box"><span>دائن</span><br><b>${formatCurrency(totalCreditYear)}</b></div>
+                        <div class="year-summary-box"><span>رصيد السنة</span><br><b>${formatCurrency(closingBalance)}</b></div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -244,7 +252,7 @@
                         <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
                         <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
                         <td class="${toNumber(item.balance) === 0 ? 'balance-zero' : ''}">${formatCurrency(item.balance)}</td>
-                        <td title="${item.description || ''}">${item.description || ''}</td>
+                        <td>${item.description || ''}</td>
                         <td><span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : ''}">${item.receipt_no || '—'}</span></td>
                     `;
                     tbody.appendChild(tr);
