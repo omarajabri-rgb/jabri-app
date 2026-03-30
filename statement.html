@@ -34,18 +34,10 @@
             margin: 0;
             color: var(--text);
             padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
             background:
                 radial-gradient(circle at top left, rgba(201,164,107,0.10), transparent 24%),
                 radial-gradient(circle at bottom right, rgba(177,138,82,0.08), transparent 24%),
                 linear-gradient(135deg, var(--bg), var(--bg-2));
-        }
-
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .wrap {
@@ -116,56 +108,49 @@
         }
 
         .year-card {
-    border-radius: 26px;
-    margin-bottom: 24px;
-
-    /* ✨ نفس ألوان الثيم */
-    background: linear-gradient(
-        135deg,
-        rgba(253,251,246,0.95),
-        rgba(247,244,237,0.90)
-    );
-
-    border: 1px solid rgba(201,164,107,0.18);
-
-    overflow: hidden;
-
-    box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-}
+            border-radius: 26px;
+            margin-bottom: 24px;
+            background: linear-gradient(
+                135deg,
+                rgba(253,251,246,0.95),
+                rgba(247,244,237,0.90)
+            );
+            border: 1px solid rgba(201,164,107,0.18);
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
         }
 
         .year-head {
-    padding: 22px 20px 18px;
-    display: grid;
-    grid-template-columns: 120px 1fr 120px;
-    align-items: center;
-    border-bottom: 1px solid rgba(201,164,107,0.10);
-    direction: ltr; /* 🔥 للتوزيع فقط */
-}
+            padding: 22px 20px 18px;
+            display: grid;
+            grid-template-columns: 120px 1fr 120px;
+            align-items: center;
+            border-bottom: 1px solid rgba(201,164,107,0.10);
+            direction: ltr;
+        }
 
-.year-title {
-    font-size: 34px;
-    font-weight: 900;
-    color: var(--gold-deep);
-    letter-spacing: 0.4px;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.45);
-    text-align: center;
-    grid-column: 2;
-}
+        .year-title {
+            font-size: 34px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            letter-spacing: 0.4px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.45);
+            text-align: center;
+            grid-column: 2;
+        }
 
-.year-status {
-    grid-column: 1;
-    justify-self: start; /* يرجع يسار */
-    direction: rtl;      /* النص العربي طبيعي */
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 900;
-    box-shadow: 0 4px 12px rgba(120,95,56,0.08);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-}
+        .year-status {
+            grid-column: 1;
+            justify-self: start;
+            direction: rtl;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
 
         .status-paid {
             background: rgba(47,158,111,0.12);
@@ -185,7 +170,6 @@
             border: 1px solid rgba(204,90,80,0.22);
         }
 
-        /* TABLE = TRANSPARENT */
         .statement-table {
             width: 100%;
             border-collapse: collapse;
@@ -206,7 +190,6 @@
             transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
         }
 
-        /* TD = COLORED */
         .statement-table td {
             padding: 10px 4px;
             border: 1px solid rgba(201,164,107,0.12);
@@ -220,7 +203,6 @@
             background: transparent !important;
         }
 
-        /* Luxury hover */
         .statement-table tbody tr {
             transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
         }
@@ -240,7 +222,6 @@
             background: rgba(201,164,107,0.12) !important;
         }
 
-        /* Column colors: 1 التاريخ | 2 مدين | 3 دائن | 4 الرصيد | 5 البيان | 6 رقم السند */
         .statement-table td:nth-child(2) {
             color: var(--danger);
             font-weight: 900;
@@ -286,95 +267,63 @@
         }
 
         .year-summary-box {
-    padding: 14px;
-    border-radius: 16px;
-    text-align: center;
-    border: 1px solid rgba(201,164,107,0.22);
-    background: linear-gradient(
-        135deg,
-        rgba(255,255,255,0.65),
-        rgba(255,255,255,0.25)
-    );
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 6px 18px rgba(120,95,56,0.08);
-    transition: transform 0.20s ease, box-shadow 0.20s ease;
-}
+            padding: 14px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(201,164,107,0.22);
+            background: linear-gradient(
+                135deg,
+                rgba(255,255,255,0.65),
+                rgba(255,255,255,0.25)
+            );
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 18px rgba(120,95,56,0.08);
+            transition: transform 0.20s ease, box-shadow 0.20s ease;
+        }
 
-.year-summary-box:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(120,95,56,0.08);
-}
+        .year-summary-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+        }
 
-.year-summary-box::before {
-    content: "";
-    display: block;
-    height: 2px;
-    width: 40%;
-    margin: 0 auto 8px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(201,164,107,0.6),
-        transparent
-    );
-}
+        .year-summary-box::before {
+            content: "";
+            display: block;
+            height: 2px;
+            width: 40%;
+            margin: 0 auto 8px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(201,164,107,0.6),
+                transparent
+            );
+        }
 
-.year-summary-box span {
-    display: block;
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 800;
-    margin-bottom: 6px;
-}
+        .year-summary-box span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
 
-.year-summary-box b {
-    display: block;
-    font-size: 26px;
-    font-weight: 900;
-    line-height: 1.1;
-}
+        .year-summary-box b {
+            display: block;
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1.1;
+        }
 
-.year-summary-box.credit-box b {
-    color: var(--success);
-}
+        .year-summary-box.credit-box b {
+            color: var(--success);
+        }
 
-.year-summary-box.balance-box b {
-    color: var(--danger);
-}
+        .year-summary-box.balance-box b {
+            color: var(--danger);
+        }
 
-    background: rgba(255,255,255,0.28);
-
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    border: 1px solid rgba(201,164,107,0.18);
-
-    box-shadow: 0 4px 12px rgba(120,95,56,0.05);
-
-    transition: all 0.2s ease;
-}
-
-/* ✨ hover */
-.year-summary-box:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(120,95,56,0.08);
-}
-
-/* ✨ خط ذهبي */
-.year-summary-box::before {
-    content: "";
-    display: block;
-    height: 2px;
-    width: 40%;
-    margin: 0 auto 8px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(201,164,107,0.6),
-        transparent
-    );
-}
         .bottom-actions {
             display: flex;
             justify-content: center;
@@ -427,6 +376,17 @@
             animation: spin 1s linear infinite;
         }
 
+        .error-box {
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(204,90,80,0.08);
+            border: 1px solid rgba(204,90,80,0.18);
+            color: var(--danger);
+            text-align: center;
+            font-weight: 800;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -435,8 +395,6 @@
             body {
                 background: #fff !important;
                 padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
             }
 
             #loader,
@@ -465,6 +423,7 @@
         </div>
 
         <div id="years_container"></div>
+        <div id="error_container"></div>
 
         <div class="bottom-actions">
             <button class="back-btn" onclick="window.history.back()">رجوع</button>
@@ -476,6 +435,7 @@
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const tenantCode = localStorage.getItem('jabri_tenant_code');
+
         const supabase = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
@@ -486,34 +446,52 @@
         }
 
         function formatCurrency(v) {
-            return Math.round(v).toLocaleString();
+            return Math.round(v || 0).toLocaleString('en-US');
+        }
+
+        function showError(msg) {
+            document.getElementById('error_container').innerHTML = `
+                <div class="error-box">${msg}</div>
+            `;
         }
 
         async function init() {
-            if (!tenantCode) return;
-
             try {
-                const { data: tenant } = await supabase
+                if (!tenantCode) {
+                    showError('لا يوجد مستأجر مسجل حالياً. الرجاء تسجيل الدخول أولاً.');
+                    return;
+                }
+
+                const { data: tenant, error: tenantError } = await supabase
                     .from('tenants')
                     .select('*')
                     .eq('tenant_code', tenantCode)
                     .single();
 
-                const { data: tx } = await supabase
+                if (tenantError || !tenant) {
+                    throw new Error('تعذر تحميل بيانات المستأجر');
+                }
+
+                const { data: tx, error: txError } = await supabase
                     .from('tenant_transactions')
                     .select('*')
                     .eq('tenant_code', tenantCode)
                     .order('date', { ascending: true });
 
-                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
-                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')}`;
+                if (txError) {
+                    throw new Error('تعذر تحميل الحركات المالية');
+                }
+
+                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name || tenantCode;
+                document.getElementById('statement_date').innerText =
+                    `تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')} - ${new Date().toLocaleTimeString('ar-JO')}`;
 
                 render(toNumber(tenant.previous_balance), tx || []);
-
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
             } catch (e) {
                 console.error(e);
+                showError(e.message || 'حدث خطأ أثناء تحميل كشف الحساب');
+            } finally {
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
@@ -563,8 +541,8 @@
                     const ad = (a.description || '');
                     const bd = (b.description || '');
 
-                    if (ad.includes('معارف') && bd.includes('ايجار')) return -1;
-                    if (ad.includes('ايجار') && bd.includes('معارف')) return 1;
+                    if (ad.includes('ايجار') && bd.includes('معارف')) return -1;
+                    if (ad.includes('معارف') && bd.includes('ايجار')) return 1;
                     return 0;
                 });
 
@@ -633,6 +611,7 @@
                     <div class="year-head">
                         <div class="year-status ${status.className}">${status.text}</div>
                         <div class="year-title">${year}</div>
+                        <div></div>
                     </div>
 
                     <table class="statement-table">
@@ -652,12 +631,10 @@
                     <div class="year-footer">
                         <div class="year-summary-box credit-box">
                             <span>دائن</span>
-                            <br>
                             <b>${formatCurrency(totalCreditYear)}</b>
                         </div>
                         <div class="year-summary-box balance-box">
                             <span>رصيد السنة</span>
-                            <br>
                             <b>${formatCurrency(closingBalance)}</b>
                         </div>
                     </div>
