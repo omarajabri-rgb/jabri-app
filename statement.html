@@ -65,6 +65,16 @@
             text-align: center;
         }
 
+        .statement-header.glass {
+            background: linear-gradient(
+                135deg,
+                rgba(255,255,255,0.88),
+                rgba(247,244,237,0.78)
+            );
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+        }
+
         .statement-header h1 {
             margin: 0 0 8px;
             font-size: 28px;
@@ -105,32 +115,22 @@
             border: 1px solid rgba(201,164,107,0.18);
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
             transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-        }
-
-        .year-card.status-paid {
             background: linear-gradient(
                 135deg,
                 rgba(255,255,255,0.92),
-                rgba(236,249,242,0.82)
+                rgba(247,244,237,0.75)
             );
+        }
+
+        .year-card.status-paid {
             border-color: rgba(47,158,111,0.18);
         }
 
         .year-card.status-partial {
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(255,247,232,0.86)
-            );
             border-color: rgba(195,138,46,0.18);
         }
 
         .year-card.status-late {
-            background: linear-gradient(
-                135deg,
-                rgba(255,255,255,0.92),
-                rgba(255,241,239,0.84)
-            );
             border-color: rgba(204,90,80,0.16);
         }
 
@@ -238,7 +238,6 @@
             line-height: 1.3;
             font-size: 11px;
             border: 1px solid rgba(201,164,107,0.15);
-            font-weight: 800;
         }
 
         .statement-table tbody tr:nth-child(even) td {
@@ -254,12 +253,29 @@
             transition: 0.2s;
         }
 
+        .statement-table th:nth-child(1),
+        .statement-table td:nth-child(1),
+        .statement-table th:nth-child(2),
+        .statement-table td:nth-child(2),
+        .statement-table th:nth-child(3),
+        .statement-table td:nth-child(3),
+        .statement-table th:nth-child(4),
+        .statement-table td:nth-child(4),
+        .statement-table th:nth-child(6),
+        .statement-table td:nth-child(6) {
+            font-weight: 900;
+        }
+
+        .statement-table th:nth-child(5),
+        .statement-table td:nth-child(5) {
+            font-weight: 700;
+        }
+
         .statement-table td:nth-child(2),
         .statement-table td:nth-child(3),
         .statement-table td:nth-child(4) {
             font-variant-numeric: tabular-nums;
             letter-spacing: 0.5px;
-            font-weight: 900;
         }
 
         .statement-table td:nth-child(2) {
@@ -272,7 +288,6 @@
 
         .statement-table td:nth-child(4) {
             font-size: 12px;
-            font-weight: 900;
         }
 
         .statement-table td:nth-child(4),
@@ -474,6 +489,51 @@
             animation: spin 1s linear infinite;
         }
 
+        body.pdf-export,
+        body.pdf-export * {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        body.pdf-export {
+            opacity: 1 !important;
+            transform: none !important;
+            background: #ffffff !important;
+        }
+
+        body.pdf-export .glass,
+        body.pdf-export .statement-header,
+        body.pdf-export .year-card,
+        body.pdf-export .year-summary-box,
+        body.pdf-export .year-chip,
+        body.pdf-export .year-status {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+        }
+
+        body.pdf-export .statement-header {
+            background: #ffffff !important;
+        }
+
+        body.pdf-export .year-card {
+            background: #ffffff !important;
+            border: 1px solid #d8c9af !important;
+        }
+
+        body.pdf-export .statement-table tbody tr:nth-child(even) td,
+        body.pdf-export .statement-table tbody tr:nth-child(odd) td,
+        body.pdf-export .statement-table tbody tr:hover td,
+        body.pdf-export .carry-row td,
+        body.pdf-export .main-row td {
+            background: #ffffff !important;
+        }
+
+        body.pdf-export #loader,
+        body.pdf-export .bottom-actions {
+            display: none !important;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -493,7 +553,7 @@
 
         <div class="bottom-actions">
             <button class="back-btn" onclick="window.history.back()">رجوع</button>
-            <button class="back-btn save-btn" onclick="savePDF()">حفظ PDF</button>
+            <button class="back-btn save-btn" onclick="savePDF()">حفظ</button>
         </div>
     </div>
 
@@ -524,6 +584,11 @@
             return d.includes('معارف');
         }
 
+        function isCarryRow(desc) {
+            const d = (desc || '').trim();
+            return d.includes('رصيد سابق') || d.includes('رصيد مدور');
+        }
+
         function getBalanceClass(balance) {
             const v = toNumber(balance);
             if (v <= 0) return 'balance-paid';
@@ -545,6 +610,16 @@
             return 'late';
         }
 
+        function formatLastUpdate() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-JO');
+            const timeStr = now.toLocaleTimeString('ar-JO', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            return `آخر تحديث: ${dateStr} - ${timeStr}`;
+        }
+
         async function init() {
             if (!tenantCode) return;
 
@@ -562,8 +637,7 @@
                     .order('date', { ascending: true });
 
                 document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
-                document.getElementById('statement_date').innerText =
-                    `تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')}`;
+                document.getElementById('statement_date').innerText = formatLastUpdate();
 
                 render(toNumber(tenant?.previous_balance), tx || []);
 
@@ -571,6 +645,8 @@
                 document.body.classList.add('loaded');
             } catch (e) {
                 console.error(e);
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
             }
         }
 
@@ -593,6 +669,7 @@
 
                 const rentRows = [];
                 const feesRows = [];
+                const carryRowsFromDb = [];
                 const paymentRows = [];
 
                 yearRows.forEach(r => {
@@ -604,6 +681,8 @@
                         rentRows.push(r);
                     } else if (isOpeningDate && isFeesRow(desc)) {
                         feesRows.push(r);
+                    } else if (isCarryRow(desc)) {
+                        carryRowsFromDb.push(r);
                     } else {
                         paymentRows.push(r);
                     }
@@ -611,6 +690,7 @@
 
                 rentRows.sort((a, b) => new Date(a.date) - new Date(b.date));
                 feesRows.sort((a, b) => new Date(a.date) - new Date(b.date));
+                carryRowsFromDb.sort((a, b) => new Date(a.date) - new Date(b.date));
                 paymentRows.sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 let running = 0;
@@ -634,7 +714,19 @@
                     });
                 });
 
-                if (carryBalance > 0) {
+                if (carryRowsFromDb.length > 0) {
+                    carryRowsFromDb.forEach(r => {
+                        running += toNumber(r.debit) - toNumber(r.credit);
+                        items.push({
+                            ...r,
+                            date: r.date || `${year}-01-01`,
+                            description: `رصيد سابق عام ${year - 1}`,
+                            receipt_no: r.receipt_no || '-',
+                            balance: running,
+                            isCarry: true
+                        });
+                    });
+                } else if (carryBalance > 0) {
                     running += carryBalance;
                     items.push({
                         date: `${year}-01-01`,
@@ -751,17 +843,40 @@
             });
         }
 
-        window.savePDF = () => {
+        window.savePDF = async () => {
             const element = document.querySelector('.wrap');
-            html2pdf()
-                .set({
-                    margin: 10,
-                    filename: 'statement.pdf',
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                })
-                .from(element)
-                .save();
+            const fileNameBase = document.getElementById('statement_tenant_name')?.innerText?.trim() || 'statement';
+
+            document.body.classList.add('pdf-export');
+
+            await new Promise(resolve => setTimeout(resolve, 250));
+
+            try {
+                await html2pdf()
+                    .set({
+                        margin: 10,
+                        filename: `${fileNameBase}.pdf`,
+                        html2canvas: {
+                            scale: 2,
+                            useCORS: true,
+                            scrollY: 0
+                        },
+                        jsPDF: {
+                            unit: 'mm',
+                            format: 'a4',
+                            orientation: 'portrait'
+                        },
+                        pagebreak: {
+                            mode: ['css', 'legacy']
+                        }
+                    })
+                    .from(element)
+                    .save();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                document.body.classList.remove('pdf-export');
+            }
         };
 
         init();
