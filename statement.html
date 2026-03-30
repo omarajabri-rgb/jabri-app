@@ -67,37 +67,101 @@
             background: rgba(201,164,107,0.10); color: var(--text);
         }
 
-        .summary-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-        .summary-item { border-radius: 22px; padding: 16px; text-align: center; }
-        .summary-item span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 8px; }
-        .summary-item b { font-size: 18px; font-weight: 900; color: var(--text); }
-        .summary-item.is-paid b { color: var(--success); }
-        .summary-item.is-balance b { color: var(--danger); }
-
-        /* --- Updated Table Styles --- */
-        .table-wrapper { overflow-x: auto; padding: 10px 16px 0; }
-        
-        .statement-table {
-            width: 100%; min-width: 680px; border-collapse: collapse;
-            font-size: 12px; table-layout: fixed;
-            background: rgba(255,255,255,0.96); overflow: hidden; border-radius: 20px;
+        .year-head {
+            padding: 18px 18px 10px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
         }
+
+        .year-title {
+            grid-column: 2;
+            justify-self: center;
+            text-align: center;
+            font-size: 34px;
+            font-weight: 900;
+            color: #a88349;
+            line-height: 1;
+        }
+
+        .year-status {
+            grid-column: 1;
+            justify-self: start;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            background: rgba(201,164,107,0.10);
+            border: 1px solid rgba(201,164,107,0.18);
+        }
+
+        /* --- Updated Table Configuration --- */
+        .table-wrapper {
+            padding: 8px 12px 0;
+            overflow: hidden;
+        }
+
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 11px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        /* توزيع الأعمدة */
+        .statement-table th:nth-child(1),
+        .statement-table td:nth-child(1) { width: 18%; } /* التاريخ */
+
+        .statement-table th:nth-child(2),
+        .statement-table td:nth-child(2) { width: 16%; } /* مدين */
+
+        .statement-table th:nth-child(3),
+        .statement-table td:nth-child(3) { width: 16%; } /* دائن */
+
+        .statement-table th:nth-child(4),
+        .statement-table td:nth-child(4) { width: 16%; } /* الرصيد */
+
+        .statement-table th:nth-child(5),
+        .statement-table td:nth-child(5) { width: 20%; } /* البيان */
+
+        .statement-table th:nth-child(6),
+        .statement-table td:nth-child(6) { width: 14%; } /* السند */
 
         .statement-table th {
             background: linear-gradient(135deg, rgba(201,164,107,0.90), rgba(177,138,82,0.90));
-            color: #fffdf8; padding: 10px 6px; font-weight: 900; font-size: 12px;
-            border: 1px solid rgba(255,255,255,0.14); white-space: nowrap;
+            color: #fffdf8;
+            padding: 8px 4px;
+            font-weight: 900;
+            border: 1px solid rgba(255,255,255,0.14);
+            font-size: 10.5px;
+            white-space: normal;
         }
 
         .statement-table td {
-            padding: 8px 6px; border: 1px solid rgba(201,164,107,0.10);
-            text-align: center; color: var(--text); background: rgba(255,255,255,0.90);
-            vertical-align: middle; font-size: 11px; line-height: 1.5; word-break: break-word;
+            padding: 7px 3px;
+            border: 1px solid rgba(201,164,107,0.10);
+            text-align: center;
+            color: var(--text);
+            background: rgba(255,255,255,0.90);
+            vertical-align: middle;
+            font-size: 10px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .statement-table td:nth-child(2),
+        .statement-table td:nth-child(3),
+        .statement-table td:nth-child(4) {
+            font-size: 9.5px;
         }
 
         .statement-table tbody tr:nth-child(even) td { background: rgba(201,164,107,0.05); }
+        .statement-table tbody tr:hover td { background: rgba(201,164,107,0.08); }
 
-        /* Column Specifics */
         .statement-table td:first-child { color: var(--gold-deep); font-weight: 900; }
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; }
         .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; }
@@ -106,27 +170,56 @@
         .statement-table td:nth-child(6) { color: var(--gold-deep); font-weight: 900; }
 
         .table-chip {
-            display: inline-flex; align-items: center; justify-content: center;
-            padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 900;
-            background: rgba(201,164,107,0.12); color: var(--gold-deep);
-            border: 1px solid rgba(201,164,107,0.18); min-width: 96px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 6px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 900;
+            background: rgba(201,164,107,0.12);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.18);
+            min-width: auto;
+            max-width: 100%;
         }
 
         .carry-row td { background: rgba(201,164,107,0.08) !important; font-weight: 900; }
 
-        /* --- Year Container --- */
         .year-card {
             border-radius: 26px; padding: 0; overflow: hidden;
             background: rgba(255,255,255,0.84); border: 1px solid rgba(201,164,107,0.22);
             box-shadow: var(--shadow); margin-bottom: 24px;
         }
-        .year-title { font-size: 30px; font-weight: 900; color: #a88349; line-height: 1; }
-        .year-status { padding: 10px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; background: rgba(201,164,107,0.10); }
 
-        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
-        .year-summary-box { background: rgba(201,164,107,0.08); border: 1px solid rgba(201,164,107,0.16); border-radius: 18px; padding: 12px; text-align: center; }
-        .year-summary-box span { display: block; color: var(--muted); font-size: 11px; font-weight: 800; margin-bottom: 7px; }
-        .year-summary-box b { display: block; font-size: 16px; font-weight: 900; }
+        .year-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 14px 16px 16px;
+        }
+
+        .year-summary-box {
+            background: rgba(201,164,107,0.08);
+            border: 1px solid rgba(201,164,107,0.16);
+            border-radius: 18px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .year-summary-box span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .year-summary-box b {
+            display: block;
+            font-size: 15px;
+            font-weight: 900;
+        }
         .year-summary-box.debit-box b { color: var(--danger); }
 
         .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
@@ -153,12 +246,9 @@
             <p id="statement_date">—</p>
         </div>
         <div id="last_payment_box" class="last-payment-box glass">—</div>
-        <div class="summary-box">
-            <div class="summary-item glass"><span>إجمالي المستحق</span><b id="sum_due">0 د.أ</b></div>
-            <div class="summary-item glass is-paid"><span>إجمالي المدفوع</span><b id="sum_paid">0 د.أ</b></div>
-            <div class="summary-item glass is-balance"><span>الرصيد المتبقي</span><b id="sum_balance">0 د.أ</b></div>
-        </div>
+        
         <div id="years_container" class="years-stack"></div>
+
         <div class="bottom-actions">
             <button class="back-btn" onclick="goBack()"><i data-lucide="arrow-right"></i> رجوع</button>
             <button class="back-btn save-btn" onclick="savePDF()"><i data-lucide="download"></i> حفظ PDF</button>
@@ -175,7 +265,21 @@
         );
 
         function toNumber(v) { return parseFloat(v) || 0; }
-        function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`; }
+        
+        // --- Updated formatCurrency ---
+        function formatCurrency(v) {
+            return toNumber(v).toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            });
+        }
+
+        // --- Added shortText Function ---
+        function shortText(text, max = 14) {
+            if (!text) return '-';
+            return text.length > max ? text.slice(0, max) + '…' : text;
+        }
+
         function formatDate(v) { return v ? new Date(v).toLocaleDateString('en-GB') : '-'; }
         function formatDateTime(v) { return v ? new Date(v).toLocaleString('en-GB', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '-'; }
 
@@ -194,7 +298,7 @@
                     <td>${debit ? formatCurrency(debit) : ''}</td>
                     <td>${credit ? formatCurrency(credit) : ''}</td>
                     <td>${formatCurrency(balance)}</td>
-                    <td style="text-align:right">${description || '-'}</td>
+                    <td style="text-align:right">${shortText(description)}</td>
                     <td><span class="table-chip">${receipt_no || '-'}</span></td>
                 </tr>
             `;
@@ -254,8 +358,8 @@
                 card.className = `year-card ${Number(year) === currentYear ? 'current-year' : ''}`;
                 card.innerHTML = `
                     <div class="year-head">
+                        <div class="year-status ${yearStatus.className}">${yearStatus.text}</div>
                         <div class="year-title">${year}</div>
-                        <div class="year-status ${yearStatus.className}">حالة السنة: ${yearStatus.text}</div>
                     </div>
                     <div class="table-wrapper">
                         <table class="statement-table">
@@ -280,14 +384,9 @@
             
             const rows = tx || [];
             const prev = toNumber(tenant.previous_balance);
-            const totalDue = prev + rows.reduce((s,r) => s + toNumber(r.debit), 0);
-            const totalPaid = rows.reduce((s,r) => s + toNumber(r.credit), 0);
 
             document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
             document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
-            document.getElementById('sum_due').innerText = formatCurrency(totalDue);
-            document.getElementById('sum_paid').innerText = formatCurrency(totalPaid);
-            document.getElementById('sum_balance').innerText = formatCurrency(totalDue - totalPaid);
 
             renderYears(prev, rows);
             document.getElementById('loader').style.display = 'none';
