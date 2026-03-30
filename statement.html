@@ -135,33 +135,34 @@
         }
 
         .year-head {
-            padding: 22px 20px 18px;
-            position: relative;
-            text-align: center;
-            border-bottom: 1px solid rgba(201,164,107,0.10);
-        }
+    padding: 22px 20px 18px;
+    display: grid;
+    grid-template-columns: 120px 1fr 120px;
+    align-items: center;
+    border-bottom: 1px solid rgba(201,164,107,0.10);
+}
 
-        .year-title {
-            font-size: 34px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            letter-spacing: 0.4px;
-            text-shadow: 0 1px 0 rgba(255,255,255,0.45);
-        }
+.year-title {
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--gold-deep);
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.45);
+    text-align: center;
+    grid-column: 2;
+}
 
-        .year-status {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
+.year-status {
+    justify-self: start;
+    grid-column: 1;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
 
         .status-paid {
             background: rgba(47,158,111,0.12);
