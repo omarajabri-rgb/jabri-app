@@ -140,6 +140,7 @@
     grid-template-columns: 120px 1fr 120px;
     align-items: center;
     border-bottom: 1px solid rgba(201,164,107,0.10);
+    direction: ltr; /* 🔥 للتوزيع فقط */
 }
 
 .year-title {
@@ -153,8 +154,9 @@
 }
 
 .year-status {
-    justify-self: start;
     grid-column: 1;
+    justify-self: start; /* يرجع يسار */
+    direction: rtl;      /* النص العربي طبيعي */
     padding: 8px 14px;
     border-radius: 999px;
     font-size: 12px;
@@ -162,6 +164,7 @@
     box-shadow: 0 4px 12px rgba(120,95,56,0.08);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+}
 }
 
         .status-paid {
