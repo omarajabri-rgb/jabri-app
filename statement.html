@@ -240,18 +240,20 @@
             border: 1px solid rgba(201,164,107,0.15);
         }
 
-        .statement-table tbody tr:nth-child(even) td {
-            background: rgba(201,164,107,0.06);
-        }
+        /* zebra cream + gold (clean luxury) */
+.statement-table tbody tr:nth-child(odd) td {
+    background: rgba(253,251,246,0.90); /* cream */
+}
 
-        .statement-table tbody tr:nth-child(odd) td {
-            background: rgba(255,255,255,0.55);
-        }
+.statement-table tbody tr:nth-child(even) td {
+    background: rgba(201,164,107,0.08); /* light gold */
+}
 
-        .statement-table tbody tr:hover td {
-            background: rgba(201,164,107,0.12);
-            transition: 0.2s;
-        }
+/* hover highlight */
+.statement-table tbody tr:hover td {
+    background: rgba(201,164,107,0.18);
+    transition: 0.2s;
+}
 
         .statement-table th:nth-child(1),
         .statement-table td:nth-child(1),
