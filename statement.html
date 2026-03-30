@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">tatement-table 
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -13,10 +13,8 @@
             --bg: #f7f4ed;
             --bg-2: #fdfbf6;
             --surface: rgba(255,255,255,0.78);
-            --surface-strong: rgba(255,255,255,0.92);
             --border: rgba(201,164,107,0.22);
             --text: #2f2a24;
-            --muted: #7d7468;
             --gold: #c9a46b;
             --gold-deep: #b18a52;
             --success: #2f9e6f;
@@ -30,195 +28,63 @@
         body {
             margin: 0; color: var(--text); padding: 16px; opacity: 0;
             transform: translateY(8px); transition: all 0.45s ease;
-            background: radial-gradient(circle at top left, rgba(201,164,107,0.12), transparent 24%),
-                        radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 24%),
-                        linear-gradient(135deg, var(--bg), var(--bg-2));
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
         }
 
         body.loaded { opacity: 1; transform: translateY(0); }
         .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; }
-        .glass { background: var(--surface); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .glass { background: var(--surface); backdrop-filter: blur(16px); border: 1px solid var(--border); box-shadow: var(--shadow); }
 
         .statement-header { border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: center; }
         .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
-        .statement-header h2 { margin: 0 0 8px; font-size: 20px; font-weight: 900; color: var(--text); }
-        #statement_date { font-size: 13px; font-weight: 900; color: var(--gold-deep); margin-top: 6px; }
+        
+        /* 🔥 أنيميشن الدفعات الجديدة */
+        @keyframes paymentHighlight {
+            0% { background: rgba(46,160,67,0.25); transform: scale(1.01); }
+            50% { background: rgba(46,160,67,0.10); }
+            100% { background: transparent; transform: scale(1); }
+        }
 
-        .year-head { padding: 18px 18px 10px; position: relative; display: flex; justify-content: center; align-items: center; }
-        .year-title { font-size: 34px; font-weight: 900; color: #a88349; text-align: center; }
+        .payment-new { animation: paymentHighlight 1.5s ease forwards; z-index: 10; position: relative; }
+        
+        /* توهج رقم الدفعة */
+        .payment-new td:nth-child(3) {
+            text-shadow: 0 0 6px rgba(46,160,67,0.5);
+            color: #2f9e6f !important;
+        }
+
         .year-status {
             position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
             padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 900;
-            background: rgba(201,164,107,0.10); border: 1px solid rgba(201,164,107,0.18);
         }
 
-.table-wrapper {
-    padding: 8px 12px 0;
-    overflow: hidden;
-    border-radius: 18px;
-}
+        .status-paid { background: rgba(47,158,111,0.12); color: #2f9e6f; border: 1px solid rgba(47,158,111,0.22); }
+        .status-partial { background: rgba(195,138,46,0.12); color: #c38a2e; border: 1px solid rgba(195,138,46,0.22); }
+        .status-late { background: rgba(204,90,80,0.12); color: #cc5a50; border: 1px solid rgba(204,90,80,0.22); }
 
-/* 🔥 الجدول */
-.statement-table { 
-    width: 100%; 
-    border-collapse: collapse;
-    table-layout: fixed; 
-    font-size: 11px; 
-    background: rgba(255,255,255,0.96); 
-}
+        .statement-table { width: 100%; border-collapse: collapse; font-size: 11px; background: rgba(255,255,255,0.9); table-layout: fixed; }
+        .statement-table th { background: #e9e2d5; color: #5f5345; padding: 12px 4px; font-weight: 900; }
+        .statement-table td { padding: 10px 4px; border: 1px solid rgba(201,164,107,0.15); text-align: center; word-break: break-word; }
 
-/* إزالة أي خلفية للصفوف */
-.statement-table tr {
-    background: transparent !important;
-}
+        /* تلوين الأعمدة */
+        .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; } /* مدين */
+        .statement-table td:nth-child(3) { color: var(--success); font-weight: 900; } /* دائن */
+        .statement-table td:nth-child(4) { font-weight: 900; color: #b0413e; } /* الرصيد */
 
-/* الأعمدة */
-.statement-table th:nth-child(1), .statement-table td:nth-child(1) { width: 18%; }
-.statement-table th:nth-child(2), .statement-table td:nth-child(2) { width: 16%; }
-.statement-table th:nth-child(3), .statement-table td:nth-child(3) { width: 16%; }
-.statement-table th:nth-child(4), .statement-table td:nth-child(4) { width: 16%; }
-.statement-table th:nth-child(5), .statement-table td:nth-child(5) { width: 20%; }
-.statement-table th:nth-child(6), .statement-table td:nth-child(6) { width: 14%; }
+        .year-card { border-radius: 26px; margin-bottom: 24px; background: #fff; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+        .year-head { padding: 20px; position: relative; text-align: center; }
+        .year-title { font-size: 32px; font-weight: 900; color: var(--gold-deep); }
 
-/* Header الأساسي */
-/* 🔥 Header موحّد */
-.statement-table th {
-    background: linear-gradient(
-        135deg,
-        rgba(201,164,107,0.75),
-        rgba(177,138,82,0.75)
-    );
-    color: #2f2a24; /* 🔥 نص أسود/غامق */
-    padding: 9px 4px;
-    font-weight: 900;
-    font-size: 10.5px;
-    border: none;
-    border-bottom: 2px solid rgba(201,164,107,0.4);
-    letter-spacing: 0.4px;
-}
-
-/* ❌ حذف كل th:nth-child (لا تستخدمها) */
-
-/* 🔥 Cells */
-.statement-table td {
-    padding: 8px 4px;
-    border: 1px solid rgba(201,164,107,0.10);
-    text-align: center;
-    color: var(--text);
-    vertical-align: middle;
-    font-size: 10px;
-    line-height: 1.4;
-    word-break: break-word;
-    background: rgba(247,244,237,0.6);
-}
-
-/* 🔥 إزالة zebra */
-.statement-table tr:nth-child(even),
-.statement-table tr:nth-child(odd) {
-    background: transparent !important;
-}
-
-/* 🔥 تلوين النص حسب الأعمدة */
-
-/* رقم السند */
-.statement-table td:nth-child(1) {
-    color: #8a673c;
-    font-weight: 900;
-}
-
-/* البيان */
-.statement-table td:nth-child(2) {
-    color: #5f5345;
-}
-
-/* الرصيد */
-.statement-table td:nth-child(3) {
-    color: #b0413e;
-    font-weight: 900;
-}
-
-/* دائن */
-.statement-table td:nth-child(4) {
-    color: #2f9e6f;
-    font-weight: 900;
-}
-
-/* مدين */
-.statement-table td:nth-child(5) {
-    color: #cc5a50;
-    font-weight: 900;
-}
-
-/* التاريخ */
-.statement-table td:nth-child(6) {
-    color: #7b6a55;
-    font-weight: 900;
-}
-
-/* الرصيد صفر */
-.balance-zero {
-    color: var(--success) !important;
-}
-
-/* 🔥 Chips */
-.table-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 58px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 900;
-    line-height: 1;
-    background: linear-gradient(135deg, rgba(201,164,107,0.18), rgba(177,138,82,0.12));
-    color: #7b5322;
-    border: 1px solid rgba(177,138,82,0.28);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
-    white-space: nowrap;
-}
-
-.statement-table td:nth-child(1) .table-chip { min-width: 74px; font-size: 10px; }
-.statement-table td:nth-child(6) .table-chip { min-width: 54px; font-size: 10px; }
-
-        .main-row td,
-.carry-row td,
-.last-row td {
-    background: rgba(247,244,237,0.6) !important;
-    font-weight: 900;
-}
-
-.last-row td {
-    border-top: 2px solid rgba(201,164,107,0.5);
-}
-
-
-        .last-row td { background: rgba(201,164,107,0.15) !important; font-weight: 900; border-top: 2px solid var(--gold-deep); }
-        .last-row td.balance-cell { color: var(--danger); font-size: 13px; }
-
-        .year-card { border-radius: 26px; margin-bottom: 24px; background: rgba(255,255,255,0.84); border: 1px solid rgba(201,164,107,0.22); box-shadow: var(--shadow); overflow: hidden; }
+        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; background: #fdfbf6; }
+        .year-summary-box { padding: 12px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
         
-        .year-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px 16px; }
-        .year-summary-box { background: rgba(201,164,107,0.08); border: 1px solid rgba(201,164,107,0.16); border-radius: 18px; padding: 12px; text-align: center; }
-        .year-summary-box span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; margin-bottom: 6px; }
-        .year-summary-box b { display: block; font-size: 15px; font-weight: 900; }
-
-        .year-summary-box.credit-box b { color: #2f9e6f; font-weight: 900; }
-        .year-summary-box.balance-box b { color: var(--danger); }
-
         .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; }
-        .back-btn { border: 1px solid var(--border); background: rgba(255,255,255,0.74); padding: 10px 15px; border-radius: 14px; font-size: 13px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .save-btn { color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); border: none; }
+        .back-btn { padding: 12px 20px; border-radius: 14px; font-weight: 900; cursor: pointer; border: 1px solid var(--border); background: #fff; }
+        .save-btn { background: var(--gold-deep); color: white; border: none; }
 
-        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg), var(--bg-2)); z-index: 9999; }
-        .spinner { width: 38px; height: 38px; border: 3px solid rgba(201,164,107,0.18); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media print {
-            body { background: #fff !important; padding: 0; opacity: 1 !important; transform: none !important; }
-            #loader, .bottom-actions { display: none !important; }
-            .year-card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
-        }
     </style>
 </head>
 <body>
@@ -226,13 +92,13 @@
     <div class="wrap">
         <div class="statement-header glass">
             <h1>مجمع جبري الصناعي التجاري</h1>
-            <h2 id="statement_tenant_name">اسم المستأجر</h2>
-            <p id="statement_date">—</p>
+            <h2 id="statement_tenant_name">-</h2>
+            <p id="statement_date">-</p>
         </div>
-        <div id="years_container" class="years-stack"></div>
+        <div id="years_container"></div>
         <div class="bottom-actions">
-            <button class="back-btn" onclick="goBack()"><i data-lucide="arrow-right"></i> رجوع</button>
-            <button class="back-btn save-btn" onclick="savePDF()"><i data-lucide="download"></i> حفظ PDF</button>
+            <button class="back-btn" onclick="window.history.back()">رجوع</button>
+            <button class="back-btn save-btn" onclick="savePDF()">حفظ PDF</button>
         </div>
     </div>
 
@@ -240,139 +106,106 @@
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const tenantCode = localStorage.getItem('jabri_tenant_code');
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const supabase = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
         function toNumber(v) { return parseFloat(v) || 0; }
-        function formatCurrency(v) { return Math.round(toNumber(v)).toString(); }
-        function formatDate(v) { return v ? new Date(v).toLocaleDateString('en-GB') : '-'; }
-        function formatDateTime(v) { return v ? new Date(v).toLocaleString('en-GB', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '-'; }
+        function formatCurrency(v) { return Math.round(v).toLocaleString(); }
 
-        function goBack() { window.history.back(); }
-        function savePDF() {
-            const element = document.querySelector('.wrap');
-            const name = document.getElementById('statement_tenant_name').innerText.replace(/\s+/g, '_');
-            html2pdf().set({ margin: 5, filename: `كشف_حساب_${name}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }}).from(element).save();
-        }
-        window.goBack = goBack; window.savePDF = savePDF;
+        async function init() {
+            if (!tenantCode) return;
+            try {
+                const { data: tenant } = await supabase.from('tenants').select('*').eq('tenant_code', tenantCode).single();
+                const { data: tx } = await supabase.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
 
-        function txRowHTML({ date, description, debit, credit, balance, receipt_no, isCarry = false, isLast = false }) {
-            const isMain = description?.includes('ايجار') || description?.includes('الإيجار') || description?.includes('معارف');
-            const isZero = Math.round(balance) === 0;
+                document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
+                document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${new Date().toLocaleDateString('ar-JO')}`;
 
-            return `
-                <tr class="${isCarry ? 'carry-row' : ''} ${isMain ? 'main-row' : ''} ${isLast ? 'last-row' : ''}">
-                    <td><span class="table-chip">${date || '-'}</span></td>
-                    <td>${debit ? formatCurrency(debit) : ''}</td>
-                    <td>${credit ? formatCurrency(credit) : ''}</td>
-                    <td class="balance-cell ${isZero ? 'balance-zero' : ''}">${formatCurrency(balance)}</td>
-                    <td style="text-align:right">${description || '-'}</td>
-                    <td><span class="table-chip">${receipt_no || '-'}</span></td>
-                </tr>
-            `;
+                render(toNumber(tenant.previous_balance), tx || []);
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+            } catch (e) { console.error(e); }
         }
 
-        function renderYears(previousBalance, transactions) {
+        function render(prevBal, transactions) {
             const container = document.getElementById('years_container');
-            container.innerHTML = '';
             const grouped = {};
-            transactions.forEach(r => {
-                const year = new Date(r.date).getFullYear();
-                if (!grouped[year]) grouped[year] = []; grouped[year].push(r);
+            transactions.forEach(t => {
+                const y = new Date(t.date).getFullYear();
+                if (!grouped[y]) grouped[y] = [];
+                grouped[y].push(t);
             });
 
-            const years = Object.keys(grouped).sort((a,b) => a - b);
-            let totalRunningCarry = toNumber(previousBalance);
-            const currentYear = new Date().getFullYear();
+            let runningTotal = prevBal;
+            const years = Object.keys(grouped).sort();
 
-            (years.length ? years : [currentYear]).forEach((year) => {
-                const yearRows = (grouped[year] || []).sort((a, b) => new Date(a.date) - new Date(b.date));
-                const openingBalance = totalRunningCarry;
-                const renderedItems = [];
-                let running = 0;
-
-                const openingRows = [];
-                const normalRows = [];
-
-                yearRows.forEach(row => {
-                    const desc = (row.description || '').trim();
-                    const rowDate = formatDate(row.date);
-                    const isOpeningYearItem = rowDate === `01/01/${year}` && (desc.includes('الإيجار') || desc.includes('ايجار') || desc.includes('معارف'));
-                    if (isOpeningYearItem) openingRows.push(row); else normalRows.push(row);
-                });
-
-                openingRows.forEach(row => {
-                    const d = toNumber(row.debit); const c = toNumber(row.credit);
-                    running += d - c;
-                    renderedItems.push({ date: formatDate(row.date), description: row.description, debit: d, credit: c, balance: running, receipt_no: row.receipt_no });
-                });
-
-                if (openingBalance > 0) {
-                    running += openingBalance;
-                    renderedItems.push({ date: '-', description: `رصيد متراكم`, debit: openingBalance, credit: 0, balance: running, receipt_no: '-', isCarry: true });
+            years.forEach((year, yearIdx) => {
+                const yearRows = grouped[year];
+                const items = [];
+                
+                if (runningTotal > 0) {
+                    items.push({ date: '-', description: 'رصيد مدور من سنوات سابقة', debit: runningTotal, credit: 0, balance: runningTotal, isCarry: true });
                 }
 
-                normalRows.forEach(row => {
-                    const d = toNumber(row.debit); const c = toNumber(row.credit);
-                    running += d - c;
-                    renderedItems.push({ date: formatDate(row.date), description: row.description, debit: d, credit: c, balance: running, receipt_no: row.receipt_no });
+                yearRows.forEach(r => {
+                    runningTotal += (toNumber(r.debit) - toNumber(r.credit));
+                    items.push({ ...r, balance: runningTotal });
                 });
 
-                const closingBalance = running;
-                totalRunningCarry = closingBalance;
-                const yearStatus = closingBalance <= 0 ? {text:'مسدد', className:'status-paid'} : {text:'غير مسدد', className:'status-unpaid'};
+                const totalCreditYear = yearRows.reduce((s, r) => s + toNumber(r.credit), 0);
+                let status = { text: 'متأخر', className: 'status-late' };
+                if (runningTotal <= 0) status = { text: 'مسدد', className: 'status-paid' };
+                else if (totalCreditYear > 0) status = { text: 'جزئي', className: 'status-partial' };
 
-                const card = document.createElement('section');
+                const card = document.createElement('div');
                 card.className = 'year-card';
                 card.innerHTML = `
                     <div class="year-head">
-                        <div class="year-status ${yearStatus.className}">${yearStatus.text}</div>
+                        <div class="year-status ${status.className}">${status.text}</div>
                         <div class="year-title">${year}</div>
                     </div>
-                    <div class="table-wrapper">
-                        <table class="statement-table">
-                            <thead><tr><th>التاريخ</th><th>مدين </th><th>دائن </th><th>الرصيد</th><th>البيان</th><th>رقم السند</th></tr></thead>
-                            <tbody>
-                                ${renderedItems.map((item, index) => {
-                                    return txRowHTML({
-                                        ...item,
-                                        isLast: index === renderedItems.length - 1
-                                    });
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="statement-table">
+                        <thead><tr><th>التاريخ</th><th>مدين</th><th>دائن</th><th>الرصيد</th><th>البيان</th><th>سند</th></tr></thead>
+                        <tbody id="body-${year}"></tbody>
+                    </table>
                     <div class="year-footer">
-                        <div class="year-summary-box credit-box">
-                            <span>دائن</span>
-                            <b>${formatCurrency(renderedItems.reduce((s, r) => s + toNumber(r.credit), 0))}</b>
-                        </div>
-                        <div class="year-summary-box balance-box">
-                            <span>رصيد السنة</span>
-                            <b>${formatCurrency(closingBalance)}</b>
-                        </div>
+                        <div class="year-summary-box"><span>واصل ${year}</span><br><b>${formatCurrency(totalCreditYear)}</b></div>
+                        <div class="year-summary-box"><span>رصيد الذمة</span><br><b>${formatCurrency(runningTotal)}</b></div>
                     </div>
                 `;
                 container.appendChild(card);
+
+                const tbody = document.getElementById(`body-${year}`);
+                
+                // 🔥 استخدام منطق الـ Index الجديد لتمييز آخر دفعة فقط
+                items.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    const isLastPayment = (index === items.length - 1) && (toNumber(item.credit) > 0);
+
+                    if (isLastPayment) {
+                        tr.classList.add('payment-new');
+                        setTimeout(() => tr.classList.remove('payment-new'), 1500);
+                    }
+
+                    tr.innerHTML = `
+                        <td>${item.date !== '-' ? new Date(item.date).toLocaleDateString('en-GB') : '-'}</td>
+                        <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
+                        <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
+                        <td>${formatCurrency(item.balance)}</td>
+                        <td style="text-align:right">${item.description}</td>
+                        <td>${item.receipt_no || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             });
         }
 
-        window.onload = async () => {
-            if (!tenantCode) return;
-            const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-            if (!tenant) return;
-            const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode).order('date', { ascending: true });
-            
-            document.getElementById('statement_tenant_name').innerText = tenant.tenant_name;
-            document.getElementById('statement_date').innerText = `تاريخ الإصدار: ${formatDateTime(new Date())}`;
-
-            renderYears(toNumber(tenant.previous_balance), tx || []);
-            document.getElementById('loader').style.display = 'none';
-            document.body.classList.add('loaded');
-            if (window.lucide) lucide.createIcons();
+        window.savePDF = () => {
+            const element = document.querySelector('.wrap');
+            html2pdf().set({ margin: 10, filename: 'kashf_hisab.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }}).from(element).save();
         };
+
+        init();
     </script>
 </body>
 </html>
