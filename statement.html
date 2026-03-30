@@ -62,9 +62,18 @@
         .statement-table th:nth-child(5), .statement-table td:nth-child(5) { width: 20%; }
         .statement-table th:nth-child(6), .statement-table td:nth-child(6) { width: 14%; }
 
-        .statement-table th { background: linear-gradient(135deg, rgba(201,164,107,0.90), rgba(177,138,82,0.90)); color: #fffdf8; padding: 8px 4px; font-weight: 900; border: 1px solid rgba(255,255,255,0.14); font-size: 10.5px; }
+        /* 4- Updated table th style (Transparent Minimalist) */
+        .statement-table th {
+            background: transparent;
+            color: #a88349;
+            padding: 10px 4px;
+            font-weight: 900;
+            font-size: 11px;
+            border: none;
+            border-bottom: 2px solid rgba(201,164,107,0.35);
+            letter-spacing: 0.4px;
+        }
         
-        /* 3- Updated Cell Padding */
         .statement-table td { padding: 8px 4px; border: 1px solid rgba(201,164,107,0.10); text-align: center; color: var(--text); vertical-align: middle; font-size: 10px; line-height: 1.4; word-break: break-word; }
 
         .statement-table td:nth-child(2) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
@@ -72,7 +81,6 @@
         .statement-table td:nth-child(4) { color: var(--danger); font-weight: 900; font-size: 9.5px; }
         .balance-zero { color: var(--success) !important; }
 
-        /* 1- Updated table-chip Style */
         .table-chip {
             display: inline-flex;
             align-items: center;
@@ -84,21 +92,14 @@
             font-weight: 900;
             line-height: 1;
             background: linear-gradient(135deg, rgba(201,164,107,0.18), rgba(177,138,82,0.12));
-            color: #7b5322; /* 4- Text color updated */
+            color: #7b5322;
             border: 1px solid rgba(177,138,82,0.28);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
             white-space: nowrap;
         }
 
-        /* 2- Chip specific sizes */
-        .statement-table td:nth-child(1) .table-chip {
-            min-width: 74px;
-            font-size: 10px;
-        }
-        .statement-table td:nth-child(6) .table-chip {
-            min-width: 54px;
-            font-size: 10px;
-        }
+        .statement-table td:nth-child(1) .table-chip { min-width: 74px; font-size: 10px; }
+        .statement-table td:nth-child(6) .table-chip { min-width: 54px; font-size: 10px; }
 
         .main-row td { background: rgba(201,164,107,0.10) !important; font-weight: 900; }
         .main-row td:nth-child(5) { font-weight: 900; color: #2f2a24; }
@@ -114,8 +115,11 @@
         .year-summary-box span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; margin-bottom: 6px; }
         .year-summary-box b { display: block; font-size: 15px; font-weight: 900; }
 
-        /* 5- Credit and Balance colored as Danger */
-        .year-summary-box.credit-box b,
+        /* 2- Updated Credit Box Color (Professional Green) */
+        .year-summary-box.credit-box b {
+            color: #2f9e6f; 
+            font-weight: 900;
+        }
         .year-summary-box.balance-box b {
             color: var(--danger);
         }
@@ -260,7 +264,7 @@
                     </div>
                     <div class="year-footer">
                         <div class="year-summary-box credit-box">
-                            <span>إجمالي المدفوع</span>
+                            <span>دائن</span>
                             <b>${formatCurrency(renderedItems.reduce((s, r) => s + toNumber(r.credit), 0))}</b>
                         </div>
                         <div class="year-summary-box balance-box">
