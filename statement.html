@@ -143,9 +143,16 @@
 .statement-table td:nth-child(1) .table-chip { min-width: 74px; font-size: 10px; }
 .statement-table td:nth-child(6) .table-chip { min-width: 54px; font-size: 10px; }
 
-        .main-row td { background: rgba(201,164,107,0.10) !important; font-weight: 900; }
-        .main-row td:nth-child(5) { font-weight: 900; color: #2f2a24; }
-        .carry-row td { background: rgba(201,164,107,0.08) !important; font-weight: 900; }
+        ..main-row td,
+.carry-row td {
+    background: rgba(201,164,107,0.05) !important; /* 🔥 نفس الدرجة */
+    font-weight: 900;
+}
+
+.main-row td:nth-child(5) {
+    font-weight: 900;
+    color: #2f2a24;
+}
 
         .last-row td { background: rgba(201,164,107,0.15) !important; font-weight: 900; border-top: 2px solid var(--gold-deep); }
         .last-row td.balance-cell { color: var(--danger); font-size: 13px; }
