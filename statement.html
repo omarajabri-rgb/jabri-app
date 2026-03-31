@@ -459,36 +459,39 @@
 
         /* PDF ONLY */
         #pdf_export_root {
-    position: absolute;
-    /* نستخدم إزاحة كبيرة بدلاً من opacity لضمان أن المحرك يرى العرض الكامل */
-    left: -5000px; 
+    position: fixed;
+    left: -99999px; /* 🔥 أبعده تماماً بدون مشاكل html2canvas */
     top: 0;
-    width: 794px; /* العرض الحقيقي للـ A4 */
+    width: 794px;
     background: #ffffff;
     z-index: -9999;
-    /* نلغي opacity 0 هنا لأنها بتسبب مشاكل في الرؤية لبعض المتصفحات */
-    opacity: 1; 
+
+    opacity: 1;
     pointer-events: none;
     overflow: visible;
 }
 
 #pdf_export_root .pdf-sheet {
     width: 794px;
-    /* الارتفاع الأدنى يضمن عدم قص الصفحة */
-    min-height: 1123px; 
-    padding: 40px 35px; /* هوامش أكبر لتعطي فخامة في الطباعة */
+    min-height: 1123px;
+    padding: 40px 35px;
     background: #ffffff;
     color: #2f2a24;
     direction: rtl;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
+
+    display: block; /* 🔥 مهم بدل flex عشان مشاكل القص */
     box-sizing: border-box;
+
     page-break-after: always;
+    break-after: page;
 }
 
-/* 🎯 إجبار الـ wrap على أخذ العرض الكامل داخل الـ PDF */
+#pdf_export_root .pdf-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
+
+/* 🔥 تثبيت العرض بالكامل */
 #pdf_export_root .wrap {
     width: 100% !important;
     max-width: 100% !important;
@@ -497,41 +500,45 @@
     display: block !important;
 }
 
+/* 🔥 جدول ثابت بدون انضغاط */
 #pdf_export_root .statement-table {
     width: 100% !important;
-    /* fixed تضمن أن النسب المئوية التي اخترتها تملأ الـ 794px بالكامل */
-    table-layout: fixed !important; 
+    table-layout: fixed !important;
     border-collapse: collapse !important;
-    border: 1px solid #d8c9af !important; 
+    border: 1px solid #d8c9af !important;
     margin-bottom: 20px;
 }
 
 #pdf_export_root .statement-table th,
 #pdf_export_root .statement-table td {
-    font-size: 11px !important; /* تكبير بسيط للوضوح */
-    padding: 8px 6px !important; /* مساحات تنفس للأرقام */
+    font-size: 11px !important;
+    padding: 8px 6px !important;
     line-height: 1.3 !important;
     border: 1px solid #eee !important;
     word-wrap: break-word;
 }
 
-/* 🟢 توزيع الأعمدة الذهبي (يملأ العرض الآن) */
-#pdf_export_root .statement-table th:nth-child(5) { width: 30%; } /* البيان */
+/* 🔥 توزيع الأعمدة */
+#pdf_export_root .statement-table th:nth-child(5) { width: 30%; }
 #pdf_export_root .statement-table th:nth-child(1),
-#pdf_export_root .statement-table th:nth-child(6) { width: 12%; } /* التاريخ والسند */
+#pdf_export_root .statement-table th:nth-child(6) { width: 12%; }
+
 #pdf_export_root .statement-table th:nth-child(2),
 #pdf_export_root .statement-table th:nth-child(3),
-#pdf_export_root .statement-table th:nth-child(4) { width: 15.33%; } /* المبالغ */
+#pdf_export_root .statement-table th:nth-child(4) { width: 15.33%; }
 
+/* 🔥 أهم إصلاح: السماح بتقسيم الجدول */
 #pdf_export_root .year-card {
     background: #ffffff !important;
     border: 1px solid #d8c9af !important;
     margin-bottom: 30px;
     width: 100% !important;
-    page-break-inside: avoid; /* يمنع انقسام السنة الواحدة بين صفحتين */
-    display: block !important;
+
+    break-inside: auto !important;
+    page-break-inside: auto !important;
 }
 
+/* 🔥 الهيدر */
 #pdf_export_root .statement-header {
     background: #ffffff !important;
     border: 2px solid #c9a46b !important;
@@ -540,12 +547,18 @@
     text-align: center;
 }
 
-/* تحسين الألوان لتبدو رسمية جداً */
+/* 🔥 ألوان رسمية للطباعة */
 #pdf_export_root .statement-table tbody tr:nth-child(odd) td {
     background: #fdfbf6 !important;
 }
 #pdf_export_root .statement-table tbody tr:nth-child(even) td {
     background: #ffffff !important;
+}
+
+/* 🔥 إخفاء عناصر ما بدنا ياها */
+#pdf_export_root .bottom-actions,
+#pdf_export_root #loader {
+    display: none !important;
 }
 </head>
 <body>
