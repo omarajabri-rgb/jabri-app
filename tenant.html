@@ -136,6 +136,34 @@
             font-weight: 800;
         }
 
+        /* 🔥 Chip System */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            min-width: 110px; /* 🔥 توحيد الحجم */
+            color: #fff;
+            background: linear-gradient(135deg, #c9a46b, #b18a52);
+            box-shadow: 0 6px 16px rgba(201,164,107,0.25);
+            transition: all 0.25s ease;
+        }
+
+        .chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(201,164,107,0.35);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: flex-end; /* 🔥 يمين */
+            margin-bottom: 12px;
+        }
+
         .stats-grid, .chart-grid {
             display: grid;
             gap: 16px;
@@ -160,10 +188,10 @@
         .stat-card span {
             display: block;
             color: #7a6c59;
-            font-size: 14px;   /* 🔥 كبرنا النص */
-            font-weight: 900;  /* 🔥 صار أوضح */
+            font-size: 14px;
+            font-weight: 900;
             margin-bottom: 6px;
-            letter-spacing: 0.5px; /* لمسة فخمة */
+            letter-spacing: 0.5px;
         }
 
         .stat-card b {
@@ -177,53 +205,14 @@
             margin-bottom: 16px;
         }
 
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 16px;
-            border-radius: 999px;
-            font-size: 13px;          /* 🔥 أكبر */
-            font-weight: 900;
-            color: #fff;
-            background: linear-gradient(135deg, #c9a46b, #b18a52);
-            box-shadow: 0 6px 16px rgba(201,164,107,0.25);
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            transition: all 0.25s ease;
-        }
-
-        .tag:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 22px rgba(201,164,107,0.35);
-        }
-
         .smart-body {
-            font-size: 16px;       /* 🔥 أكبر */
+            font-size: 16px;
             line-height: 1.9;
             font-weight: 800;
             color: var(--text);
         }
 
         .panel { padding: 18px; }
-
-        .panel-header {
-            display: flex;
-            justify-content: flex-end; /* 🔥 يمين + فخم */
-            margin-bottom: 10px;
-        }
-
-        .panel-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 18px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            color: #fff;
-            background: linear-gradient(135deg, #c9a46b, #b18a52);
-            box-shadow: 0 6px 16px rgba(201,164,107,0.25);
-        }
 
         .panel-note {
             text-align: center;
@@ -245,8 +234,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 14px 16px;
-            border-radius: 999px; /* 🔥 chip */
-            font-size: 14px;      /* 🔥 أكبر */
+            border-radius: 999px;
+            font-size: 14px;
             font-weight: 900;
             background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(247,244,237,0.8));
             border: 1px solid rgba(201,164,107,0.20);
@@ -344,7 +333,7 @@
 
         <div class="smart-card reveal">
             <div class="smart-header">
-                <div class="tag">نصيحة محاسبية</div>
+                <div class="chip">نصيحة محاسبية</div>
             </div>
             <div id="smart_message" class="smart-body">جاري التحليل...</div>
         </div>
@@ -352,17 +341,16 @@
         <div class="chart-grid">
             <section class="panel reveal">
                 <div class="panel-header">
-                    <div class="panel-chip">ملخص الحساب</div>
+                    <div class="chip">ملخص الحساب</div>
                 </div>
-                <div id="collection_note" class="panel-note">-</div>
-                <div class="chart-wrap">
+                <div id="collection_note" class="panel-note"></div> <div class="chart-wrap">
                     <canvas id="balancePieChart"></canvas>
                 </div>
             </section>
 
             <section class="panel reveal">
                 <div class="panel-header">
-                    <div class="panel-chip">إشعارات</div>
+                    <div class="chip">إشعارات</div>
                 </div>
                 <div id="notifications_box">
                     <div class="notify-item">لا توجد إشعارات حالياً</div>
@@ -395,6 +383,12 @@
             return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
         }
 
+        // 🔥 دالة النصيحة اليدوية (يجب تعريفها لاحقاً أو استبدالها بالمنطق المطلوب)
+        function getManualAdvice(code) {
+             // يمكنك لاحقاً ربط هذا بجدول في قاعدة البيانات أو منطق شرطي هنا
+             return "جاري تحليل البيانات المالية لتقديم النصيحة الدقيقة...";
+        }
+
         async function init() {
             try {
                 const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
@@ -416,26 +410,19 @@
                 document.getElementById('val_credit').innerText = formatCurrency(daen2026);
                 document.getElementById('val_balance').innerText = formatCurrency(balance2026);
 
-                document.getElementById('smart_message').innerText = balance2026 === 0
-                    ? "لا توجد ذمم مالية معلقة لعام 2026، حسابك مسدد بالكامل ونشكركم على التزامكم."
-                    : "يتطلب الحساب سداد الرصيد المتبقي لإغلاق سنة 2026 مالياً وتجنب تراكم الذمم.";
+                // 🔥 تطبيق دالة النصيحة اليدوية
+                document.getElementById('smart_message').innerText = getManualAdvice(tenantCode);
 
                 const noteEl = document.getElementById('collection_note');
-                if (balance2026 === 0) {
-                    noteEl.innerText = 'مسدد بالكامل';
-                    noteEl.style.color = '#2f9e6f';
-                } else {
-                    noteEl.innerText = 'سداد جزئي';
-                    noteEl.style.color = '#c38a2e';
-                }
+                noteEl.innerText = ''; // 🔥 تفريغ النص التلقائي
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['رصيد', 'دائن'], /* 🔥 الترتيب الجديد */
+                        labels: ['رصيد', 'دائن'],
                         datasets: [{
-                            data: [balance2026, daen2026], /* 🔥 الترتيب الجديد */
-                            backgroundColor: ['#c95a52', '#2f9e6f'], /* 🔥 التلوين الجديد */
+                            data: [balance2026, daen2026],
+                            backgroundColor: ['#c95a52', '#2f9e6f'],
                             borderWidth: 0
                         }]
                     },
@@ -468,7 +455,6 @@
                 console.error(e);
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
-                alert('خطأ في الاتصال بقاعدة البيانات.');
             }
         }
 
