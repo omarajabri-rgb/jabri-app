@@ -963,21 +963,22 @@
     };
 
     try {
-        await new Promise(resolve => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(resolve);
-            });
+    await new Promise(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(resolve);
         });
+    });
 
-        await html2pdf().set(opt).from(pdfRoot).save();
-    } catch (error) {
-        console.error('PDF export failed:', error);
-        alert('حدث خطأ أثناء إنشاء PDF');
-    } finally {
-        pdfRoot.classList.remove('exporting');
-        pdfRoot.innerHTML = '';
-    }
-};
+    await html2pdf().set(opt).from(pdfContent).save();
+
+} catch (error) { 
+    console.error('PDF export failed:', error);
+    alert('حدث خطأ أثناء إنشاء PDF');
+
+} finally {
+    pdfRoot.classList.remove('exporting');
+    pdfRoot.innerHTML = '';
+}
 
 init();
     </script>
