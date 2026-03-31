@@ -165,14 +165,14 @@
             min-width: 120px;
             color: #fff;
             background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 6px 16px rgba(201,164,107,0.25);
+            box-shadow: 0 8px 20px rgba(201,164,107,0.35);
         }
 
         .stats-grid,
         .content-grid {
             display: grid;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 22px;
+            margin-bottom: 22px;
         }
 
         .stats-grid {
@@ -190,11 +190,16 @@
             border: 1px solid rgba(201,164,107,0.18);
             background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
             box-shadow: var(--soft-shadow);
+        }
+
+        .smart-card, .panel {
             padding: 24px;
+            margin-bottom: 22px;
         }
 
         .soft-card {
             text-align: center;
+            padding: 24px;
         }
 
         .soft-card span {
@@ -238,6 +243,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 10px;
+        }
+
+        #notifications_box {
+            margin-top: 6px;
         }
 
         .notify-item {
@@ -250,8 +260,9 @@
             text-align: center;
             color: var(--muted);
             width: 100%;
+            max-width: 90%;
+            margin: 10px auto 0;
             box-shadow: 0 6px 16px rgba(120,95,56,0.08);
-            margin-top: 10px;
             line-height: 1.7;
         }
 
@@ -327,30 +338,11 @@
             transform: translateY(0);
         }
 
-        @media screen and (max-width: 900px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .hero-card h1 {
-                font-size: 24px;
-                padding-left: 90px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .soft-card b {
-                font-size: 24px;
-            }
+            body { padding: 10px; }
+            .hero-card h1 { font-size: 24px; padding-left: 90px; }
+            .stats-grid { gap: 12px; }
+            .soft-card b { font-size: 24px; }
         }
     </style>
 </head>
@@ -429,12 +421,19 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function toNumber(v) {
-            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-        }
+        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
 
-        function formatCurrency(v) {
-            return `${Math.round(toNumber(v)).toLocaleString('en-US')} `;
+        function animateNumber(element, endValue, duration = 800) {
+            let start = 0;
+            const startTime = performance.now();
+            function update(currentTime) {
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const value = Math.floor(progress * endValue);
+                element.innerText = value.toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
+                else element.innerText = endValue.toLocaleString('en-US');
+            }
+            requestAnimationFrame(update);
         }
 
         function formatNow() {
@@ -444,16 +443,8 @@
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                const { data: tx } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode);
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
 
                 const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
                 const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
@@ -468,27 +459,19 @@
                 chip.innerText = balance2026 === 0 ? 'مسدد' : 'جزئي';
                 chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
-                document.getElementById('val_credit').innerText = formatCurrency(daen2026);
-                document.getElementById('val_balance').innerText = formatCurrency(balance2026);
+                animateNumber(document.getElementById('val_credit'), Math.round(daen2026));
+                animateNumber(document.getElementById('val_balance'), Math.round(balance2026));
 
                 const storedAdvice = localStorage.getItem(`advice_${tenantCode}`);
-                if (storedAdvice) {
-                    document.getElementById('smart_message').innerText = storedAdvice;
-                }
+                if (storedAdvice) document.getElementById('smart_message').innerText = storedAdvice;
 
                 const rawNotification = localStorage.getItem(`notify_${tenantCode}`);
                 if (rawNotification) {
                     try {
                         const notification = JSON.parse(rawNotification);
                         const typeClass = notification.type === 'friendly' ? 'good' : 'warn';
-                        document.getElementById('notifications_box').innerHTML = `
-                            <div class="notify-item ${typeClass}">${notification.message}</div>
-                        `;
-                    } catch (e) {
-                        document.getElementById('notifications_box').innerHTML = `
-                            <div class="notify-item">لا توجد إشعارات حالياً</div>
-                        `;
-                    }
+                        document.getElementById('notifications_box').innerHTML = `<div class="notify-item ${typeClass}">${notification.message}</div>`;
+                    } catch (e) { }
                 }
 
                 new Chart(document.getElementById('balancePieChart'), {
@@ -505,17 +488,7 @@
                         cutout: '78%',
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    boxWidth: 10,
-                                    color: '#5d5347',
-                                    font: { family: 'Tajawal', weight: '700' }
-                                }
-                            }
-                        }
+                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, color: '#5d5347', font: { family: 'Tajawal', weight: '700' } } } }
                     },
                     plugins: [{
                         id: 'centerText',
@@ -539,18 +512,11 @@
             } catch (e) {
                 console.error(e);
                 document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
             }
         }
 
-        function goToStatement() {
-            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
+        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
         window.onload = init;
     </script>
