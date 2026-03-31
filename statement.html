@@ -693,7 +693,13 @@
 
     return new Date(a.date) - new Date(b.date);
 });
-                let items = calculateRunningBalance(yearRows, carryBalance);
+
+                const hasCarryRow = yearRows.some(r => isCarryRow(r.description));
+
+let items = calculateRunningBalance(
+    yearRows,
+    hasCarryRow ? 0 : carryBalance
+);
 
                 items = items.map((item, idx) => {
                     const desc = (item.description || '').trim();
