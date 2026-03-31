@@ -43,234 +43,62 @@
             50% { transform: scale(1.035); }
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            color: var(--text);
+            margin: 0; min-height: 100vh; color: var(--text);
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            padding: 16px;
-            opacity: 0;
-            transition: opacity 0.45s ease, background 0.5s ease;
-            overflow-x: hidden;
+            padding: 16px; opacity: 0; transition: opacity 0.45s ease, background 0.5s ease; overflow-x: hidden;
         }
 
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: inherit;
-            z-index: 9999;
-        }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: inherit; z-index: 9999; }
+        .spinner { width: 42px; height: 42px; border: 3px solid rgba(201,164,107,0.18); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .spinner {
-            width: 42px;
-            height: 42px;
-            border: 3px solid rgba(201,164,107,0.18);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+        .app { max-width: 1100px; margin: 0 auto; padding-bottom: 42px; position: relative; z-index: 1; }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .reveal { opacity: 0; transform: translateY(16px); }
+        .reveal.active { animation: fadeUpSoft 0.65s cubic-bezier(.2,.8,.2,1) forwards; }
 
-        .app {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-            position: relative;
-            z-index: 1;
-        }
+        .glass { background: var(--surface); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--card-border); box-shadow: var(--shadow); }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(16px);
-        }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
+        .brand small { font-size: 11px; letter-spacing: 1.8px; color: var(--muted); font-weight: 800; display: block; }
 
-        .reveal.active {
-            animation: fadeUpSoft 0.65s cubic-bezier(.2,.8,.2,1) forwards;
+        .hero-card { 
+            border-radius: var(--radius-xl); padding: 26px; margin-bottom: 16px; 
+            display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
         }
+        .hero-title { font-size: 30px; font-weight: 900; color: var(--gold-deep); letter-spacing: 0.5px; margin: 0; }
+        #account_status_chip { align-self: flex-start; animation: badgeBreath 2.2s ease-in-out infinite; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
+        .stats-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1fr; }
+        .stat-card { 
+            border-radius: var(--radius-lg); padding: 18px; background: var(--surface-strong); 
+            text-align: center; position: relative; overflow: hidden; 
         }
+        .stat-card span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 8px; letter-spacing: 0.3px; }
+        .stat-card b { display: block; font-size: 24px; font-weight: 900; }
 
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
+        .stat-card.is-paid b { color: #2f9e6f; animation: softPop 1.2s ease; }
 
-        .brand strong {
-            color: var(--gold-deep);
-            font-size: 18px;
-            font-weight: 900;
-        }
+        .chart-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1.35fr; }
+        .panel { border-radius: var(--radius-lg); padding: 18px; }
+        .chart-wrap { position: relative; min-height: 290px; display: flex; align-items: center; justify-content: center; }
 
-        .brand small {
-            font-size: 11px;
-            letter-spacing: 1.8px;
-            color: var(--muted);
-            font-weight: 800;
-            display: block;
-        }
+        .smart-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1fr; }
+        .smart-card { border-radius: var(--radius-lg); padding: 12px; font-size: 13px; }
+        .tag { display: inline-flex; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; color: #fff; margin-bottom: 10px; }
 
-        .hero-card {
-            border-radius: var(--radius-xl);
-            padding: 26px;
-            margin-bottom: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            text-align: center;
-        }
+        .btn { width: 100%; padding: 17px; border-radius: 18px; border: none; font-size: 15px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-gold { color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); box-shadow: 0 10px 20px rgba(201,164,107,0.2); }
 
-        .hero-title {
-            font-size: 30px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            letter-spacing: 0.5px;
-            margin: 0;
-        }
+        .ghost-btn { border: 1px solid var(--card-border); background: rgba(255,255,255,0.5); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 6px; }
 
-        #account_status_chip {
-            align-self: flex-start;
-            animation: badgeBreath 2.2s ease-in-out infinite;
-        }
-
-        .stats-grid {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 16px;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .stat-card {
-            border-radius: var(--radius-lg);
-            padding: 18px;
-            background: var(--surface-strong);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: 0.3px;
-        }
-
-        .stat-card b {
-            display: block;
-            font-size: 24px;
-            font-weight: 900;
-        }
-
-        .stat-card.is-paid b {
-            color: #2f9e6f;
-            animation: softPop 1.2s ease;
-        }
-
-        .chart-grid {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 16px;
-            grid-template-columns: 1fr 1.35fr;
-        }
-
-        .panel {
-            border-radius: var(--radius-lg);
-            padding: 18px;
-        }
-
-        .chart-wrap {
-            position: relative;
-            min-height: 290px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .smart-grid {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 16px;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .smart-card {
-            border-radius: var(--radius-lg);
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .tag {
-            display: inline-flex;
-            padding: 7px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 17px;
-            border-radius: 18px;
-            border: none;
-            font-size: 15px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-gold {
-            color: #fff;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 10px 20px rgba(201,164,107,0.2);
-        }
-
-        .ghost-btn {
-            border: 1px solid var(--card-border);
-            background: rgba(255,255,255,0.5);
-            padding: 8px 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 800;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        @media (max-width: 800px) {
-            .stats-grid,
-            .chart-grid,
-            .smart-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 800px) { 
+            .chart-grid, .smart-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -291,9 +119,6 @@
         <section class="hero-card glass reveal">
             <span id="account_status_chip" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:900; color:#fff;">-</span>
             <h1 id="t_name" class="hero-title">...</h1>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <div style="font-size:12px; font-weight:800; color:var(--muted);"><i data-lucide="calendar"></i> حساب سنة 2026</div>
-            </div>
         </section>
 
         <div class="stats-grid">
@@ -313,10 +138,14 @@
                 <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
                 <div id="collection_note" style="text-align:center; margin-top:10px; font-size:13px; color:#7d7468; font-weight:800;">-</div>
             </section>
-
+            
             <section class="panel glass reveal">
-                <div style="font-weight:900; font-size:17px; margin-bottom:15px;">حركة الدفعات</div>
-                <div class="chart-wrap" id="line_chart_container"><canvas id="paymentLineChart"></canvas></div>
+                <div style="font-weight:900; font-size:17px; margin-bottom:15px;">إشعارات</div>
+                <div id="notifications_box" style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="glass" style="padding:12px; border-radius:16px; font-size:13px; font-weight:800; color:var(--text);">
+                        لا توجد إشعارات حالياً.
+                    </div>
+                </div>
             </section>
         </div>
 
@@ -325,9 +154,8 @@
                 <div class="tag">الحالة المالية</div>
                 <div id="smart_message" style="font-weight:700;">جاري التحليل...</div>
             </section>
-
             <section class="smart-card glass reveal" id="advice_box">
-                <div class="tag" style="background:#5f89c5">التوصية</div>
+                <div class="tag" style="background:var(--info)">التوصية</div>
                 <div id="advice_message" style="font-weight:700;">جاري الإعداد...</div>
             </section>
         </div>
@@ -346,19 +174,15 @@
         if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
         let transactions = [];
 
-        function toNumber(v) {
-            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-        }
-
+        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
+        
+        // التحديث الجديد لتنسيق العملة (أرقام صحيحة)
         function formatCurrency(v) {
-            return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3 })} د.أ`;
+            return `${Math.round(toNumber(v)).toLocaleString('en-US')} `;
         }
 
         function goToStatement() {
@@ -382,22 +206,16 @@
             const el = document.getElementById(id);
             const duration = 1200;
             let startTime = null;
-
-            function easeOutCubic(t) {
-                return 1 - Math.pow(1 - t, 3);
-            }
-
+            function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
             function step(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const raw = Math.min((timestamp - startTime) / duration, 1);
                 const progress = easeOutCubic(raw);
-                const current = end * progress;
+                const current = 0 + (end - 0) * progress;
                 el.textContent = formatCurrency(current);
-
                 if (raw < 1) requestAnimationFrame(step);
                 else el.textContent = formatCurrency(end);
             }
-
             requestAnimationFrame(step);
         }
 
@@ -421,85 +239,48 @@
                 }],
                 data: {
                     labels: ['المدفوع', 'المتبقي'],
-                    datasets: [{
-                        data: [paid, Math.max(0, balance)],
-                        backgroundColor: ['#2f9e6f', '#cc5a50'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: [paid, Math.max(0, balance)], backgroundColor: ['#2f9e6f', '#cc5a50'], borderWeight: 0 }]
                 },
                 options: {
-                    cutout: '75%',
-                    responsive: true,
+                    cutout: '75%', 
+                    responsive: true, 
                     maintainAspectRatio: false,
                     animation: { animateRotate: true, duration: 1200 },
                     plugins: { legend: { position: 'bottom' } }
                 }
             });
-
-            const creditTx = transactions.filter(t => new Date(t.date).getFullYear() === 2026 && toNumber(t.credit) > 0);
-
-            if (creditTx.length <= 1) {
-                document.getElementById('line_chart_container').innerHTML =
-                    '<div style="text-align:center; padding:30px; color:#7d7468; font-weight:800;">لا يوجد بيانات كافية لعرض الرسم</div>';
-            } else {
-                new Chart(document.getElementById('paymentLineChart'), {
-                    type: 'line',
-                    data: {
-                        labels: creditTx.map(t => new Date(t.date).toLocaleDateString('ar-JO')),
-                        datasets: [{
-                            label: 'دفعة',
-                            data: creditTx.map(t => toNumber(t.credit)),
-                            borderColor: '#c9a46b',
-                            tension: 0.4,
-                            fill: true,
-                            backgroundColor: 'rgba(201,164,107,0.1)'
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
         }
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                const { data: tx } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode);
-
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
+                
                 transactions = tx || [];
-
-                const tx2026 = transactions.filter(t => {
-                    const d = new Date(t.date);
-                    return d.getFullYear() === 2026;
-                });
-
-                const totalDebit = tx2026.reduce((s, t) => s + toNumber(t.debit), 0);
-                const totalCredit = tx2026.reduce((s, t) => s + toNumber(t.credit), 0);
-
+                const totalDebit = transactions.reduce((s,t)=>s+toNumber(t.debit), 0);
+                const totalCredit = transactions.reduce((s,t)=>s+toNumber(t.credit), 0);
+                
                 const daen = totalCredit;
                 const balance = Math.max(0, totalDebit - totalCredit);
                 const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 100;
 
-                document.body.style.background = balance === 0
-                    ? 'linear-gradient(135deg,#edf7f1,#f6fff9)'
-                    : 'linear-gradient(135deg,#f7f4ed,#fdfbf6)';
-
-                document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
-
+                // تحديث الخلفية والاسم
+                document.body.style.background = balance === 0 ? 'linear-gradient(135deg,#edf7f1,#f6fff9)' : 'linear-gradient(135deg,#f7f4ed,#fdfbf6)';
+                document.getElementById('t_name').innerText = tenant.tenant_name;
+                
+                // تحديث الـ Status Chip الجديد
                 const chip = document.getElementById('account_status_chip');
-                chip.innerText = balance === 0 ? 'منتظم' : 'متابعة';
-                chip.style.background = balance === 0 ? '#2f9e6f' : '#cc5a50';
+                if (balance === 0) {
+                    chip.innerText = 'مسدد';
+                    chip.style.background = 'linear-gradient(135deg, #39a97b, #2f9e6f)';
+                } else {
+                    chip.innerText = 'جزئي';
+                    chip.style.background = 'linear-gradient(135deg, #d96a60, #cc5a50)';
+                }
 
+                // تحديث المبالغ والألوان
                 document.getElementById('val_credit').style.color = '#2f9e6f';
                 const balanceEl = document.getElementById('val_balance');
-
                 if (balance === 0) {
                     balanceEl.style.color = '#2f9e6f';
                     document.querySelector('.stat-card.is-balance').style.boxShadow = '0 0 25px rgba(47,158,111,0.2)';
@@ -507,42 +288,45 @@
                     balanceEl.style.color = '#cc5a50';
                 }
 
-                document.getElementById('collection_note').innerText =
-                    `نسبة السداد الحالية تشير إلى حالة حساب ${collectionRate > 70 ? 'مستقرة' : 'تحتاج متابعة'}`;
+                // تحديث نظام الإشعارات الجديد
+                const notificationsBox = document.getElementById('notifications_box');
+                if (notificationsBox) {
+                    if (balance === 0) {
+                        notificationsBox.innerHTML = `
+                            <div class="glass" style="padding:12px; border-radius:16px; font-size:13px; font-weight:800; color:#2f9e6f;">
+                                حسابك مسدد بالكامل، لا توجد إشعارات مستحقة.
+                            </div>
+                        `;
+                    } else {
+                        notificationsBox.innerHTML = `
+                            <div class="glass" style="padding:12px; border-radius:16px; font-size:13px; font-weight:800; color:#cc5a50;">
+                                يوجد رصيد مستحق بقيمة ${formatCurrency(balance)}، يرجى المتابعة مع الإدارة.
+                            </div>
+                            <div class="glass" style="padding:12px; border-radius:16px; font-size:12px; font-weight:800; color:var(--muted);">
+                                آخر تحديث تم على حسابك اليوم.
+                            </div>
+                        `;
+                    }
+                }
 
-                document.getElementById('footer_year').innerText =
-                    `© 2026 مجمع الجبري الصناعي التجاري`;
+                document.getElementById('collection_note').innerText = `نسبة السداد الحالية تشير إلى حالة حساب ${collectionRate > 70 ? 'مستقرة' : 'تحتاج متابعة'}`;
+                document.getElementById('footer_year').innerText = `© 2026 مجمع الجبري الصناعي التجاري`;
 
                 animateValue('val_credit', daen);
                 animateValue('val_balance', balance);
                 buildCharts(daen, balance, collectionRate);
 
-                document.getElementById('smart_message').innerText =
-                    balance === 0
-                        ? "الحساب مسدد بالكامل لعام 2026."
-                        : `يوجد رصيد مستحق بقيمة ${formatCurrency(balance)}.`;
-
-                document.getElementById('advice_message').innerText =
-                    balance === 0
-                        ? "شكراً لالتزامكم المميز."
-                        : "يرجى مراجعة الإدارة لتسوية الرصيد المتبقي.";
+                document.getElementById('smart_message').innerText = balance === 0 ? "لا توجد ذمم مالية معلقة لعام 2026." : "يتطلب الحساب سداد الرصيد المتبقي لإغلاق السنة مالياً.";
+                document.getElementById('advice_message').innerText = balance === 0 ? "حسابك منتظم تماماً." : "يمكنك سداد المبلغ المتبقي عبر مكتب الإدارة أو التحويل البنكي.";
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.style.opacity = '1';
                 activateReveal();
                 if (window.lucide) lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.style.opacity = '1';
-                alert('خطأ في الاتصال بقاعدة البيانات.');
-            }
+            } catch (e) { console.error(e); }
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
         window.onload = init;
     </script>
