@@ -459,22 +459,24 @@
 
         /* PDF ONLY */
         #pdf_export_root {
-    position: fixed;
-    /* نضعه بعيداً جداً عن العين لضمان عدم تداخله مع واجهة المستخدم */
-    left: -2000px; 
+    position: absolute;
+    /* نستخدم إزاحة كبيرة بدلاً من opacity لضمان أن المحرك يرى العرض الكامل */
+    left: -5000px; 
     top: 0;
-    width: 794px; /* العرض الثابت لـ A4 */
+    width: 794px; /* العرض الحقيقي للـ A4 */
     background: #ffffff;
     z-index: -9999;
-    opacity: 0;
+    /* نلغي opacity 0 هنا لأنها بتسبب مشاكل في الرؤية لبعض المتصفحات */
+    opacity: 1; 
     pointer-events: none;
-    overflow: visible; /* نغيره لـ visible لكي يقرأ المحرك الصفحات التالية */
+    overflow: visible;
 }
 
 #pdf_export_root .pdf-sheet {
     width: 794px;
-    height: 1123px; /* تحديد الارتفاع بدقة يمنع مشكلة "نصف الصفحة" */
-    padding: 30px 25px; /* هوامش احترافية للطباعة */
+    /* الارتفاع الأدنى يضمن عدم قص الصفحة */
+    min-height: 1123px; 
+    padding: 40px 35px; /* هوامش أكبر لتعطي فخامة في الطباعة */
     background: #ffffff;
     color: #2f2a24;
     direction: rtl;
@@ -483,68 +485,68 @@
     justify-content: flex-start;
     align-items: stretch;
     box-sizing: border-box;
-    position: relative;
     page-break-after: always;
-    break-after: page;
 }
 
-#pdf_export_root .pdf-sheet:last-child {
-    page-break-after: auto;
-    break-after: auto;
+/* 🎯 إجبار الـ wrap على أخذ العرض الكامل داخل الـ PDF */
+#pdf_export_root .wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
 }
 
-/* تعديل الجداول لضمان عدم القص */
 #pdf_export_root .statement-table {
     width: 100% !important;
-    table-layout: fixed;
+    /* fixed تضمن أن النسب المئوية التي اخترتها تملأ الـ 794px بالكامل */
+    table-layout: fixed !important; 
     border-collapse: collapse !important;
-    /* إضافة حدود صريحة للطباعة */
     border: 1px solid #d8c9af !important; 
+    margin-bottom: 20px;
 }
 
 #pdf_export_root .statement-table th,
 #pdf_export_root .statement-table td {
-    font-size: 10.5px !important;
-    padding: 6px 4px !important;
-    line-height: 1.25 !important;
-    border: 0.5px solid #eee !important; /* حدود خفيفة جداً */
-    word-wrap: break-word; /* يمنع خروج النص عن العمود */
+    font-size: 11px !important; /* تكبير بسيط للوضوح */
+    padding: 8px 6px !important; /* مساحات تنفس للأرقام */
+    line-height: 1.3 !important;
+    border: 1px solid #eee !important;
+    word-wrap: break-word;
 }
 
-/* 🟢 تثبيت عرض الأعمدة كما طلبت لضمان التناسق */
-#pdf_export_root .statement-table th:nth-child(5) { width: 28%; } /* البيان */
+/* 🟢 توزيع الأعمدة الذهبي (يملأ العرض الآن) */
+#pdf_export_root .statement-table th:nth-child(5) { width: 30%; } /* البيان */
 #pdf_export_root .statement-table th:nth-child(1),
-#pdf_export_root .statement-table th:nth-child(6) { width: 13%; } /* التاريخ والسند */
+#pdf_export_root .statement-table th:nth-child(6) { width: 12%; } /* التاريخ والسند */
 #pdf_export_root .statement-table th:nth-child(2),
 #pdf_export_root .statement-table th:nth-child(3),
 #pdf_export_root .statement-table th:nth-child(4) { width: 15.33%; } /* المبالغ */
 
-/* إلغاء أي تأثيرات تعيق المحرك */
 #pdf_export_root .year-card {
     background: #ffffff !important;
     border: 1px solid #d8c9af !important;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     width: 100% !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+    page-break-inside: avoid; /* يمنع انقسام السنة الواحدة بين صفحتين */
     display: block !important;
 }
 
 #pdf_export_root .statement-header {
     background: #ffffff !important;
-    border: 1.5px solid #c9a46b !important; /* لون مجمع جبري الذهبي */
-    margin-bottom: 20px;
-    padding: 20px !important;
+    border: 2px solid #c9a46b !important;
+    margin-bottom: 30px;
+    padding: 25px !important;
+    text-align: center;
 }
 
-/* تحسين الألوان للطباعة */
+/* تحسين الألوان لتبدو رسمية جداً */
 #pdf_export_root .statement-table tbody tr:nth-child(odd) td {
     background: #fdfbf6 !important;
 }
-#pdf_export_root .statement-table tbody tr:even td {
+#pdf_export_root .statement-table tbody tr:nth-child(even) td {
     background: #ffffff !important;
 }
-    </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
@@ -872,12 +874,12 @@
                 margin: [6, 6, 6, 6],
                 filename: `${filenameBase}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    scrollY: 0,
-                    windowWidth: 794
-                },
+                html2canvas: { 
+    scale: 2, 
+    useCORS: true, 
+    width: 794, 
+    windowWidth: 794 // 👈 هذا السطر هو الذي سيمنع ظهور الجدول "محشور" على اليسار
+}
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
