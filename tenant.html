@@ -90,7 +90,13 @@
             align-items: center;
             gap: 8px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+        }
+
+        .ghost-btn:focus,
+        .ghost-btn:active {
+            outline: none;
         }
 
         .hero-card {
@@ -101,6 +107,7 @@
             border: 1px solid rgba(201,164,107,0.18);
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             position: relative;
             text-align: right;
         }
@@ -116,10 +123,16 @@
             color: #fff;
             box-shadow: 0 4px 12px rgba(120,95,56,0.08);
             line-height: 1;
+            white-space: nowrap;
         }
 
-        .hero-status.paid { background: linear-gradient(135deg, #39a97b, #2f9e6f); }
-        .hero-status.partial { background: linear-gradient(135deg, #d96a60, #c95a52); }
+        .hero-status.paid {
+            background: linear-gradient(135deg, #39a97b, #2f9e6f);
+        }
+
+        .hero-status.partial {
+            background: linear-gradient(135deg, #d96a60, #c95a52);
+        }
 
         .hero-card h1 {
             margin: 0;
@@ -136,7 +149,6 @@
             font-weight: 800;
         }
 
-        /* 🔥 Chip System */
         .chip {
             display: inline-flex;
             align-items: center;
@@ -146,7 +158,7 @@
             font-size: 13px;
             font-weight: 900;
             letter-spacing: 0.5px;
-            min-width: 110px; /* 🔥 توحيد الحجم */
+            min-width: 118px;
             color: #fff;
             background: linear-gradient(135deg, #c9a46b, #b18a52);
             box-shadow: 0 6px 16px rgba(201,164,107,0.25);
@@ -158,26 +170,38 @@
             box-shadow: 0 10px 22px rgba(201,164,107,0.35);
         }
 
-        .panel-header {
+        .panel-header,
+        .smart-header {
             display: flex;
-            justify-content: flex-end; /* 🔥 يمين */
+            justify-content: flex-end;
+            align-items: center;
             margin-bottom: 12px;
+            width: 100%;
         }
 
-        .stats-grid, .chart-grid {
+        .stats-grid,
+        .chart-grid {
             display: grid;
             gap: 16px;
             margin-bottom: 16px;
+            align-items: stretch;
         }
 
-        .stats-grid { grid-template-columns: 1fr 1fr; }
-        .chart-grid { grid-template-columns: 1fr 1.1fr; }
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
 
-        .stat-card, .smart-card, .panel {
+        .chart-grid {
+            grid-template-columns: 1fr 1.1fr;
+        }
+
+        .stat-card,
+        .smart-card,
+        .panel {
             border-radius: 26px;
             border: 1px solid rgba(201,164,107,0.18);
-            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            overflow: hidden;
         }
 
         .stat-card {
@@ -185,19 +209,44 @@
             text-align: center;
         }
 
+        .stat-card.credit-card {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.92));
+            border-color: rgba(47,158,111,0.22);
+        }
+
+        .stat-card.balance-card {
+            background: linear-gradient(135deg, rgba(201,90,82,0.14), rgba(255,255,255,0.92));
+            border-color: rgba(201,90,82,0.20);
+        }
+
         .stat-card span {
             display: block;
-            color: #7a6c59;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 900;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            letter-spacing: 0.4px;
+        }
+
+        .stat-card.credit-card span,
+        .stat-card.credit-card b {
+            color: var(--success);
+        }
+
+        .stat-card.balance-card span,
+        .stat-card.balance-card b {
+            color: var(--danger);
         }
 
         .stat-card b {
             display: block;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 900;
+            line-height: 1.2;
+        }
+
+        .smart-card,
+        .panel {
+            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
         }
 
         .smart-card {
@@ -210,9 +259,13 @@
             line-height: 1.9;
             font-weight: 800;
             color: var(--text);
+            white-space: pre-line;
+            text-align: right;
         }
 
-        .panel { padding: 18px; }
+        .panel {
+            padding: 18px;
+        }
 
         .panel-note {
             text-align: center;
@@ -220,6 +273,7 @@
             font-size: 13px;
             color: #7d7468;
             font-weight: 800;
+            min-height: 18px;
         }
 
         .chart-wrap {
@@ -229,20 +283,42 @@
             justify-content: center;
         }
 
+        #notifications_box {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
         .notify-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            border-radius: 999px;
-            font-size: 14px;
+            justify-content: flex-start;
+            text-align: right;
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 15px;
             font-weight: 900;
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(247,244,237,0.8));
+            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.82));
             border: 1px solid rgba(201,164,107,0.20);
-            box-shadow: 0 6px 16px rgba(120,95,56,0.10);
-            margin-bottom: 10px;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.10);
             color: #7a6c59;
+            line-height: 1.7;
+        }
+
+        .notify-item.warn {
+            color: var(--danger);
+            border-color: rgba(201,90,82,0.25);
+            background: linear-gradient(135deg, rgba(201,90,82,0.08), rgba(255,255,255,0.92));
+        }
+
+        .notify-item.good {
+            color: var(--success);
+            border-color: rgba(47,158,111,0.25);
+            background: linear-gradient(135deg, rgba(47,158,111,0.08), rgba(255,255,255,0.92));
         }
 
         .action-btn {
@@ -272,18 +348,27 @@
         }
 
         #loader {
-            position: fixed; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--bg); z-index: 9999;
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
         }
 
         .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #eee; border-top-color: var(--gold-deep);
-            border-radius: 50%; animation: spin 1s linear infinite;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: var(--gold-deep);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .reveal {
             opacity: 0;
@@ -291,12 +376,35 @@
             transition: all 0.55s ease;
         }
 
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        @media screen and (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+        @media screen and (max-width: 900px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media screen and (max-width: 768px) {
-            .hero-card h1 { font-size: 24px; padding-left: 90px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .hero-card h1 {
+                font-size: 24px;
+                padding-left: 90px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card span {
+                font-size: 14px;
+            }
+
+            .stat-card b {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
@@ -321,13 +429,13 @@
         </section>
 
         <div class="stats-grid">
-            <div class="stat-card reveal">
+            <div class="stat-card reveal credit-card">
                 <span>دائن</span>
-                <b id="val_credit" style="color: var(--success);">0</b>
+                <b id="val_credit">0</b>
             </div>
-            <div class="stat-card reveal">
+            <div class="stat-card reveal balance-card">
                 <span>الرصيد</span>
-                <b id="val_balance" style="color: var(--danger);">0</b>
+                <b id="val_balance">0</b>
             </div>
         </div>
 
@@ -343,7 +451,8 @@
                 <div class="panel-header">
                     <div class="chip">ملخص الحساب</div>
                 </div>
-                <div id="collection_note" class="panel-note"></div> <div class="chart-wrap">
+                <div id="collection_note" class="panel-note"></div>
+                <div class="chart-wrap">
                     <canvas id="balancePieChart"></canvas>
                 </div>
             </section>
@@ -375,24 +484,50 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
-        function formatCurrency(v) { return `${Math.round(toNumber(v)).toLocaleString('en-US')} `; }
+        function toNumber(v) {
+            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+        }
+
+        function formatCurrency(v) {
+            return `${Math.round(toNumber(v)).toLocaleString('en-US')} `;
+        }
 
         function formatNow() {
             const now = new Date();
-            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`;
         }
 
-        // 🔥 دالة النصيحة اليدوية (يجب تعريفها لاحقاً أو استبدالها بالمنطق المطلوب)
         function getManualAdvice(code) {
-             // يمكنك لاحقاً ربط هذا بجدول في قاعدة البيانات أو منطق شرطي هنا
-             return "جاري تحليل البيانات المالية لتقديم النصيحة الدقيقة...";
+            const storedAdvice = localStorage.getItem(`advice_${code}`);
+            return storedAdvice || 'لا توجد نصيحة محاسبية حالياً.';
+        }
+
+        function loadNotification(code) {
+            const raw = localStorage.getItem(`notify_${code}`);
+            if (!raw) return null;
+
+            try {
+                return JSON.parse(raw);
+            } catch {
+                return null;
+            }
         }
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
+                const { data: tenant } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                const { data: tx } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode);
 
                 const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
                 const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
@@ -410,11 +545,25 @@
                 document.getElementById('val_credit').innerText = formatCurrency(daen2026);
                 document.getElementById('val_balance').innerText = formatCurrency(balance2026);
 
-                // 🔥 تطبيق دالة النصيحة اليدوية
                 document.getElementById('smart_message').innerText = getManualAdvice(tenantCode);
 
-                const noteEl = document.getElementById('collection_note');
-                noteEl.innerText = ''; // 🔥 تفريغ النص التلقائي
+                const notificationBox = document.getElementById('notifications_box');
+                const storedNotification = loadNotification(tenantCode);
+
+                if (storedNotification && storedNotification.message) {
+                    const notifyClass = storedNotification.type === 'friendly' ? 'good' : 'warn';
+                    notificationBox.innerHTML = `
+                        <div class="notify-item ${notifyClass}">
+                            ${storedNotification.message}
+                        </div>
+                    `;
+                } else {
+                    notificationBox.innerHTML = `
+                        <div class="notify-item">لا توجد إشعارات حالياً</div>
+                    `;
+                }
+
+                document.getElementById('collection_note').innerText = '';
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
@@ -433,7 +582,15 @@
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: { usePointStyle: true, boxWidth: 10, color: '#5d5347', font: { family: 'Tajawal', weight: '700' } }
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 10,
+                                    color: '#5d5347',
+                                    font: {
+                                        family: 'Tajawal',
+                                        weight: '700'
+                                    }
+                                }
                             }
                         }
                     },
@@ -441,8 +598,13 @@
                         id: 'centerText',
                         beforeDraw(chart) {
                             const { width, height, ctx } = chart;
-                            ctx.restore(); ctx.font = "bold 22px Tajawal"; ctx.fillStyle = "#2f2a24"; ctx.textBaseline = "middle";
-                            const text = `${rate}%`; ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2); ctx.save();
+                            ctx.restore();
+                            ctx.font = "bold 22px Tajawal";
+                            ctx.fillStyle = "#2f2a24";
+                            ctx.textBaseline = "middle";
+                            const text = `${rate}%`;
+                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2);
+                            ctx.save();
                         }
                     }]
                 });
@@ -458,8 +620,15 @@
             }
         }
 
-        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function goToStatement() {
+            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
         window.onload = init;
     </script>
 </body>
