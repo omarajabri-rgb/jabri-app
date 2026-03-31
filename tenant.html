@@ -21,309 +21,83 @@
             --gold: #c9a46b;
             --gold-deep: #b18a52;
             --success: #2f9e6f;
-            --warning: #c88a1e;
             --danger: #cc5a50;
-            --info: #5f89c5;
             --shadow: 0 18px 40px rgba(120, 95, 56, 0.10);
             --radius-xl: 28px;
             --radius-lg: 22px;
-            --radius-md: 16px;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
+        @keyframes fadeUpSoft {
+            from { opacity: 0; transform: translateY(18px) scale(0.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        @keyframes softPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes badgeBreath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.035); }
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top left, rgba(201,164,107,0.12), transparent 28%),
-                radial-gradient(circle at bottom right, rgba(177,138,82,0.10), transparent 26%),
-                linear-gradient(135deg, var(--bg), var(--bg-2));
-            padding: 16px;
-            opacity: 0;
-            transition: opacity 0.45s ease;
-            overflow-x: hidden;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0; min-height: 100vh; color: var(--text);
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            z-index: 9999;
+            padding: 16px; opacity: 0; transition: opacity 0.45s ease, background 0.5s ease; overflow-x: hidden;
         }
 
-        .spinner {
-            width: 42px;
-            height: 42px;
-            border: 3px solid rgba(201,164,107,0.18);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: inherit; z-index: 9999; }
+        .spinner { width: 42px; height: 42px; border: 3px solid rgba(201,164,107,0.18); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .app {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-            position: relative;
-            z-index: 1;
-        }
+        .app { max-width: 1100px; margin: 0 auto; padding-bottom: 42px; position: relative; z-index: 1; }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(14px);
-            transition: all 0.55s cubic-bezier(.2,.8,.2,1);
-        }
+        .reveal { opacity: 0; transform: translateY(16px); }
+        .reveal.active { animation: fadeUpSoft 0.65s cubic-bezier(.2,.8,.2,1) forwards; }
 
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .glass { background: var(--surface); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--card-border); box-shadow: var(--shadow); }
 
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
-        }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
+        .brand small { font-size: 11px; letter-spacing: 1.8px; color: var(--muted); font-weight: 800; display: block; }
 
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
+        .hero-card { 
+            border-radius: var(--radius-xl); padding: 26px; margin-bottom: 16px; 
+            display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
         }
+        .hero-title { font-size: 30px; font-weight: 900; color: var(--gold-deep); letter-spacing: 0.5px; margin: 0; }
+        #account_status_chip { align-self: flex-start; animation: badgeBreath 2.2s ease-in-out infinite; }
 
-        .brand {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .stats-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1fr; }
+        .stat-card { 
+            border-radius: var(--radius-lg); padding: 18px; background: var(--surface-strong); 
+            text-align: center; position: relative; overflow: hidden; 
         }
+        .stat-card span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 8px; letter-spacing: 0.3px; }
+        .stat-card b { display: block; font-size: 24px; font-weight: 900; }
 
-        .brand small {
-            font-size: 11px;
-            letter-spacing: 1.8px;
-            color: var(--muted);
-            font-weight: 800;
-        }
+        .stat-card.is-paid b { color: #2f9e6f; animation: softPop 1.2s ease; }
+        /* الرصيد يتم تلوينه برمجياً */
 
-        .brand strong {
-            color: var(--gold-deep);
-            font-size: 18px;
-            font-weight: 900;
-        }
+        .chart-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1.35fr; }
+        .panel { border-radius: var(--radius-lg); padding: 18px; }
+        .chart-wrap { position: relative; min-height: 290px; display: flex; align-items: center; justify-content: center; }
 
-        .ghost-btn {
-            border: 1px solid var(--card-border);
-            background: rgba(255,255,255,0.55);
-            color: var(--muted);
-            padding: 10px 14px;
-            border-radius: 14px;
-            font-size: 12px;
-            font-weight: 900;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .smart-grid { display: grid; gap: 14px; margin-bottom: 16px; grid-template-columns: 1fr 1fr; }
+        .smart-card { border-radius: var(--radius-lg); padding: 12px; font-size: 13px; }
+        .tag { display: inline-flex; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; color: #fff; margin-bottom: 10px; }
 
-        .hero-card {
-            border-radius: var(--radius-xl);
-            padding: 26px;
-            margin-bottom: 16px;
-            position: relative;
-            overflow: hidden;
-        }
+        .btn { width: 100%; padding: 17px; border-radius: 18px; border: none; font-size: 15px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-gold { color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); box-shadow: 0 10px 20px rgba(201,164,107,0.2); }
 
-        .hero-title {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
+        .ghost-btn { border: 1px solid var(--card-border); background: rgba(255,255,255,0.5); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 6px; }
 
-        .hero-sub {
-            margin: 8px 0 0;
-            font-size: 13px;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .meta-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            background: rgba(255,255,255,0.65);
-            color: var(--muted);
-            border: 1px solid rgba(201,164,107,0.16);
-        }
-
-        .stats-grid {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 16px;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .chart-grid, .smart-grid {
-            display: grid;
-            gap: 14px;
-            margin-bottom: 16px;
-            grid-template-columns: 1fr 1.35fr;
-        }
-
-        .smart-grid { grid-template-columns: repeat(2, 1fr); }
-
-        .stat-card, .panel, .smart-card {
-            border-radius: var(--radius-lg);
-            padding: 18px;
-        }
-
-        .stat-card {
-            background: var(--surface-strong);
-            border: 1px solid rgba(201,164,107,0.15);
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .stat-card b {
-            display: block;
-            font-size: 22px;
-            font-weight: 900;
-        }
-
-        .panel-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .panel-title {
-            font-size: 17px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .chart-wrap {
-            position: relative;
-            min-height: 290px;
-        }
-
-        .smart-card {
-            position: relative;
-            overflow: hidden;
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .smart-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-right: 5px solid var(--gold);
-            pointer-events: none;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 12px;
-        }
-
-        .smart-body {
-            line-height: 1.8;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .risk-chip {
-            display: inline-flex;
-            margin-top: 12px;
-            padding: 7px 12px;
-            border-radius: 999px;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 900;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 17px 18px;
-            border-radius: 18px;
-            border: none;
-            font-size: 15px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .btn-gold {
-            color: #fff;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 14px 24px rgba(201,164,107,0.22);
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-top: 8px;
-        }
-
-        @media (max-width: 900px) {
-            .chart-grid, .smart-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 800px) { .stats-grid, .chart-grid, .smart-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -332,7 +106,7 @@
     <div class="app">
         <div class="topbar reveal">
             <div class="brand">
-                <small>MANAGED BUSINESS SPACES FOR LEASE</small>
+                <small>MANAGED BUSINESS SPACES</small>
                 <strong>JABRI COMPLEX</strong>
             </div>
             <button class="ghost-btn" onclick="logout()">
@@ -341,74 +115,54 @@
         </div>
 
         <section class="hero-card glass reveal">
-            <div style="position:absolute; left:20px; top:20px;">
-                <span id="account_status_chip" style="
-                    padding:8px 14px;
-                    border-radius:999px;
-                    font-size:12px;
-                    font-weight:900;
-                    background:#cc5a50;
-                    color:#fff;
-                ">متابعة</span>
-            </div>
-
+            <span id="account_status_chip" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:900; color:#fff;">-</span>
             <h1 id="t_name" class="hero-title">...</h1>
-            <p id="t_unit" class="hero-sub">...</p>
-
-            <div class="meta-row">
-                <div class="meta-chip"><i data-lucide="calendar-range"></i><span id="year_info">سنة 2026</span></div>
-                <div class="meta-chip"><i data-lucide="clock-3"></i><span id="last_update">-</span></div>
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <div style="font-size:12px; font-weight:800; color:var(--muted);"><i data-lucide="calendar"></i> حساب سنة 2026</div>
             </div>
         </section>
 
         <div class="stats-grid">
-            <div class="stat-card reveal">
-                <span>إجمالي المدفوع</span>
+            <div class="stat-card glass reveal is-paid">
+                <span>دائن</span>
                 <b id="val_credit">0</b>
             </div>
-            <div class="stat-card reveal">
-                <span>الرصيد المتبقي</span>
+            <div class="stat-card glass reveal is-balance">
+                <span>الرصيد</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
 
         <div class="chart-grid">
             <section class="panel glass reveal">
-                <div class="panel-head">
-                    <div class="panel-title">حالة الحساب</div>
-                </div>
+                <div style="font-weight:900; font-size:17px; margin-bottom:15px;">حالة الحساب</div>
                 <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
+                <div id="collection_note" style="text-align:center; margin-top:10px; font-size:13px; color:#7d7468; font-weight:800;">-</div>
             </section>
-
             <section class="panel glass reveal">
-                <div class="panel-head">
-                    <div class="panel-title">حركة الدفعات</div>
-                </div>
-                <div class="chart-wrap"><canvas id="paymentLineChart"></canvas></div>
+                <div style="font-weight:900; font-size:17px; margin-bottom:15px;">حركة الدفعات</div>
+                <div class="chart-wrap" id="line_chart_container"><canvas id="paymentLineChart"></canvas></div>
             </section>
         </div>
 
         <div class="smart-grid">
             <section class="smart-card glass reveal" id="smart_box">
-                <div class="tag" id="status_tag">الحالة المالية</div>
-                <div id="smart_icon" style="margin-bottom:10px;"></div>
-                <div id="smart_message" class="smart-body">جاري التحليل...</div>
+                <div class="tag">الحالة المالية</div>
+                <div id="smart_message" style="font-weight:700;">جاري التحليل...</div>
             </section>
-
             <section class="smart-card glass reveal" id="advice_box">
-                <div class="tag" id="advice_tag">التوصية المالية</div>
-                <div id="advice_icon" style="margin-bottom:10px;"></div>
-                <div id="advice_message" class="smart-body">جاري إعداد التوصية...</div>
+                <div class="tag" style="background:var(--info)">التوصية</div>
+                <div id="advice_message" style="font-weight:700;">جاري الإعداد...</div>
             </section>
         </div>
 
-        <div class="actions reveal">
+        <div class="actions reveal" style="margin-top:20px;">
             <button class="btn btn-gold" onclick="goToStatement()">
-                <i data-lucide="file-text"></i> كشف الحساب
+                <i data-lucide="file-text"></i> كشف الحساب التفصيلي
             </button>
         </div>
 
-        <div class="footer reveal" id="footer_year"></div>
+        <div class="footer reveal" id="footer_year" style="text-align:center; padding-top:20px; font-size:11px; color:var(--muted);"></div>
     </div>
 
     <script>
@@ -416,127 +170,139 @@
         if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
-        let dbData = {};
         let transactions = [];
-        let pieChart = null;
-        let lineChart = null;
 
-        function toNumber(value) { return isNaN(parseFloat(value)) ? 0 : parseFloat(value); }
+        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
         function formatCurrency(v) { return `${toNumber(v).toLocaleString('en-US', {minimumFractionDigits: 3})} د.أ`; }
+
+        function activateReveal() {
+            const items = document.querySelectorAll('.reveal');
+            items.forEach((el, i) => {
+                el.style.animationDelay = `${i * 0.06}s`;
+                setTimeout(() => el.classList.add('active'), 60 + (i * 60));
+            });
+        }
 
         function animateValue(id, end) {
             const el = document.getElementById(id);
-            let start = 0;
-            const duration = 800;
+            const duration = 1200;
             let startTime = null;
+            function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
             function step(timestamp) {
                 if (!startTime) startTime = timestamp;
-                const progress = Math.min((timestamp - startTime) / duration, 1);
-                el.textContent = formatCurrency(start + (end - start) * progress);
-                if (progress < 1) requestAnimationFrame(step);
+                const raw = Math.min((timestamp - startTime) / duration, 1);
+                const progress = easeOutCubic(raw);
+                const current = 0 + (end - 0) * progress;
+                el.textContent = formatCurrency(current);
+                if (raw < 1) requestAnimationFrame(step);
+                else el.textContent = formatCurrency(end);
             }
             requestAnimationFrame(step);
         }
 
-        function buildCharts(paid, balance) {
-            if (pieChart) pieChart.destroy();
-            if (lineChart) lineChart.destroy();
-
-            pieChart = new Chart(document.getElementById('balancePieChart'), {
-                type: 'pie',
+        function buildCharts(paid, balance, rate) {
+            // Doughnut Chart
+            new Chart(document.getElementById('balancePieChart'), {
+                type: 'doughnut',
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const { width, height, ctx } = chart;
+                        ctx.restore();
+                        ctx.font = "bold 22px Tajawal";
+                        ctx.fillStyle = "#2f2a24";
+                        ctx.textBaseline = "middle";
+                        const text = `${rate}%`;
+                        const x = (width - ctx.measureText(text).width) / 2;
+                        const y = height / 2;
+                        ctx.fillText(text, x, y);
+                        ctx.save();
+                    }
+                }],
                 data: {
                     labels: ['المدفوع', 'المتبقي'],
-                    datasets: [{
-                        data: [paid, Math.max(0, balance)],
-                        backgroundColor: ['#2f9e6f', '#cc5a50'],
-                        borderWidth: 2
-                    }]
+                    datasets: [{ data: [paid, Math.max(0, balance)], backgroundColor: ['#2f9e6f', '#cc5a50'], borderWeight: 0 }]
                 },
                 options: {
-                    responsive: true,
+                    cutout: '75%', 
+                    responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { family: 'Tajawal', weight: '700' } } },
-                        title: {
-                            display: true,
-                            text: `المدفوع ${formatCurrency(paid)} | المتبقي ${formatCurrency(balance)}`,
-                            font: { size: 14, family:'Tajawal', weight:'bold' }
-                        }
-                    }
+                    animation: { animateRotate: true, duration: 1200 },
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
 
-            const creditTx = [...transactions].filter(t => toNumber(t.credit) > 0 && new Date(t.date).getFullYear() === 2026).sort((a, b) => new Date(a.date) - new Date(b.date));
-            lineChart = new Chart(document.getElementById('paymentLineChart'), {
-                type: 'line',
-                data: {
-                    labels: creditTx.length ? creditTx.map(t => new Date(t.date).toLocaleDateString('ar-JO')) : ['-'],
-                    datasets: [{
-                        label: 'قيمة الدفعة',
-                        data: creditTx.length ? creditTx.map(t => toNumber(t.credit)) : [0],
-                        borderColor: '#c9a46b',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function updateUI() {
-            document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), 50 + (i * 40)));
-
-            const yearFiltered = transactions.filter(t => new Date(t.date).getFullYear() === 2026);
-            const totalDebits = yearFiltered.reduce((s,t)=>s+toNumber(t.debit), 0);
-            const totalCredits = yearFiltered.reduce((s,t)=>s+toNumber(t.credit), 0);
-            const balance = totalDebits - totalCredits;
-
-            const badgeText = balance === 0 ? 'منتظم' : (balance <= 500 ? 'تنبيه' : 'متابعة');
-            const statusChip = document.getElementById('account_status_chip');
-            statusChip.innerText = badgeText;
-            statusChip.style.background = balance === 0 ? '#2f9e6f' : (balance <= 500 ? '#c88a1e' : '#cc5a50');
-
-            document.getElementById('t_name').innerText = dbData.tenant_name || '-';
-            document.getElementById('t_unit').innerText = `الوحدة: ${dbData.shop_no || '-'} • رمز: ${tenantCode}`;
-            document.getElementById('val_balance').style.color = balance === 0 ? '#2f9e6f' : '#cc5a50';
-            document.getElementById('val_credit').style.color = '#2f9e6f';
-            document.getElementById('footer_year').innerText = `© 2026 مجمع الجبري الصناعي التجاري`;
-
-            animateValue('val_credit', totalCredits);
-            animateValue('val_balance', balance);
-            buildCharts(totalCredits, balance);
-
-            // Smart Logic
-            const smartBox = document.getElementById('smart_box');
-            const smartMsg = document.getElementById('smart_message');
-            if(balance === 0) {
-                smartBox.querySelector('.tag').style.background = '#2f9e6f';
-                smartMsg.innerText = "حسابك مكتمل لعام 2026، شكراً لالتزامك.";
+            // Line Chart
+            const creditTx = transactions.filter(t => new Date(t.date).getFullYear() === 2026 && toNumber(t.credit) > 0);
+            
+            if (creditTx.length <= 1) {
+                document.getElementById('line_chart_container').innerHTML = 
+                    '<div style="text-align:center; padding:30px; color:#7d7468; font-weight:800;">لا يوجد بيانات كافية لعرض الرسم</div>';
             } else {
-                smartBox.querySelector('.tag').style.background = balance <= 500 ? '#c88a1e' : '#cc5a50';
-                smartMsg.innerText = `يوجد رصيد مستحق بقيمة ${formatCurrency(balance)} يرجى مراجعته.`;
+                new Chart(document.getElementById('paymentLineChart'), {
+                    type: 'line',
+                    data: {
+                        labels: creditTx.map(t => new Date(t.date).toLocaleDateString('ar-JO')),
+                        datasets: [{ label: 'دفعة', data: creditTx.map(t => toNumber(t.credit)), borderColor: '#c9a46b', tension: 0.4, fill: true, backgroundColor: 'rgba(201,164,107,0.1)' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
             }
-
-            if (window.lucide) lucide.createIcons();
         }
 
-        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
+        async function init() {
+            try {
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
+                
+                transactions = tx || [];
+                const totalDebit = transactions.reduce((s,t)=>s+toNumber(t.debit), 0);
+                const totalCredit = transactions.reduce((s,t)=>s+toNumber(t.credit), 0);
+                
+                const daen = totalCredit;
+                const balance = Math.max(0, totalDebit - totalCredit);
+                const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 100;
+
+                document.body.style.background = balance === 0 ? 'linear-gradient(135deg,#edf7f1,#f6fff9)' : 'linear-gradient(135deg,#f7f4ed,#fdfbf6)';
+                document.getElementById('t_name').innerText = tenant.tenant_name;
+                
+                const chip = document.getElementById('account_status_chip');
+                chip.innerText = balance === 0 ? 'منتظم' : (balance <= 500 ? 'تنبيه' : 'متابعة');
+                chip.style.background = balance === 0 ? '#2f9e6f' : (balance <= 500 ? '#c88a1e' : '#cc5a50');
+
+                // تلوين ذكي للرصيد والدائن
+                document.getElementById('val_credit').style.color = '#2f9e6f';
+                const balanceEl = document.getElementById('val_balance');
+                if (balance === 0) {
+                    balanceEl.style.color = '#2f9e6f';
+                    document.querySelector('.stat-card.is-balance').style.boxShadow = '0 0 25px rgba(47,158,111,0.2)';
+                } else {
+                    balanceEl.style.color = '#cc5a50';
+                }
+
+                document.getElementById('collection_note').innerText = `نسبة السداد الحالية تشير إلى حالة حساب ${collectionRate > 70 ? 'مستقرة' : 'تحتاج متابعة'}`;
+                document.getElementById('footer_year').innerText = `© 2026 مجمع الجبري الصناعي التجاري`;
+
+                animateValue('val_credit', daen);
+                animateValue('val_balance', balance);
+                buildCharts(daen, balance, collectionRate);
+
+                document.getElementById('smart_message').innerText = balance === 0 ? "الحساب مسدد بالكامل لعام 2026." : `يوجد رصيد مستحق بقيمة ${formatCurrency(balance)}.`;
+                document.getElementById('advice_message').innerText = balance === 0 ? "شكراً لالتزامكم المميز." : "يرجى مراجعة الإدارة لتسوية الرصيد المتبقي.";
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.style.opacity = '1';
+                activateReveal();
+                if (window.lucide) lucide.createIcons();
+            } catch (e) { console.error(e); }
+        }
+
+        function goToStatement() { window.location.href = `statement.html?tenant=${tenantCode}`; }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
-        window.onload = async () => {
-            const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-            const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
-            dbData = tenant;
-            transactions = tx || [];
-            document.getElementById('loader').style.display = 'none';
-            document.body.style.opacity = '1';
-            updateUI();
-        };
+        window.onload = init;
     </script>
 </body>
 </html>
