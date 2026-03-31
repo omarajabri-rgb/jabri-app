@@ -459,95 +459,133 @@
 
         /* PDF ONLY */
         #pdf_export_root {
-            position: fixed;
-            left: -99999px;
-            top: 0;
-            width: 794px;
-            background: #ffffff;
-            z-index: -1;
-            visibility: hidden;
-        }
+    position: fixed;
+    inset: 0;
+    width: 794px;
+    background: #ffffff;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
 
-        #pdf_export_root .pdf-sheet {
-            width: 794px;
-            padding: 18px;
-            background: #ffffff;
-            color: #2f2a24;
-        }
+#pdf_export_root .pdf-sheet {
+    width: 794px;
+    min-height: 1123px;
+    padding: 18px;
+    background: #ffffff;
+    color: #2f2a24;
+    direction: rtl;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+}
 
-        #pdf_export_root .statement-header,
-        #pdf_export_root .year-card,
-        #pdf_export_root .year-summary-box,
-        #pdf_export_root .year-chip,
-        #pdf_export_root .year-status {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            box-shadow: none !important;
-        }
+#pdf_export_root .pdf-sheet:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
 
-        #pdf_export_root .statement-header {
-            background: #ffffff !important;
-            border: 1px solid #d8c9af !important;
-            margin-bottom: 12px;
-        }
+#pdf_export_root .wrap {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+}
 
-        #pdf_export_root .year-card {
-            background: #ffffff !important;
-            border: 1px solid #d8c9af !important;
-            break-inside: auto !important;
-            page-break-inside: auto !important;
-            margin-bottom: 12px;
-        }
+#pdf_export_root .statement-header,
+#pdf_export_root .year-card,
+#pdf_export_root .year-summary-box,
+#pdf_export_root .year-chip,
+#pdf_export_root .year-status {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
 
-        #pdf_export_root .statement-table {
-            width: 100% !important;
-            table-layout: fixed;
-        }
+#pdf_export_root .statement-header {
+    background: #ffffff !important;
+    border: 1px solid #d8c9af !important;
+    margin-bottom: 12px;
+    width: 100% !important;
+}
 
-        #pdf_export_root .statement-table th,
-        #pdf_export_root .statement-table td {
-            font-size: 10.5px !important;
-            padding: 5px 4px !important;
-            line-height: 1.25 !important;
-        }
+#pdf_export_root .year-card {
+    background: #ffffff !important;
+    border: 1px solid #d8c9af !important;
+    margin-bottom: 12px;
+    width: 100% !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
 
-        #pdf_export_root .statement-table td:nth-child(5),
-        #pdf_export_root .statement-table th:nth-child(5) {
-            width: 26%;
-        }
+#pdf_export_root .year-head {
+    padding: 14px 16px !important;
+}
 
-        #pdf_export_root .statement-table td:nth-child(1),
-        #pdf_export_root .statement-table th:nth-child(1),
-        #pdf_export_root .statement-table td:nth-child(6),
-        #pdf_export_root .statement-table th:nth-child(6) {
-            width: 14%;
-        }
+#pdf_export_root .year-status {
+    box-shadow: none !important;
+}
 
-        #pdf_export_root .statement-table td:nth-child(2),
-        #pdf_export_root .statement-table th:nth-child(2),
-        #pdf_export_root .statement-table td:nth-child(3),
-        #pdf_export_root .statement-table th:nth-child(3),
-        #pdf_export_root .statement-table td:nth-child(4),
-        #pdf_export_root .statement-table th:nth-child(4) {
-            width: 15%;
-        }
+#pdf_export_root .year-footer {
+    gap: 8px !important;
+    padding: 12px !important;
+}
 
-        #pdf_export_root .statement-table tbody tr:nth-child(odd) td {
-            background: rgba(253,251,246,0.78) !important;
-        }
+#pdf_export_root .year-summary-box {
+    background: #ffffff !important;
+}
 
-        #pdf_export_root .statement-table tbody tr:nth-child(even) td {
-            background: rgba(201,164,107,0.045) !important;
-        }
+#pdf_export_root .statement-table {
+    width: 100% !important;
+    table-layout: fixed;
+    border-collapse: collapse !important;
+}
 
-        #pdf_export_root .statement-table tbody tr:hover td {
-            background: inherit !important;
-        }
+#pdf_export_root .statement-table th,
+#pdf_export_root .statement-table td {
+    font-size: 10.5px !important;
+    padding: 5px 4px !important;
+    line-height: 1.25 !important;
+}
 
-        #pdf_export_root .bottom-actions,
-        #pdf_export_root #loader {
-            display: none !important;
-        }
+#pdf_export_root .statement-table td:nth-child(5),
+#pdf_export_root .statement-table th:nth-child(5) {
+    width: 26%;
+}
+
+#pdf_export_root .statement-table td:nth-child(1),
+#pdf_export_root .statement-table th:nth-child(1),
+#pdf_export_root .statement-table td:nth-child(6),
+#pdf_export_root .statement-table th:nth-child(6) {
+    width: 14%;
+}
+
+#pdf_export_root .statement-table td:nth-child(2),
+#pdf_export_root .statement-table th:nth-child(2),
+#pdf_export_root .statement-table td:nth-child(3),
+#pdf_export_root .statement-table th:nth-child(3),
+#pdf_export_root .statement-table td:nth-child(4),
+#pdf_export_root .statement-table th:nth-child(4) {
+    width: 15%;
+}
+
+#pdf_export_root .statement-table tbody tr:nth-child(odd) td {
+    background: rgba(253,251,246,0.78) !important;
+}
+
+#pdf_export_root .statement-table tbody tr:nth-child(even) td {
+    background: rgba(201,164,107,0.045) !important;
+}
+
+#pdf_export_root .statement-table tbody tr:hover td {
+    background: inherit !important;
+}
+
+#pdf_export_root .bottom-actions,
+#pdf_export_root #loader {
+    display: none !important;
+}
     </style>
 </head>
 <body>
