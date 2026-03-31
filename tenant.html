@@ -14,406 +14,99 @@
             --bg: #f7f4ed;
             --bg-2: #fdfbf6;
             --surface: rgba(255,255,255,0.80);
-            --surface-strong: rgba(255,255,255,0.90);
-            --border: rgba(201,164,107,0.20);
             --text: #2f2a24;
             --muted: #7a6c59;
             --gold: #c9a46b;
             --gold-deep: #b18a52;
             --success: #2f9e6f;
             --danger: #c95a52;
-            --warning: #c38a2e;
             --shadow: 0 18px 40px rgba(120,95,56,0.10);
             --soft-shadow: 0 12px 28px rgba(120,95,56,0.08);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
 
         body {
-            margin: 0;
-            color: var(--text);
-            padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
-            background: linear-gradient(135deg, var(--bg), var(--bg-2));
+            margin: 0; color: var(--text); padding: 16px; opacity: 0; transform: translateY(8px);
+            transition: all 0.45s ease; background: linear-gradient(135deg, var(--bg), var(--bg-2));
         }
 
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body.loaded { opacity: 1; transform: translateY(0); }
 
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
 
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .brand small {
-            display: block;
-            font-size: 11px;
-            letter-spacing: 1.8px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .brand strong {
-            color: var(--gold-deep);
-            font-size: 18px;
-            font-weight: 900;
-        }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
+        .brand small { display: block; font-size: 11px; letter-spacing: 1.8px; color: var(--muted); font-weight: 800; }
 
         .ghost-btn {
-            padding: 12px 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(201,164,107,0.18);
-            background: rgba(255,255,255,0.70);
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 900;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(201,164,107,0.18);
+            background: rgba(255,255,255,0.70); color: var(--text); font-size: 12px; font-weight: 900;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);
         }
 
-        .ghost-btn:focus,
-        .ghost-btn:active {
-            outline: none;
-        }
-
-        /* نفس روح statement header */
         .hero-card {
-            border-radius: 26px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: right;
+            border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: right;
             background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
-            border: 1px solid rgba(201,164,107,0.18);
-            box-shadow: var(--soft-shadow);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            position: relative;
+            border: 1px solid rgba(201,164,107,0.18); box-shadow: var(--soft-shadow);
+            backdrop-filter: blur(16px); position: relative;
         }
 
         .hero-status {
-            position: absolute;
-            left: 18px;
-            top: 18px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            line-height: 1;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+            position: absolute; left: 18px; top: 18px; padding: 8px 14px; border-radius: 999px;
+            font-size: 12px; font-weight: 900; line-height: 1; box-shadow: 0 4px 12px rgba(120,95,56,0.08);
         }
+        .hero-status.paid { background: rgba(47,158,111,0.12); color: var(--success); border: 1px solid rgba(47,158,111,0.24); }
+        .hero-status.partial { background: rgba(204,90,80,0.12); color: var(--danger); border: 1px solid rgba(204,90,80,0.22); }
 
-        .hero-status.paid {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.24);
-        }
+        .hero-card h1 { margin: 0; font-size: 28px; font-weight: 900; color: var(--gold-deep); padding-left: 110px; }
+        .hero-note { margin-top: 8px; color: var(--text); font-size: 13px; font-weight: 800; }
 
-        .hero-status.partial {
-            background: rgba(204,90,80,0.12);
-            color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.22);
-        }
-
-        .hero-card h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            padding-left: 110px;
-        }
-
-        .hero-note {
-            margin-top: 8px;
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        /* chip نفس statement */
         .chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 18px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            color: #fff;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px;
+            border-radius: 999px; font-size: 13px; font-weight: 900; letter-spacing: 0.5px;
+            color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep));
             box-shadow: 0 6px 16px rgba(201,164,107,0.25);
         }
 
-        .smart-header,
-        .panel-header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 12px;
-            width: 100%;
+        .smart-header, .panel-header {
+            display: flex; justify-content: flex-end; /* 🔥 المحاذاة لليمين لجميع الأقسام */
+            align-items: center; margin-bottom: 12px; width: 100%;
         }
 
-        .stats-grid,
-        .content-grid {
-            display: grid;
-            gap: 16px;
-            margin-bottom: 16px;
-            align-items: stretch;
-        }
+        .stats-grid, .content-grid { display: grid; gap: 16px; margin-bottom: 16px; }
+        .stats-grid { grid-template-columns: 1fr 1fr; }
+        .content-grid { grid-template-columns: 1fr 1.1fr; }
 
-        .stats-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .content-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .soft-card,
-        .smart-card,
-        .panel {
-            border-radius: 26px;
-            border: 1px solid rgba(201,164,107,0.18);
+        .soft-card, .smart-card, .panel {
+            border-radius: 26px; border: 1px solid rgba(201,164,107,0.18);
             background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
-            box-shadow: var(--soft-shadow);
+            box-shadow: var(--soft-shadow); padding: 20px;
         }
 
-        /* مثل year footer boxes */
-        .soft-card {
-            padding: 18px;
-            text-align: center;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+        .soft-card { text-align: center; }
+        .soft-card span { display: block; font-size: 14px; font-weight: 900; margin-bottom: 8px; }
+        .soft-card b { display: block; font-size: 26px; font-weight: 900; }
 
-        .soft-card span {
-            display: block;
-            font-size: 14px;
-            font-weight: 900;
-            margin-bottom: 8px;
-            letter-spacing: 0.4px;
-        }
+        .credit-card { background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25)); border-color: rgba(47,158,111,0.24); color: var(--success); }
+        .balance-card { background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25)); border-color: rgba(204,90,80,0.22); color: var(--danger); }
 
-        .soft-card b {
-            display: block;
-            font-size: 26px;
-            font-weight: 900;
-            line-height: 1.2;
-        }
+        .smart-body { font-size: 16px; line-height: 1.9; font-weight: 800; color: var(--text); text-align: right; white-space: pre-line; }
 
-        .credit-card {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
-            border-color: rgba(47,158,111,0.24);
-        }
+        .chart-wrap { min-height: 250px; display: flex; align-items: center; justify-content: center; }
+        .notify-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .notify-item { padding: 14px 18px; border-radius: 18px; font-size: 15px; font-weight: 900; background: #fff; border: 1px solid var(--border); text-align: right; color: var(--muted); }
 
-        .credit-card span,
-        .credit-card b {
-            color: var(--success);
-        }
+        .action-btn { width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px; border-radius: 20px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; }
 
-        .balance-card {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-            border-color: rgba(204,90,80,0.22);
-        }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .balance-card span,
-        .balance-card b {
-            color: var(--danger);
-        }
+        .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
-        .smart-card,
-        .panel {
-            padding: 20px;
-        }
-
-        .smart-card {
-            margin-bottom: 16px;
-        }
-
-        .smart-body {
-            font-size: 16px;
-            line-height: 1.9;
-            font-weight: 800;
-            color: var(--text);
-            white-space: pre-line;
-            text-align: right;
-        }
-
-        .panel-note {
-            text-align: center;
-            margin-bottom: 12px;
-            font-size: 13px;
-            color: var(--muted);
-            font-weight: 800;
-            min-height: 18px;
-        }
-
-        /* الدائرة أصغر وأهدأ */
-        .chart-wrap {
-            min-height: 250px;
-            max-width: 430px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notify-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .notify-item {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            text-align: right;
-            width: 100%;
-            padding: 14px 18px;
-            border-radius: 18px;
-            font-size: 15px;
-            font-weight: 900;
-            line-height: 1.7;
-            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.82));
-            border: 1px solid rgba(201,164,107,0.20);
-            box-shadow: 0 8px 18px rgba(120,95,56,0.10);
-            color: var(--muted);
-        }
-
-        .notify-item.warn {
-            color: var(--danger);
-            border-color: rgba(201,90,82,0.25);
-            background: linear-gradient(135deg, rgba(201,90,82,0.08), rgba(255,255,255,0.92));
-        }
-
-        .notify-item.good {
-            color: var(--success);
-            border-color: rgba(47,158,111,0.25);
-            background: linear-gradient(135deg, rgba(47,158,111,0.08), rgba(255,255,255,0.92));
-        }
-
-        .action-btn {
-            width: 100%;
-            max-width: 300px;
-            margin: 24px auto 0;
-            padding: 16px;
-            border-radius: 20px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: none;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            color: #fff;
-            box-shadow: var(--shadow);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #eee;
-            border-top-color: var(--gold-deep);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(14px);
-            transition: all 0.55s ease;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        @media screen and (max-width: 900px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .hero-card h1 {
-                font-size: 24px;
-                padding-left: 90px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .soft-card span {
-                font-size: 14px;
-            }
-
-            .soft-card b {
-                font-size: 22px;
-            }
-
-            .chart-wrap {
-                min-height: 220px;
-            }
-        }
+        @media screen and (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -421,15 +114,8 @@
 
     <div class="wrap">
         <div class="topbar reveal">
-            <div class="brand">
-                <small>MANAGED BUSINESS SPACES</small>
-                <strong>JABRI COMPLEX</strong>
-            </div>
-
-            <button class="ghost-btn" onclick="logout()">
-                <i data-lucide="log-out"></i>
-                خروج
-            </button>
+            <div class="brand"><small>MANAGED BUSINESS SPACES</small><strong>JABRI COMPLEX</strong></div>
+            <button class="ghost-btn" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
         </div>
 
         <section class="hero-card reveal">
@@ -439,15 +125,8 @@
         </section>
 
         <div class="stats-grid">
-            <div class="soft-card credit-card reveal">
-                <span>دائن</span>
-                <b id="val_credit">0</b>
-            </div>
-
-            <div class="soft-card balance-card reveal">
-                <span>الرصيد</span>
-                <b id="val_balance">0</b>
-            </div>
+            <div class="soft-card credit-card reveal"><span>دائن</span><b id="val_credit">0</b></div>
+            <div class="soft-card balance-card reveal"><span>الرصيد</span><b id="val_balance">0</b></div>
         </div>
 
         <div class="smart-card reveal">
@@ -459,87 +138,36 @@
 
         <div class="content-grid">
             <section class="panel reveal">
-                <div class="panel-header">
-                    <div class="chip">ملخص الحساب</div>
-                </div>
-                <div id="collection_note" class="panel-note"></div>
-                <div class="chart-wrap">
-                    <canvas id="balancePieChart"></canvas>
-                </div>
+                <div class="panel-header"><div class="chip">ملخص الحساب</div></div>
+                <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
             </section>
 
             <section class="panel reveal">
-                <div class="panel-header">
-                    <div class="chip">إشعارات</div>
-                </div>
+                <div class="panel-header"><div class="chip">إشعارات</div></div>
                 <div id="notifications_box" class="notify-list">
                     <div class="notify-item">لا توجد إشعارات حالياً</div>
                 </div>
             </section>
         </div>
 
-        <button class="action-btn reveal" onclick="goToStatement()">
-            <i data-lucide="file-text"></i>
-            كشف الحساب
-        </button>
-
+        <button class="action-btn reveal" onclick="goToStatement()"><i data-lucide="file-text"></i> كشف الحساب</button>
         <div class="footer reveal">© 2026 مجمع الجبري الصناعي التجاري</div>
     </div>
 
     <script>
         const tenantCode = localStorage.getItem('jabri_tenant_code');
         if (!tenantCode) window.location.href = "index.html";
-
         const { createClient } = supabase;
-        const supabaseClient = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
 
-        function toNumber(v) {
-            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-        }
-
-        function formatCurrency(v) {
-            return `${Math.round(toNumber(v)).toLocaleString('en-US')} `;
-        }
-
-        function formatNow() {
-            const now = new Date();
-            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            })}`;
-        }
-
-        function getManualAdvice(code) {
-            const storedAdvice = localStorage.getItem(`advice_${code}`);
-            return storedAdvice || 'لا توجد نصيحة محاسبية حالياً.';
-        }
-
-        function loadNotification(code) {
-            const raw = localStorage.getItem(`notify_${code}`);
-            if (!raw) return null;
-
-            try {
-                return JSON.parse(raw);
-            } catch {
-                return null;
-            }
-        }
+        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
+        function formatCurrency(v) { return `${Math.round(toNumber(v)).toLocaleString('en-US')} `; }
+        function formatNow() { const now = new Date(); return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`; }
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                const { data: tx } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode);
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
 
                 const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
                 const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
@@ -549,102 +177,29 @@
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
                 document.getElementById('last_update').innerText = formatNow();
-
                 const chip = document.getElementById('account_status_chip');
                 chip.innerText = balance2026 === 0 ? 'مسدد' : 'جزئي';
                 chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
                 document.getElementById('val_credit').innerText = formatCurrency(daen2026);
                 document.getElementById('val_balance').innerText = formatCurrency(balance2026);
-
-                document.getElementById('smart_message').innerText = getManualAdvice(tenantCode);
-
-                const notificationBox = document.getElementById('notifications_box');
-                const storedNotification = loadNotification(tenantCode);
-
-                if (storedNotification && storedNotification.message) {
-                    const notifyClass = storedNotification.type === 'friendly' ? 'good' : 'warn';
-                    notificationBox.innerHTML = `
-                        <div class="notify-item ${notifyClass}">
-                            ${storedNotification.message}
-                        </div>
-                    `;
-                } else {
-                    notificationBox.innerHTML = `
-                        <div class="notify-item">لا توجد إشعارات حالياً</div>
-                    `;
-                }
-
-                document.getElementById('collection_note').innerText = '';
+                document.getElementById('smart_message').innerText = localStorage.getItem(`advice_${tenantCode}`) || 'لا توجد نصيحة محاسبية حالياً.';
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
-                    data: {
-                        labels: ['رصيد', 'دائن'],
-                        datasets: [{
-                            data: [balance2026, daen2026],
-                            backgroundColor: ['#c95a52', '#2f9e6f'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        cutout: '78%',
-                        radius: '88%',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: 6
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    boxWidth: 10,
-                                    color: '#5d5347',
-                                    font: {
-                                        family: 'Tajawal',
-                                        weight: '700'
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    plugins: [{
-                        id: 'centerText',
-                        beforeDraw(chart) {
-                            const { width, height, ctx } = chart;
-                            ctx.restore();
-                            ctx.font = "bold 22px Tajawal";
-                            ctx.fillStyle = "#2f2a24";
-                            ctx.textBaseline = "middle";
-                            const text = `${rate}%`;
-                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2);
-                            ctx.save();
-                        }
-                    }]
+                    data: { labels: ['رصيد', 'دائن'], datasets: [{ data: [balance2026, daen2026], backgroundColor: ['#c95a52', '#2f9e6f'], borderWidth: 0 }] },
+                    options: { cutout: '78%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
+                    plugins: [{ id: 'centerText', beforeDraw(chart) { const { width, height, ctx } = chart; ctx.restore(); ctx.font = "bold 22px Tajawal"; ctx.fillStyle = "#2f2a24"; ctx.textBaseline = "middle"; const text = `${rate}%`; ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2); ctx.save(); } }]
                 });
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
                 document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 50));
                 lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-            }
+            } catch (e) { console.error(e); }
         }
-
-        function goToStatement() {
-            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
+        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
         window.onload = init;
     </script>
 </body>
