@@ -912,7 +912,8 @@
             return wrapper;
         }
 
-        window.savePDF = async () => {
+        <script>
+window.savePDF = async () => {
     const pdfRoot = document.getElementById('pdf_export_root');
     if (!pdfRoot) {
         alert('PDF root not found');
@@ -933,9 +934,7 @@
     const filenameBase = (
         document.getElementById('statement_tenant_name')?.innerText ||
         'Jabri_Statement'
-    )
-        .trim()
-        .replace(/[\\/:*?"<>|]/g, '_');
+    ).trim().replace(/[\\/:*?"<>|]/g, '_');
 
     const opt = {
         margin: [0, 0, 0, 0],
@@ -963,24 +962,28 @@
     };
 
     try {
-    await new Promise(resolve => {
-        requestAnimationFrame(() => {
-            requestAnimationFrame(resolve);
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
         });
-    });
 
-    await html2pdf().set(opt).from(pdfContent).save();
+        await html2pdf().set(opt).from(pdfContent).save();
 
-} catch (error) { 
-    console.error('PDF export failed:', error);
-    alert('حدث خطأ أثناء إنشاء PDF');
+    } catch (error) {
+        console.error('PDF export failed:', error);
+        alert('حدث خطأ أثناء إنشاء PDF');
 
-} finally {
-    pdfRoot.classList.remove('exporting');
-    pdfRoot.innerHTML = '';
-}
+    } finally {
+        pdfRoot.classList.remove('exporting');
+        pdfRoot.innerHTML = '';
+    }
+};
 
 init();
+</script>
+</body>
+</html>
     </script>
 </body>
 </html>
