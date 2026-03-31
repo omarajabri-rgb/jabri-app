@@ -301,7 +301,7 @@
         }
 
         .carry-row td {
-            font-style: italic;
+            font-style: normal;
         }
 
         .main-row td {
@@ -403,25 +403,46 @@
         }
 
         .back-btn,
-        .save-btn {
-            padding: 12px 20px;
-            border-radius: 16px;
-            font-weight: 900;
-            cursor: pointer;
-            border: 1px solid rgba(201,164,107,0.18);
-            background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
-            color: var(--text);
-            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.2s ease;
-        }
+.save-btn {
+    padding: 16px 32px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
 
-        .back-btn:hover,
-        .save-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 24px rgba(120,95,56,0.12);
-        }
+    min-width: 130px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(201,164,107,0.18);
+    background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+    color: var(--text);
+
+    box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    transition: all 0.25s ease;
+}
+
+.back-btn:hover,
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(120,95,56,0.15);
+}
+
+/* زر الحفظ (مميز) */
+.save-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color: #fff;
+    border: none;
+}
+
+.save-btn:hover {
+    box-shadow: 0 16px 30px rgba(201,164,107,0.25);
+}
 
         #loader {
             position: fixed;
