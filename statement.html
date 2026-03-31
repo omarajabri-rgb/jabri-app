@@ -301,10 +301,10 @@
             border-radius: 18px;
             text-align: center;
             border: 1px solid rgba(201,164,107,0.18);
-            background: linear-gradient(135deg, rgba(255,255,255,0.86), rgba(255,255,255,0.28));
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+            transition: all 0.25s ease;
         }
 
         .year-summary-box span {
@@ -321,9 +321,24 @@
             font-weight: 900;
         }
 
+        .year-summary-box.credit-box {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+        }
+
         .year-summary-box.credit-box span,
         .year-summary-box.credit-box b {
             color: var(--success);
+        }
+
+        .year-summary-box.balance-box.paid {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+        }
+
+        .year-summary-box.balance-box.late {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+            border-color: rgba(204,90,80,0.22);
         }
 
         .year-summary-box.balance-box.paid span,
@@ -367,6 +382,16 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:focus,
+        .back-btn:active {
+            outline: none;
+            background: rgba(255,255,255,0.7);
+            color: var(--text);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            transform: none;
         }
 
         .save-btn {
@@ -414,20 +439,28 @@
             }
 
             .year-head {
+                min-height: 58px;
                 padding: 14px 12px;
-                min-height: auto;
-                flex-direction: column;
-                gap: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .year-status {
-                position: static;
-                left: auto;
+                position: absolute;
+                left: 12px;
                 right: auto;
-                top: auto;
-                transform: none;
+                top: 50%;
+                transform: translateY(-50%);
                 display: inline-block;
-                margin-bottom: 0;
+                margin: 0;
+                font-size: 11px;
+                padding: 7px 12px;
+            }
+
+            .year-title {
+                width: 100%;
+                justify-content: center;
             }
 
             .year-chip {
@@ -490,11 +523,11 @@
             }
 
             .year-status {
+                position: absolute !important;
                 left: 12px !important;
                 right: auto !important;
                 top: 50% !important;
                 transform: translateY(-50%) !important;
-                position: absolute !important;
             }
 
             .year-footer {
