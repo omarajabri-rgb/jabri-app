@@ -648,18 +648,34 @@
                     ...openingFees
                 ];
 
-                if (existingCarryRows.length > 0) {
-                    itemsRaw.push(...existingCarryRows);
-                } else if (carryBalance > 0) {
-                    itemsRaw.push({
-                        date: `${year}-01-01`,
-                        description: `رصيد سابق عام ${year - 1}`,
-                        debit: carryBalance,
-                        credit: 0,
-                        receipt_no: '-',
-                        isCarry: true
-                    });
-                }
+                // 🔥 فحص إذا في رصيد افتتاحي يدوي داخل نفس السنة
+const hasManualOpeningBalanceRow = yearRows.some(r => {
+    const d = new Date(r.date);
+    const isOpeningDate = d.getDate() === 1 && d.getMonth() === 0;
+    const debit = toNumber(r.debit);
+    const desc = (r.description || '').trim();
+
+    return (
+        isOpeningDate &&
+        debit > 0 &&
+        !desc.includes('ايجار') &&
+        !desc.includes('الإيجار') &&
+        !desc.includes('معارف')
+    );
+});
+
+if (existingCarryRows.length > 0) {
+    itemsRaw.push(...existingCarryRows);
+} else if (!hasManualOpeningBalanceRow && carryBalance > 0) {
+    itemsRaw.push({
+        date: `${year}-01-01`,
+        description: `رصيد سابق عام ${year - 1}`,
+        debit: carryBalance,
+        credit: 0,
+        receipt_no: '-',
+        isCarry: true
+    });
+}
 
                 itemsRaw.push(...otherRows);
 
