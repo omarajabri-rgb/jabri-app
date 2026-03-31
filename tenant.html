@@ -207,6 +207,7 @@
             font-size: 15px;
             font-weight: 900;
             margin-bottom: 8px;
+            color: var(--muted);
         }
 
         .soft-card b {
@@ -368,11 +369,11 @@
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
-                <span>دائن</span>
+                <span style="color: #7a6c59;">دائن</span>
                 <b id="val_credit">0</b>
             </div>
             <div class="soft-card balance-card reveal">
-                <span>الرصيد</span>
+                <span style="color: #7a6c59;">الرصيد</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
@@ -488,19 +489,43 @@
                         cutout: '78%',
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, color: '#5d5347', font: { family: 'Tajawal', weight: '700' } } } }
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold',
+                                        family: 'Tajawal'
+                                    },
+                                    color: '#2f2a24',
+                                    padding: 16,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 10
+                                }
+                            }
+                        }
                     },
                     plugins: [{
                         id: 'centerText',
                         beforeDraw(chart) {
                             const { width, height, ctx } = chart;
+                            if (!chart._animatedValue) chart._animatedValue = 0;
+                            const target = rate;
+                            chart._animatedValue += (target - chart._animatedValue) * 0.08;
+
                             ctx.restore();
-                            ctx.font = "bold 22px Tajawal";
+                            ctx.font = "bold 42px Tajawal";
                             ctx.fillStyle = "#2f2a24";
                             ctx.textBaseline = "middle";
-                            const text = `${rate}%`;
+                            const text = `${Math.round(chart._animatedValue)}%`;
                             ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2);
                             ctx.save();
+
+                            if (Math.abs(chart._animatedValue - target) > 0.5) {
+                                chart.draw();
+                            }
                         }
                     }]
                 });
