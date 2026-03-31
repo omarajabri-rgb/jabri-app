@@ -457,129 +457,58 @@
             to { transform: rotate(360deg); }
         }
 
-        /* =========================================
-   🖨️ PDF EXPORT ENGINE (A4 OPTIMIZED)
-   ========================================= */
+        
+    window.savePDF = async () => {
+    const pdfRoot = document.getElementById('pdf_export_root');
+    pdfRoot.innerHTML = ''; // تنظيف أي محتوى قديم
 
-/* =========================================
-       🖨️ PDF EXPORT ENGINE (A4 SMART VIEW)
-       ========================================= */
+    // 1. إنشاء حاوية الورق الكبيرة
+    const pageWrapper = document.createElement('div');
+    pageWrapper.className = 'pdf-page-wrapper';
 
-    /* =========================================
-       🖨️ PDF EXPORT ENGINE (A4 FULL WIDTH)
-       ========================================= */
+    // 2. نسخ الهيدر (عنوان مجمع جبري)
+    const header = document.querySelector('.statement-header').cloneNode(true);
+    pageWrapper.appendChild(header);
 
-    #pdf_export_root {
-        position: fixed;
-        /* 🔥 نضعه بعيداً جداً لكن مع إبقاء العرض صريحاً */
-        left: -9999px; 
-        top: 0;
-        width: 794px !important; 
-        background: #ffffff;
-        z-index: -9999;
-        opacity: 1;
-        pointer-events: none;
-        overflow: visible;
+    // 3. نسخ كل السنوات (Year Cards) واحدة تلو الأخرى لضمان ظهورها كلها
+    const allYears = document.getElementById('years_container').querySelectorAll('.year-card');
+    allYears.forEach(card => {
+        const cardClone = card.cloneNode(true);
+        // نلغي أي Scroll جانبي للموبايل عشان يفرش بالـ PDF
+        cardClone.style.overflow = 'visible'; 
+        pageWrapper.appendChild(cardClone);
+    });
+
+    pdfRoot.appendChild(pageWrapper);
+
+    // 4. إعدادات المحرك الذكي
+    const opt = {
+        margin: [10, 10, 10, 10], // هوامش أمان للطابعة (1 سم من كل جهة)
+        filename: `كشف_حساب_مجمع_جبري.pdf`,
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: { 
+            scale: 2,           // دقة عالية جداً
+            useCORS: true, 
+            width: 794,         // عرض اللقطة بالبكسل
+            windowWidth: 794,   // 👈 السر: إجبار المحرك على رؤية العرض الكامل
+            scrollY: 0,         // يبدأ التصوير من أعلى نقطة
+            letterRendering: true
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        // 🎯 التقطيع التلقائي الذكي لكل الصفحات
+        pagebreak: { mode: ['css', 'legacy'] } 
+    };
+
+    try {
+        // ننتظر ثانية لضمان أن المتصفح رسم كل الجداول في الحاوية المخفية
+        await new Promise(resolve => setTimeout(resolve, 800));
+        await html2pdf().set(opt).from(pageWrapper).save();
+    } catch (error) {
+        console.error("PDF Export Failed:", error);
+    } finally {
+        pdfRoot.innerHTML = ''; // تنظيف بعد الانتهاء
     }
-
-    #pdf_export_root .pdf-sheet {
-        width: 794px !important;
-        min-width: 794px !important; /* 🔥 يمنع الانكماش على الموبايل */
-        background: #ffffff;
-        color: #2f2a24;
-        direction: rtl;
-        padding: 40px 30px;
-        display: block;
-        box-sizing: border-box;
-    }
-
-    /* 🎯 إجبار الحاوية على ملء الـ 794px بالكامل */
-    #pdf_export_root .wrap {
-        width: 100% !important;
-        min-width: 734px !important; /* عرض الورقة ناقص الهوامش */
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: block !important;
-    }
-
-    /* 🎯 الهيدر الرسمي للطباعة */
-    #pdf_export_root .statement-header {
-        background: #ffffff !important;
-        border: 2px solid #c9a46b !important;
-        border-radius: 0 !important;
-        margin-bottom: 25px;
-        padding: 20px !important;
-        text-align: center;
-        box-shadow: none !important;
-    }
-
-    #pdf_export_root .statement-header h1 {
-        color: #b18a52 !important;
-        font-size: 26px !important;
-        margin: 0 0 5px 0 !important;
-        font-weight: 900 !important;
-    }
-
-    /* 🎯 الجدول: الحل النهائي لمشكلة "المحشور لليسار" */
-    #pdf_export_root .statement-table {
-        width: 100% !important;
-        min-width: 100% !important;
-        table-layout: fixed !important; /* 🔥 يوزع الأعمدة غصباً عن المحرك */
-        border-collapse: collapse !important;
-        border: 1px solid #d8c9af !important;
-    }
-
-    #pdf_export_root .statement-table th,
-    #pdf_export_root .statement-table td {
-        font-size: 11px !important;
-        padding: 10px 5px !important;
-        line-height: 1.4 !important;
-        border: 1px solid #eee !important;
-        word-wrap: break-word;
-        white-space: normal !important; /* 🔥 يسمح بكسر النص بدل "مط" الجدول */
-    }
-
-    /* 📏 توزيع الأعمدة الذهبي الخاص بك */
-    #pdf_export_root .statement-table th:nth-child(5) { width: 30%; } /* البيان */
-    #pdf_export_root .statement-table th:nth-child(1),
-    #pdf_export_root .statement-table th:nth-child(6) { width: 12%; } /* التاريخ والسند */
-    #pdf_export_root .statement-table th:nth-child(2),
-    #pdf_export_root .statement-table th:nth-child(3),
-    #pdf_export_root .statement-table th:nth-child(4) { width: 15.33%; } /* المبالغ */
-
-    /* 🎯 بطاقة السنة والتقسيم */
-    #pdf_export_root .year-card {
-        background: #ffffff !important;
-        border: 1px solid #d8c9af !important;
-        border-radius: 0 !important;
-        margin-bottom: 25px;
-        width: 100% !important;
-        box-shadow: none !important;
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-
-    #pdf_export_root .year-head {
-        background: #fcfbf6 !important;
-        border-bottom: 1px solid #d8c9af !important;
-        padding: 10px !important;
-    }
-
-    /* ألوان الطباعة */
-    #pdf_export_root .statement-table tbody tr:nth-child(odd) td { background: #fdfbf6 !important; }
-    #pdf_export_root .statement-table tbody tr:even td { background: #ffffff !important; }
-    #pdf_export_root .balance-late { color: #c95a52 !important; font-weight: bold; }
-    #pdf_export_root .balance-paid { color: #2f9e6f !important; font-weight: bold; }
-
-    /* إخفاء الزوائد */
-    #pdf_export_root .bottom-actions,
-    #pdf_export_root .year-status,
-    #pdf_export_root #loader,
-    #pdf_export_root .back-btn,
-    #pdf_export_root .save-btn {
-        display: none !important;
-    }
+};
 </style>
     </head>
     <div id="loader"><div class="spinner"></div></div>
