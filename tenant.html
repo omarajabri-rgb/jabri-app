@@ -156,7 +156,7 @@
             </section>
             <section class="smart-card glass reveal" id="advice_box">
                 <div class="tag" style="background:var(--info)">التوصية</div>
-                <div id="advice_message" style="font-weight:700;">جاري الإعداد...</div>
+                <div id="advice_message" style="font-weight:700;">جاري إعداد التوصية...</div>
             </section>
         </div>
 
@@ -179,18 +179,42 @@
         let transactions = [];
 
         function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
-        
-        // التحديث الجديد لتنسيق العملة (أرقام صحيحة)
-        function formatCurrency(v) {
-            return `${Math.round(toNumber(v)).toLocaleString('en-US')} `;
+        function formatCurrency(v) { return `${Math.round(toNumber(v)).toLocaleString('en-US')} `; }
+
+        function getYearStatementSummary(previousBalance, allTransactions, targetYear = 2026) {
+            const grouped = {};
+            allTransactions.forEach(t => {
+                const y = new Date(t.date).getFullYear();
+                if (!grouped[y]) grouped[y] = [];
+                grouped[y].push(t);
+            });
+
+            const years = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+            let carryBalance = toNumber(previousBalance);
+            let result = { year: targetYear, totalDebit: 0, totalCredit: 0, finalBalance: carryBalance };
+
+            years.forEach(year => {
+                const yearRows = (grouped[year] || []).slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+                let totalDebit = yearRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
+                let totalCredit = yearRows.reduce((sum, row) => sum + toNumber(row.credit), 0);
+                let yearBalance = carryBalance + totalDebit - totalCredit;
+
+                if (year === targetYear) {
+                    result = {
+                        year,
+                        totalDebit: carryBalance + totalDebit,
+                        totalCredit,
+                        finalBalance: Math.max(0, yearBalance)
+                    };
+                }
+                carryBalance = yearBalance;
+            });
+            return result;
         }
 
         function goToStatement() {
             const code = localStorage.getItem('jabri_tenant_code');
-            if (!code) {
-                alert('لا يوجد مستأجر');
-                return;
-            }
+            if (!code) { alert('لا يوجد مستأجر'); return; }
             window.location.href = `statement.html?tenant=${encodeURIComponent(code)}`;
         }
 
@@ -257,18 +281,16 @@
                 const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
                 
                 transactions = tx || [];
-                const totalDebit = transactions.reduce((s,t)=>s+toNumber(t.debit), 0);
-                const totalCredit = transactions.reduce((s,t)=>s+toNumber(t.credit), 0);
                 
-                const daen = totalCredit;
-                const balance = Math.max(0, totalDebit - totalCredit);
-                const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 100;
+                const summary2026 = getYearStatementSummary(tenant?.previous_balance || 0, transactions, 2026);
+                const daen = summary2026.totalCredit;
+                const balance = summary2026.finalBalance;
+                const totalDue = summary2026.totalDebit;
+                const collectionRate = totalDue > 0 ? Math.round((daen / totalDue) * 100) : 100;
 
-                // تحديث الخلفية والاسم
                 document.body.style.background = balance === 0 ? 'linear-gradient(135deg,#edf7f1,#f6fff9)' : 'linear-gradient(135deg,#f7f4ed,#fdfbf6)';
                 document.getElementById('t_name').innerText = tenant.tenant_name;
                 
-                // تحديث الـ Status Chip الجديد
                 const chip = document.getElementById('account_status_chip');
                 if (balance === 0) {
                     chip.innerText = 'مسدد';
@@ -278,7 +300,6 @@
                     chip.style.background = 'linear-gradient(135deg, #d96a60, #cc5a50)';
                 }
 
-                // تحديث المبالغ والألوان
                 document.getElementById('val_credit').style.color = '#2f9e6f';
                 const balanceEl = document.getElementById('val_balance');
                 if (balance === 0) {
@@ -288,7 +309,6 @@
                     balanceEl.style.color = '#cc5a50';
                 }
 
-                // تحديث نظام الإشعارات الجديد
                 const notificationsBox = document.getElementById('notifications_box');
                 if (notificationsBox) {
                     if (balance === 0) {
