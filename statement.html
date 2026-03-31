@@ -459,18 +459,23 @@
 
         /* PDF ONLY */
         #pdf_export_root {
-    position: absolute;
-    left: 0;
+    position: fixed;
     top: 0;
+    left: 0;
     width: 794px;
     background: #ffffff;
-    z-index: -1;
-    opacity: 0.01;
+    z-index: -9999;
+    opacity: 0;
     pointer-events: none;
     overflow: visible;
 }
 
-/* الصفحة */
+#pdf_export_root.exporting {
+    z-index: 99999 !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+
 #pdf_export_root .pdf-sheet {
     width: 794px;
     min-height: 1123px;
@@ -483,7 +488,6 @@
     overflow: visible;
 }
 
-/* wrapper */
 #pdf_export_root .wrap {
     width: 100% !important;
     max-width: 100% !important;
@@ -492,7 +496,6 @@
     display: block !important;
 }
 
-/* إزالة تأثيرات */
 #pdf_export_root .statement-header,
 #pdf_export_root .year-card,
 #pdf_export_root .year-summary-box,
@@ -503,7 +506,6 @@
     box-shadow: none !important;
 }
 
-/* الهيدر */
 #pdf_export_root .statement-header {
     background: #ffffff !important;
     border: 2px solid #c9a46b !important;
@@ -512,7 +514,6 @@
     text-align: center;
 }
 
-/* كرت السنة */
 #pdf_export_root .year-card {
     background: #ffffff !important;
     border: 1px solid #d8c9af !important;
@@ -522,8 +523,6 @@
     page-break-inside: avoid !important;
     overflow: visible !important;
 }
-
-/* ================== الجدول الذكي ================== */
 
 #pdf_export_root .statement-table {
     width: 100% !important;
@@ -546,14 +545,12 @@
     overflow-wrap: break-word !important;
 }
 
-/* الهيدر */
 #pdf_export_root .statement-table th {
     background: #f7f1e6 !important;
     font-weight: 800 !important;
     color: #2f2a24 !important;
 }
 
-/* توزيع الأعمدة الذكي */
 #pdf_export_root .statement-table td:nth-child(1),
 #pdf_export_root .statement-table th:nth-child(1) {
     width: 14% !important;
@@ -579,7 +576,6 @@
     width: 13% !important;
 }
 
-/* صفوف */
 #pdf_export_root .statement-table tbody tr:nth-child(odd) td {
     background: #fdfbf6 !important;
 }
@@ -592,7 +588,6 @@
     background: inherit !important;
 }
 
-/* إخفاء */
 #pdf_export_root .bottom-actions,
 #pdf_export_root #loader {
     display: none !important;
@@ -918,45 +913,73 @@
         }
 
         window.savePDF = async () => {
-            const pdfRoot = document.getElementById('pdf_export_root');
-            pdfRoot.innerHTML = '';
+    const pdfRoot = document.getElementById('pdf_export_root');
+    if (!pdfRoot) {
+        alert('PDF root not found');
+        return;
+    }
 
-            const pdfContent = buildPDFClone();
-            pdfRoot.appendChild(pdfContent);
+    pdfRoot.innerHTML = '';
 
-            const filenameBase = (document.getElementById('statement_tenant_name')?.innerText || 'Jabri_Statement').trim();
+    const pdfContent = buildPDFClone();
+    if (!pdfContent) {
+        alert('PDF content could not be created');
+        return;
+    }
 
-            const opt = {
-                margin: [6, 6, 6, 6],
-                filename: `${filenameBase}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    width: 794,
-                    windowWidth: 794,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-                pagebreak: {
-                    mode: ['css', 'legacy']
-                }
-            };
+    pdfRoot.appendChild(pdfContent);
+    pdfRoot.classList.add('exporting');
 
-            try {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                await html2pdf().set(opt).from(pdfContent).save();
-            } finally {
-                pdfRoot.innerHTML = '';
-            }
-        };
+    const filenameBase = (
+        document.getElementById('statement_tenant_name')?.innerText ||
+        'Jabri_Statement'
+    )
+        .trim()
+        .replace(/[\\/:*?"<>|]/g, '_');
 
-        init();
+    const opt = {
+        margin: [0, 0, 0, 0],
+        filename: `${filenameBase}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: 794,
+            windowWidth: 794,
+            scrollX: 0,
+            scrollY: 0
+        },
+        jsPDF: {
+            unit: 'px',
+            format: [794, 1123],
+            orientation: 'portrait'
+        },
+        pagebreak: {
+            mode: ['css', 'legacy']
+        }
+    };
+
+    try {
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+        await html2pdf().set(opt).from(pdfRoot).save();
+    } catch (error) {
+        console.error('PDF export failed:', error);
+        alert('حدث خطأ أثناء إنشاء PDF');
+    } finally {
+        pdfRoot.classList.remove('exporting');
+        pdfRoot.innerHTML = '';
+    }
+};
+
+init();
     </script>
 </body>
 </html>
