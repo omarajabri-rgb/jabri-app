@@ -6,7 +6,6 @@
     <title>مجمع جبري | كشف الحساب التفصيلي</title>
 
     <script defer src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -48,6 +47,8 @@
             max-width: 1120px;
             margin: 0 auto;
             padding-bottom: 42px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .statement-header {
@@ -103,6 +104,7 @@
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
             transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
             background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
+            break-inside: avoid;
         }
 
         .year-card.status-paid {
@@ -204,6 +206,9 @@
         .statement-table td {
             text-align: center;
             vertical-align: middle;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .statement-table th {
@@ -457,142 +462,286 @@
             to { transform: rotate(360deg); }
         }
 
-        /* PDF ONLY */
-        #pdf_export_root {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 794px;
-    background: #ffffff;
-    z-index: -9999;
-    opacity: 0;
-    pointer-events: none;
-    overflow: visible;
-}
+        /* =========================
+           Print / Save as PDF
+           ========================= */
 
-#pdf_export_root.exporting {
-    z-index: 99999 !important;
-    opacity: 1 !important;
-    pointer-events: none !important;
-}
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
 
-#pdf_export_root .pdf-sheet {
-    width: 794px;
-    min-height: 1123px;
-    padding: 40px 35px;
-    background: #ffffff;
-    color: #2f2a24;
-    direction: rtl;
-    display: block;
-    box-sizing: border-box;
-    overflow: visible;
-}
+            .wrap {
+                max-width: 100%;
+                padding-bottom: 24px;
+            }
 
-#pdf_export_root .wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
-}
+            .statement-header {
+                border-radius: 20px;
+                padding: 18px 14px;
+            }
 
-#pdf_export_root .statement-header,
-#pdf_export_root .year-card,
-#pdf_export_root .year-summary-box,
-#pdf_export_root .year-chip,
-#pdf_export_root .year-status {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
-}
+            .statement-header h1 {
+                font-size: 22px;
+            }
 
-#pdf_export_root .statement-header {
-    background: #ffffff !important;
-    border: 2px solid #c9a46b !important;
-    margin-bottom: 30px;
-    padding: 25px !important;
-    text-align: center;
-}
+            .statement-header h2 {
+                font-size: 17px;
+            }
 
-#pdf_export_root .year-card {
-    background: #ffffff !important;
-    border: 1px solid #d8c9af !important;
-    margin-bottom: 30px;
-    width: 100% !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    overflow: visible !important;
-}
+            #statement_date {
+                font-size: 12px;
+            }
 
-#pdf_export_root .statement-table {
-    width: 100% !important;
-    table-layout: auto !important;
-    border-collapse: collapse !important;
-    border: 1px solid #d8c9af !important;
-    margin-bottom: 20px;
-}
+            .year-card {
+                border-radius: 20px;
+                margin-bottom: 18px;
+            }
 
-#pdf_export_root .statement-table th,
-#pdf_export_root .statement-table td {
-    font-size: 11px !important;
-    padding: 8px 6px !important;
-    line-height: 1.4 !important;
-    border: 1px solid #eee !important;
-    vertical-align: middle !important;
-    text-align: center !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-}
+            .year-head {
+                padding: 14px 12px;
+            }
 
-#pdf_export_root .statement-table th {
-    background: #f7f1e6 !important;
-    font-weight: 800 !important;
-    color: #2f2a24 !important;
-}
+            .year-status {
+                position: static;
+                transform: none;
+                display: inline-block;
+                margin-bottom: 10px;
+            }
 
-#pdf_export_root .statement-table td:nth-child(1),
-#pdf_export_root .statement-table th:nth-child(1) {
-    width: 14% !important;
-}
+            .year-chip {
+                font-size: 17px;
+                padding: 7px 14px;
+            }
 
-#pdf_export_root .statement-table td:nth-child(2),
-#pdf_export_root .statement-table th:nth-child(2),
-#pdf_export_root .statement-table td:nth-child(3),
-#pdf_export_root .statement-table th:nth-child(3),
-#pdf_export_root .statement-table td:nth-child(4),
-#pdf_export_root .statement-table th:nth-child(4) {
-    width: 13% !important;
-}
+            .statement-table th,
+            .statement-table td {
+                font-size: 10px;
+                padding: 6px 4px;
+                line-height: 1.35;
+            }
 
-#pdf_export_root .statement-table td:nth-child(5),
-#pdf_export_root .statement-table th:nth-child(5) {
-    width: 34% !important;
-    text-align: right !important;
-}
+            .year-footer {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 12px;
+            }
 
-#pdf_export_root .statement-table td:nth-child(6),
-#pdf_export_root .statement-table th:nth-child(6) {
-    width: 13% !important;
-}
+            .year-summary-box {
+                padding: 12px;
+            }
 
-#pdf_export_root .statement-table tbody tr:nth-child(odd) td {
-    background: #fdfbf6 !important;
-}
+            .year-summary-box b {
+                font-size: 16px;
+            }
 
-#pdf_export_root .statement-table tbody tr:nth-child(even) td {
-    background: #ffffff !important;
-}
+            .bottom-actions {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
 
-#pdf_export_root .statement-table tbody tr:hover td {
-    background: inherit !important;
-}
+            .back-btn,
+            .save-btn {
+                width: 100%;
+                min-width: 0;
+                height: 48px;
+                font-size: 14px;
+                border-radius: 16px;
+            }
+        }
 
-#pdf_export_root .bottom-actions,
-#pdf_export_root #loader {
-    display: none !important;
-}
-        </style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        @media print {
+            html,
+            body {
+                width: 210mm;
+                min-height: 297mm;
+                background: #ffffff !important;
+                color: #2f2a24 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            body {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+
+            #loader,
+            .bottom-actions {
+                display: none !important;
+            }
+
+            .wrap {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .statement-header,
+            .year-card,
+            .year-summary-box,
+            .year-chip,
+            .year-status {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                box-shadow: none !important;
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .statement-header {
+                background: #ffffff !important;
+                border: 1px solid #c9a46b !important;
+                border-radius: 18px !important;
+                margin-bottom: 12px !important;
+                padding: 14px !important;
+                text-align: center !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .statement-header h1 {
+                font-size: 20px !important;
+                margin: 0 0 6px !important;
+            }
+
+            .statement-header h2 {
+                font-size: 16px !important;
+                margin: 0 0 4px !important;
+            }
+
+            #statement_date {
+                font-size: 11px !important;
+                margin: 0 !important;
+            }
+
+            .year-card {
+                background: #ffffff !important;
+                border: 1px solid #d8c9af !important;
+                border-radius: 16px !important;
+                margin-bottom: 10px !important;
+                overflow: visible !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .year-head {
+                padding: 10px 12px !important;
+                text-align: center !important;
+            }
+
+            .year-status {
+                position: static !important;
+                transform: none !important;
+                display: inline-block !important;
+                margin-bottom: 6px !important;
+                font-size: 10px !important;
+                padding: 5px 10px !important;
+            }
+
+            .year-title {
+                display: block !important;
+            }
+
+            .year-chip {
+                display: inline-block !important;
+                font-size: 16px !important;
+                padding: 6px 14px !important;
+            }
+
+            .statement-table {
+                width: 100% !important;
+                table-layout: auto !important;
+                border-collapse: collapse !important;
+                margin: 0 !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .statement-table thead {
+                display: table-header-group !important;
+            }
+
+            .statement-table tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .statement-table th,
+            .statement-table td {
+                font-size: 10px !important;
+                padding: 5px 4px !important;
+                line-height: 1.3 !important;
+                border: 1px solid rgba(201,164,107,0.22) !important;
+                text-align: center !important;
+                vertical-align: middle !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                background: #ffffff !important;
+                color: #2f2a24 !important;
+            }
+
+            .statement-table th {
+                background: #f7f1e6 !important;
+                font-weight: 900 !important;
+            }
+
+            .statement-table td:nth-child(5),
+            .statement-table th:nth-child(5) {
+                text-align: right !important;
+            }
+
+            .chip {
+                background: #f7f1e6 !important;
+                border: 1px solid rgba(201,164,107,0.24) !important;
+                color: #2f2a24 !important;
+                box-shadow: none !important;
+            }
+
+            .year-footer {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                padding: 10px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .year-summary-box {
+                background: #ffffff !important;
+                border: 1px solid #d8c9af !important;
+                border-radius: 14px !important;
+                padding: 10px !important;
+            }
+
+            .year-summary-box span {
+                font-size: 10px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .year-summary-box b {
+                font-size: 15px !important;
+            }
+
+            .payment-new {
+                animation: none !important;
+            }
+
+            a,
+            button {
+                text-decoration: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
@@ -608,11 +757,9 @@
 
         <div class="bottom-actions">
             <button class="back-btn" onclick="window.history.back()">رجوع</button>
-            <button class="save-btn" onclick="savePDF()">حفظ</button>
+            <button class="save-btn" type="button" onclick="window.print()">حفظ PDF</button>
         </div>
     </div>
-
-    <div id="pdf_export_root"></div>
 
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -893,97 +1040,7 @@
             });
         }
 
-        function buildPDFClone() {
-    const original = document.querySelector('.wrap');
-    const clone = original.cloneNode(true);
-
-    const actions = clone.querySelector('.bottom-actions');
-    if (actions) actions.remove();
-
-    clone.style.maxWidth = '100%';
-    clone.style.width = '100%';
-    clone.style.margin = '0';
-    clone.style.padding = '0';
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'pdf-sheet';
-    wrapper.appendChild(clone);
-
-    return wrapper;
-}
-
-window.savePDF = async () => {
-    // باقي الكود هنا
-};
-window.savePDF = async () => {
-    const pdfRoot = document.getElementById('pdf_export_root');
-    if (!pdfRoot) {
-        alert('PDF root not found');
-        return;
-    }
-
-    pdfRoot.innerHTML = '';
-
-    const pdfContent = buildPDFClone();
-    if (!pdfContent) {
-        alert('PDF content could not be created');
-        return;
-    }
-
-    pdfRoot.appendChild(pdfContent);
-    pdfRoot.classList.add('exporting');
-
-    const filenameBase = (
-        document.getElementById('statement_tenant_name')?.innerText ||
-        'Jabri_Statement'
-    ).trim().replace(/[\\/:*?"<>|]/g, '_');
-
-    const opt = {
-        margin: [0, 0, 0, 0],
-        filename: `${filenameBase}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: 794,
-            windowWidth: 794,
-            scrollX: 0,
-            scrollY: 0
-        },
-        jsPDF: {
-            unit: 'px',
-            format: [794, 1123],
-            orientation: 'portrait'
-        },
-        pagebreak: {
-            mode: ['css', 'legacy']
-        }
-    };
-
-    try {
-        await new Promise(resolve => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(resolve);
-            });
-        });
-
-        await html2pdf().set(opt).from(pdfContent).save();
-
-    } catch (error) {
-        console.error('PDF export failed:', error);
-        alert('حدث خطأ أثناء إنشاء PDF');
-
-    } finally {
-        pdfRoot.classList.remove('exporting');
-        pdfRoot.innerHTML = '';
-    }
-};
-
-init();
-</script>
+        init();
+    </script>
 </body>
 </html>
-    
