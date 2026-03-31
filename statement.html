@@ -223,7 +223,6 @@
             border: 1px solid rgba(201,164,107,0.15);
         }
 
-        /* zebra على كل الصفوف وبألوان أفتح */
         .statement-table tbody tr:nth-child(odd) td {
             background: rgba(253,251,246,0.78);
         }
@@ -237,14 +236,12 @@
             transition: 0.2s;
         }
 
-        /* آخر صف */
         .statement-table tbody tr:last-child td,
         .last-row td {
             border-bottom: 2px solid var(--gold) !important;
             box-shadow: inset 0 -1px 0 rgba(201,164,107,0.35);
         }
 
-        /* الأعمدة */
         .statement-table th:nth-child(1),
         .statement-table td:nth-child(1),
         .statement-table th:nth-child(2),
@@ -348,7 +345,6 @@
             font-weight: 900;
         }
 
-        /* دائن smart أخضر */
         .year-summary-box.credit-box {
             background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
             border-color: rgba(47,158,111,0.24);
@@ -359,7 +355,6 @@
             color: var(--success);
         }
 
-        /* رصيد السنة smart أخضر/أحمر */
         .year-summary-box.balance-box.paid {
             background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
             border-color: rgba(47,158,111,0.25);
@@ -403,46 +398,41 @@
         }
 
         .back-btn,
-.save-btn {
-    padding: 16px 32px;
-    border-radius: 20px;
-    font-weight: 900;
-    font-size: 15px;
-    cursor: pointer;
+        .save-btn {
+            padding: 16px 32px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            min-width: 130px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(201,164,107,0.18);
+            background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+            color: var(--text);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
 
-    min-width: 130px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        .back-btn:hover,
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(120,95,56,0.15);
+        }
 
-    border: 1px solid rgba(201,164,107,0.18);
-    background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
-    color: var(--text);
+        .save-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            border: none;
+        }
 
-    box-shadow: 0 10px 22px rgba(120,95,56,0.10);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    transition: all 0.25s ease;
-}
-
-.back-btn:hover,
-.save-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(120,95,56,0.15);
-}
-
-/* زر الحفظ (مميز) */
-.save-btn {
-    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-    color: #fff;
-    border: none;
-}
-
-.save-btn:hover {
-    box-shadow: 0 16px 30px rgba(201,164,107,0.25);
-}
+        .save-btn:hover {
+            box-shadow: 0 16px 30px rgba(201,164,107,0.25);
+        }
 
         #loader {
             position: fixed;
@@ -467,32 +457,95 @@
             to { transform: rotate(360deg); }
         }
 
-        body.pdf-export .wrap {
-            width: 1200px !important;
-            margin: auto !important;
+        /* PDF ONLY */
+        #pdf_export_root {
+            position: fixed;
+            left: -99999px;
+            top: 0;
+            width: 794px;
+            background: #ffffff;
+            z-index: -1;
+            visibility: hidden;
         }
 
-        body.pdf-export .statement-table td,
-        body.pdf-export .statement-table th {
-            font-size: 12px !important;
+        #pdf_export_root .pdf-sheet {
+            width: 794px;
+            padding: 18px;
+            background: #ffffff;
+            color: #2f2a24;
         }
 
-        body.pdf-export * {
-            animation: none !important;
-            transition: none !important;
+        #pdf_export_root .statement-header,
+        #pdf_export_root .year-card,
+        #pdf_export_root .year-summary-box,
+        #pdf_export_root .year-chip,
+        #pdf_export_root .year-status {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
             box-shadow: none !important;
         }
 
-        body.pdf-export .year-card,
-        body.pdf-export .statement-header {
+        #pdf_export_root .statement-header {
             background: #ffffff !important;
             border: 1px solid #d8c9af !important;
+            margin-bottom: 12px;
         }
 
-        body.pdf-export .bottom-actions,
-        body.pdf-export #loader {
+        #pdf_export_root .year-card {
+            background: #ffffff !important;
+            border: 1px solid #d8c9af !important;
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+            margin-bottom: 12px;
+        }
+
+        #pdf_export_root .statement-table {
+            width: 100% !important;
+            table-layout: fixed;
+        }
+
+        #pdf_export_root .statement-table th,
+        #pdf_export_root .statement-table td {
+            font-size: 10.5px !important;
+            padding: 5px 4px !important;
+            line-height: 1.25 !important;
+        }
+
+        #pdf_export_root .statement-table td:nth-child(5),
+        #pdf_export_root .statement-table th:nth-child(5) {
+            width: 26%;
+        }
+
+        #pdf_export_root .statement-table td:nth-child(1),
+        #pdf_export_root .statement-table th:nth-child(1),
+        #pdf_export_root .statement-table td:nth-child(6),
+        #pdf_export_root .statement-table th:nth-child(6) {
+            width: 14%;
+        }
+
+        #pdf_export_root .statement-table td:nth-child(2),
+        #pdf_export_root .statement-table th:nth-child(2),
+        #pdf_export_root .statement-table td:nth-child(3),
+        #pdf_export_root .statement-table th:nth-child(3),
+        #pdf_export_root .statement-table td:nth-child(4),
+        #pdf_export_root .statement-table th:nth-child(4) {
+            width: 15%;
+        }
+
+        #pdf_export_root .statement-table tbody tr:nth-child(odd) td {
+            background: rgba(253,251,246,0.78) !important;
+        }
+
+        #pdf_export_root .statement-table tbody tr:nth-child(even) td {
+            background: rgba(201,164,107,0.045) !important;
+        }
+
+        #pdf_export_root .statement-table tbody tr:hover td {
+            background: inherit !important;
+        }
+
+        #pdf_export_root .bottom-actions,
+        #pdf_export_root #loader {
             display: none !important;
         }
     </style>
@@ -514,6 +567,8 @@
             <button class="save-btn" onclick="savePDF()">حفظ</button>
         </div>
     </div>
+
+    <div id="pdf_export_root"></div>
 
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -669,37 +724,35 @@
                     ...openingFees
                 ];
 
-                // 🔥 فحص إذا في رصيد افتتاحي يدوي داخل نفس السنة
-const hasManualOpeningBalanceRow = yearRows.some(r => {
-    const d = new Date(r.date);
-    const isOpeningDate = d.getDate() === 1 && d.getMonth() === 0;
-    const debit = toNumber(r.debit);
-    const desc = (r.description || '').trim();
+                const hasManualOpeningBalanceRow = yearRows.some(r => {
+                    const d = new Date(r.date);
+                    const isOpeningDate = d.getDate() === 1 && d.getMonth() === 0;
+                    const debit = toNumber(r.debit);
+                    const desc = (r.description || '').trim();
 
-    return (
-        isOpeningDate &&
-        debit > 0 &&
-        !desc.includes('ايجار') &&
-        !desc.includes('الإيجار') &&
-        !desc.includes('معارف')
-    );
-});
+                    return (
+                        isOpeningDate &&
+                        debit > 0 &&
+                        !desc.includes('ايجار') &&
+                        !desc.includes('الإيجار') &&
+                        !desc.includes('معارف')
+                    );
+                });
 
-if (existingCarryRows.length > 0) {
-    itemsRaw.push(...existingCarryRows);
-} else if (!hasManualOpeningBalanceRow && carryBalance > 0) {
-    itemsRaw.push({
-        date: `${year}-01-01`,
-        description: `رصيد سابق عام ${year - 1}`,
-        debit: carryBalance,
-        credit: 0,
-        receipt_no: '-',
-        isCarry: true
-    });
-}
+                if (existingCarryRows.length > 0) {
+                    itemsRaw.push(...existingCarryRows);
+                } else if (!hasManualOpeningBalanceRow && carryBalance > 0) {
+                    itemsRaw.push({
+                        date: `${year}-01-01`,
+                        description: `رصيد سابق عام ${year - 1}`,
+                        debit: carryBalance,
+                        credit: 0,
+                        receipt_no: '-',
+                        isCarry: true
+                    });
+                }
 
                 itemsRaw.push(...otherRows);
-
                 itemsRaw.sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 const items = calculateRunningBalance(itemsRaw, 0);
@@ -796,20 +849,38 @@ if (existingCarryRows.length > 0) {
             });
         }
 
+        function buildPDFClone() {
+            const original = document.querySelector('.wrap');
+            const clone = original.cloneNode(true);
+
+            const actions = clone.querySelector('.bottom-actions');
+            if (actions) actions.remove();
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pdf-sheet';
+            wrapper.appendChild(clone);
+
+            return wrapper;
+        }
+
         window.savePDF = async () => {
-            const element = document.querySelector('.wrap');
-            document.body.classList.add('pdf-export');
+            const pdfRoot = document.getElementById('pdf_export_root');
+            pdfRoot.innerHTML = '';
+
+            const pdfContent = buildPDFClone();
+            pdfRoot.appendChild(pdfContent);
+
+            const filenameBase = (document.getElementById('statement_tenant_name')?.innerText || 'Jabri_Statement').trim();
 
             const opt = {
-                margin: 10,
-                filename: 'Jabri_Statement.pdf',
+                margin: [6, 6, 6, 6],
+                filename: `${filenameBase}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
-                    scale: 3,
-                    dpi: 300,
-                    letterRendering: true,
+                    scale: 2,
                     useCORS: true,
-                    scrollY: 0
+                    scrollY: 0,
+                    windowWidth: 794
                 },
                 jsPDF: {
                     unit: 'mm',
@@ -817,14 +888,14 @@ if (existingCarryRows.length > 0) {
                     orientation: 'portrait'
                 },
                 pagebreak: {
-                    mode: ['css', 'legacy', 'avoid-all']
+                    mode: ['css', 'legacy']
                 }
             };
 
             try {
-                await html2pdf().set(opt).from(element).save();
+                await html2pdf().set(opt).from(pdfContent).save();
             } finally {
-                document.body.classList.remove('pdf-export');
+                pdfRoot.innerHTML = '';
             }
         };
 
