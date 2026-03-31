@@ -467,6 +467,7 @@
     opacity: 0;
     pointer-events: none;
     overflow: hidden;
+    align-items: flex-start;
 }
 
 #pdf_export_root .pdf-sheet {
@@ -476,6 +477,12 @@
     background: #ffffff;
     color: #2f2a24;
     direction: rtl;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+
     overflow: hidden;
     page-break-after: always;
     break-after: page;
