@@ -658,7 +658,7 @@
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
             }
-        }
+        
 
         function render(prevBal, transactions) {
             const container = document.getElementById('years_container');
@@ -683,7 +683,8 @@
         if (d.includes('ايجار') || d.includes('الإيجار')) return 1;
         if (d.includes('معارف')) return 2;
         if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 3;
-        return 4;
+
+        return 99;
     };
 
     const pA = getPriority(a.description);
