@@ -497,7 +497,7 @@
         </div>
 
         <div class="actions reveal">
-            <button class="btn btn-gold" onclick="window.location.href='statement.html'">
+            <button class="btn btn-gold" onclick="goToStatement()">
                 <i data-lucide="file-text"></i>
                 كشف الحساب
             </button>
@@ -525,6 +525,15 @@
         let pieChart = null;
         let lineChart = null;
         const currentYear = new Date().getFullYear();
+
+        function goToStatement() {
+            const code = localStorage.getItem('jabri_tenant_code');
+            if (!code) {
+                alert('لا يوجد مستأجر');
+                return;
+            }
+            window.location.href = `statement.html?tenant=${encodeURIComponent(code)}`;
+        }
 
         function toNumber(value) {
             const n = parseFloat(value);
