@@ -62,16 +62,14 @@
         .hero-card h1 { margin: 0; font-size: 28px; font-weight: 900; color: var(--gold-deep); padding-left: 110px; }
         .hero-note { margin-top: 8px; color: var(--text); font-size: 13px; font-weight: 800; }
 
+        /* 🔥 Chip System Mapped to Right */
+        .chip-header { display: flex; justify-content: flex-end; margin-bottom: 12px; width: 100%; }
+        
         .chip {
             display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px;
             border-radius: 999px; font-size: 13px; font-weight: 900; letter-spacing: 0.5px;
-            color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            min-width: 120px; color: #fff; background: linear-gradient(135deg, var(--gold), var(--gold-deep));
             box-shadow: 0 6px 16px rgba(201,164,107,0.25);
-        }
-
-        .smart-header, .panel-header {
-            display: flex; justify-content: flex-end; /* 🔥 المحاذاة لليمين لجميع الأقسام */
-            align-items: center; margin-bottom: 12px; width: 100%;
         }
 
         .stats-grid, .content-grid { display: grid; gap: 16px; margin-bottom: 16px; }
@@ -85,17 +83,21 @@
         }
 
         .soft-card { text-align: center; }
-        .soft-card span { display: block; font-size: 14px; font-weight: 900; margin-bottom: 8px; }
-        .soft-card b { display: block; font-size: 26px; font-weight: 900; }
+        .soft-card span { display: block; font-size: 15px; font-weight: 900; margin-bottom: 8px; }
+        .soft-card b { display: block; font-size: 28px; font-weight: 900; }
 
         .credit-card { background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25)); border-color: rgba(47,158,111,0.24); color: var(--success); }
-        .balance-card { background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25)); border-color: rgba(204,90,80,0.22); color: var(--danger); }
+        .balance-card { background: linear-gradient(135deg, rgba(201,90,82,0.14), rgba(255,255,255,0.25)); border-color: rgba(201,90,82,0.22); color: var(--danger); }
 
-        .smart-body { font-size: 16px; line-height: 1.9; font-weight: 800; color: var(--text); text-align: right; white-space: pre-line; }
+        .smart-body { font-size: 16px; line-height: 1.9; font-weight: 800; color: var(--text); text-align: right; white-space: pre-line; margin-top: 5px; }
 
         .chart-wrap { min-height: 250px; display: flex; align-items: center; justify-content: center; }
-        .notify-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .notify-item { padding: 14px 18px; border-radius: 18px; font-size: 15px; font-weight: 900; background: #fff; border: 1px solid var(--border); text-align: right; color: var(--muted); }
+        
+        .notify-item { 
+            padding: 14px 18px; border-radius: 999px; font-size: 15px; font-weight: 900; 
+            background: #fff; border: 1px solid rgba(201,164,107,0.20); text-align: center; 
+            color: var(--muted); width: 100%; box-shadow: 0 6px 16px rgba(120,95,56,0.08);
+        }
 
         .action-btn { width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px; border-radius: 20px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; }
 
@@ -130,21 +132,21 @@
         </div>
 
         <div class="smart-card reveal">
-            <div class="smart-header">
+            <div class="chip-header">
                 <div class="chip">نصيحة محاسبية</div>
             </div>
-            <div id="smart_message" class="smart-body">جاري التحليل...</div>
+            <div id="smart_message" class="smart-body">لا توجد نصيحة محاسبية حالياً.</div>
         </div>
 
         <div class="content-grid">
             <section class="panel reveal">
-                <div class="panel-header"><div class="chip">ملخص الحساب</div></div>
+                <div class="chip-header"><div class="chip">ملخص الحساب</div></div>
                 <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
             </section>
 
             <section class="panel reveal">
-                <div class="panel-header"><div class="chip">إشعارات</div></div>
-                <div id="notifications_box" class="notify-list">
+                <div class="chip-header"><div class="chip">إشعارات</div></div>
+                <div id="notifications_box">
                     <div class="notify-item">لا توجد إشعارات حالياً</div>
                 </div>
             </section>
@@ -183,7 +185,10 @@
 
                 document.getElementById('val_credit').innerText = formatCurrency(daen2026);
                 document.getElementById('val_balance').innerText = formatCurrency(balance2026);
-                document.getElementById('smart_message').innerText = localStorage.getItem(`advice_${tenantCode}`) || 'لا توجد نصيحة محاسبية حالياً.';
+                
+                // تحميل النصيحة من localStorage أو عرض افتراضي
+                const storedAdvice = localStorage.getItem(`advice_${tenantCode}`);
+                if (storedAdvice) document.getElementById('smart_message').innerText = storedAdvice;
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
