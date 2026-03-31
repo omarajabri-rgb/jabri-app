@@ -20,72 +20,336 @@
             --gold-deep: #b18a52;
             --success: #2f9e6f;
             --danger: #c95a52;
+            --warning: #c38a2e;
             --shadow: 0 18px 40px rgba(120,95,56,0.10);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
-
-        body {
-            margin: 0; color: var(--text); padding: 16px; opacity: 0; transform: translateY(8px);
-            transition: all 0.45s ease; background: linear-gradient(135deg, var(--bg), var(--bg-2));
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
         }
 
-        body.loaded { opacity: 1; transform: translateY(0); }
+        body {
+            margin: 0;
+            color: var(--text);
+            padding: 16px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.45s ease;
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
+        }
 
-        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
+        body.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
-        .brand small { display: block; font-size: 11px; letter-spacing: 1.8px; color: #7a6c59; font-weight: 800; }
+        .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding-bottom: 42px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .brand small {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 1.8px;
+            color: #7a6c59;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .brand strong {
+            color: var(--gold-deep);
+            font-size: 18px;
+            font-weight: 900;
+        }
 
         .ghost-btn {
-            padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(201,164,107,0.18);
-            background: rgba(255,255,255,0.7); color: var(--text); font-size: 12px; font-weight: 900;
-            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.18);
+            background: rgba(255,255,255,0.7);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+        }
+
+        .ghost-btn:focus,
+        .ghost-btn:active {
+            outline: none;
+            background: rgba(255,255,255,0.7);
+            color: var(--text);
+            transform: none;
         }
 
         .hero-card {
-            border-radius: 26px; padding: 40px 24px; margin-bottom: 16px; text-align: center;
+            border-radius: 26px;
+            padding: 24px;
+            margin-bottom: 16px;
             background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
-            border: 1px solid rgba(201,164,107,0.18); box-shadow: var(--shadow); position: relative;
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: relative;
+            text-align: right;
         }
 
         .hero-status {
-            position: absolute; left: 18px; top: 18px; padding: 8px 14px; border-radius: 999px;
-            font-size: 12px; font-weight: 900; color: #fff; box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+            line-height: 1;
+            white-space: nowrap;
         }
-        .hero-status.paid { background: linear-gradient(135deg, #39a97b, #2f9e6f); }
-        .hero-status.partial { background: linear-gradient(135deg, #d96a60, #c95a52); }
 
-        .hero-card h1 { margin: 0; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+        .hero-status.paid {
+            background: linear-gradient(135deg, #39a97b, #2f9e6f);
+        }
 
-        .stats-grid { display: grid; gap: 16px; margin-bottom: 16px; grid-template-columns: 1fr 1fr; }
-        .stat-card { border-radius: 26px; border: 1px solid rgba(201,164,107,0.18); padding: 18px; text-align: center; background: #fff; }
-        .stat-card span { display: block; color: #7a6c59; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
-        .stat-card b { display: block; font-size: 24px; font-weight: 900; }
+        .hero-status.partial {
+            background: linear-gradient(135deg, #d96a60, #c95a52);
+        }
 
-        .smart-card { border-radius: 26px; border: 1px solid rgba(201,164,107,0.18); padding: 20px; background: #fff; margin-bottom: 16px; }
-        .tag { display: inline-flex; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; color: #fff; margin-bottom: 10px; }
-        .smart-body { font-size: 14px; line-height: 1.8; font-weight: 700; color: var(--text); }
+        .hero-card h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            padding-left: 110px;
+        }
 
-        .chart-grid { display: grid; gap: 16px; margin-bottom: 16px; grid-template-columns: 1fr 1.1fr; }
-        .panel { border-radius: 26px; border: 1px solid rgba(201,164,107,0.18); padding: 18px; background: #fff; }
-        .chart-wrap { min-height: 300px; display: flex; align-items: center; justify-content: center; }
+        .hero-note {
+            margin-top: 8px;
+            color: #7a6c59;
+            font-size: 12px;
+            font-weight: 800;
+        }
 
-        .notify-item { padding: 12px; border-radius: 16px; border: 1px solid rgba(201,164,107,0.18); background: rgba(255,255,255,0.58); font-size: 13px; font-weight: 800; margin-bottom: 10px; }
-        .notify-item.good { color: var(--success); }
-        .notify-item.warn { color: var(--danger); }
+        .stats-grid,
+        .chart-grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
 
-        .action-btn { width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px; border-radius: 20px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; box-shadow: var(--shadow); }
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
 
-        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .chart-grid {
+            grid-template-columns: 1fr 1.1fr;
+        }
 
-        .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        .stat-card,
+        .smart-card,
+        .panel {
+            border-radius: 26px;
+            border: 1px solid rgba(201,164,107,0.18);
+            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+        }
 
-        @media screen and (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+        .stat-card {
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-card span {
+            display: block;
+            color: #7a6c59;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stat-card b {
+            display: block;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .smart-card {
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            display: inline-flex;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .smart-body {
+            font-size: 14px;
+            line-height: 1.8;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .panel {
+            padding: 18px;
+        }
+
+        .panel-title {
+            font-weight: 900;
+            font-size: 17px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .panel-note {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #7d7468;
+            font-weight: 800;
+        }
+
+        .chart-wrap {
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notify-item {
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.18);
+            background: rgba(255,255,255,0.58);
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #7a6c59;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+            margin: 24px auto 0;
+            padding: 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: var(--shadow);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #7a6c59;
+            font-weight: 800;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: var(--gold-deep);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: all 0.55s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media screen and (max-width: 900px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .hero-card {
+                padding: 20px 18px;
+            }
+
+            .hero-card h1 {
+                font-size: 24px;
+                padding-left: 90px;
+            }
+
+            .hero-status {
+                left: 12px;
+                top: 12px;
+                font-size: 11px;
+                padding: 7px 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .chart-wrap {
+                min-height: 260px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -93,18 +357,32 @@
 
     <div class="wrap">
         <div class="topbar reveal">
-            <div class="brand"><small>MANAGED BUSINESS SPACES</small><strong>JABRI COMPLEX</strong></div>
-            <button class="ghost-btn" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
+            <div class="brand">
+                <small>MANAGED BUSINESS SPACES</small>
+                <strong>JABRI COMPLEX</strong>
+            </div>
+
+            <button class="ghost-btn" onclick="logout()">
+                <i data-lucide="log-out"></i>
+                خروج
+            </button>
         </div>
 
         <section class="hero-card reveal">
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
+            <div id="last_update" class="hero-note">-</div>
         </section>
 
         <div class="stats-grid">
-            <div class="stat-card reveal"><span>دائن</span><b id="val_credit" style="color: var(--success);">0</b></div>
-            <div class="stat-card reveal"><span>رصيد</span><b id="val_balance" style="color: var(--danger);">0</b></div>
+            <div class="stat-card reveal">
+                <span>دائن</span>
+                <b id="val_credit" style="color: var(--success);">0</b>
+            </div>
+            <div class="stat-card reveal">
+                <span>الرصيد</span>
+                <b id="val_balance" style="color: var(--danger);">0</b>
+            </div>
         </div>
 
         <div class="smart-card reveal">
@@ -114,15 +392,15 @@
 
         <div class="chart-grid">
             <section class="panel reveal">
-                <div style="font-weight:900; font-size:17px; margin-bottom:5px;">حالة الحساب</div>
-                <div id="collection_note" style="text-align:center; margin-bottom:15px; font-size:13px; color:#7d7468; font-weight:800;">-</div>
+                <div class="panel-title">ملخص الحساب</div>
+                <div id="collection_note" class="panel-note">-</div>
                 <div class="chart-wrap">
                     <canvas id="balancePieChart"></canvas>
                 </div>
             </section>
 
             <section class="panel reveal">
-                <div style="font-weight:900; font-size:17px; margin-bottom:14px;">إشعارات</div>
+                <div class="panel-title">إشعارات</div>
                 <div id="notifications_box">
                     <div class="notify-item">لا توجد إشعارات حالياً.</div>
                 </div>
@@ -130,10 +408,11 @@
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
-            <i data-lucide="file-text"></i> كشف الحساب
+            <i data-lucide="file-text"></i>
+            كشف الحساب
         </button>
 
-        <div class="footer reveal" style="text-align:center; margin-top:20px; font-size:11px; color:#7a6c59; font-weight:800;">© 2026 مجمع الجبري الصناعي التجاري</div>
+        <div class="footer reveal">© 2026 مجمع الجبري الصناعي التجاري</div>
     </div>
 
     <script>
@@ -141,77 +420,114 @@
         if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
-        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
 
-        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
-        function formatCurrency(v) { return `${Math.round(toNumber(v)).toLocaleString('en-US')}`; }
+        function toNumber(v) {
+            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+        }
+
+        function formatCurrency(v) {
+            return `${Math.round(toNumber(v)).toLocaleString('en-US')}`;
+        }
+
+        function formatNow() {
+            const now = new Date();
+            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`;
+        }
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
+                const { data: tenant } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                const { data: tx } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode);
 
                 const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
-                const daen2026 = tx2026.reduce((s, t) => s + toNumber(t.credit), 0);
-                const debit2026 = tx2026.reduce((s, t) => s + toNumber(t.debit), 0);
-
-                const prevTx = (tx || []).filter(t => new Date(t.date).getFullYear() < 2026);
-                const openingBal = (toNumber(tenant?.previous_balance) + prevTx.reduce((s, t) => s + toNumber(t.debit), 0)) - prevTx.reduce((s, t) => s + toNumber(t.credit), 0);
-                const balance2026 = Math.max(0, openingBal + debit2026 - daen2026);
-                const totalDue = openingBal + debit2026;
-                const rate = totalDue > 0 ? Math.round((daen2026 / totalDue) * 100) : 100;
+                const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
+                const debit2026 = tx2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
+                const balance2026 = Math.max(0, debit2026 - daen2026);
+                const rate = debit2026 > 0 ? Math.round((daen2026 / debit2026) * 100) : 0;
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
+                document.getElementById('last_update').innerText = formatNow();
+
                 const chip = document.getElementById('account_status_chip');
                 chip.innerText = balance2026 === 0 ? 'مسدد' : 'جزئي';
                 chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
                 document.getElementById('val_credit').innerText = formatCurrency(daen2026);
                 document.getElementById('val_balance').innerText = formatCurrency(balance2026);
-                
-                // تحديث النصيحة المحاسبية
-                document.getElementById('smart_message').innerText = balance2026 === 0 
-                    ? "لا توجد ذمم مالية معلقة لعام 2026، حسابك مسدد بالكامل ونشكركم على التزامكم." 
-                    : "يتطلب الحساب سداد الرصيد المتبقي لإغلاق السنة مالياً وتجنب تراكم الذمم والالتزامات.";
 
-                // تحديث جملة نسبة السداد
-                document.getElementById('collection_note').innerText = `نسبة السداد الحالية تشير إلى حالة حساب ${rate > 70 ? 'مستقرة' : 'تحتاج متابعة'}`;
+                document.getElementById('smart_message').innerText = balance2026 === 0
+                    ? "لا توجد ذمم مالية معلقة لعام 2026، حسابك مسدد بالكامل."
+                    : "يتطلب الحساب سداد الرصيد المتبقي لإغلاق سنة 2026 مالياً.";
 
-                // الإشعارات
-                const nBox = document.getElementById('notifications_box');
-                nBox.innerHTML = balance2026 === 0 
-                    ? `<div class="notify-item good">حسابك مسدد بالكامل، لا توجد إشعارات مستحقة.</div>` 
-                    : `<div class="notify-item warn">يوجد رصيد مستحق بقيمة ${formatCurrency(balance2026)}، يرجى المتابعة مع الإدارة.</div>`;
+                const noteEl = document.getElementById('collection_note');
+                if (balance2026 === 0) {
+                    noteEl.innerText = 'مسدد بالكامل';
+                    noteEl.style.color = '#2f9e6f';
+                } else if (rate >= 50) {
+                    noteEl.innerText = 'سداد جزئي';
+                    noteEl.style.color = '#c38a2e';
+                } else {
+                    noteEl.innerText = 'رصيد قائم';
+                    noteEl.style.color = '#c95a52';
+                }
 
-                // الرسم البياني
+                document.getElementById('notifications_box').innerHTML = `
+                    <div class="notify-item">لا توجد إشعارات حالياً.</div>
+                `;
+
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
-                    data: { 
-                        labels: ['المدفوع', 'المتبقي'], 
-                        datasets: [{ 
-                            data: [daen2026, balance2026], 
-                            backgroundColor: ['#2f9e6f', '#c95a52'], 
-                            borderWidth: 0 
-                        }] 
+                    data: {
+                        labels: ['المدفوع', 'المتبقي'],
+                        datasets: [{
+                            data: [daen2026, balance2026],
+                            backgroundColor: ['#2f9e6f', '#c95a52'],
+                            borderWidth: 0
+                        }]
                     },
-                    options: { 
-                        cutout: '75%', 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { legend: { position: 'bottom' } } 
+                    options: {
+                        cutout: '75%',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 10,
+                                    color: '#5d5347',
+                                    font: { family: 'Tajawal', weight: '700' }
+                                }
+                            }
+                        }
                     },
-                    plugins: [{ 
-                        id: 'centerText', 
-                        beforeDraw(chart) { 
-                            const { width, height, ctx } = chart; 
-                            ctx.restore(); 
-                            ctx.font = "bold 22px Tajawal"; 
-                            ctx.fillStyle = "#2f2a24"; 
-                            ctx.textBaseline = "middle"; 
-                            const text = `${rate}%`; 
-                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2); 
-                            ctx.save(); 
-                        } 
+                    plugins: [{
+                        id: 'centerText',
+                        beforeDraw(chart) {
+                            const { width, height, ctx } = chart;
+                            ctx.restore();
+                            ctx.font = "bold 22px Tajawal";
+                            ctx.fillStyle = "#2f2a24";
+                            ctx.textBaseline = "middle";
+                            const text = `${rate}%`;
+                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2);
+                            ctx.save();
+                        }
                     }]
                 });
 
@@ -219,11 +535,23 @@
                 document.body.classList.add('loaded');
                 document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 50));
                 lucide.createIcons();
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                alert('خطأ في الاتصال بقاعدة البيانات.');
+            }
         }
 
-        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function goToStatement() {
+            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
         window.onload = init;
     </script>
 </body>
