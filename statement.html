@@ -461,127 +461,121 @@
    🖨️ PDF EXPORT ENGINE (A4 OPTIMIZED)
    ========================================= */
 
-#pdf_export_root {
-    position: fixed;
-    /* 🔥 الإزاحة لضمان عدم التداخل مع الشاشة مع بقاء الرؤية للمحرك */
-    left: -5000px; 
-    top: 0;
-    width: 794px; /* العرض الحقيقي لورقة A4 */
-    background: #ffffff;
-    z-index: -9999;
-    opacity: 1;
-    pointer-events: none;
-    overflow: visible;
-}
+/* =========================================
+       🖨️ PDF EXPORT ENGINE (A4 SMART VIEW)
+       ========================================= */
 
-#pdf_export_root .pdf-sheet {
-    width: 794px;
-    min-height: 1123px;
-    padding: 45px 40px; /* هوامش متوازنة للطباعة */
-    background: #ffffff;
-    color: #2f2a24;
-    direction: rtl;
-    display: block; /* لضمان تسلسل الصفحات بشكل سليم */
-    box-sizing: border-box;
-    page-break-after: always;
-    break-after: page;
-}
+    #pdf_export_root {
+        position: fixed;
+        left: -5000px; 
+        top: 0;
+        width: 794px; /* العرض الحقيقي للـ A4 */
+        background: #ffffff;
+        z-index: -9999;
+        opacity: 1;
+        pointer-events: none;
+        overflow: visible;
+    }
 
-#pdf_export_root .pdf-sheet:last-child {
-    page-break-after: auto;
-    break-after: auto;
-}
+    #pdf_export_root .pdf-sheet {
+        width: 794px;
+        background: #ffffff;
+        color: #2f2a24;
+        direction: rtl;
+        padding: 40px 35px;
+        display: block;
+        box-sizing: border-box;
+        /* نلغي الارتفاع الثابت هنا لكي يتقسم المحتوى تلقائياً */
+    }
 
-/* 🎯 إجبار الحاوية على ملء العرض الكامل */
-#pdf_export_root .wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
-}
+    /* 🎯 إجبار الحاوية على ملء العرض الكامل */
+    #pdf_export_root .wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
 
-/* 🎯 تنسيق الهيدر للطباعة (رسمي) */
-#pdf_export_root .statement-header {
-    background: #ffffff !important;
-    border: 2px solid #c9a46b !important; /* ذهبي مجمع جبري */
-    border-radius: 0 !important; /* شكل رسمي أكثر في الورق */
-    margin-bottom: 35px;
-    padding: 30px !important;
-    text-align: center;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-}
+    /* 🎯 تنسيق الهيدر للطباعة (رسمي) */
+    #pdf_export_root .statement-header {
+        background: #ffffff !important;
+        border: 2px solid #c9a46b !important;
+        border-radius: 0 !important;
+        margin-bottom: 25px;
+        padding: 25px !important;
+        text-align: center;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
 
-#pdf_export_root .statement-header h1 {
-    color: #b18a52 !important;
-    font-size: 32px !important;
-    margin-bottom: 10px !important;
-}
+    #pdf_export_root .statement-header h1 {
+        color: #b18a52 !important;
+        font-size: 28px !important;
+        margin: 0 0 10px 0 !important;
+    }
 
-/* 🎯 تنسيق الجداول (توزيع ذهبي للأعمدة) */
-#pdf_export_root .statement-table {
-    width: 100% !important;
-    table-layout: fixed !important; /* يمنع انكماش الجدول */
-    border-collapse: collapse !important;
-    border: 1px solid #d8c9af !important;
-    margin-bottom: 20px;
-}
+    /* 🎯 تنسيق الجداول (توزيع ثابت يملأ الصفحة) */
+    #pdf_export_root .statement-table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        border: 1px solid #d8c9af !important;
+        margin-bottom: 0px; /* نلغيه عشان ما يترك فراغ بالتقطيع */
+    }
 
-#pdf_export_root .statement-table th,
-#pdf_export_root .statement-table td {
-    font-size: 11.5px !important; /* حجم خط مثالي للقراءة الورقية */
-    padding: 10px 6px !important;
-    line-height: 1.4 !important;
-    border: 1px solid #eee !important;
-    word-wrap: break-word;
-}
+    #pdf_export_root .statement-table th,
+    #pdf_export_root .statement-table td {
+        font-size: 11px !important;
+        padding: 8px 5px !important;
+        line-height: 1.3 !important;
+        border: 1px solid #eee !important;
+        word-wrap: break-word;
+    }
 
-/* 📏 توزيع النسب المئوية للأعمدة (ملء العرض) */
-#pdf_export_root .statement-table th:nth-child(5) { width: 30%; } /* البيان */
-#pdf_export_root .statement-table th:nth-child(1),
-#pdf_export_root .statement-table th:nth-child(6) { width: 12.5%; } /* التاريخ والسند */
-#pdf_export_root .statement-table th:nth-child(2),
-#pdf_export_root .statement-table th:nth-child(3),
-#pdf_export_root .statement-table th:nth-child(4) { width: 15%; } /* المبالغ */
+    /* 📏 توزيع النسب المئوية للأعمدة */
+    #pdf_export_root .statement-table th:nth-child(5) { width: 28%; } /* البيان */
+    #pdf_export_root .statement-table th:nth-child(1),
+    #pdf_export_root .statement-table th:nth-child(6) { width: 13%; } /* التاريخ والسند */
+    #pdf_export_root .statement-table th:nth-child(2),
+    #pdf_export_root .statement-table th:nth-child(3),
+    #pdf_export_root .statement-table th:nth-child(4) { width: 15.33%; } /* المبالغ */
 
-/* 🎯 تنسيق بطاقة السنة */
-#pdf_export_root .year-card {
-    background: #ffffff !important;
-    border: 1px solid #d8c9af !important;
-    border-radius: 0 !important; /* تقليل الانحناء يعطي طابع رسمي للـ PDF */
-    margin-bottom: 40px;
-    width: 100% !important;
-    box-shadow: none !important;
-    /* السماح بتقسيم الجدول الطويل بين الصفحات */
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-}
+    /* 🎯 تنسيق بطاقة السنة - الحل الذكي للتقسيم */
+    #pdf_export_root .year-card {
+        background: #ffffff !important;
+        border: 1px solid #d8c9af !important;
+        border-radius: 0 !important;
+        margin-bottom: 30px;
+        width: 100% !important;
+        box-shadow: none !important;
+        /* يخبر المحرك: "إذا كان الكرت سينقسم في نصفه، انقله لصفحة جديدة" */
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        display: block !important;
+    }
 
-#pdf_export_root .year-head {
-    background: #f9f7f2 !important;
-    border-bottom: 1px solid #d8c9af !important;
-    padding: 15px !important;
-}
+    #pdf_export_root .year-head {
+        background: #f9f7f2 !important;
+        border-bottom: 1px solid #d8c9af !important;
+        padding: 12px !important;
+    }
 
-/* 🎯 تحسين الألوان للطباعة الواضحة */
-#pdf_export_root .statement-table tbody tr:nth-child(odd) td {
-    background: #fdfbf6 !important;
-}
-#pdf_export_root .statement-table tbody tr:nth-child(even) td {
-    background: #ffffff !important;
-}
+    /* 🎯 تحسين الألوان للطباعة */
+    #pdf_export_root .statement-table tbody tr:nth-child(odd) td { background: #fdfbf6 !important; }
+    #pdf_export_root .statement-table tbody tr:nth-child(even) td { background: #ffffff !important; }
 
-#pdf_export_root .balance-late { color: #c95a52 !important; font-weight: bold; }
-#pdf_export_root .balance-paid { color: #2f9e6f !important; font-weight: bold; }
+    #pdf_export_root .balance-late { color: #c95a52 !important; font-weight: bold; }
+    #pdf_export_root .balance-paid { color: #2f9e6f !important; font-weight: bold; }
 
-/* إخفاء أي عناصر تشتت الطباعة */
-#pdf_export_root .bottom-actions,
-#pdf_export_root .year-status,
-#pdf_export_root #loader {
-    display: none !important;
-}
-    </style>
+    /* إخفاء عناصر الموبايل في الـ PDF */
+    #pdf_export_root .bottom-actions,
+    #pdf_export_root .year-status,
+    #pdf_export_root #loader,
+    #pdf_export_root .back-btn {
+        display: none !important;
+    }
+</style>
 </head>
     <div id="loader"><div class="spinner"></div></div>
 
