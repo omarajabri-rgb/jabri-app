@@ -894,25 +894,27 @@
         }
 
         function buildPDFClone() {
-            const original = document.querySelector('.wrap');
-            const clone = original.cloneNode(true);
+    const original = document.querySelector('.wrap');
+    const clone = original.cloneNode(true);
 
-            const actions = clone.querySelector('.bottom-actions');
-            if (actions) actions.remove();
+    const actions = clone.querySelector('.bottom-actions');
+    if (actions) actions.remove();
 
-            clone.style.maxWidth = '100%';
-            clone.style.width = '100%';
-            clone.style.margin = '0';
-            clone.style.padding = '0';
+    clone.style.maxWidth = '100%';
+    clone.style.width = '100%';
+    clone.style.margin = '0';
+    clone.style.padding = '0';
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'pdf-sheet';
-            wrapper.appendChild(clone);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'pdf-sheet';
+    wrapper.appendChild(clone);
 
-            return wrapper;
-        }
+    return wrapper;
+}
 
-        <script>
+window.savePDF = async () => {
+    // باقي الكود هنا
+};
 window.savePDF = async () => {
     const pdfRoot = document.getElementById('pdf_export_root');
     if (!pdfRoot) {
