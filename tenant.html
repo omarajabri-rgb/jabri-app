@@ -20,7 +20,6 @@
             --gold-deep: #b18a52;
             --success: #2f9e6f;
             --danger: #c95a52;
-            --shadow: 0 18px 40px rgba(120,95,56,0.10);
             --soft-shadow: 0 14px 30px rgba(120,95,56,0.08);
         }
 
@@ -369,11 +368,11 @@
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
-                <span style="color: #7a6c59;">دائن</span>
+                <span>دائن</span>
                 <b id="val_credit">0</b>
             </div>
             <div class="soft-card balance-card reveal">
-                <span style="color: #7a6c59;">الرصيد</span>
+                <span>الرصيد</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
@@ -493,11 +492,7 @@
                             legend: {
                                 position: 'bottom',
                                 labels: {
-                                    font: {
-                                        size: 16,
-                                        weight: 'bold',
-                                        family: 'Tajawal'
-                                    },
+                                    font: { size: 16, weight: 'bold', family: 'Tajawal' },
                                     color: '#2f2a24',
                                     padding: 16,
                                     usePointStyle: true,
@@ -516,14 +511,18 @@
                             chart._animatedValue += (target - chart._animatedValue) * 0.08;
 
                             ctx.restore();
-                            ctx.font = "bold 42px Tajawal";
+                            const fontSize = Math.min(width, height) / 4;
+                            ctx.font = `bold ${fontSize}px Tajawal`;
                             ctx.fillStyle = "#2f2a24";
                             ctx.textBaseline = "middle";
+                            
                             const text = `${Math.round(chart._animatedValue)}%`;
-                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2);
+                            const textWidth = ctx.measureText(text).width;
+                            
+                            ctx.fillText(text, (width - textWidth) / 2, height / 2);
                             ctx.save();
 
-                            if (Math.abs(chart._animatedValue - target) > 0.5) {
+                            if (Math.abs(chart._animatedValue - target) > 0.1) {
                                 chart.draw();
                             }
                         }
