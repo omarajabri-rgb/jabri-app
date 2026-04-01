@@ -588,7 +588,7 @@
         }
 
         function formatCurrency(v) {
-            return Math.round(v).toLocaleString();
+            return String(Math.round(v));
         }
 
         function formatShortDate(dateValue) {
@@ -598,7 +598,7 @@
 
         function isRentRow(desc) {
             const d = (desc || '').trim();
-            return d.startsWith('ايجار') || d.startsWith('الإيجار');
+            return d.startsWith('ايجار') || d.startsWith('الإيجار') || d.startsWith('الايجار');
         }
 
         function isFeesRow(desc) {
@@ -608,27 +608,38 @@
 
         function isCarryRow(desc) {
             const d = (desc || '').trim();
-            return d.includes('رصيد سابق') || d.includes('رصيد مدور');
+            return d.includes('رصيد سابق') || d.includes('رصيد مدور') || d.startsWith('رصيد عام');
         }
 
         function calculateRunningBalance(rows, initialBalance = 0) {
-    let running = initialBalance;
-    return rows.map(row => {
-        const debit = toNumber(row.debit);
-        const credit = toNumber(row.credit);
+            let running = initialBalance;
 
-        // نفس Excel: الرصيد السابق + مدين - دائن
-        running = running + debit - credit;
+            return rows.map(row => {
+                const desc = (row.description || '').trim();
+                const debit = toNumber(row.debit);
+                const credit = toNumber(row.credit);
 
-        return {
-            ...row,
-            debit,
-            credit,
-            balance: running,
-            isClosed: running <= 0
-        };
-    });
-}
+                if (isCarryRow(desc)) {
+                    return {
+                        ...row,
+                        debit,
+                        credit,
+                        balance: running,
+                        isClosed: running <= 0
+                    };
+                }
+
+                running = running + debit - credit;
+
+                return {
+                    ...row,
+                    debit,
+                    credit,
+                    balance: running,
+                    isClosed: running <= 0
+                };
+            });
+        }
 
         function formatLastUpdate() {
             const now = new Date();
@@ -723,8 +734,6 @@
                     ...openingRows,
                     ...paymentRows
                 ];
-
-                const hasCarryRow = yearRows.some(r => isCarryRow(r.description || ''));
 
                 let items = calculateRunningBalance(
                     yearRows,
