@@ -612,20 +612,23 @@
         }
 
         function calculateRunningBalance(rows, initialBalance = 0) {
-            let running = initialBalance;
-            return rows.map(row => {
-                const debit = toNumber(row.debit);
-                const credit = toNumber(row.credit);
-                running = running - credit + debit;
-                return {
-                    ...row,
-                    debit,
-                    credit,
-                    balance: running,
-                    isClosed: running <= 0
-                };
-            });
-        }
+    let running = initialBalance;
+    return rows.map(row => {
+        const debit = toNumber(row.debit);
+        const credit = toNumber(row.credit);
+
+        // نفس Excel: الرصيد السابق + مدين - دائن
+        running = running + debit - credit;
+
+        return {
+            ...row,
+            debit,
+            credit,
+            balance: running,
+            isClosed: running <= 0
+        };
+    });
+}
 
         function formatLastUpdate() {
             const now = new Date();
