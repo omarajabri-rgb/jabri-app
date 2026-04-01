@@ -1,3 +1,5 @@
+تم تحديث الكود بالكامل بدمج التحسينات البصرية الجديدة للبطاقات، وحالات الدفع (Status)، وتطوير نظام الإشعارات ليكون أكثر فخامة وتحديداً.
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -29,8 +31,6 @@
             --glass-soft-shadow: 0 14px 30px rgba(120,95,56,0.08);
             --glass-blur: blur(14px);
 
-            --chip-bg: rgba(201,164,107,0.14);
-            --chip-border: 1px solid rgba(201,164,107,0.24);
             --chip-inner-glow: inset 0 1px 0 rgba(255,255,255,0.45);
         }
 
@@ -124,29 +124,30 @@
             position: relative;
         }
 
+        /* 🆕 Hero Status Upgrade */
         .hero-status {
             position: absolute;
             left: 18px;
             top: 18px;
-            padding: 10px 18px;
+            padding: 6px 12px;
             border-radius: 999px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 900;
-            line-height: 1;
-            white-space: nowrap;
-            box-shadow: var(--chip-inner-glow);
+            letter-spacing: 0.4px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .hero-status.paid {
-            background: rgba(47,158,111,0.10);
+            background: rgba(47,158,111,0.12);
             color: var(--success);
-            border: 1px solid rgba(47,158,111,0.24);
+            border: 1px solid rgba(47,158,111,0.25);
         }
 
         .hero-status.partial {
-            background: rgba(204,90,80,0.10);
+            background: rgba(201,90,82,0.10);
             color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.22);
+            border: 1px solid rgba(201,90,82,0.25);
         }
 
         .hero-card h1 {
@@ -172,20 +173,21 @@
             padding-right: 10px;
         }
 
+        /* 🆕 Chip Upgrade */
         .chip {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 22px;
+            padding: 8px 16px;
             border-radius: 999px;
-            min-width: 130px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 900;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.3px;
+            min-width: 100px;
             color: var(--gold-deep);
-            background: rgba(201,164,107,0.14);
-            border: 1px solid rgba(201,164,107,0.26);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
         }
 
         .stats-grid {
@@ -245,7 +247,7 @@
 
         .smart-body {
             font-size: 16px;
-            line-height: 1.9;
+            line-height: 2.2;
             font-weight: 800;
             color: var(--text);
             text-align: right;
@@ -253,12 +255,17 @@
             white-space: pre-line;
         }
 
-        .chart-wrap {
-            min-height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
+        .highlight-number {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 0 3px;
+            border-radius: 10px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.15);
+            border: 1px solid rgba(201,164,107,0.25);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
 
         #notifications_box {
@@ -278,23 +285,56 @@
             border: 1px dashed rgba(201,164,107,0.24);
         }
 
+        /* 🆕 Notify Card CSS Upgrade */
         .notify-card {
             padding: 16px 18px;
             border-radius: 20px;
-            background: rgba(255,255,255,0.55);
+            background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(247,244,237,0.75));
             border: 1px solid rgba(201,164,107,0.18);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
-            line-height: 1.8;
+            box-shadow: 0 6px 18px rgba(120,95,56,0.08);
+            position: relative;
+            overflow: hidden;
         }
 
-        .notify-card.normal { border-color: rgba(201,164,107,0.22); }
-        .notify-card.warning { border-color: rgba(204,90,80,0.22); background: linear-gradient(135deg, rgba(204,90,80,0.08), rgba(255,255,255,0.92)); }
-        .notify-card.legal { border-color: rgba(160,40,40,0.28); background: linear-gradient(135deg, rgba(160,40,40,0.10), rgba(255,255,255,0.92)); }
-        .notify-card.success { border-color: rgba(47,158,111,0.24); background: linear-gradient(135deg, rgba(47,158,111,0.08), rgba(255,255,255,0.92)); }
+        .notify-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
 
-        .notify-title { font-size: 15px; font-weight: 900; margin-bottom: 6px; color: var(--text); }
-        .notify-message { font-size: 14px; font-weight: 700; color: var(--text); }
-        .notify-date { margin-top: 8px; font-size: 11px; font-weight: 800; color: var(--muted); }
+        .notify-title {
+            font-size: 14px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: var(--gold-deep);
+        }
+
+        .notify-message {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .notify-date {
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .chart-wrap {
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
 
         .action-btn {
             width: 100%;
@@ -315,11 +355,6 @@
             transition: all 0.25s ease;
         }
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 38px rgba(201,164,107,0.28);
-        }
-
         .footer {
             text-align: center;
             margin-top: 20px;
@@ -329,33 +364,21 @@
         }
 
         #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
+            position: fixed; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg); z-index: 9999;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #eee;
-            border-top-color: var(--gold-deep);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 40px; height: 40px;
+            border: 4px solid #eee; border-top-color: var(--gold-deep);
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
         .reveal.active { opacity: 1; transform: translateY(0); }
-
-        @media screen and (max-width: 768px) {
-            .hero-card h1 { font-size: 24px; padding-left: 90px; }
-            .soft-card b { font-size: 24px; }
-        }
     </style>
 </head>
 <body>
@@ -497,36 +520,48 @@
             }
 
             let recommended = advice.suggestedMonthly;
+            const monthsToClose = prediction.monthsToClose || '..';
 
-            if (prediction.level === 'excellent') {
-                recommended = advice.monthlyBase;
-                return `1- ممتاز، استمر على حوالي ${recommended} د.أ شهريًا 👍\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+            if (prediction.level === 'excellent') recommended = advice.monthlyBase;
+            else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
+            else if (prediction.level === 'warning') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
+            else if (prediction.level === 'weak') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
+
+            return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً
+            سيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
+        }
+
+        function animateNumber(element, endValue) {
+            const duration = 800;
+            const startTime = performance.now();
+            function update(currentTime) {
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                element.innerText = Math.floor(progress * endValue).toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
             }
+            requestAnimationFrame(update);
+        }
 
-            if (prediction.level === 'good') {
-                recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
-                return `1- يُنصح بدفع حوالي ${recommended} د.أ شهريًا (قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
-            }
-
-            if (prediction.level === 'warning') {
-                recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
-                return `1- يُنصح بزيادة الدفع إلى حوالي ${recommended} د.أ شهريًا ⚠️ (بهذا المعدل قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
-            }
-
-            if (prediction.level === 'weak') {
-                recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
-                return `1- يُنصح بزيادة الدفع إلى حوالي ${recommended} د.أ شهريًا ⚠️ (بهذا المعدل قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
-            }
-
-            return `1- يُنصح بدفع حوالي ${advice.suggestedMonthly} د.أ شهريًا\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+        function animateHighlights(){
+            const elements = document.querySelectorAll('.highlight-number');
+            elements.forEach(el=>{
+                const end = parseInt(el.getAttribute('data-value')) || 0;
+                const duration = 800;
+                const startTime = performance.now();
+                function update(currentTime){
+                    const progress = Math.min((currentTime - startTime)/duration, 1);
+                    el.innerText = Math.floor(progress * end);
+                    if(progress < 1) requestAnimationFrame(update);
+                }
+                requestAnimationFrame(update);
+            });
         }
 
         function formatNotificationDate(value) {
             const d = new Date(value);
             if (isNaN(d)) return '';
             return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
+                hour: '2-digit', minute: '2-digit'
             });
         }
 
@@ -563,17 +598,6 @@
             }
         }
 
-        function animateNumber(element, endValue) {
-            const duration = 800;
-            const startTime = performance.now();
-            function update(currentTime) {
-                const progress = Math.min((currentTime - startTime) / duration, 1);
-                element.innerText = Math.floor(progress * endValue).toLocaleString('en-US');
-                if (progress < 1) requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
-        }
-
         async function init() {
             try {
                 const { data: tenant } = await supabaseClient
@@ -597,14 +621,16 @@
                 document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
 
                 const chip = document.getElementById('account_status_chip');
-                chip.innerText = balance2026 === 0 ? 'مسدد' : 'جزئي';
+                // 🆕 Status Label Upgrade
+                chip.innerText = balance2026 === 0 ? '✔ مسدد' : '⚠ جزئي';
                 chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
                 animateNumber(document.getElementById('val_credit'), Math.round(daen2026));
                 animateNumber(document.getElementById('val_balance'), Math.round(balance2026));
 
-                document.getElementById('smart_message').innerText =
+                document.getElementById('smart_message').innerHTML =
                     buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
+                animateHighlights();
 
                 await loadNotifications();
 
@@ -619,19 +645,13 @@
                         }]
                     },
                     options: {
-                        cutout: '75%',
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        cutout: '75%', responsive: true, maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 position: 'bottom',
                                 labels: {
                                     font: { family: 'Tajawal', weight: 'bold' },
-                                    color: '#2f2a24',
-                                    padding: 16,
-                                    usePointStyle: true,
-                                    pointStyle: 'circle',
-                                    boxWidth: 10
+                                    color: '#2f2a24', padding: 16, usePointStyle: true, pointStyle: 'circle', boxWidth: 10
                                 }
                             }
                         }
@@ -662,15 +682,8 @@
             }
         }
 
-        function goToStatement() {
-            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
         window.onload = init;
     </script>
 </body>
