@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>مجمع جبري | لوحة المستأجر المحدثة</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -23,12 +22,14 @@
             --danger: #c95a52;
             --warning: #c38a2e;
 
-            --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(247,244,237,0.85));
-            --glass-card-bg: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.90));
-            --glass-border: 1px solid rgba(201,164,107,0.22);
+            --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+            --glass-card-bg: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
+            --glass-border: 1px solid rgba(201,164,107,0.18);
             --glass-shadow: 0 12px 28px rgba(120,95,56,0.08);
             --glass-soft-shadow: 0 14px 30px rgba(120,95,56,0.08);
             --glass-blur: blur(14px);
+
+            --chip-inner-glow: inset 0 1px 0 rgba(255,255,255,0.45);
         }
 
         * {
@@ -43,9 +44,10 @@
             padding: 16px;
             opacity: 0;
             transform: translateY(8px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.45s ease;
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            min-height: 100vh;
+            direction: rtl;
+            text-align: right;
         }
 
         body.loaded {
@@ -54,337 +56,344 @@
         }
 
         .wrap {
-            max-width: 600px;
+            max-width: 1120px;
             margin: 0 auto;
-            padding-bottom: 40px;
+            padding-bottom: 42px;
+            width: 100%;
         }
 
         .topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .brand strong {
             color: var(--gold-deep);
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
-            display: block;
         }
 
         .brand small {
-            font-size: 10px;
-            letter-spacing: 1.5px;
+            display: block;
+            font-size: 11px;
+            letter-spacing: 1.8px;
             color: var(--muted);
-            font-weight: 700;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
 
         .ghost-btn {
-            padding: 10px 14px;
-            border-radius: 14px;
+            padding: 12px 16px;
+            border-radius: 16px;
             border: var(--glass-border);
-            background: #fff;
-            color: var(--danger);
-            font-size: 13px;
-            font-weight: 800;
+            background: rgba(255,255,255,0.70);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 900;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            transition: all 0.25s ease;
         }
 
         .hero-card {
-            border-radius: 28px;
+            border-radius: 26px;
             padding: 24px;
             margin-bottom: 16px;
+            text-align: right;
             background: var(--glass-bg);
             border: var(--glass-border);
             box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             position: relative;
-            overflow: hidden;
-        }
-
-        .hero-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at top left, rgba(201,164,107,0.10), transparent 35%),
-                radial-gradient(circle at bottom right, rgba(177,138,82,0.08), transparent 35%);
-            pointer-events: none;
         }
 
         .hero-status {
             position: absolute;
-            left: 20px;
-            top: 24px;
-            padding: 5px 14px;
+            left: 18px;
+            top: 18px;
+            padding: 6px 12px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 900;
-            z-index: 2;
+            letter-spacing: 0.4px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .hero-status.paid {
-            background: rgba(47,158,111,0.1);
+            background: rgba(47,158,111,0.12);
             color: var(--success);
-            border: 1px solid rgba(47,158,111,0.35);
+            border: 1px solid rgba(47,158,111,0.25);
         }
 
         .hero-status.partial {
-            background: rgba(201,90,82,0.1);
+            background: rgba(201,90,82,0.10);
             color: var(--danger);
-            border: 1px solid rgba(201,90,82,0.35);
+            border: 1px solid rgba(201,90,82,0.25);
         }
 
         .hero-card h1 {
             margin: 0;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 900;
             color: var(--gold-deep);
-            max-width: 72%;
-            position: relative;
-            z-index: 2;
+            padding-left: 110px;
         }
 
         .hero-note {
-            margin-top: 6px;
+            margin-top: 8px;
+            color: var(--text);
             font-size: 13px;
-            font-weight: 600;
-            color: var(--muted);
-            position: relative;
-            z-index: 2;
+            font-weight: 800;
         }
 
-        .hero-subinfo {
-            margin-top: 10px;
+        .chip-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            position: relative;
-            z-index: 2;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            width: 100%;
+            padding-right: 10px;
         }
 
-        .meta-pill {
+        .chip {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 7px 12px;
+            justify-content: center;
+            padding: 8px 16px;
             border-radius: 999px;
-            font-size: 11px;
-            font-weight: 800;
-            background: rgba(255,255,255,0.75);
-            border: 1px solid rgba(201,164,107,0.16);
-            color: var(--muted);
+            min-width: 100px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 22px;
+            margin-bottom: 22px;
         }
 
         .soft-card {
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
+            border-radius: 26px;
             border: var(--glass-border);
-            background: #fff;
+            background: var(--glass-card-bg);
             box-shadow: var(--glass-soft-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            text-align: center;
+            padding: 24px;
         }
 
         .soft-card span {
             display: block;
-            font-size: 13px;
-            font-weight: 800;
+            font-size: 15px;
+            font-weight: 900;
+            margin-bottom: 8px;
             color: var(--muted);
-            margin-bottom: 5px;
         }
 
         .soft-card b {
             display: block;
-            font-size: 24px;
+            font-size: 30px;
             font-weight: 900;
         }
 
-        .credit-card b { color: var(--success); }
-        .balance-card b { color: var(--danger); }
+        .credit-card {
+            background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+            color: var(--success);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, rgba(201,90,82,0.10), rgba(255,255,255,0.25));
+            border-color: rgba(201,90,82,0.22);
+            color: var(--danger);
+        }
 
         .panel {
-            padding: 20px;
-            margin-bottom: 16px;
-            border-radius: 24px;
-            background: var(--glass-card-bg);
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 26px;
             border: var(--glass-border);
-            box-shadow: var(--glass-shadow);
-        }
-
-        .chip {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            background: rgba(201,164,107,0.15);
-            color: var(--gold-deep);
-            margin-bottom: 12px;
+            background: var(--glass-card-bg);
+            box-shadow: var(--glass-soft-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
         }
 
         .smart-body {
-            font-size: 15px;
-            line-height: 1.9;
-            font-weight: 700;
+            font-size: 16px;
+            line-height: 2.2;
+            font-weight: 800;
+            color: var(--text);
+            text-align: right;
+            margin-top: 10px;
+            white-space: pre-line;
         }
 
         .highlight-number {
-            color: var(--gold-deep);
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 0 3px;
+            border-radius: 10px;
             font-weight: 900;
-            background: rgba(201,164,107,0.12);
-            padding: 2px 8px;
-            border-radius: 8px;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.15);
+            border: 1px solid rgba(201,164,107,0.25);
+            backdrop-filter: blur(6px);
+        }
+
+        .pie-text-stats {
+            margin-top: 16px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .pie-text-item {
+            color: var(--muted);
+        }
+
+        .pie-text-item b {
+            font-weight: 900;
+            margin-right: 4px;
+        }
+
+        .pie-text-item.paid b {
+            color: var(--success);
+        }
+
+        .pie-text-item.balance b {
+            color: var(--danger);
+        }
+
+        .chart-wrap {
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        #notifications_box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .notify-empty {
+            padding: 16px;
+            border-radius: 18px;
+            text-align: center;
+            color: var(--muted);
+            font-weight: 800;
+            background: rgba(255,255,255,0.45);
+            border: 1px dashed rgba(201,164,107,0.24);
         }
 
         .notify-card {
-            padding: 14px;
-            border-radius: 16px;
-            background: #fff;
-            border-right: 4px solid var(--gold);
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(247,244,237,0.75));
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 6px 18px rgba(120,95,56,0.08);
+            position: relative;
+            overflow: hidden;
         }
 
-        .notify-card:last-child {
-            margin-bottom: 0;
+        .notify-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
 
         .notify-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 900;
+            margin-bottom: 6px;
             color: var(--gold-deep);
         }
 
         .notify-message {
-            font-size: 13px;
-            margin: 6px 0;
-            color: var(--text);
-            line-height: 1.8;
+            font-size: 14px;
             font-weight: 700;
+            color: var(--text);
         }
 
         .notify-date {
+            margin-top: 6px;
             font-size: 10px;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--muted);
-            font-size: 12px;
-            padding: 10px;
-            font-weight: 700;
-        }
-
-        .chart-wrap {
-            height: 190px;
-            position: relative;
-        }
-
-        .chart-center-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            pointer-events: none;
-        }
-
-        .chart-center-text strong {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            line-height: 1;
-        }
-
-        .chart-center-text span {
-            margin-top: 4px;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-        }
-
-        .chart-legend {
-            margin-top: 14px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
             font-weight: 800;
             color: var(--muted);
-            background: rgba(255,255,255,0.72);
-            padding: 8px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(201,164,107,0.12);
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
         }
 
         .action-btn {
             width: 100%;
-            padding: 18px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            color: #fff;
-            border: none;
+            max-width: 300px;
+            margin: 24px auto 0;
+            padding: 16px;
+            border-radius: 24px;
             font-weight: 900;
-            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 10px 20px rgba(177,138,82,0.3);
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 18px 35px rgba(201,164,107,0.25);
         }
 
-        .action-btn:active {
-            transform: scale(0.99);
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 800;
         }
 
         #loader {
             position: fixed;
             inset: 0;
-            background: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.35s ease;
+            background: var(--bg);
+            z-index: 9999;
         }
 
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(201,164,107,0.2);
+            border: 4px solid #eee;
             border-top-color: var(--gold-deep);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
@@ -393,76 +402,39 @@
 
         .reveal {
             opacity: 0;
-            transform: translateY(15px);
-            transition: 0.6s ease-out;
+            transform: translateY(14px);
+            transition: all 0.55s ease;
         }
 
         .reveal.active {
             opacity: 1;
             transform: translateY(0);
         }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 14px;
-            }
-
-            .hero-card h1 {
-                font-size: 22px;
-                max-width: 68%;
-            }
-
-            .soft-card {
-                padding: 18px 14px;
-            }
-
-            .soft-card b {
-                font-size: 22px;
-            }
-
-            .hero-status {
-                left: 16px;
-                top: 18px;
-            }
-        }
     </style>
 </head>
 <body>
-
     <div id="loader"><div class="spinner"></div></div>
 
     <div class="wrap">
-        <header class="topbar reveal">
+        <div class="topbar reveal">
             <div class="brand">
-                <small>OMAR JABRI PROPERTIES</small>
-                <strong>مجمع جبري</strong>
+                <small>MANAGED BUSINESS SPACES</small>
+                <strong>JABRI COMPLEX</strong>
             </div>
             <button class="ghost-btn" onclick="logout()">
-                <i data-lucide="log-out"></i>
-                خروج
+                <i data-lucide="log-out"></i> خروج
             </button>
-        </header>
+        </div>
 
         <section class="hero-card reveal">
-            <span id="account_status_chip" class="hero-status">-</span>
-            <h1 id="t_name">جاري التحميل...</h1>
+            <span id="account_status_chip" class="hero-status partial">-</span>
+            <h1 id="t_name">...</h1>
             <div id="last_update" class="hero-note">-</div>
-
-            <div class="hero-subinfo">
-                <div class="meta-pill">
-                    <i data-lucide="calendar-clock" style="width:14px;height:14px;"></i>
-                    <span id="last_seen_text">آخر ظهور: -</span>
-                </div>
-                <div class="meta-pill">
-                    <i data-lucide="badge-dollar-sign" style="width:14px;height:14px;"></i>
-                    <span>السنة الحالية: 2026</span>
-                </div>
-            </div>
         </section>
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
-                <span>المدفوع (2026)</span>
+                <span>دائن (مدفوع)</span>
                 <b id="val_credit">0</b>
             </div>
             <div class="soft-card balance-card reveal">
@@ -472,52 +444,44 @@
         </div>
 
         <div class="panel reveal">
-            <div class="chip">المساعد الذكي</div>
-            <div id="smart_message" class="smart-body">تحليل الوضع المالي...</div>
+            <div class="chip-header">
+                <div class="chip">نصيحة محاسبية</div>
+            </div>
+            <div id="smart_message" class="smart-body">تحليل البيانات...</div>
         </div>
 
         <div class="panel reveal">
-            <div class="chip">الإشعارات</div>
+            <div class="chip-header">
+                <div class="chip">إشعار</div>
+            </div>
             <div id="notifications_box">
-                <div class="empty-state">لا توجد إشعارات جديدة</div>
+                <div class="notify-empty">لا توجد إشعارات حالياً</div>
             </div>
         </div>
 
-        <div class="panel reveal" style="text-align:center;">
-            <div class="chip">نسبة السداد السنوية</div>
-
+        <div class="panel reveal">
+            <div class="chip-header">
+                <div class="chip">ملخص الحساب</div>
+            </div>
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
-                <div class="chart-center-text">
-                    <strong id="pay_percent_text">0%</strong>
-                    <span>نسبة التحصيل</span>
-                </div>
             </div>
-
-            <div class="chart-legend">
-                <div class="legend-item">
-                    <span class="legend-dot" style="background:#c9a46b;"></span>
-                    <span id="legend_paid">مدفوع: 0 د.أ</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot" style="background:#e4dfd5;"></span>
-                    <span id="legend_remaining">متبقي: 0 د.أ</span>
-                </div>
+            <div class="pie-text-stats">
+                <span class="pie-text-item paid">مدفوع: <b id="pie_paid_value">0</b></span>
+                <span class="pie-text-item balance">متبقي: <b id="pie_balance_value">0</b></span>
             </div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
-            <i data-lucide="file-text"></i>
-            عرض كشف الحساب التفصيلي
+            <i data-lucide="file-text"></i> كشف الحساب بالتفصيل
         </button>
 
-        <p style="text-align:center; font-size:10px; color:var(--muted); margin-top:25px; font-weight:700;">
-            حقوق الطبع © 2026 إدارة مجمع جبري التجاري الصناعي
-        </p>
+        <div class="footer reveal">© 2026 مجمع الجبري الصناعي التجاري</div>
     </div>
 
     <script>
-        const DISPLAY_YEAR = 2026;
+        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
         const supabaseClient = createClient(
@@ -525,314 +489,274 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        const tenantCode = localStorage.getItem('jabri_tenant_code');
-
-        if (!tenantCode) {
-            window.location.href = "index.html";
+        function toNumber(v) {
+            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
         }
 
-        let pieChartInstance = null;
-
-        function formatMoney(value) {
-            const number = Number(value) || 0;
-            return number.toLocaleString('en-US');
+        function isRentRow(desc) {
+            const d = (desc || '').trim();
+            return d.startsWith('ايجار') || d.startsWith('الإيجار') || d.startsWith('الايجار');
         }
 
-        function formatArabicDate(dateValue, withTime = false) {
-            if (!dateValue) return '-';
-            const date = new Date(dateValue);
-            if (isNaN(date.getTime())) return '-';
+        function isFeesRow(desc) {
+            return (desc || '').trim().startsWith('معارف');
+        }
 
-            return withTime
-                ? date.toLocaleString('ar-JO', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit'
+        function isCarryRow(desc) {
+            const d = (desc || '').trim();
+            return d.includes('رصيد سابق') || d.includes('رصيد مدور') || d.startsWith('رصيد عام');
+        }
+
+        function getStatementYearAdvice(transactions, year = 2026) {
+            const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
+            const rentRow = yearRows.find(t => isRentRow(t.description || ''));
+            const feesRow = yearRows.find(t => isFeesRow(t.description || ''));
+            const carryRow = yearRows.find(t => isCarryRow(t.description || ''));
+
+            const yearlyRent = toNumber(rentRow?.debit);
+            const yearlyFees = toNumber(feesRow?.debit);
+            const previousBalance = toNumber(carryRow?.debit);
+            const monthlyBase = Math.round((yearlyRent + yearlyFees) / 12);
+
+            let suggestedMonthly = monthlyBase;
+            if (previousBalance > 0) {
+                if (previousBalance <= 600) suggestedMonthly += 25;
+                else if (previousBalance <= 1200) suggestedMonthly += 50;
+                else if (previousBalance <= 1800) suggestedMonthly += 100;
+                else suggestedMonthly += 150;
+            }
+
+            return { yearlyRent, yearlyFees, previousBalance, monthlyBase, suggestedMonthly };
+        }
+
+        function buildPredictionMeta(transactions, balance, year = 2026) {
+            const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
+            const payments = yearRows.filter(t => toNumber(t.credit) > 0);
+
+            if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
+
+            const totalPaid = payments.reduce((sum, t) => sum + toNumber(t.credit), 0);
+            const months = new Set(
+                payments.map(t => {
+                    const d = new Date(t.date);
+                    return `${d.getFullYear()}-${d.getMonth()}`;
                 })
-                : date.toLocaleDateString('ar-JO', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+            ).size;
+
+            const monthlyRate = totalPaid / (months || 1);
+            if (monthlyRate <= 0) return { level: 'unknown' };
+
+            const monthsToClose = Math.ceil(balance / monthlyRate);
+            if (monthsToClose <= 3) return { level: 'excellent', monthsToClose };
+            if (monthsToClose <= 6) return { level: 'good', monthsToClose };
+            if (monthsToClose <= 12) return { level: 'warning', monthsToClose };
+            return { level: 'weak', monthsToClose };
         }
 
-        function animateValue(id, end) {
-            const el = document.getElementById(id);
-            if (!el) return;
+        function buildAdviceMessageFromStatement(transactions, balance, year = 2026) {
+            const advice = getStatementYearAdvice(transactions, year);
+            const prediction = buildPredictionMeta(transactions, balance, year);
 
-            const finalValue = Math.max(0, Math.round(Number(end) || 0));
-            const duration = 1000;
+            if (!advice.yearlyRent && !advice.yearlyFees) {
+                return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
+            }
+
+            let recommended = advice.suggestedMonthly;
+            const monthsToClose = prediction.monthsToClose || '..';
+
+            if (prediction.level === 'excellent') recommended = advice.monthlyBase;
+            else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
+            else if (prediction.level === 'warning') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
+            else if (prediction.level === 'weak') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
+
+            return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً
+سيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
+        }
+
+        function animateNumber(element, endValue) {
+            if (!element) return;
+            const duration = 800;
             const startTime = performance.now();
 
             function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const current = Math.floor(progress * finalValue);
-                el.textContent = formatMoney(current);
-
-                if (progress < 1) {
-                    requestAnimationFrame(update);
-                } else {
-                    el.textContent = formatMoney(finalValue);
-                }
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                element.innerText = Math.floor(progress * endValue).toLocaleString('en-US');
+                if (progress < 1) requestAnimationFrame(update);
             }
 
             requestAnimationFrame(update);
         }
 
-        function showLoaderDone() {
-            const loader = document.getElementById('loader');
-            loader.style.opacity = '0';
+        function animateHighlights() {
+            document.querySelectorAll('.highlight-number').forEach(el => {
+                const end = parseInt(el.getAttribute('data-value')) || 0;
+                const duration = 900;
+                const startTime = performance.now();
 
-            setTimeout(() => {
-                loader.style.display = 'none';
-                document.body.classList.add('loaded');
+                function update(currentTime) {
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    el.innerText = Math.floor(eased * end);
+                    if (progress < 1) requestAnimationFrame(update);
+                }
 
-                document.querySelectorAll('.reveal').forEach((el, index) => {
-                    setTimeout(() => el.classList.add('active'), index * 90);
+                requestAnimationFrame(update);
+            });
+        }
+
+        function formatNotificationDate(value) {
+            const d = new Date(value);
+            return isNaN(d)
+                ? ''
+                : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
-
-                lucide.createIcons();
-            }, 350);
-        }
-
-        function renderEmptyNotifications(message = 'لا توجد إشعارات جديدة') {
-            document.getElementById('notifications_box').innerHTML = `
-                <div class="empty-state">${message}</div>
-            `;
-        }
-
-        async function updateLastSeen() {
-            try {
-                const nowIso = new Date().toISOString();
-
-                await supabaseClient
-                    .from('tenants')
-                    .update({ last_seen: nowIso })
-                    .eq('tenant_code', tenantCode);
-
-                document.getElementById('last_seen_text').textContent = `آخر ظهور: الآن`;
-            } catch (error) {
-                console.warn('Last seen update skipped:', error);
-                document.getElementById('last_seen_text').textContent = 'آخر ظهور: -';
-            }
         }
 
         async function loadNotifications() {
-            try {
-                const { data, error } = await supabaseClient
+            const box = document.getElementById('notifications_box');
+
+            const { data, error } = await supabaseClient
+                .from('tenant_notifications')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (error || !data || data.length === 0) {
+                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
+                return;
+            }
+
+            box.innerHTML = data.map(item => `
+                <div class="notify-card ${item.type || 'normal'}">
+                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
+                    <div class="notify-message">${item.message || ''}</div>
+                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
+                </div>
+            `).join('');
+
+            const unreadIds = data.filter(item => !item.is_read).map(item => item.id);
+
+            if (unreadIds.length > 0) {
+                await supabaseClient
                     .from('tenant_notifications')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('created_at', { ascending: false })
-                    .limit(3);
-
-                if (error) {
-                    console.warn('Notifications error:', error.message);
-                    renderEmptyNotifications('لا توجد إشعارات حالياً');
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    renderEmptyNotifications('لا توجد إشعارات جديدة');
-                    return;
-                }
-
-                const html = data.map(n => `
-                    <div class="notify-card">
-                        <div class="notify-title">${n.title || 'تنبيه'}</div>
-                        <div class="notify-message">${n.message || ''}</div>
-                        <div class="notify-date">${formatArabicDate(n.created_at, true)}</div>
-                    </div>
-                `).join('');
-
-                document.getElementById('notifications_box').innerHTML = html;
-            } catch (error) {
-                console.warn('Notifications catch:', error);
-                renderEmptyNotifications('تعذر تحميل الإشعارات');
+                    .update({
+                        is_read: true,
+                        read_at: new Date().toISOString()
+                    })
+                    .in('id', unreadIds);
             }
-        }
-
-        function renderPieChart(credit, balance, payPercent) {
-            const canvas = document.getElementById('balancePieChart');
-            if (!canvas) return;
-
-            if (pieChartInstance) {
-                pieChartInstance.destroy();
-            }
-
-            pieChartInstance = new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['متبقي', 'مدفوع'],
-                    datasets: [{
-                        data: [balance, credit],
-                        backgroundColor: ['#e4dfd5', '#c9a46b'],
-                        borderWidth: 0,
-                        hoverOffset: 2
-                    }]
-                },
-                options: {
-                    cutout: '78%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            rtl: true,
-                            bodyFont: {
-                                family: 'Tajawal'
-                            },
-                            titleFont: {
-                                family: 'Tajawal'
-                            },
-                            callbacks: {
-                                label: function(context) {
-                                    const value = Number(context.raw) || 0;
-                                    return `${context.label}: ${formatMoney(value)} د.أ`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            document.getElementById('pay_percent_text').textContent = `${payPercent}%`;
-            document.getElementById('legend_paid').textContent = `مدفوع: ${formatMoney(credit)} د.أ`;
-            document.getElementById('legend_remaining').textContent = `متبقي: ${formatMoney(balance)} د.أ`;
-        }
-
-        function buildSmartMessage({ debit, credit, balance, payPercent, txCount }) {
-            if (debit <= 0 && credit <= 0) {
-                return `لا توجد حركات مالية مسجلة لعام <span class="highlight-number">${DISPLAY_YEAR}</span> حتى الآن.`;
-            }
-
-            if (balance <= 0 && debit > 0) {
-                return `وضعك المالي ممتاز، تم تسديد التزامات عام <span class="highlight-number">${DISPLAY_YEAR}</span> بالكامل بنسبة <span class="highlight-number">${payPercent}%</span>.`;
-            }
-
-            const monthlyTarget = Math.ceil(balance / Math.max(1, 12 - new Date().getMonth()));
-            return `
-                تم تسجيل <span class="highlight-number">${txCount}</span> حركة خلال عام <span class="highlight-number">${DISPLAY_YEAR}</span>،
-                ونسبة السداد الحالية هي <span class="highlight-number">${payPercent}%</span>.
-                لتخفيف الرصيد المتبقي، يُنصح بدفع حوالي <span class="highlight-number">${formatMoney(monthlyTarget)} د.أ</span> شهرياً خلال الفترة القادمة.
-            `;
         }
 
         async function init() {
             try {
-                const [
-                    tenantResponse,
-                    txResponse
-                ] = await Promise.all([
-                    supabaseClient
-                        .from('tenants')
-                        .select('*')
-                        .eq('tenant_code', tenantCode)
-                        .maybeSingle(),
+                const { data: tenant } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
 
-                    supabaseClient
-                        .from('tenant_transactions')
-                        .select('*')
-                        .eq('tenant_code', tenantCode)
-                        .order('date', { ascending: true })
-                ]);
+                const { data: tx } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode);
 
-                const tenant = tenantResponse.data;
-                const tenantError = tenantResponse.error;
-                const tx = txResponse.data || [];
-                const txError = txResponse.error;
+                const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
+                const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
+                const debit2026 = tx2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
+                const balance2026 = Math.max(0, debit2026 - daen2026);
+                const rate = debit2026 > 0 ? Math.round((daen2026 / debit2026) * 100) : 0;
 
-                if (tenantError) {
-                    console.error('Tenant error:', tenantError);
-                }
-
-                if (txError) {
-                    console.error('Transactions error:', txError);
-                }
-
-                if (!tenant) {
-                    logout();
-                    return;
-                }
-
-                const txYear = tx.filter(item => {
-                    if (!item.date) return false;
-                    const d = new Date(item.date);
-                    return !isNaN(d.getTime()) && d.getFullYear() === DISPLAY_YEAR;
-                });
-
-                const credit = txYear.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
-                const debit = txYear.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
-                const rawBalance = debit - credit;
-                const balance = Math.max(0, rawBalance);
-                const payPercent = debit > 0 ? Math.min(100, Math.round((credit / debit) * 100)) : 0;
-
-                const latestTxDate = tx.length > 0
-                    ? tx
-                        .map(item => item.date)
-                        .filter(Boolean)
-                        .sort((a, b) => new Date(b) - new Date(a))[0]
-                    : null;
-
-                document.getElementById('t_name').textContent = tenant.tenant_name || tenant.اسم_المستأجر || 'مستأجر';
-                document.getElementById('last_update').textContent = latestTxDate
-                    ? `آخر تحديث فعلي: ${formatArabicDate(latestTxDate)}`
-                    : `آخر تحديث فعلي: لا توجد حركات حتى الآن`;
+                document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
+                document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
 
                 const chip = document.getElementById('account_status_chip');
-                if (balance <= 0 && debit > 0) {
-                    chip.textContent = 'مُسدد بالكامل';
-                    chip.className = 'hero-status paid';
-                } else {
-                    chip.textContent = 'رصيد مستحق';
-                    chip.className = 'hero-status partial';
-                }
+                chip.innerText = balance2026 === 0 ? '✔ مسدد' : '⚠ جزئي';
+                chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
-                animateValue('val_credit', credit);
-                animateValue('val_balance', balance);
+                animateNumber(document.getElementById('val_credit'), Math.round(daen2026));
+                animateNumber(document.getElementById('val_balance'), Math.round(balance2026));
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(daen2026));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(balance2026));
 
-                document.getElementById('smart_message').innerHTML = buildSmartMessage({
-                    debit,
-                    credit,
-                    balance,
-                    payPercent,
-                    txCount: txYear.length
+                document.getElementById('smart_message').innerHTML =
+                    buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
+
+                animateHighlights();
+                await loadNotifications();
+
+                const percentTarget = rate;
+
+                new Chart(document.getElementById('balancePieChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['مدفوع', 'متبقي'],
+                        datasets: [{
+                            data: [balance2026, daen2026],
+                            backgroundColor: ['#c95a52', '#2f9e6f'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '75%',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: 'centerText',
+                        beforeDraw(chart) {
+                            const { width, height, ctx } = chart;
+
+                            if (typeof chart._animatedValue !== 'number') {
+                                chart._animatedValue = 0;
+                            }
+
+                            chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
+                            const currentValue = Math.round(chart._animatedValue);
+
+                            ctx.restore();
+                            ctx.font = 'bold 52px Tajawal';
+                            ctx.fillStyle = '#2f2a24';
+                            ctx.textBaseline = 'middle';
+
+                            const text = currentValue + '%';
+                            const textWidth = ctx.measureText(text).width;
+                            ctx.fillText(text, (width - textWidth) / 2, height / 2 - 8);
+
+                            ctx.save();
+
+                            if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
+                                requestAnimationFrame(() => chart.draw());
+                            }
+                        }
+                    }]
                 });
 
-                renderPieChart(credit, balance, payPercent);
-
-                if (tenant.last_seen) {
-                    document.getElementById('last_seen_text').textContent = `آخر ظهور: ${formatArabicDate(tenant.last_seen, true)}`;
-                } else {
-                    document.getElementById('last_seen_text').textContent = 'آخر ظهور: أول تسجيل';
-                }
-
-                await Promise.all([
-                    loadNotifications(),
-                    updateLastSeen()
-                ]);
-
-            } catch (err) {
-                console.error('Init error:', err);
-
-                document.getElementById('t_name').textContent = 'تعذر تحميل البيانات';
-                document.getElementById('last_update').textContent = 'حدث خطأ أثناء قراءة الحساب';
-                renderEmptyNotifications('تعذر تحميل الإشعارات');
-            } finally {
-                showLoaderDone();
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                document.querySelectorAll('.reveal').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('active'), i * 80);
+                });
+                lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
         function logout() {
-            localStorage.removeItem('jabri_tenant_code');
+            localStorage.clear();
             window.location.href = 'index.html';
         }
 
@@ -840,7 +764,7 @@
             window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
         }
 
-        window.addEventListener('load', init);
+        window.onload = init;
     </script>
 </body>
 </html>
