@@ -617,7 +617,13 @@
                 const debit = toNumber(row.debit);
                 const credit = toNumber(row.credit);
                 running = running - credit + debit;
-                return { ...row, debit, credit, balance: running };
+                return {
+                    ...row,
+                    debit,
+                    credit,
+                    balance: running,
+                    isClosed: running <= 0
+                };
             });
         }
 
@@ -666,7 +672,15 @@
 
             const grouped = {};
             transactions.forEach(t => {
-                const y = new Date(t.date).getFullYear();
+                const dateObj = new Date(t.date);
+                let y = dateObj.getFullYear();
+                const desc = (t.description || '').trim();
+
+                // الرصيد السابق يظهر في السنة التالية لكن يبقى بتاريخه الحقيقي
+                if (isCarryRow(desc)) {
+                    y = y + 1;
+                }
+
                 if (!grouped[y]) grouped[y] = [];
                 grouped[y].push(t);
             });
@@ -675,108 +689,108 @@
             let carryBalance = prevBal;
 
             years.forEach(year => {
-    const rows = grouped[year] || [];
+                const rows = grouped[year] || [];
 
-    const rentRows = rows.filter(r => isRentRow(r.description));
-    const feeRows = rows.filter(r => isFeesRow(r.description));
-    const carryRows = rows.filter(r => isCarryRow(r.description));
+                const rentRows = rows.filter(r => isRentRow(r.description || ''));
+                const feeRows = rows.filter(r => isFeesRow(r.description || ''));
+                const carryRows = rows.filter(r => isCarryRow(r.description || ''));
 
-    const paymentRows = rows
-        .filter(r =>
-            !isRentRow(r.description) &&
-            !isFeesRow(r.description) &&
-            !isCarryRow(r.description)
-        )
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+                const paymentRows = rows
+                    .filter(r =>
+                        !isRentRow(r.description || '') &&
+                        !isFeesRow(r.description || '') &&
+                        !isCarryRow(r.description || '')
+                    )
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    const yearRows = [
-        ...rentRows,
-        ...feeRows,
-        ...carryRows,
-        ...paymentRows
-    ];
+                const yearRows = [
+                    ...rentRows,
+                    ...feeRows,
+                    ...carryRows,
+                    ...paymentRows
+                ];
 
-    const hasCarryRow = yearRows.some(r => isCarryRow(r.description));
+                const hasCarryRow = yearRows.some(r => isCarryRow(r.description || ''));
 
-    let items = calculateRunningBalance(
-        yearRows,
-        hasCarryRow ? 0 : carryBalance
-    );
+                let items = calculateRunningBalance(
+                    yearRows,
+                    hasCarryRow ? 0 : carryBalance
+                );
 
-    items = items.map((item, idx) => {
-        const desc = (item.description || '').trim();
-        return {
-            ...item,
-            isCarry: isCarryRow(desc),
-            isMain: isRentRow(desc) || isFeesRow(desc),
-            isLast: idx === items.length - 1
-        };
-    });
+                items = items.map((item, idx) => {
+                    const desc = (item.description || '').trim();
+                    return {
+                        ...item,
+                        isCarry: isCarryRow(desc),
+                        isMain: isRentRow(desc) || isFeesRow(desc),
+                        isLast: idx === items.length - 1
+                    };
+                });
 
-    const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
-    const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
+                const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
+                const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
 
-    let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
-    if (finalBalance <= 0) {
-        status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
-    } else if (totalCredit > 0) {
-        status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
-    }
+                let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
+                if (finalBalance <= 0) {
+                    status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
+                } else if (totalCredit > 0) {
+                    status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+                }
 
-    const card = document.createElement('div');
-    card.className = `year-card ${status.className}`;
-    card.innerHTML = `
-        <div class="year-head">
-            <div class="year-status ${status.className}">${status.text}</div>
-            <div class="year-title">
-                <span class="year-chip ${status.chip}">${year}</span>
-            </div>
-        </div>
+                const card = document.createElement('div');
+                card.className = `year-card ${status.className}`;
+                card.innerHTML = `
+                    <div class="year-head">
+                        <div class="year-status ${status.className}">${status.text}</div>
+                        <div class="year-title">
+                            <span class="year-chip ${status.chip}">${year}</span>
+                        </div>
+                    </div>
 
-        <table class="statement-table">
-            <thead>
-                <tr>
-                    <th>التاريخ</th>
-                    <th>مدين</th>
-                    <th>دائن</th>
-                    <th>الرصيد</th>
-                    <th>البيان</th>
-                    <th>سند</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${items.map(item => `
-                    <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
-                        <td><span class="chip">${formatShortDate(item.date)}</span></td>
-                        <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
-                        <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
-                        <td class="${item.balance <= 0 ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
-                        <td>${item.description || ''}</td>
-                        <td>
-                            <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
-                                ${item.receipt_no || '—'}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+                    <table class="statement-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>مدين</th>
+                                <th>دائن</th>
+                                <th>الرصيد</th>
+                                <th>البيان</th>
+                                <th>سند</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
+                                    <td><span class="chip">${formatShortDate(item.date)}</span></td>
+                                    <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
+                                    <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
+                                    <td class="${item.isClosed ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
+                                    <td>${item.description || ''}</td>
+                                    <td>
+                                        <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
+                                            ${item.receipt_no || '—'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
 
-        <div class="year-footer">
-            <div class="year-summary-box credit-box">
-                <span>دائن</span>
-                <b>${formatCurrency(totalCredit)}</b>
-            </div>
-            <div class="year-summary-box balance-box ${getBalanceBoxClass(finalBalance)}">
-                <span>رصيد</span>
-                <b>${formatCurrency(finalBalance)}</b>
-            </div>
-        </div>
-    `;
+                    <div class="year-footer">
+                        <div class="year-summary-box credit-box">
+                            <span>دائن</span>
+                            <b>${formatCurrency(totalCredit)}</b>
+                        </div>
+                        <div class="year-summary-box balance-box ${finalBalance <= 0 ? 'paid' : 'late'}">
+                            <span>رصيد</span>
+                            <b>${formatCurrency(finalBalance)}</b>
+                        </div>
+                    </div>
+                `;
 
-    container.appendChild(card);
-    carryBalance = finalBalance;
-});
+                container.appendChild(card);
+                carryBalance = finalBalance;
+            });
         }
 
         init();
