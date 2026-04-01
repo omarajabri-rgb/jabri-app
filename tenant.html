@@ -1,3 +1,5 @@
+تم تحديث الكود بالكامل ودمج التعديلات المطلوبة على ستايل الـ chip وتغيير نص عنوان الإشعارات.
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -176,16 +178,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 20px;
+            padding: 12px 22px;
             border-radius: 999px;
-            min-width: 120px;
+            min-width: 130px;
             font-size: 14px;
             font-weight: 900;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             color: var(--gold-deep);
-            background: var(--chip-bg);
-            border: var(--chip-border);
-            box-shadow: var(--chip-inner-glow);
+            background: rgba(201,164,107,0.14);
+            border: 1px solid rgba(201,164,107,0.26);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
         }
 
         .stats-grid {
@@ -250,19 +252,7 @@
             color: var(--text);
             text-align: right;
             margin-top: 10px;
-        }
-
-        .prediction-item {
-            margin-top: 15px;
-            padding: 16px 18px;
-            border-radius: 22px;
-            background: rgba(255,255,255,0.55);
-            border: 1px dashed rgba(201,164,107,0.65);
-            box-shadow: var(--chip-inner-glow);
-            font-weight: 900;
-            text-align: center;
-            color: var(--gold-deep);
-            line-height: 1.8;
+            white-space: pre-line;
         }
 
         .chart-wrap {
@@ -272,6 +262,41 @@
             justify-content: center;
             margin-top: 10px;
         }
+
+        #notifications_box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .notify-empty {
+            padding: 16px;
+            border-radius: 18px;
+            text-align: center;
+            color: var(--muted);
+            font-weight: 800;
+            background: rgba(255,255,255,0.45);
+            border: 1px dashed rgba(201,164,107,0.24);
+        }
+
+        .notify-card {
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+            line-height: 1.8;
+        }
+
+        .notify-card.normal { border-color: rgba(201,164,107,0.22); }
+        .notify-card.warning { border-color: rgba(204,90,80,0.22); background: linear-gradient(135deg, rgba(204,90,80,0.08), rgba(255,255,255,0.92)); }
+        .notify-card.legal { border-color: rgba(160,40,40,0.28); background: linear-gradient(135deg, rgba(160,40,40,0.10), rgba(255,255,255,0.92)); }
+        .notify-card.success { border-color: rgba(47,158,111,0.24); background: linear-gradient(135deg, rgba(47,158,111,0.08), rgba(255,255,255,0.92)); }
+
+        .notify-title { font-size: 15px; font-weight: 900; margin-bottom: 6px; color: var(--text); }
+        .notify-message { font-size: 14px; font-weight: 700; color: var(--text); }
+        .notify-date { margin-top: 8px; font-size: 11px; font-weight: 800; color: var(--muted); }
 
         .action-btn {
             width: 100%;
@@ -324,30 +349,14 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(14px);
-            transition: all 0.55s ease;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
         @media screen and (max-width: 768px) {
-            .hero-card h1 {
-                font-size: 24px;
-                padding-left: 90px;
-            }
-
-            .soft-card b {
-                font-size: 24px;
-            }
+            .hero-card h1 { font-size: 24px; padding-left: 90px; }
+            .soft-card b { font-size: 24px; }
         }
     </style>
 </head>
@@ -391,12 +400,20 @@
 
         <div class="panel reveal">
             <div class="chip-header">
+                <div class="chip">إشعار</div>
+            </div>
+            <div id="notifications_box">
+                <div class="notify-empty">لا توجد إشعارات حالياً</div>
+            </div>
+        </div>
+
+        <div class="panel reveal">
+            <div class="chip-header">
                 <div class="chip">ملخص الحساب</div>
             </div>
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
             </div>
-            <div id="prediction_box" class="prediction-item">جاري تحليل نمط الدفع...</div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
@@ -416,19 +433,14 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        function toNumber(v) {
-            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-        }
+        function toNumber(v) { return isNaN(parseFloat(v)) ? 0 : parseFloat(v); }
 
         function isRentRow(desc) {
             const d = (desc || '').trim();
             return d.startsWith('ايجار') || d.startsWith('الإيجار') || d.startsWith('الايجار');
         }
 
-        function isFeesRow(desc) {
-            const d = (desc || '').trim();
-            return d.startsWith('معارف');
-        }
+        function isFeesRow(desc) { return (desc || '').trim().startsWith('معارف'); }
 
         function isCarryRow(desc) {
             const d = (desc || '').trim();
@@ -460,66 +472,22 @@
         function buildPredictionMeta(transactions, balance, year = 2026) {
             const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
             const payments = yearRows.filter(t => toNumber(t.credit) > 0);
-
-            if (payments.length === 0 || balance <= 0) {
-                return {
-                    text: 'لا يوجد بيانات كافية لعرض التوقع حالياً',
-                    monthsToClose: null,
-                    monthlyRate: 0,
-                    level: 'unknown'
-                };
-            }
-
+            if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
+            
             const totalPaid = payments.reduce((sum, t) => sum + toNumber(t.credit), 0);
-            const months = new Set(
-                payments.map(t => {
-                    const d = new Date(t.date);
-                    return `${d.getFullYear()}-${d.getMonth()}`;
-                })
-            ).size;
-
+            const months = new Set(payments.map(t => {
+                const d = new Date(t.date);
+                return `${d.getFullYear()}-${d.getMonth()}`;
+            })).size;
+            
             const monthlyRate = totalPaid / (months || 1);
-
-            if (monthlyRate <= 0) {
-                return {
-                    text: 'لا يوجد نمط دفع واضح حالياً',
-                    monthsToClose: null,
-                    monthlyRate: 0,
-                    level: 'unknown'
-                };
-            }
-
+            if (monthlyRate <= 0) return { level: 'unknown' };
+            
             const monthsToClose = Math.ceil(balance / monthlyRate);
-
-            if (monthsToClose <= 3) {
-                return {
-                    text: `ممتاز 🔥 — بهذا المعدل سيتم تسوية الرصيد خلال ${monthsToClose} أشهر`,
-                    monthsToClose,
-                    monthlyRate,
-                    level: 'excellent'
-                };
-            } else if (monthsToClose <= 6) {
-                return {
-                    text: `جيد 👍 — يتوقع تسوية الرصيد خلال ${monthsToClose} أشهر`,
-                    monthsToClose,
-                    monthlyRate,
-                    level: 'good'
-                };
-            } else if (monthsToClose <= 12) {
-                return {
-                    text: `يُنصح برفع الدفعة قليلًا ⚠️ — بهذا المعدل يحتاج ${monthsToClose} أشهر لتصفية الرصيد`,
-                    monthsToClose,
-                    monthlyRate,
-                    level: 'warning'
-                };
-            } else {
-                return {
-                    text: `يُنصح بزيادة الدفع ⚠️ — بهذا المعدل يحتاج ${monthsToClose} أشهر لتصفية الرصيد`,
-                    monthsToClose,
-                    monthlyRate,
-                    level: 'weak'
-                };
-            }
+            if (monthsToClose <= 3) return { level: 'excellent', monthsToClose };
+            if (monthsToClose <= 6) return { level: 'good', monthsToClose };
+            if (monthsToClose <= 12) return { level: 'warning', monthsToClose };
+            return { level: 'weak', monthsToClose };
         }
 
         function buildAdviceMessageFromStatement(transactions, balance, year = 2026) {
@@ -527,38 +495,84 @@
             const prediction = buildPredictionMeta(transactions, balance, year);
 
             if (!advice.yearlyRent && !advice.yearlyFees) {
-                return 'لا توجد بيانات كافية في كشف حساب 2026 لإظهار النصيحة المحاسبية حالياً.';
+                return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
             }
 
             let recommended = advice.suggestedMonthly;
 
             if (prediction.level === 'excellent') {
                 recommended = advice.monthlyBase;
-            } else if (prediction.level === 'good') {
+                return `1- ممتاز، استمر على حوالي ${recommended} د.أ شهريًا 👍\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+            }
+
+            if (prediction.level === 'good') {
                 recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
-            } else if (prediction.level === 'warning') {
+                return `1- يُنصح بدفع حوالي ${recommended} د.أ شهريًا (قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+            }
+
+            if (prediction.level === 'warning') {
                 recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
-            } else if (prediction.level === 'weak') {
+                return `1- يُنصح بزيادة الدفع إلى حوالي ${recommended} د.أ شهريًا ⚠️ (بهذا المعدل قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+            }
+
+            if (prediction.level === 'weak') {
                 recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
+                return `1- يُنصح بزيادة الدفع إلى حوالي ${recommended} د.أ شهريًا ⚠️ (بهذا المعدل قد يحتاج ${prediction.monthsToClose} أشهر لتصفية الرصيد)\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
             }
 
-            if (advice.previousBalance > 0) {
-                return `حسب كشف حساب ${year}، الأساس الشهري هو ${advice.monthlyBase} د.أ (شامل الإيجار والمعارف)، ومع وجود رصيد سابق يُنصح بدفع ${recommended} د.أ شهريًا لتخفيف الرصيد بشكل مريح.`;
+            return `1- يُنصح بدفع حوالي ${advice.suggestedMonthly} د.أ شهريًا\n2- الحد الأدنى المناسب: ${advice.monthlyBase} د.أ`;
+        }
+
+        function formatNotificationDate(value) {
+            const d = new Date(value);
+            if (isNaN(d)) return '';
+            return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function loadNotifications() {
+            const box = document.getElementById('notifications_box');
+            if (!box) return;
+
+            const { data, error } = await supabaseClient
+                .from('tenant_notifications')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (error || !data || data.length === 0) {
+                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
+                return;
             }
 
-            return `حسب كشف حساب ${year}، الأساس الشهري الحالي هو ${advice.monthlyBase} د.أ (شامل الإيجار والمعارف)، ويُنصح بالالتزام بهذا المبلغ شهريًا.`;
+            box.innerHTML = data.map(item => `
+                <div class="notify-card ${item.type || 'normal'}">
+                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
+                    <div class="notify-message">${item.message || ''}</div>
+                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
+                </div>
+            `).join('');
+
+            const unreadIds = data.filter(item => !item.is_read).map(item => item.id);
+            if (unreadIds.length > 0) {
+                await supabaseClient
+                    .from('tenant_notifications')
+                    .update({ is_read: true, read_at: new Date().toISOString() })
+                    .in('id', unreadIds);
+            }
         }
 
         function animateNumber(element, endValue) {
             const duration = 800;
             const startTime = performance.now();
-
             function update(currentTime) {
                 const progress = Math.min((currentTime - startTime) / duration, 1);
                 element.innerText = Math.floor(progress * endValue).toLocaleString('en-US');
                 if (progress < 1) requestAnimationFrame(update);
             }
-
             requestAnimationFrame(update);
         }
 
@@ -594,8 +608,7 @@
                 document.getElementById('smart_message').innerText =
                     buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
 
-                const prediction = buildPredictionMeta(tx || [], balance2026, 2026);
-                document.getElementById('prediction_box').innerText = prediction.text;
+                await loadNotifications();
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
@@ -664,3 +677,5 @@
     </script>
 </body>
 </html>
+
+```
