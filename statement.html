@@ -675,112 +675,111 @@
             let carryBalance = prevBal;
 
             years.forEach(year => {
-                const getPriority = (desc) => {
-    const d = (desc || '').trim();
+    const yearRows = grouped[year].slice().sort((a, b) => {
+        const getPriority = (desc) => {
+            const d = (desc || '').trim();
 
-    if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 1;
-    if (d.includes('ايجار') || d.includes('الإيجار')) return 2;
-    if (d.includes('معارف')) return 3;
+            if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 1;
+            if (d.includes('ايجار') || d.includes('الإيجار')) return 2;
+            if (d.includes('معارف')) return 3;
 
-    return null;
-};
+            return null;
+        };
 
-    const pA = getPriority(a.description);
-const pB = getPriority(b.description);
+        const pA = getPriority(a.description);
+        const pB = getPriority(b.description);
 
-if (pA !== null && pB !== null && pA !== pB) {
-    return pA - pB;
-}
+        if (pA !== null && pB !== null && pA !== pB) {
+            return pA - pB;
+        }
 
-if (pA !== null) return -1;
-if (pB !== null) return 1;
+        if (pA !== null) return -1;
+        if (pB !== null) return 1;
 
-return new Date(a.date) - new Date(b.date);
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    const hasCarryRow = yearRows.some(r => isCarryRow(r.description));
+
+    let items = calculateRunningBalance(
+        yearRows,
+        hasCarryRow ? 0 : carryBalance
+    );
+
+    items = items.map((item, idx) => {
+        const desc = (item.description || '').trim();
+        return {
+            ...item,
+            isCarry: isCarryRow(desc),
+            isMain: isRentRow(desc) || isFeesRow(desc),
+            isLast: idx === items.length - 1
+        };
+    });
+
+    const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
+    const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
+
+    let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
+    if (finalBalance <= 0) {
+        status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
+    } else if (totalCredit > 0) {
+        status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+    }
+
+    const card = document.createElement('div');
+    card.className = `year-card ${status.className}`;
+    card.innerHTML = `
+        <div class="year-head">
+            <div class="year-status ${status.className}">${status.text}</div>
+            <div class="year-title">
+                <span class="year-chip ${status.chip}">${year}</span>
+            </div>
+        </div>
+
+        <table class="statement-table">
+            <thead>
+                <tr>
+                    <th>التاريخ</th>
+                    <th>مدين</th>
+                    <th>دائن</th>
+                    <th>الرصيد</th>
+                    <th>البيان</th>
+                    <th>سند</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${items.map(item => `
+                    <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
+                        <td><span class="chip">${formatShortDate(item.date)}</span></td>
+                        <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
+                        <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
+                        <td class="${item.balance <= 0 ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
+                        <td>${item.description || ''}</td>
+                        <td>
+                            <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
+                                ${item.receipt_no || '—'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+        <div class="year-footer">
+            <div class="year-summary-box credit-box">
+                <span>دائن</span>
+                <b>${formatCurrency(totalCredit)}</b>
+            </div>
+            <div class="year-summary-box balance-box ${getBalanceBoxClass(finalBalance)}">
+                <span>رصيد</span>
+                <b>${formatCurrency(finalBalance)}</b>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(card);
+    carryBalance = finalBalance;
 });
-  
-
-
-                const hasCarryRow = yearRows.some(r => isCarryRow(r.description));
-
-let items = calculateRunningBalance(
-    yearRows,
-    hasCarryRow ? 0 : carryBalance
-);
-
-                items = items.map((item, idx) => {
-                    const desc = (item.description || '').trim();
-                    return {
-                        ...item,
-                        isCarry: isCarryRow(desc),
-                        isMain: isRentRow(desc) || isFeesRow(desc),
-                        isLast: idx === items.length - 1
-                    };
-                });
-
-                const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
-                const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
-
-                let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
-                if (finalBalance <= 0) {
-                    status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
-                } else if (totalCredit > 0) {
-                    status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
-                }
-
-                const card = document.createElement('div');
-                card.className = `year-card ${status.className}`;
-                card.innerHTML = `
-                    <div class="year-head">
-                        <div class="year-status ${status.className}">${status.text}</div>
-                        <div class="year-title">
-                            <span class="year-chip ${status.chip}">${year}</span>
-                        </div>
-                    </div>
-
-                    <table class="statement-table">
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>مدين</th>
-                                <th>دائن</th>
-                                <th>الرصيد</th>
-                                <th>البيان</th>
-                                <th>سند</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${items.map(item => `
-                                <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
-                                    <td><span class="chip">${formatShortDate(item.date)}</span></td>
-                                    <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
-                                    <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
-                                    <td class="${item.balance <= 0 ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
-                                    <td>${item.description || ''}</td>
-                                    <td>
-                                        <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
-                                            ${item.receipt_no || '—'}
-                                        </span>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div class="year-footer">
-                        <div class="year-summary-box credit-box">
-                            <span>دائن</span>
-                            <b>${formatCurrency(totalCredit)}</b>
-                        </div>
-                        <div class="year-summary-box balance-box ${getBalanceBoxClass(finalBalance)}">
-                            <span>رصيد</span>
-                            <b>${formatCurrency(finalBalance)}</b>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(card);
-                carryBalance = finalBalance;
-            });
         }
 
         init();
