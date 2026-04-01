@@ -735,15 +735,22 @@
                     ...paymentRows
                 ];
 
-                let items = calculateRunningBalance(
-                    yearRows,
-                    carryBalance
-                );
+                let items = calculateRunningBalance(yearRows, carryBalance);
 
                 items = items.map((item, idx) => {
                     const desc = (item.description || '').trim();
+
+                    let fixedDate = item.date;
+                    if (isCarryRow(desc)) {
+                        const match = desc.match(/\d{4}/);
+                        if (match) {
+                            fixedDate = `${match[0]}-01-01`;
+                        }
+                    }
+
                     return {
                         ...item,
+                        date: fixedDate,
                         isCarry: isCarryRow(desc),
                         isMain: isRentRow(desc) || isFeesRow(desc),
                         isLast: idx === items.length - 1
@@ -804,7 +811,7 @@
                             <span>دائن</span>
                             <b>${formatCurrency(totalCredit)}</b>
                         </div>
-                        <div class="year-summary-box balance-box ${finalBalance <= 0 ? 'paid' : 'late'}">
+                        <div class="year-summary-box balance-box ${getBalanceBoxClass(finalBalance)}">
                             <span>رصيد</span>
                             <b>${formatCurrency(finalBalance)}</b>
                         </div>
