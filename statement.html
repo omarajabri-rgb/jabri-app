@@ -603,7 +603,7 @@
 
         function isFeesRow(desc) {
             const d = (desc || '').trim();
-            return d.includes('معارف');
+            return d.startsWith('معارف');
         }
 
         function isCarryRow(desc) {
