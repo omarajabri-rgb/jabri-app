@@ -598,7 +598,7 @@
 
         function isRentRow(desc) {
             const d = (desc || '').trim();
-            return d.includes('ايجار') || d.includes('الإيجار');
+            return d.startsWith('ايجار') || d.startsWith('الإيجار');
         }
 
         function isFeesRow(desc) {
