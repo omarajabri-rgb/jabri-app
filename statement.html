@@ -675,23 +675,27 @@
             let carryBalance = prevBal;
 
             years.forEach(year => {
-                const yearRows = grouped[year].slice().sort((a, b) => {
-    const getPriority = (desc) => {
-        const d = (desc || '').trim();
+                const getPriority = (desc) => {
+    const d = (desc || '').trim();
 
-        if (d.includes('ايجار') || d.includes('الإيجار')) return 1;
-        if (d.includes('معارف')) return 2;
-        if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 3;
+    if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 1;
+    if (d.includes('ايجار') || d.includes('الإيجار')) return 2;
+    if (d.includes('معارف')) return 3;
 
-        return 99; // أي شيء ثاني = دفعات
-    };
+    return null;
+};
 
     const pA = getPriority(a.description);
-    const pB = getPriority(b.description);
+const pB = getPriority(b.description);
 
-    if (pA !== pB) return pA - pB;
+if (pA !== null && pB !== null && pA !== pB) {
+    return pA - pB;
+}
 
-    return new Date(a.date) - new Date(b.date);
+if (pA !== null) return -1;
+if (pB !== null) return 1;
+
+return new Date(a.date) - new Date(b.date);
 });
   
 
