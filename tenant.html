@@ -646,8 +646,10 @@
                         read_at: new Date().toISOString()
                     })
                     .in('id', unreadIds);
+           }
             
-        }
+        
+            }
 
         async function init() {
             try {
@@ -687,25 +689,38 @@
                 await loadNotifications();
 
                 new Chart(document.getElementById('balancePieChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['متبقي', 'مدفوع'],
-                        datasets: [{
-                            data: [balance2026, daen2026],
-                            backgroundColor: ['#c95a52', '#2f9e6f'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-    cutout: '75%',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            display: false
+    type: 'doughnut',
+    data: {
+        labels: ['مدفوع', 'متبقي'],
+        datasets: [{
+            data: [balance2026, daen2026],
+            backgroundColor: ['#c95a52', '#2f9e6f'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        cutout: '75%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
         }
-    }
-}
+    },
+    plugins: [{
+        beforeDraw(chart) {
+            const { width, height, ctx } = chart;
+            ctx.restore();
+            ctx.font = "bold 38px Tajawal";
+            ctx.fillStyle = "#2f2a24";
+            ctx.textBaseline = "middle";
+            const text = rate + "%";
+            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2 - 6);
+            ctx.save();
+        }
+    }]
+});
                                     font: { family: 'Tajawal', weight: 'bold' },
                                     color: '#2f2a24',
                                     padding: 16,
