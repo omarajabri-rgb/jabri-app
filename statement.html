@@ -1,149 +1,810 @@
-/** * تم تحديث منطق ترتيب الصفوف (V1 - Locked)
- * الترتيب: 1. إيجار | 2. معارف | 3. رصيد مدور | 4. الدفعات (حسب التاريخ)
- */
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>مجمع جبري | كشف الحساب التفصيلي</title>
 
-function render(prevBal, transactions) {
-    const container = document.getElementById('years_container');
-    container.innerHTML = '';
+    <script defer src="https://unpkg.com/lucide@latest"></script>
 
-    const grouped = {};
-    transactions.forEach(t => {
-        const dateObj = new Date(t.date);
-        let y = dateObj.getFullYear();
-        const desc = (t.description || '').trim();
-
-        if (isCarryRow(desc)) {
-            y = y + 1;
+    <style>
+        :root {
+            --bg: #f7f4ed;
+            --bg-2: #fdfbf6;
+            --surface: rgba(255,255,255,0.80);
+            --border: rgba(201,164,107,0.20);
+            --text: #2f2a24;
+            --gold: #c9a46b;
+            --gold-deep: #b18a52;
+            --success: #2f9e6f;
+            --danger: #c95a52;
+            --warning: #c38a2e;
+            --shadow: 0 18px 40px rgba(120,95,56,0.10);
         }
 
-        if (!grouped[y]) grouped[y] = [];
-        grouped[y].push(t);
-    });
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
 
-    const years = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-    let carryBalance = prevBal;
+        body {
+            margin: 0;
+            color: var(--text);
+            padding: 16px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.45s ease;
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
+        }
 
-    years.forEach(year => {
-        const rows = grouped[year] || [];
+        body.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        // المنطق المحدث لترتيب صفوف الافتتاح (Opening Rows)
-        const openingRows = rows
-            .filter(r =>
-                isRentRow(r.description || '') ||
-                isFeesRow(r.description || '') ||
-                isCarryRow(r.description || '')
-            )
-            .sort((a, b) => {
-                const descA = (a.description || '').trim();
-                const descB = (b.description || '').trim();
+        .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding-bottom: 42px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-                const getOpeningOrder = (desc) => {
-                    if (isRentRow(desc)) return 1;
-                    if (isFeesRow(desc)) return 2;
-                    if (isCarryRow(desc)) return 3;
-                    return 99;
-                };
+        .statement-header {
+            border-radius: 26px;
+            padding: 24px;
+            margin-bottom: 16px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
 
-                const orderA = getOpeningOrder(descA);
-                const orderB = getOpeningOrder(descB);
+        .statement-header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold-deep);
+        }
 
-                if (orderA !== orderB) return orderA - orderB;
-                return new Date(a.date) - new Date(b.date);
-            });
+        .statement-header h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text);
+        }
 
-        // ترتيب صفوف الدفعات والعمليات الأخرى حسب التاريخ
-        const paymentRows = rows
-            .filter(r =>
-                !isRentRow(r.description || '') &&
-                !isFeesRow(r.description || '') &&
-                !isCarryRow(r.description || '')
-            )
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        #statement_date {
+            margin: 0;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+        }
 
-        const yearRows = [
-            ...openingRows,
-            ...paymentRows
-        ];
+        .chip {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 900;
+            white-space: nowrap;
+            background: rgba(201,164,107,0.14);
+            color: var(--text);
+            border: 1px solid rgba(201,164,107,0.24);
+        }
 
-        const hasCarryRow = yearRows.some(r => isCarryRow(r.description || ''));
+        .year-card {
+            border-radius: 26px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
 
-        let items = calculateRunningBalance(
-            yearRows,
-            hasCarryRow ? 0 : carryBalance
+        .year-card.status-paid { border-color: rgba(47,158,111,0.18); }
+        .year-card.status-partial { border-color: rgba(195,138,46,0.18); }
+        .year-card.status-late { border-color: rgba(204,90,80,0.16); }
+
+        .year-head {
+            position: relative;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 66px;
+        }
+
+        .year-status {
+            position: absolute;
+            left: 18px;
+            right: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+        }
+
+        .status-paid {
+            background: rgba(47,158,111,0.12);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.24);
+        }
+
+        .status-partial {
+            background: rgba(195,138,46,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(195,138,46,0.24);
+        }
+
+        .status-late {
+            background: rgba(204,90,80,0.12);
+            color: var(--danger);
+            border: 1px solid rgba(204,90,80,0.22);
+        }
+
+        .year-title {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            text-align: center;
+        }
+
+        .year-chip {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 900;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            letter-spacing: 1px;
+            transition: all 0.25s ease;
+        }
+
+        .year-chip.paid {
+            color: var(--success);
+            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(47,158,111,0.35);
+        }
+
+        .year-chip.partial {
+            color: var(--warning);
+            background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25));
+            border: 1px solid rgba(195,138,46,0.30);
+        }
+
+        .year-chip.late {
+            color: var(--danger);
+            background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25));
+            border: 1px solid rgba(204,90,80,0.30);
+        }
+
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+            background: transparent;
+        }
+
+        .statement-table th,
+        .statement-table td {
+            text-align: center;
+            vertical-align: middle;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .statement-table th {
+            background: #e9e2d5;
+            color: #5f5345;
+            padding: 12px 10px;
+            font-weight: 900;
+            font-size: 11px;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(201,164,107,0.18);
+        }
+
+        .statement-table td {
+            padding: 6px 6px;
+            line-height: 1.3;
+            font-size: 11px;
+            border: 1px solid rgba(201,164,107,0.15);
+        }
+
+        .statement-table tbody tr:nth-child(odd) td {
+            background: rgba(253,251,246,0.78);
+        }
+
+        .statement-table tbody tr:nth-child(even) td {
+            background: rgba(201,164,107,0.045);
+        }
+
+        .statement-table tbody tr:hover td {
+            background: rgba(201,164,107,0.12);
+            transition: 0.2s;
+        }
+
+        .statement-table tbody tr:last-child td,
+        .last-row td {
+            border-bottom: 2px solid var(--gold) !important;
+            box-shadow: inset 0 -1px 0 rgba(201,164,107,0.35);
+        }
+
+        .statement-table td:nth-child(2),
+        .statement-table td:nth-child(4) {
+            color: var(--danger);
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.4px;
+        }
+
+        .statement-table td:nth-child(3) {
+            color: var(--success);
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.4px;
+        }
+
+        .statement-table td:nth-child(5),
+        .statement-table th:nth-child(5) {
+            color: #000000;
+            font-weight: 800;
+        }
+
+        .statement-table td .chip {
+            display: inline-block;
+            margin: auto;
+            color: var(--text);
+        }
+
+        .balance-paid {
+            color: var(--success) !important;
+        }
+
+        .balance-late {
+            color: var(--danger) !important;
+        }
+
+        .carry-row td {
+            font-style: normal;
+        }
+
+        .main-row td {
+            font-weight: 900;
+        }
+
+        .year-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .year-summary-box {
+            padding: 14px;
+            border-radius: 18px;
+            text-align: center;
+            border: 1px solid rgba(201,164,107,0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+            transition: all 0.25s ease;
+        }
+
+        .year-summary-box span {
+            display: block;
+            color: #7a6c59;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .year-summary-box b {
+            display: block;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .year-summary-box.credit-box {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+        }
+
+        .year-summary-box.credit-box span,
+        .year-summary-box.credit-box b {
+            color: var(--success);
+        }
+
+        .year-summary-box.balance-box.paid {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+        }
+
+        .year-summary-box.balance-box.late {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+            border-color: rgba(204,90,80,0.22);
+        }
+
+        .year-summary-box.balance-box.paid span,
+        .year-summary-box.balance-box.paid b {
+            color: var(--success);
+        }
+
+        .year-summary-box.balance-box.late span,
+        .year-summary-box.balance-box.late b {
+            color: var(--danger);
+        }
+
+        .bottom-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: nowrap;
+        }
+
+        .back-btn,
+        .save-btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            transition: all 0.25s ease;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:focus,
+        .back-btn:active {
+            outline: none;
+            background: rgba(255,255,255,0.7);
+            color: var(--text);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            transform: none;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            border: none;
+        }
+
+        .back-btn:hover,
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(120,95,56,0.15);
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: var(--gold-deep);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .statement-header h1 {
+                font-size: 22px;
+            }
+
+            .year-head {
+                min-height: 58px;
+                padding: 14px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .year-status {
+                position: absolute;
+                left: 12px;
+                right: auto;
+                top: 50%;
+                transform: translateY(-50%);
+                display: inline-block;
+                margin: 0;
+                font-size: 11px;
+                padding: 7px 12px;
+            }
+
+            .year-title {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .year-chip {
+                font-size: 17px;
+            }
+
+            .bottom-actions {
+                flex-wrap: nowrap;
+            }
+
+            .back-btn,
+            .save-btn {
+                width: auto;
+                flex: 1;
+                font-size: 14px;
+            }
+
+            .year-footer {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 12px;
+            }
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                opacity: 1 !important;
+                transform: none !important;
+                padding: 0 !important;
+                color: var(--text) !important;
+            }
+
+            .bottom-actions,
+            #loader {
+                display: none !important;
+            }
+
+            .wrap {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .year-card,
+            .statement-header,
+            .year-footer,
+            .statement-table tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            .year-head {
+                min-height: 60px;
+            }
+
+            .year-status {
+                position: absolute !important;
+                left: 12px !important;
+                right: auto !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+            }
+
+            .year-footer {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            .statement-table th,
+            .statement-table td {
+                font-size: 10px !important;
+            }
+
+            .statement-table td:nth-child(5),
+            .statement-table th:nth-child(5) {
+                color: #000 !important;
+            }
+
+            .statement-table td:nth-child(2),
+            .statement-table td:nth-child(4) {
+                color: var(--danger) !important;
+            }
+
+            .statement-table td:nth-child(3) {
+                color: var(--success) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div class="wrap">
+        <div class="statement-header">
+            <h1>مجمع جبري الصناعي التجاري</h1>
+            <h2 id="statement_tenant_name">-</h2>
+            <p id="statement_date">-</p>
+        </div>
+
+        <div id="years_container"></div>
+
+        <div class="bottom-actions">
+            <button class="back-btn" onclick="window.history.back()">رجوع</button>
+            <button class="save-btn" type="button" onclick="window.print()">حفظ PDF</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        const supabase = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        items = items.map((item, idx) => {
-            const desc = (item.description || '').trim();
-            return {
-                ...item,
-                isCarry: isCarryRow(desc),
-                isMain: isRentRow(desc) || isFeesRow(desc),
-                isLast: idx === items.length - 1
-            };
-        });
-
-        const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
-        const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
-
-        let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
-        if (finalBalance <= 0) {
-            status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
-        } else if (totalCredit > 0) {
-            status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+        function toNumber(v) {
+            return parseFloat(String(v).replace(/,/g, '')) || 0;
         }
 
-        const card = document.createElement('div');
-        card.className = `year-card ${status.className}`;
-        card.innerHTML = `
-            <div class="year-head">
-                <div class="year-status ${status.className}">${status.text}</div>
-                <div class="year-title">
-                    <span class="year-chip ${status.chip}">${year}</span>
-                </div>
-            </div>
+        function formatCurrency(v) {
+            return Math.round(v).toLocaleString();
+        }
 
-            <table class="statement-table">
-                <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>مدين</th>
-                        <th>دائن</th>
-                        <th>الرصيد</th>
-                        <th>البيان</th>
-                        <th>سند</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${items.map(item => `
-                        <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
-                            <td><span class="chip">${formatShortDate(item.date)}</span></td>
-                            <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
-                            <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
-                            <td class="${item.isClosed ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
-                            <td>${item.description || ''}</td>
-                            <td>
-                                <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
-                                    ${item.receipt_no || '—'}
-                                </span>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+        function formatShortDate(dateValue) {
+            const d = new Date(dateValue);
+            return isNaN(d) ? '-' : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+        }
 
-            <div class="year-footer">
-                <div class="year-summary-box credit-box">
-                    <span>دائن</span>
-                    <b>${formatCurrency(totalCredit)}</b>
-                </div>
-                <div class="year-summary-box balance-box ${finalBalance <= 0 ? 'paid' : 'late'}">
-                    <span>رصيد</span>
-                    <b>${formatCurrency(finalBalance)}</b>
-                </div>
-            </div>
-        `;
+        function isRentRow(desc) {
+            const d = (desc || '').trim();
+            return d.includes('ايجار') || d.includes('الإيجار');
+        }
 
-        container.appendChild(card);
-        carryBalance = finalBalance;
-    });
-}
+        function isFeesRow(desc) {
+            const d = (desc || '').trim();
+            return d.includes('معارف');
+        }
+
+        function isCarryRow(desc) {
+            const d = (desc || '').trim();
+            return d.includes('رصيد سابق') || d.includes('رصيد مدور');
+        }
+
+        function calculateRunningBalance(rows, initialBalance = 0) {
+            let running = initialBalance;
+            return rows.map(row => {
+                const debit = toNumber(row.debit);
+                const credit = toNumber(row.credit);
+                running = running - credit + debit;
+                return {
+                    ...row,
+                    debit,
+                    credit,
+                    balance: running,
+                    isClosed: running <= 0
+                };
+            });
+        }
+
+        function formatLastUpdate() {
+            const now = new Date();
+            return `أخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function getBalanceBoxClass(balance) {
+            return toNumber(balance) <= 0 ? 'paid' : 'late';
+        }
+
+        async function init() {
+            if (!tenantCode) return;
+
+            try {
+                const { data: tenant } = await supabase
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .single();
+
+                const { data: tx } = await supabase
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true });
+
+                document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
+                document.getElementById('statement_date').innerText = formatLastUpdate();
+
+                render(toNumber(tenant?.previous_balance), tx || []);
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+            }
+        }
+
+        function render(prevBal, transactions) {
+            const container = document.getElementById('years_container');
+            container.innerHTML = '';
+
+            const grouped = {};
+            transactions.forEach(t => {
+                const y = new Date(t.date).getFullYear();
+                if (!grouped[y]) grouped[y] = [];
+                grouped[y].push(t);
+            });
+
+            const years = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+            let carryBalance = prevBal;
+
+            years.forEach(year => {
+                const rows = grouped[year] || [];
+
+                const openingRows = rows
+                    .filter(r =>
+                        isRentRow(r.description || '') ||
+                        isFeesRow(r.description || '') ||
+                        isCarryRow(r.description || '')
+                    )
+                    .sort((a, b) => {
+                        const descA = (a.description || '').trim();
+                        const descB = (b.description || '').trim();
+
+                        const getOpeningOrder = (desc) => {
+                            if (isRentRow(desc)) return 1;
+                            if (isFeesRow(desc)) return 2;
+                            if (isCarryRow(desc)) return 3;
+                            return 99;
+                        };
+
+                        const orderA = getOpeningOrder(descA);
+                        const orderB = getOpeningOrder(descB);
+
+                        if (orderA !== orderB) return orderA - orderB;
+
+                        return new Date(a.date) - new Date(b.date);
+                    });
+
+                const paymentRows = rows
+                    .filter(r =>
+                        !isRentRow(r.description || '') &&
+                        !isFeesRow(r.description || '') &&
+                        !isCarryRow(r.description || '')
+                    )
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                const yearRows = [
+                    ...openingRows,
+                    ...paymentRows
+                ];
+
+                const hasCarryRow = yearRows.some(r => isCarryRow(r.description || ''));
+
+                let items = calculateRunningBalance(
+                    yearRows,
+                    hasCarryRow ? 0 : carryBalance
+                );
+
+                items = items.map((item, idx) => {
+                    const desc = (item.description || '').trim();
+                    return {
+                        ...item,
+                        isCarry: isCarryRow(desc),
+                        isMain: isRentRow(desc) || isFeesRow(desc),
+                        isLast: idx === items.length - 1
+                    };
+                });
+
+                const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
+                const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
+
+                let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
+                if (finalBalance <= 0) {
+                    status = { text: 'مسدد', className: 'status-paid', chip: 'paid' };
+                } else if (totalCredit > 0) {
+                    status = { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+                }
+
+                const card = document.createElement('div');
+                card.className = `year-card ${status.className}`;
+                card.innerHTML = `
+                    <div class="year-head">
+                        <div class="year-status ${status.className}">${status.text}</div>
+                        <div class="year-title">
+                            <span class="year-chip ${status.chip}">${year}</span>
+                        </div>
+                    </div>
+
+                    <table class="statement-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>مدين</th>
+                                <th>دائن</th>
+                                <th>الرصيد</th>
+                                <th>البيان</th>
+                                <th>سند</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr class="${item.isCarry ? 'carry-row' : ''} ${item.isMain ? 'main-row' : ''} ${item.isLast ? 'last-row' : ''}">
+                                    <td><span class="chip">${formatShortDate(item.date)}</span></td>
+                                    <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
+                                    <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
+                                    <td class="${item.isClosed ? 'balance-paid' : 'balance-late'}">${formatCurrency(item.balance)}</td>
+                                    <td>${item.description || ''}</td>
+                                    <td>
+                                        <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
+                                            ${item.receipt_no || '—'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="year-footer">
+                        <div class="year-summary-box credit-box">
+                            <span>دائن</span>
+                            <b>${formatCurrency(totalCredit)}</b>
+                        </div>
+                        <div class="year-summary-box balance-box ${finalBalance <= 0 ? 'paid' : 'late'}">
+                            <span>رصيد</span>
+                            <b>${formatCurrency(finalBalance)}</b>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+                carryBalance = finalBalance;
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
