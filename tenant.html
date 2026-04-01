@@ -258,38 +258,34 @@
             backdrop-filter: blur(6px);
         }
 
-        .pie-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        /* المحدث: تنسيقات الإحصائيات النصية */
+        .pie-text-stats {
             margin-top: 16px;
-        }
-
-        .pie-stat {
             text-align: center;
-            padding: 14px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.55);
-            border: 1px solid rgba(201,164,107,0.16);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 15px;
+            font-weight: 900;
         }
 
-        .pie-stat span {
-            display: block;
-            font-size: 12px;
-            font-weight: 900;
-            margin-bottom: 6px;
+        .pie-text-item {
             color: var(--muted);
         }
 
-        .pie-stat b {
-            display: block;
-            font-size: 22px;
+        .pie-text-item b {
             font-weight: 900;
+            margin-right: 4px;
         }
 
-        .pie-stat.paid b { color: var(--success); }
-        .pie-stat.balance b { color: var(--danger); }
+        .pie-text-item.paid b {
+            color: var(--success);
+        }
+
+        .pie-text-item.balance b {
+            color: var(--danger);
+        }
 
         .chart-wrap {
             min-height: 220px;
@@ -471,15 +467,9 @@
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
             </div>
-            <div class="pie-stats">
-                <div class="pie-stat paid">
-                    <span>مدفوع</span>
-                    <b id="pie_paid_value">0</b>
-                </div>
-                <div class="pie-stat balance">
-                    <span>متبقي</span>
-                    <b id="pie_balance_value">0</b>
-                </div>
+            <div class="pie-text-stats">
+                <span class="pie-text-item paid">مدفوع: <b id="pie_paid_value">0</b></span>
+                <span class="pie-text-item balance">متبقي: <b id="pie_balance_value">0</b></span>
             </div>
         </div>
 
@@ -763,3 +753,5 @@
     </script>
 </body>
 </html>
+
+```
