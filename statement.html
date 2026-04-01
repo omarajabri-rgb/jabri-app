@@ -676,25 +676,20 @@
 
             years.forEach(year => {
     const yearRows = grouped[year].slice().sort((a, b) => {
-        const getPriority = (desc) => {
-            const d = (desc || '').trim();
+        const getPriority = (row) => {
+            const d = (row.description || '').trim();
 
-            if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 1;
-            if (d.includes('ايجار') || d.includes('الإيجار')) return 2;
-            if (d.includes('معارف')) return 3;
+            if (d.includes('ايجار') || d.includes('الإيجار')) return 1;
+            if (d.includes('معارف')) return 2;
+            if (d.includes('رصيد سابق') || d.includes('رصيد مدور')) return 3;
 
-            return null;
+            return 99;
         };
 
-        const pA = getPriority(a.description);
-        const pB = getPriority(b.description);
+        const pA = getPriority(a);
+        const pB = getPriority(b);
 
-        if (pA !== null && pB !== null && pA !== pB) {
-            return pA - pB;
-        }
-
-        if (pA !== null) return -1;
-        if (pB !== null) return 1;
+        if (pA !== pB) return pA - pB;
 
         return new Date(a.date) - new Date(b.date);
     });
