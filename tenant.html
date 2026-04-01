@@ -104,11 +104,6 @@
             transition: all 0.25s ease;
         }
 
-        .ghost-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(120,95,56,0.15);
-        }
-
         .hero-card {
             border-radius: 26px;
             padding: 24px;
@@ -122,7 +117,6 @@
             position: relative;
         }
 
-        /* 🆕 Hero Status Upgrade */
         .hero-status {
             position: absolute;
             left: 18px;
@@ -171,17 +165,17 @@
             padding-right: 10px;
         }
 
-        /* 🆕 Chip Upgrade */
+        /* 1) Chip Styling */
         .chip {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             padding: 8px 16px;
             border-radius: 999px;
+            min-width: 100px;
             font-size: 12px;
             font-weight: 900;
-            letter-spacing: 0.3px;
-            min-width: 100px;
+            letter-spacing: 0;
             color: var(--gold-deep);
             background: rgba(201,164,107,0.12);
             border: 1px solid rgba(201,164,107,0.22);
@@ -204,14 +198,6 @@
             -webkit-backdrop-filter: var(--glass-blur);
             text-align: center;
             padding: 24px;
-        }
-
-        .soft-card span {
-            display: block;
-            font-size: 15px;
-            font-weight: 900;
-            margin-bottom: 8px;
-            color: var(--muted);
         }
 
         .soft-card b {
@@ -263,27 +249,52 @@
             background: rgba(201,164,107,0.15);
             border: 1px solid rgba(201,164,107,0.25);
             backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
         }
 
-        #notifications_box {
-            display: flex;
-            flex-direction: column;
+        /* 3) Pie Stats CSS */
+        .pie-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
+            margin-top: 16px;
+        }
+
+        .pie-stat {
+            text-align: center;
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(201,164,107,0.16);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+        }
+
+        .pie-stat span {
+            display: block;
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: var(--muted);
+        }
+
+        .pie-stat b {
+            display: block;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .pie-stat.paid b { color: var(--success); }
+        .pie-stat.balance b { color: var(--danger); }
+
+        .chart-wrap {
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-top: 10px;
         }
 
-        .notify-empty {
-            padding: 16px;
-            border-radius: 18px;
-            text-align: center;
-            color: var(--muted);
-            font-weight: 800;
-            background: rgba(255,255,255,0.45);
-            border: 1px dashed rgba(201,164,107,0.24);
-        }
+        #notifications_box { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
 
-        /* 🆕 Notify Card CSS Upgrade */
         .notify-card {
             padding: 16px 18px;
             border-radius: 20px;
@@ -295,86 +306,26 @@
         }
 
         .notify-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: 2px;
+            content: ""; position: absolute; top: 0; right: 0; left: 0; height: 2px;
             background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
         }
 
-        .notify-title {
-            font-size: 14px;
-            font-weight: 900;
-            margin-bottom: 6px;
-            color: var(--gold-deep);
-        }
-
-        .notify-message {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .notify-date {
-            margin-top: 6px;
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--muted);
-        }
-
-        .chart-wrap {
-            min-height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
+        .notify-title { font-size: 14px; font-weight: 900; margin-bottom: 6px; color: var(--gold-deep); }
+        .notify-message { font-size: 14px; font-weight: 700; color: var(--text); }
+        .notify-date { margin-top: 6px; font-size: 10px; font-weight: 800; color: var(--muted); }
 
         .action-btn {
-            width: 100%;
-            max-width: 300px;
-            margin: 24px auto 0;
-            padding: 16px;
-            border-radius: 24px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: none;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            color: #fff;
+            width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px;
+            border-radius: 24px; font-weight: 900; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; gap: 10px; border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff;
             box-shadow: 0 18px 35px rgba(201,164,107,0.25);
-            transition: all 0.25s ease;
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-        }
-
-        #loader {
-            position: fixed; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--bg); z-index: 9999;
-        }
-
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #eee; border-top-color: var(--gold-deep);
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
-
+        .footer { text-align: center; margin-top: 20px; font-size: 11px; color: var(--muted); font-weight: 800; }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
         .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
@@ -433,6 +384,16 @@
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
             </div>
+            <div class="pie-stats">
+                <div class="pie-stat paid">
+                    <span>مدفوع</span>
+                    <b id="pie_paid_value">0</b>
+                </div>
+                <div class="pie-stat balance">
+                    <span>متبقي</span>
+                    <b id="pie_balance_value">0</b>
+                </div>
+            </div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
@@ -484,7 +445,6 @@
                 else if (previousBalance <= 1800) suggestedMonthly += 100;
                 else suggestedMonthly += 150;
             }
-
             return { yearlyRent, yearlyFees, previousBalance, monthlyBase, suggestedMonthly };
         }
 
@@ -492,16 +452,10 @@
             const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
             const payments = yearRows.filter(t => toNumber(t.credit) > 0);
             if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
-            
             const totalPaid = payments.reduce((sum, t) => sum + toNumber(t.credit), 0);
-            const months = new Set(payments.map(t => {
-                const d = new Date(t.date);
-                return `${d.getFullYear()}-${d.getMonth()}`;
-            })).size;
-            
+            const months = new Set(payments.map(t => { const d = new Date(t.date); return `${d.getFullYear()}-${d.getMonth()}`; })).size;
             const monthlyRate = totalPaid / (months || 1);
             if (monthlyRate <= 0) return { level: 'unknown' };
-            
             const monthsToClose = Math.ceil(balance / monthlyRate);
             if (monthsToClose <= 3) return { level: 'excellent', monthsToClose };
             if (monthsToClose <= 6) return { level: 'good', monthsToClose };
@@ -512,21 +466,14 @@
         function buildAdviceMessageFromStatement(transactions, balance, year = 2026) {
             const advice = getStatementYearAdvice(transactions, year);
             const prediction = buildPredictionMeta(transactions, balance, year);
-
-            if (!advice.yearlyRent && !advice.yearlyFees) {
-                return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
-            }
-
+            if (!advice.yearlyRent && !advice.yearlyFees) return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
             let recommended = advice.suggestedMonthly;
             const monthsToClose = prediction.monthsToClose || '..';
-
             if (prediction.level === 'excellent') recommended = advice.monthlyBase;
             else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
             else if (prediction.level === 'warning') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
             else if (prediction.level === 'weak') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
-
-            return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً
-            سيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
+            return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً\nسيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
         }
 
         function animateNumber(element, endValue) {
@@ -541,8 +488,7 @@
         }
 
         function animateHighlights(){
-            const elements = document.querySelectorAll('.highlight-number');
-            elements.forEach(el=>{
+            document.querySelectorAll('.highlight-number').forEach(el=>{
                 const end = parseInt(el.getAttribute('data-value')) || 0;
                 const duration = 800;
                 const startTime = performance.now();
@@ -557,28 +503,13 @@
 
         function formatNotificationDate(value) {
             const d = new Date(value);
-            if (isNaN(d)) return '';
-            return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit'
-            });
+            return isNaN(d) ? '' : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         }
 
         async function loadNotifications() {
             const box = document.getElementById('notifications_box');
-            if (!box) return;
-
-            const { data, error } = await supabaseClient
-                .from('tenant_notifications')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .order('created_at', { ascending: false })
-                .limit(5);
-
-            if (error || !data || data.length === 0) {
-                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
-                return;
-            }
-
+            const { data, error } = await supabaseClient.from('tenant_notifications').select('*').eq('tenant_code', tenantCode).order('created_at', { ascending: false }).limit(5);
+            if (error || !data || data.length === 0) { box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`; return; }
             box.innerHTML = data.map(item => `
                 <div class="notify-card ${item.type || 'normal'}">
                     ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
@@ -586,29 +517,14 @@
                     <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
                 </div>
             `).join('');
-
             const unreadIds = data.filter(item => !item.is_read).map(item => item.id);
-            if (unreadIds.length > 0) {
-                await supabaseClient
-                    .from('tenant_notifications')
-                    .update({ is_read: true, read_at: new Date().toISOString() })
-                    .in('id', unreadIds);
-            }
+            if (unreadIds.length > 0) await supabaseClient.from('tenant_notifications').update({ is_read: true, read_at: new Date().toISOString() }).in('id', unreadIds);
         }
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                const { data: tx } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', tenantCode);
-
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: tx } = await supabaseClient.from('tenant_transactions').select('*').eq('tenant_code', tenantCode);
                 const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
                 const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
                 const debit2026 = tx2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
@@ -617,52 +533,37 @@
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
                 document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
-
                 const chip = document.getElementById('account_status_chip');
-                // 🆕 Status Label Upgrade
                 chip.innerText = balance2026 === 0 ? '✔ مسدد' : '⚠ جزئي';
                 chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
 
                 animateNumber(document.getElementById('val_credit'), Math.round(daen2026));
                 animateNumber(document.getElementById('val_balance'), Math.round(balance2026));
+                // 3) New Stat Animations
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(daen2026));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(balance2026));
 
-                document.getElementById('smart_message').innerHTML =
-                    buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
+                document.getElementById('smart_message').innerHTML = buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
                 animateHighlights();
-
                 await loadNotifications();
 
                 new Chart(document.getElementById('balancePieChart'), {
                     type: 'doughnut',
-                    data: {
-                        labels: ['متبقي', 'مدفوع'],
-                        datasets: [{
-                            data: [balance2026, daen2026],
-                            backgroundColor: ['#c95a52', '#2f9e6f'],
-                            borderWidth: 0
-                        }]
-                    },
+                    data: { labels: ['متبقي', 'مدفوع'], datasets: [{ data: [balance2026, daen2026], backgroundColor: ['#c95a52', '#2f9e6f'], borderWidth: 0 }] },
                     options: {
                         cutout: '75%', responsive: true, maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    font: { family: 'Tajawal', weight: 'bold' },
-                                    color: '#2f2a24', padding: 16, usePointStyle: true, pointStyle: 'circle', boxWidth: 10
-                                }
-                            }
-                        }
+                        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Tajawal', weight: 'bold' }, color: '#2f2a24', padding: 16, usePointStyle: true, pointStyle: 'circle', boxWidth: 10 } } }
                     },
+                    // 2) Enlarged Chart Percentage
                     plugins: [{
                         beforeDraw(chart) {
                             const { width, height, ctx } = chart;
                             ctx.restore();
-                            ctx.font = 'bold 24px Tajawal';
-                            ctx.fillStyle = '#2f2a24';
-                            ctx.textBaseline = 'middle';
-                            const text = rate + '%';
-                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2 - 10);
+                            ctx.font = "bold 38px Tajawal";
+                            ctx.fillStyle = "#2f2a24";
+                            ctx.textBaseline = "middle";
+                            const text = rate + "%";
+                            ctx.fillText(text, (width - ctx.measureText(text).width) / 2, height / 2 - 6);
                             ctx.save();
                         }
                     }]
@@ -670,14 +571,9 @@
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
-                document.querySelectorAll('.reveal').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('active'), i * 80);
-                });
+                document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 80));
                 lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-            }
+            } catch (e) { console.error(e); document.getElementById('loader').style.display = 'none'; }
         }
 
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
@@ -686,5 +582,3 @@
     </script>
 </body>
 </html>
-
-```
