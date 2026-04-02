@@ -285,7 +285,7 @@
             padding-right:4px;
         }
 
-        input, select{
+        input, select, textarea{
             width:100%;
             border-radius:16px;
             border:1px solid var(--line);
@@ -294,6 +294,12 @@
             font-size:14px;
             font-weight:700;
             outline:none;
+        }
+
+        textarea{
+            min-height:150px;
+            resize:vertical;
+            line-height:1.9;
         }
 
         .form-grid{
@@ -343,87 +349,110 @@
         .btn-good-glow{ background:linear-gradient(135deg,#159a6f,#0e7a58) !important; color:#fff !important; }
         .btn-shake{ animation:shake .4s infinite; }
 
-        /* ===== Payment Plan Builder ===== */
-        .plan-builder{
-            margin-top:18px;
-            padding:18px;
-            border-radius:22px;
+        .smart-ai-box{
+            margin-top:14px;
+            padding:16px;
+            border-radius:20px;
             background:rgba(255,255,255,0.76);
             border:1px solid var(--line);
         }
 
-        .plan-chip{
-            display:inline-flex;
+        .smart-ai-header{
+            display:flex;
             align-items:center;
-            justify-content:center;
-            padding:10px 18px;
-            border-radius:999px;
-            font-size:13px;
-            font-weight:900;
-            color:#fff;
-            background:linear-gradient(135deg,var(--gold),var(--gold-deep));
-            margin-bottom:14px;
-            box-shadow:0 6px 16px rgba(201,164,107,0.25);
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:12px;
+            flex-wrap:wrap;
         }
 
-        .slider-grid{
+        .smart-ai-badge{
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+            border:1px solid transparent;
+        }
+
+        .badge-excellent{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .badge-good{
+            color:#8b6a3a;
+            background:rgba(201,164,107,0.14);
+            border-color:rgba(201,164,107,0.22);
+        }
+
+        .badge-watch{
+            color:var(--warning);
+            background:rgba(215,146,31,0.12);
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .badge-risk{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .smart-ai-grid{
             display:grid;
-            grid-template-columns:1fr 1fr;
+            grid-template-columns:repeat(3, 1fr);
+            gap:12px;
+        }
+
+        .smart-ai-card{
+            padding:14px;
+            border-radius:16px;
+            background:#fff;
+            border:1px solid var(--line);
+            text-align:center;
+        }
+
+        .smart-ai-card span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:6px;
+        }
+
+        .smart-ai-card b{
+            display:block;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+            margin-bottom:6px;
+        }
+
+        .smart-ai-card small{
+            display:block;
+            font-size:11px;
+            line-height:1.7;
+            color:#6b4f2b;
+            font-weight:700;
+        }
+
+        .notify-builder{
+            display:grid;
+            grid-template-columns:1fr;
             gap:14px;
         }
 
-        .slider-box{
-            padding:14px;
-            border-radius:18px;
-            background:#fff;
-            border:1px solid var(--line);
-        }
-
-        .slider-box > div:first-child{
-            font-size:12px;
-            font-weight:800;
-            color:#8b6a3a;
-            margin-bottom:8px;
-        }
-
-        .slider-box input[type="range"]{
-            padding:0;
-            border:none;
-            background:transparent;
-            box-shadow:none;
-            border-radius:0;
-        }
-
-        .slider-value{
-            font-size:20px;
-            font-weight:900;
-            margin-top:8px;
-            color:#4e3c24;
-            text-align:center;
-        }
-
-        .plan-preview{
-            margin-top:14px;
+        .notify-preview{
             padding:14px;
             border-radius:16px;
-            background:#f7f4ed;
-            font-weight:800;
-            text-align:center;
-            line-height:1.9;
-            color:#4e3c24;
-        }
-
-        .plan-send{
-            margin-top:14px;
-            width:100%;
-        }
-
-        .plan-status{
-            margin-top:12px;
+            background:#fff;
+            border:1px solid var(--line);
             font-size:13px;
-            font-weight:800;
-            color:#6b4f2b;
-            text-align:center;
+            line-height:2;
+            font-weight:700;
+            color:#4e3c24;
+            white-space:pre-line;
+            min-height:120px;
         }
 
         @keyframes spin{ to{ transform:rotate(360deg); } }
@@ -455,7 +484,7 @@
                 grid-template-columns:1fr;
             }
 
-            .slider-grid{
+            .smart-ai-grid{
                 grid-template-columns:1fr;
             }
         }
@@ -496,22 +525,49 @@
             </div>
             <div id="commitment_score" class="commitment-box">—</div>
             <div id="smart_alert" class="alert-box">—</div>
+
+            <div class="smart-ai-box">
+                <div class="smart-ai-header">
+                    <div class="panel-title" style="margin:0">
+                        <h3 style="font-size:16px;">AI Smart Tenant Box</h3>
+                        <p>تقييم ذكي للمستأجر المحدد</p>
+                    </div>
+                    <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
+                </div>
+                <div class="smart-ai-grid">
+                    <div class="smart-ai-card">
+                        <span>التقييم</span>
+                        <b id="ai_score_value">0 / 100</b>
+                        <small id="ai_score_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>آخر دفعة</span>
+                        <b id="ai_last_payment">—</b>
+                        <small id="ai_last_payment_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>التوصية</span>
+                        <b id="ai_recommendation">—</b>
+                        <small id="ai_recommendation_text">—</small>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section class="kpi-grid">
-            <div class="kpi-card card" id="kpi_card_debit">
+            <div class="kpi-card card good-card" id="kpi_card_debit">
                 <div class="kpi-head"><span>إجمالي المدين</span></div>
                 <div class="kpi-value" id="kpi_total_debit">0 د.أ</div>
             </div>
-            <div class="kpi-card card" id="kpi_card_credit">
+            <div class="kpi-card card warn-card" id="kpi_card_credit">
                 <div class="kpi-head"><span>إجمالي الدائن</span></div>
                 <div class="kpi-value" id="kpi_total_credit">0 د.أ</div>
             </div>
-            <div class="kpi-card card" id="kpi_card_balance">
+            <div class="kpi-card card bad-card" id="kpi_card_balance">
                 <div class="kpi-head"><span>الرصيد المتبقي</span></div>
                 <div class="kpi-value" id="kpi_total_balance">0 د.أ</div>
             </div>
-            <div class="kpi-card card" id="kpi_card_ratio">
+            <div class="kpi-card card warn-card" id="kpi_card_ratio">
                 <div class="kpi-head"><span>نسبة السداد</span></div>
                 <div class="kpi-value" id="kpi_total_ratio">0%</div>
             </div>
@@ -553,64 +609,36 @@
             <div class="panel-head">
                 <div class="panel-title">
                     <h3>إرسال إشعار للمستأجر</h3>
-                    <p>سيتم توليد النص تلقائياً بناءً على حالة الحساب</p>
+                    <p>اختر الموضوع وسيظهر النص تلقائياً مع إمكانية رسالة عامة</p>
                 </div>
             </div>
-            <div class="form-grid">
-                <div class="field">
-                    <label>نوع الإشعار</label>
-                    <select id="notification_type">
-                        <option value="">اختر نوع الإشعار</option>
-                        <option value="friendly">تذكير لطيف</option>
-                        <option value="due">تنبيه استحقاق</option>
-                        <option value="followup">تنبيه متابعة</option>
-                        <option value="final">إنذار نهائي</option>
-                    </select>
+
+            <div class="notify-builder">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>موضوع الإشعار</label>
+                        <select id="notification_type">
+                            <option value="">اختر موضوع الإشعار</option>
+                            <option value="first">الإنذار الأولى</option>
+                            <option value="second">الإنذار الثانية</option>
+                            <option value="third">الإنذار الثالثة</option>
+                            <option value="general">رسالة عامة</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>عنوان الإشعار</label>
+                        <input type="text" id="notification_title" placeholder="عنوان الإشعار" />
+                    </div>
                 </div>
+
                 <div class="field">
                     <label>نص الإشعار</label>
-                    <input type="text" id="notification_message" placeholder="سيتم توليد الرسالة تلقائيًا" />
+                    <textarea id="notification_message" placeholder="سيتم توليد النص هنا تلقائياً أو يمكنك كتابة رسالة عامة"></textarea>
                 </div>
-            </div>
-            <div style="margin-top:16px;">
+
+                <div class="notify-preview" id="notification_preview">اختر موضوع الإشعار لعرض النص هنا</div>
+
                 <button id="notifyBtn" class="btn btn-gold" style="width:100%" onclick="sendNotification()">إرسال الإشعار</button>
-            </div>
-        </section>
-
-        <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <h3>خطة سداد للمستأجر</h3>
-                    <p>حدد مبلغ شهري ومدة لإرسال نصيحة مالية</p>
-                </div>
-            </div>
-
-            <div class="plan-builder">
-                <div class="plan-chip">خطة سداد ذكية</div>
-
-                <div class="slider-grid">
-                    <div class="slider-box">
-                        <div>المبلغ الشهري</div>
-                        <input type="range" id="plan_amount" min="50" max="500" step="50" value="200">
-                        <div id="plan_amount_val" class="slider-value">200 د.أ</div>
-                    </div>
-
-                    <div class="slider-box">
-                        <div>عدد الأشهر</div>
-                        <input type="range" id="plan_months" min="1" max="12" step="1" value="6">
-                        <div id="plan_months_val" class="slider-value">6 أشهر</div>
-                    </div>
-                </div>
-
-                <div id="plan_preview" class="plan-preview">
-                    ...
-                </div>
-
-                <button class="btn btn-gold plan-send" onclick="sendPlan()">
-                    إرسال الخطة للمستأجر
-                </button>
-
-                <div id="plan_status" class="plan-status"></div>
             </div>
         </section>
 
@@ -816,15 +844,24 @@
             });
         }
 
+        function getSelectedTenant() {
+            const code = document.getElementById('tenant_select').value;
+            return tenantBalances.find(x => x.tenant_code === code) || null;
+        }
+
+        function updateGlobalKpis() {
+            const globalDebit = allTransactions.reduce((s, t) => s + toNumber(t.debit), 0);
+            const globalCredit = allTransactions.reduce((s, t) => s + toNumber(t.credit), 0);
+
+            animateValue(document.getElementById('kpi_total_debit'), 0, globalDebit, 900, false, true);
+            animateValue(document.getElementById('kpi_total_credit'), 0, globalCredit, 900, false, true);
+        }
+
         function updateTenantKpis(tenant) {
-            const debitEl = document.getElementById('kpi_total_debit');
-            const creditEl = document.getElementById('kpi_total_credit');
             const balanceEl = document.getElementById('kpi_total_balance');
             const ratioEl = document.getElementById('kpi_total_ratio');
 
             if (!tenant) {
-                debitEl.innerText = '0 د.أ';
-                creditEl.innerText = '0 د.أ';
                 balanceEl.innerText = '0 د.أ';
                 ratioEl.innerText = '0%';
                 return;
@@ -835,12 +872,10 @@
             const bal = Math.max(0, totalReq - paid);
             const ratio = totalReq > 0 ? Math.round((paid / totalReq) * 100) : 0;
 
-            animateValue(debitEl, 0, totalReq, 900, false, true);
-            animateValue(creditEl, 0, paid, 900, false, true);
             animateValue(balanceEl, 0, bal, 900, false, true);
             animateValue(ratioEl, 0, Math.min(Math.max(ratio, 0), 100), 900, true, false);
 
-            [debitEl, creditEl, balanceEl, ratioEl].forEach(el => applySmartNumberColor(el, tenant));
+            [balanceEl, ratioEl].forEach(el => applySmartNumberColor(el, tenant));
             updateCommitment(totalReq, paid);
         }
 
@@ -875,7 +910,7 @@
                 color = '#d14d4d';
             }
 
-            return { label, trend, color };
+            return { label, trend, color, avg: Math.round(avg) };
         }
 
         function drawPredictionChart(tenant) {
@@ -999,7 +1034,7 @@
 
             const labels = [], debits = [], credits = [];
 
-            for (let i = 5; i >= 0; i--) {
+            for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
 
@@ -1007,7 +1042,8 @@
 
                 const mTx = allTransactions.filter(tx =>
                     tx.tenant_code === tenant.tenant_code &&
-                    new Date(tx.date).getMonth() === d.getMonth()
+                    new Date(tx.date).getMonth() === d.getMonth() &&
+                    new Date(tx.date).getFullYear() === d.getFullYear()
                 );
 
                 debits.push(mTx.reduce((s, t) => s + toNumber(t.debit), 0));
@@ -1019,8 +1055,8 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'مدين', data: debits, borderColor: '#c9a46b' },
-                        { label: 'دائن', data: credits, borderColor: '#159a6f' }
+                        { label: 'مدين', data: debits, borderColor: '#c9a46b', tension: 0.35 },
+                        { label: 'دائن', data: credits, borderColor: '#159a6f', tension: 0.35 }
                     ]
                 },
                 options: {
@@ -1028,6 +1064,177 @@
                     maintainAspectRatio: false
                 }
             });
+        }
+
+        function renderAiTenantBox(tenant) {
+            const badge = document.getElementById('ai_badge');
+            const scoreValue = document.getElementById('ai_score_value');
+            const scoreText = document.getElementById('ai_score_text');
+            const lastPayment = document.getElementById('ai_last_payment');
+            const lastPaymentText = document.getElementById('ai_last_payment_text');
+            const recommendation = document.getElementById('ai_recommendation');
+            const recommendationText = document.getElementById('ai_recommendation_text');
+
+            if (!tenant) {
+                badge.innerText = '—';
+                badge.className = 'smart-ai-badge badge-good';
+                scoreValue.innerText = '0 / 100';
+                scoreText.innerText = '—';
+                lastPayment.innerText = '—';
+                lastPaymentText.innerText = '—';
+                recommendation.innerText = '—';
+                recommendationText.innerText = '—';
+                return;
+            }
+
+            const tx = allTransactions
+                .filter(x => x.tenant_code === tenant.tenant_code)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
+            const paid = toNumber(tenant.totalCredit);
+            const currentBalance = Math.max(0, totalReq - paid);
+            const coverageScore = totalReq > 0 ? Math.min(100, Math.round((paid / totalReq) * 100)) : 0;
+
+            const yearlyData = buildTenantYearlyPattern(tenant);
+            const regularityScore = yearlyData.length
+                ? Math.round(yearlyData.reduce((s, y) => s + y.ratio, 0) / yearlyData.length)
+                : 0;
+
+            const paymentRows = tx.filter(x => toNumber(x.credit) > 0);
+            const lastPaymentRow = paymentRows[paymentRows.length - 1] || null;
+
+            let recentScore = 0;
+            if (lastPaymentRow?.date) {
+                const diffDays = Math.max(0, Math.round((new Date() - new Date(lastPaymentRow.date)) / 86400000));
+                if (diffDays <= 30) recentScore = 100;
+                else if (diffDays <= 60) recentScore = 80;
+                else if (diffDays <= 90) recentScore = 65;
+                else if (diffDays <= 180) recentScore = 45;
+                else if (diffDays <= 365) recentScore = 25;
+                else recentScore = 10;
+            }
+
+            const debtPressureScore = totalReq > 0
+                ? Math.max(0, Math.min(100, Math.round((1 - (currentBalance / totalReq)) * 100)))
+                : 0;
+
+            const finalScore = Math.round(
+                coverageScore * 0.40 +
+                regularityScore * 0.25 +
+                recentScore * 0.20 +
+                debtPressureScore * 0.15
+            );
+
+            let badgeText = 'جيد';
+            let badgeClass = 'badge-good';
+            let badgeDesc = 'سلوك مستقر إجمالاً';
+            if (finalScore >= 85) {
+                badgeText = 'ممتاز';
+                badgeClass = 'badge-excellent';
+                badgeDesc = 'مستأجر موثوق جداً';
+            } else if (finalScore >= 70) {
+                badgeText = 'جيد جداً';
+                badgeClass = 'badge-good';
+                badgeDesc = 'سلوك دفع جيد';
+            } else if (finalScore >= 50) {
+                badgeText = 'تحت المراقبة';
+                badgeClass = 'badge-watch';
+                badgeDesc = 'يحتاج انتظاماً أعلى';
+            } else {
+                badgeText = 'مخاطرة عالية';
+                badgeClass = 'badge-risk';
+                badgeDesc = 'يحتاج متابعة مباشرة';
+            }
+
+            badge.innerText = badgeText;
+            badge.className = `smart-ai-badge ${badgeClass}`;
+            scoreValue.innerText = `${finalScore} / 100`;
+            scoreText.innerText = badgeDesc;
+
+            if (lastPaymentRow?.date) {
+                lastPayment.innerText = `${new Date(lastPaymentRow.date).toLocaleDateString('ar-JO')} • ${formatCurrency(lastPaymentRow.credit)}`;
+                lastPaymentText.innerText = 'آخر دفعة مسجلة لهذا المستأجر';
+            } else {
+                lastPayment.innerText = 'لا توجد دفعات';
+                lastPaymentText.innerText = 'لم يتم تسجيل أي دفعة حتى الآن';
+            }
+
+            if (finalScore < 50) {
+                recommendation.innerText = 'متابعة فورية';
+                recommendationText.innerText = 'يفضل إرسال إنذار مباشر ومتابعة السداد خلال فترة قصيرة.';
+            } else if (currentBalance > 0) {
+                recommendation.innerText = 'استكمال التغطية';
+                recommendationText.innerText = `يوجد رصيد متبقٍ بقيمة ${formatCurrency(currentBalance)} ويحتاج متابعة.`;
+            } else {
+                recommendation.innerText = 'حالة جيدة';
+                recommendationText.innerText = 'الحساب مغطى بشكل جيد حالياً.';
+            }
+        }
+
+        function buildNotificationText(type, tenant) {
+            if (!tenant) return '';
+
+            const amount = formatCurrency(tenant.currentBalance);
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 7);
+            const dueDateText = dueDate.toLocaleDateString('ar-JO');
+
+            if (type === 'first') {
+                return `نود لفت عنايتكم الكريمة بوجود رصيد مستحق على حسابكم بقيمة ${amount}. يرجى التكرم بتسوية هذا المبلغ في أقرب وقت ممكن لضمان تحديث سجلاتكم المالية لدينا.
+
+شاكرين لكم حسن تعاونكم،`;
+            }
+
+            if (type === 'second') {
+                return `إشارة إلى تذكيرنا السابق بخصوص الأرصدة المالية، يرجى العلم بأن الرصيد المستحق في كشف حسابكم والبالغ ${amount} لا يزال معلقاً حتى تاريخه.
+
+نرجو منكم التكرم بالمبادرة بتسديد المبلغ المطلوب خلال 48 ساعة، وذلك لتجنب تراكم الأرصدة وضمان تحديث سجلاتكم المالية لدينا بشكل دقيق.`;
+            }
+
+            if (type === 'third') {
+                return `إشعار نهائي بخصوص الذمم المستحقة
+
+يؤسفنا إبلاغكم بأنه وبالرغم من المخاطبات المتكررة، لم يتم تسوية الرصيد المستحق على ذمتكم لصالح مجمع جبري والبالغ ${amount}.
+
+وعليه، نرجو منكم مراجعة الإدارة للسداد الفوري في موعد أقصاه ${dueDateText}، لتجنب اضطرارنا لاتخاذ الإجراءات الإدارية والقانونية المنصوص عليها في عقد الإيجار، بما في ذلك تحويل المطالبة للقضاء أو وقف الخدمات.
+
+نأمل تعاونكم لإنهاء هذا الملف ودياً.`;
+            }
+
+            return '';
+        }
+
+        function updateNotificationComposer() {
+            const tenant = getSelectedTenant();
+            const type = document.getElementById('notification_type').value;
+            const titleInput = document.getElementById('notification_title');
+            const messageInput = document.getElementById('notification_message');
+            const preview = document.getElementById('notification_preview');
+
+            if (!tenant || !type) {
+                preview.innerText = 'اختر المستأجر وموضوع الإشعار لعرض النص هنا';
+                return;
+            }
+
+            if (type === 'first') {
+                titleInput.value = 'الإنذار الأولى';
+                messageInput.value = buildNotificationText(type, tenant);
+            } else if (type === 'second') {
+                titleInput.value = 'الإنذار الثانية';
+                messageInput.value = buildNotificationText(type, tenant);
+            } else if (type === 'third') {
+                titleInput.value = 'الإنذار الثالثة';
+                messageInput.value = buildNotificationText(type, tenant);
+            } else if (type === 'general') {
+                titleInput.value = 'رسالة عامة';
+                if (!messageInput.value || messageInput.dataset.generated === 'true') {
+                    messageInput.value = '';
+                }
+            }
+
+            messageInput.dataset.generated = (type !== 'general') ? 'true' : 'false';
+            preview.innerText = messageInput.value || 'اكتب نص الرسالة العامة هنا';
         }
 
         async function submitTransaction() {
@@ -1052,6 +1259,8 @@
                 alert('تم الحفظ');
                 clearForm();
                 refreshDashboard();
+            } else {
+                alert('حدث خطأ أثناء الحفظ');
             }
         }
 
@@ -1066,15 +1275,19 @@
                     `<option value="${t.tenant_code}">${t.tenant_name}</option>`
                 ).join('');
 
+                updateGlobalKpis();
+
                 const code = allTenants[0]?.tenant_code;
                 if (code) {
                     s.value = code;
                     const t = tenantBalances.find(x => x.tenant_code === code);
                     updateTenantKpis(t);
                     updateLastSeen(t);
+                    renderAiTenantBox(t);
                     drawPredictionChart(t);
                     drawCollectionChart(t.totalCredit, (toNumber(t.previous_balance) + t.totalDebit) - t.totalCredit);
                     drawMonthlyChart(t);
+                    updateNotificationComposer();
                     document.getElementById('statementBtn').disabled = false;
                 }
             } finally {
@@ -1107,18 +1320,24 @@
             window.open('statement.html', '_blank');
         }
 
-        function sendNotification() {
-            const tenantCode = document.getElementById('tenant_select').value;
+        async function sendNotification() {
+            const tenant = getSelectedTenant();
             const type = document.getElementById('notification_type').value;
+            const title = document.getElementById('notification_title').value.trim();
             const message = document.getElementById('notification_message').value.trim();
 
-            if (!tenantCode) {
+            if (!tenant) {
                 alert('اختر المستأجر أولاً');
                 return;
             }
 
             if (!type) {
-                alert('اختر نوع الإشعار');
+                alert('اختر موضوع الإشعار');
+                return;
+            }
+
+            if (!title) {
+                alert('أدخل عنوان الإشعار');
                 return;
             }
 
@@ -1127,68 +1346,35 @@
                 return;
             }
 
-            localStorage.setItem(`notify_${tenantCode}`, JSON.stringify({
-                type,
+            const payload = {
+                tenant_code: tenant.tenant_code,
+                title,
                 message,
+                type,
+                is_read: false,
                 created_at: new Date().toISOString()
-            }));
+            };
 
-            alert('تم حفظ الإشعار مؤقتاً ✔️');
-        }
+            const { error } = await supabaseClient
+                .from('tenant_notifications')
+                .insert([payload]);
 
-        const amountSlider = document.getElementById('plan_amount');
-        const monthsSlider = document.getElementById('plan_months');
-        const amountVal = document.getElementById('plan_amount_val');
-        const monthsVal = document.getElementById('plan_months_val');
-        const preview = document.getElementById('plan_preview');
-
-        function updatePlanPreview() {
-            if (!amountSlider || !monthsSlider || !amountVal || !monthsVal || !preview) return;
-
-            const amount = parseInt(amountSlider.value, 10);
-            const months = parseInt(monthsSlider.value, 10);
-            const total = amount * months;
-
-            amountVal.innerText = amount + " د.أ";
-            monthsVal.innerText = months + " أشهر";
-
-            preview.innerHTML = `
-                ${amount} د.أ شهريًا <br>
-                لمدة ${months} أشهر <br><br>
-                الإجمالي: ${total} د.أ
-            `;
-        }
-
-        function sendPlan() {
-            const tenantCode = document.getElementById('tenant_select').value;
-            const status = document.getElementById('plan_status');
-
-            if (!tenantCode) {
-                status.innerText = 'اختر المستأجر أولاً';
+            if (error) {
+                console.error(error);
+                alert('حدث خطأ أثناء إرسال الإشعار');
                 return;
             }
 
-            const amount = parseInt(amountSlider.value, 10);
-            const months = parseInt(monthsSlider.value, 10);
-            const total = amount * months;
-
-            const message = `${amount} د.أ شهريًا
-لمدة ${months} أشهر
-الإجمالي: ${total} د.أ`;
-
-            localStorage.setItem(`advice_${tenantCode}`, message);
-            status.innerText = 'تم إرسال الخطة ✔️';
+            alert('تم إرسال الإشعار بنجاح ✔️');
+            document.getElementById('notification_type').value = '';
+            document.getElementById('notification_title').value = '';
+            document.getElementById('notification_message').value = '';
+            document.getElementById('notification_preview').innerText = 'اختر موضوع الإشعار لعرض النص هنا';
         }
 
         window.onload = async () => {
             document.body.style.opacity = '1';
             document.getElementById('tx_date').valueAsDate = new Date();
-
-            if (amountSlider && monthsSlider) {
-                amountSlider.oninput = updatePlanPreview;
-                monthsSlider.oninput = updatePlanPreview;
-                updatePlanPreview();
-            }
 
             await refreshDashboard();
 
@@ -1196,6 +1382,7 @@
                 const t = tenantBalances.find(x => x.tenant_code === this.value);
                 updateTenantKpis(t);
                 updateLastSeen(t);
+                renderAiTenantBox(t);
                 drawPredictionChart(t);
 
                 if (t) {
@@ -1203,14 +1390,18 @@
                     drawMonthlyChart(t);
                 }
 
+                updateNotificationComposer();
                 document.getElementById('statementBtn').disabled = !this.value;
-                document.getElementById('plan_status').innerText = '';
             });
 
-            document.getElementById('notification_type').addEventListener('change', function() {
-                const t = tenantBalances.find(x => x.tenant_code === document.getElementById('tenant_select').value);
-                if (t) {
-                    document.getElementById('notification_message').value = `رصيدكم الحالي هو ${formatCurrency(t.currentBalance)}. يرجى المراجعة.`;
+            document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
+            document.getElementById('notification_message').addEventListener('input', () => {
+                document.getElementById('notification_preview').innerText =
+                    document.getElementById('notification_message').value || 'اكتب نص الرسالة العامة هنا';
+            });
+            document.getElementById('notification_title').addEventListener('input', () => {
+                if (!document.getElementById('notification_message').value.trim()) {
+                    document.getElementById('notification_preview').innerText = 'اكتب نص الرسالة العامة هنا';
                 }
             });
         };
