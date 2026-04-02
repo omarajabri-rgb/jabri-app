@@ -21,7 +21,6 @@
             --warning:#d7921f;
             --danger:#d14d4d;
             --shadow:0 18px 45px rgba(87,68,37,0.10);
-            --radius-xl:28px;
         }
 
         *{
@@ -149,6 +148,28 @@
             font-size:11px;
             color:var(--muted);
             font-weight:700;
+        }
+
+        .chip-header{
+            display:flex;
+            justify-content:flex-start;
+            width:100%;
+            margin-bottom:14px;
+        }
+
+        .chip-title{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px 16px;
+            border-radius:999px;
+            min-width:110px;
+            font-size:12px;
+            font-weight:900;
+            color:var(--gold-deep);
+            background:rgba(201,164,107,0.12);
+            border:1px solid rgba(201,164,107,0.22);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.40);
         }
 
         .tenant-select-grid{
@@ -344,11 +365,6 @@
             animation:spin 1s linear infinite;
         }
 
-        .btn-danger-glow{ background:linear-gradient(135deg,#d14d4d,#a83232) !important; color:#fff !important; box-shadow:0 0 12px rgba(209,77,77,0.6); animation:pulseGlow 1.5s infinite; }
-        .btn-warning-glow{ background:linear-gradient(135deg,#d7921f,#b87412) !important; color:#fff !important; }
-        .btn-good-glow{ background:linear-gradient(135deg,#159a6f,#0e7a58) !important; color:#fff !important; }
-        .btn-shake{ animation:shake .4s infinite; }
-
         .smart-ai-box{
             margin-top:14px;
             padding:16px;
@@ -436,6 +452,44 @@
             font-weight:700;
         }
 
+        .risk-flags{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:12px;
+        }
+
+        .risk-flag{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:7px 12px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            color:#6b4f2b;
+            background:rgba(201,164,107,0.10);
+            border:1px solid rgba(201,164,107,0.18);
+        }
+
+        .flag-danger{
+            color:var(--danger);
+            background:rgba(209,77,77,0.10);
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .flag-warning{
+            color:var(--warning);
+            background:rgba(215,146,31,0.10);
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .flag-success{
+            color:var(--success);
+            background:rgba(21,154,111,0.10);
+            border-color:rgba(21,154,111,0.18);
+        }
+
         .notify-builder{
             display:grid;
             grid-template-columns:1fr;
@@ -456,8 +510,6 @@
         }
 
         @keyframes spin{ to{ transform:rotate(360deg); } }
-        @keyframes shake{ 0%, 100%{ transform:translateX(0); } 25%{ transform:translateX(-2px); } 50%{ transform:translateX(2px); } 75%{ transform:translateX(-2px); } }
-        @keyframes pulseGlow{ 0%, 100%{ box-shadow:0 0 8px rgba(209,77,77,0.5); } 50%{ box-shadow:0 0 18px rgba(209,77,77,0.9); } }
 
         @media (max-width: 768px){
             .tenant-select-grid{
@@ -508,12 +560,10 @@
         </div>
 
         <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <h3>اختيار المستأجر</h3>
-                    <p>إدارة بيانات المستأجر والتقييم اللحظي</p>
-                </div>
+            <div class="chip-header">
+                <div class="chip-title">اختيار المستأجر</div>
             </div>
+
             <div class="tenant-select-grid">
                 <div class="field">
                     <label>المستأجر</label>
@@ -529,16 +579,22 @@
             <div class="smart-ai-box">
                 <div class="smart-ai-header">
                     <div class="panel-title" style="margin:0">
-                        <h3 style="font-size:16px;">AI Smart Tenant Box</h3>
-                        <p>تقييم ذكي للمستأجر المحدد</p>
+                        <h3 style="font-size:16px;">الصندوق الذكي للمستأجر</h3>
+                        <p>تحليل ذكي مباشر لحالة المستأجر المحدد</p>
                     </div>
                     <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
+
                 <div class="smart-ai-grid">
                     <div class="smart-ai-card">
-                        <span>التقييم</span>
+                        <span>التقييم الذكي</span>
                         <b id="ai_score_value">0 / 100</b>
                         <small id="ai_score_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>نوع المستأجر</span>
+                        <b id="ai_tenant_type">—</b>
+                        <small id="ai_tenant_type_text">—</small>
                     </div>
                     <div class="smart-ai-card">
                         <span>آخر دفعة</span>
@@ -546,9 +602,33 @@
                         <small id="ai_last_payment_text">—</small>
                     </div>
                     <div class="smart-ai-card">
+                        <span>أشهر بدون دفعات</span>
+                        <b id="ai_months_without_payment">0</b>
+                        <small id="ai_months_without_payment_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>التزام آخر 3 سنوات</span>
+                        <b id="ai_last3_ratio">0%</b>
+                        <small id="ai_last3_ratio_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>إغلاق الرصيد المتوقع</span>
+                        <b id="ai_close_estimate">—</b>
+                        <small id="ai_close_estimate_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>تنبيه سلوكي</span>
+                        <b id="ai_behavior_alert">—</b>
+                        <small id="ai_behavior_alert_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
                         <span>التوصية</span>
                         <b id="ai_recommendation">—</b>
                         <small id="ai_recommendation_text">—</small>
+                    </div>
+                    <div class="smart-ai-card">
+                        <span>أعلام المخاطر</span>
+                        <div class="risk-flags" id="ai_risk_flags"></div>
                     </div>
                 </div>
             </div>
@@ -575,42 +655,30 @@
 
         <section class="chart-grid">
             <div class="panel">
-                <div class="panel-head">
-                    <div class="panel-title">
-                        <h3>مقارنة التحصيل</h3>
-                        <p>المدفوع مقابل المتبقي لهذا المستأجر</p>
-                    </div>
+                <div class="chip-header">
+                    <div class="chip-title">مقارنة التحصيل</div>
                 </div>
                 <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
             </div>
             <div class="panel">
-                <div class="panel-head">
-                    <div class="panel-title">
-                        <h3>الحركة الشهرية</h3>
-                        <p>آخر 12 شهرًا لهذا المستأجر</p>
-                    </div>
+                <div class="chip-header">
+                    <div class="chip-title">الحركة الشهرية</div>
                 </div>
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
             </div>
         </section>
 
         <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <h3>تحليل نمط السداد والتوقع</h3>
-                    <p>تقييم ذكي بناءً على البيانات التاريخية والاتجاهات</p>
-                </div>
+            <div class="chip-header">
+                <div class="chip-title">تحليل التوقع</div>
             </div>
             <div id="prediction_text" class="prediction-box">—</div>
             <div class="chart-wrap"><canvas id="predictionChart"></canvas></div>
         </section>
 
         <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <h3>إرسال إشعار للمستأجر</h3>
-                    <p>اختر الموضوع وسيظهر النص تلقائياً مع إمكانية رسالة عامة</p>
-                </div>
+            <div class="chip-header">
+                <div class="chip-title">إرسال إشعار</div>
             </div>
 
             <div class="notify-builder">
@@ -632,8 +700,8 @@
                 </div>
 
                 <div class="field">
-                    <label>نص الإشعار</label>
-                    <textarea id="notification_message" placeholder="سيتم توليد النص هنا تلقائياً أو يمكنك كتابة رسالة عامة"></textarea>
+                    <label>الرسالة</label>
+                    <textarea id="notification_message" placeholder="سيظهر النص هنا تلقائياً أو اكتب رسالة عامة"></textarea>
                 </div>
 
                 <div class="notify-preview" id="notification_preview">اختر موضوع الإشعار لعرض النص هنا</div>
@@ -643,11 +711,8 @@
         </section>
 
         <section class="panel">
-            <div class="panel-head">
-                <div class="panel-title">
-                    <h3>إدخال حركة مالية</h3>
-                    <p>سجل الحركة المالية للمستأجر المحدد</p>
-                </div>
+            <div class="chip-header">
+                <div class="chip-title">إدخال حركة مالية</div>
             </div>
             <div class="form-grid">
                 <div class="field"><label>التاريخ</label><input type="date" id="tx_date" /></div>
@@ -658,8 +723,8 @@
                 <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" />
             </div>
             <div class="form-grid" style="margin-top:12px;">
-                <div class="field"><label>مدين</label><input type="number" id="tx_debit" placeholder="0.000" step="0.001" /></div>
-                <div class="field"><label>دائن</label><input type="number" id="tx_credit" placeholder="0.000" step="0.001" /></div>
+                <div class="field"><label>مدين</label><input type="number" id="tx_debit" placeholder="0" step="1" /></div>
+                <div class="field"><label>دائن</label><input type="number" id="tx_credit" placeholder="0" step="1" /></div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
                 <button class="btn btn-gold" onclick="submitTransaction()">حفظ الحركة</button>
@@ -688,12 +753,12 @@
         let collectionChart = null, monthlyChart = null, predictionChart = null;
 
         function toNumber(v) {
-            const n = parseFloat(v);
+            const n = parseFloat(String(v ?? 0).replace(/,/g, ''));
             return isNaN(n) ? 0 : n;
         }
 
         function formatCurrency(v) {
-            return `${toNumber(v).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} د.أ`;
+            return `${Math.round(toNumber(v)).toLocaleString('en-US')} د.أ`;
         }
 
         function animateValue(el, start, end, duration = 900, isPercent = false, isCurrency = false) {
@@ -786,16 +851,16 @@
                 return;
             }
 
-            const raw = tenant.lastSeen || tenant.last_seen || tenant.last_login || tenant.updated_at || null;
+            const raw = tenant.lastSeen || tenant.last_seen || tenant.last_login || tenant.updated_at || tenant.created_at || null;
 
             if (!raw) {
-                chip.innerText = 'لا يوجد دخول';
+                chip.innerText = 'لا يوجد آخر ظهور';
                 return;
             }
 
             const d = new Date(raw);
             if (isNaN(d.getTime())) {
-                chip.innerText = raw;
+                chip.innerText = 'لا يوجد آخر ظهور';
                 return;
             }
 
@@ -803,14 +868,22 @@
             const diffMs = now - d;
             const diffMin = Math.floor(diffMs / 60000);
             const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
 
-            if (diffMin < 60) {
-                chip.innerText = `منذ ${diffMin} دقيقة`;
+            if (diffMin < 1) {
+                chip.innerText = 'آخر ظهور: الآن';
                 return;
             }
-
+            if (diffMin < 60) {
+                chip.innerText = `آخر ظهور: منذ ${diffMin} دقيقة`;
+                return;
+            }
             if (diffHour < 24) {
-                chip.innerText = `منذ ${diffHour} ساعة`;
+                chip.innerText = `آخر ظهور: منذ ${diffHour} ساعة`;
+                return;
+            }
+            if (diffDay <= 7) {
+                chip.innerText = `آخر ظهور: منذ ${diffDay} يوم`;
                 return;
             }
 
@@ -839,7 +912,7 @@
                     totalDebit: deb,
                     totalCredit: cre,
                     currentBalance: Math.max(0, prev + deb - cre),
-                    lastSeen: t.last_seen || t.last_login || t.updated_at || null
+                    lastSeen: t.last_seen || t.last_login || t.updated_at || t.created_at || null
                 };
             });
         }
@@ -864,6 +937,7 @@
             if (!tenant) {
                 balanceEl.innerText = '0 د.أ';
                 ratioEl.innerText = '0%';
+                document.getElementById('commitment_score').innerText = '—';
                 return;
             }
 
@@ -1066,24 +1140,54 @@
             });
         }
 
+        function monthsSince(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return null;
+            const now = new Date();
+            return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+        }
+
         function renderAiTenantBox(tenant) {
             const badge = document.getElementById('ai_badge');
             const scoreValue = document.getElementById('ai_score_value');
             const scoreText = document.getElementById('ai_score_text');
+            const tenantType = document.getElementById('ai_tenant_type');
+            const tenantTypeText = document.getElementById('ai_tenant_type_text');
             const lastPayment = document.getElementById('ai_last_payment');
             const lastPaymentText = document.getElementById('ai_last_payment_text');
+            const monthsNoPay = document.getElementById('ai_months_without_payment');
+            const monthsNoPayText = document.getElementById('ai_months_without_payment_text');
+            const last3Ratio = document.getElementById('ai_last3_ratio');
+            const last3RatioText = document.getElementById('ai_last3_ratio_text');
+            const closeEstimate = document.getElementById('ai_close_estimate');
+            const closeEstimateText = document.getElementById('ai_close_estimate_text');
+            const behaviorAlert = document.getElementById('ai_behavior_alert');
+            const behaviorAlertText = document.getElementById('ai_behavior_alert_text');
             const recommendation = document.getElementById('ai_recommendation');
             const recommendationText = document.getElementById('ai_recommendation_text');
+            const flagsBox = document.getElementById('ai_risk_flags');
 
             if (!tenant) {
                 badge.innerText = '—';
                 badge.className = 'smart-ai-badge badge-good';
                 scoreValue.innerText = '0 / 100';
                 scoreText.innerText = '—';
+                tenantType.innerText = '—';
+                tenantTypeText.innerText = '—';
                 lastPayment.innerText = '—';
                 lastPaymentText.innerText = '—';
+                monthsNoPay.innerText = '0';
+                monthsNoPayText.innerText = '—';
+                last3Ratio.innerText = '0%';
+                last3RatioText.innerText = '—';
+                closeEstimate.innerText = '—';
+                closeEstimateText.innerText = '—';
+                behaviorAlert.innerText = '—';
+                behaviorAlertText.innerText = '—';
                 recommendation.innerText = '—';
                 recommendationText.innerText = '—';
+                flagsBox.innerHTML = '';
                 return;
             }
 
@@ -1152,24 +1256,101 @@
             scoreValue.innerText = `${finalScore} / 100`;
             scoreText.innerText = badgeDesc;
 
+            let typeLabel = 'متذبذب';
+            let typeText = 'سلوكه يحتاج مراقبة';
+            if (finalScore >= 85) {
+                typeLabel = 'ملتزم';
+                typeText = 'دفعه منتظم وتغطيته عالية';
+            } else if (finalScore >= 70) {
+                typeLabel = 'جيد';
+                typeText = 'أداء جيد مع بعض التفاوت المقبول';
+            } else if (recentScore >= 60 && currentBalance > 0) {
+                typeLabel = 'تحسن حديثاً';
+                typeText = 'هناك نشاط دفع حديث لكنه لم يغلق الرصيد بعد';
+            } else if (finalScore < 50) {
+                typeLabel = 'متأخر مزمن';
+                typeText = 'يحتاج متابعة إدارية أقوى';
+            }
+            tenantType.innerText = typeLabel;
+            tenantTypeText.innerText = typeText;
+
             if (lastPaymentRow?.date) {
                 lastPayment.innerText = `${new Date(lastPaymentRow.date).toLocaleDateString('ar-JO')} • ${formatCurrency(lastPaymentRow.credit)}`;
-                lastPaymentText.innerText = 'آخر دفعة مسجلة لهذا المستأجر';
+                const monthsGap = monthsSince(lastPaymentRow.date);
+                lastPaymentText.innerText = monthsGap === 0 ? 'آخر دفعة هذا الشهر' : `آخر دفعة منذ ${monthsGap} شهر`;
             } else {
                 lastPayment.innerText = 'لا توجد دفعات';
                 lastPaymentText.innerText = 'لم يتم تسجيل أي دفعة حتى الآن';
             }
 
+            const monthsWithoutPayment = lastPaymentRow?.date ? (monthsSince(lastPaymentRow.date) ?? 0) : yearlyData.length ? 12 : 0;
+            monthsNoPay.innerText = `${monthsWithoutPayment}`;
+            monthsNoPayText.innerText = monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `انقطاع عن الدفع منذ ${monthsWithoutPayment} شهر`;
+
+            const last3 = yearlyData.slice(-3);
+            const last3Avg = last3.length ? Math.round(last3.reduce((s, y) => s + y.ratio, 0) / last3.length) : 0;
+            last3Ratio.innerText = `${last3Avg}%`;
+            last3RatioText.innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+
+            let monthlyAverage = 0;
+            if (paymentRows.length > 0) {
+                const monthsSet = new Set(paymentRows.map(r => {
+                    const d = new Date(r.date);
+                    return `${d.getFullYear()}-${d.getMonth()}`;
+                }));
+                const totalPaidPayments = paymentRows.reduce((s, r) => s + toNumber(r.credit), 0);
+                monthlyAverage = monthsSet.size ? Math.round(totalPaidPayments / monthsSet.size) : 0;
+            }
+
+            if (currentBalance <= 0) {
+                closeEstimate.innerText = 'مغلق';
+                closeEstimateText.innerText = 'لا يوجد رصيد يحتاج إغلاق';
+            } else if (monthlyAverage > 0) {
+                const monthsToClose = Math.ceil(currentBalance / monthlyAverage);
+                closeEstimate.innerText = monthsToClose <= 12 ? `${monthsToClose} شهر` : 'أكثر من 12 شهر';
+                closeEstimateText.innerText = `بناءً على متوسط دفع شهري ${formatCurrency(monthlyAverage)}`;
+            } else {
+                closeEstimate.innerText = 'غير واضح';
+                closeEstimateText.innerText = 'لا توجد دفعات كافية لتقدير مدة الإغلاق';
+            }
+
+            let behaviorTitle = 'سلوك مستقر';
+            let behaviorText = 'الدفع يسير بشكل متوازن نسبياً';
+            if (monthsWithoutPayment >= 3) {
+                behaviorTitle = 'انقطاع واضح';
+                behaviorText = 'هناك فترة توقف ملحوظة عن الدفع';
+            } else if (last3.length >= 3 && last3[2].ratio < last3[1].ratio && last3[1].ratio < last3[0].ratio) {
+                behaviorTitle = 'اتجاه هابط';
+                behaviorText = 'نسبة الالتزام تتراجع عبر السنوات الأخيرة';
+            } else if (last3.length >= 3 && last3[2].ratio > last3[1].ratio && last3[1].ratio > last3[0].ratio) {
+                behaviorTitle = 'تحسن تدريجي';
+                behaviorText = 'هناك تحسن واضح في الالتزام';
+            } else if (Math.abs(last3Avg - regularityScore) >= 15) {
+                behaviorTitle = 'تذبذب';
+                behaviorText = 'الأداء غير ثابت ويحتاج مراقبة';
+            }
+            behaviorAlert.innerText = behaviorTitle;
+            behaviorAlertText.innerText = behaviorText;
+
             if (finalScore < 50) {
-                recommendation.innerText = 'متابعة فورية';
-                recommendationText.innerText = 'يفضل إرسال إنذار مباشر ومتابعة السداد خلال فترة قصيرة.';
+                recommendation.innerText = 'إنذار أقوى';
+                recommendationText.innerText = 'يناسب إرسال الإنذار الثانية أو الثالثة حسب الموقف.';
             } else if (currentBalance > 0) {
-                recommendation.innerText = 'استكمال التغطية';
+                recommendation.innerText = 'متابعة مالية';
                 recommendationText.innerText = `يوجد رصيد متبقٍ بقيمة ${formatCurrency(currentBalance)} ويحتاج متابعة.`;
             } else {
                 recommendation.innerText = 'حالة جيدة';
                 recommendationText.innerText = 'الحساب مغطى بشكل جيد حالياً.';
             }
+
+            const flags = [];
+            if (monthsWithoutPayment >= 3) flags.push({ text: 'لا توجد دفعات حديثة', cls: 'flag-danger' });
+            if (currentBalance > 1000) flags.push({ text: 'رصيد مرتفع', cls: 'flag-warning' });
+            if (last3Avg < 55) flags.push({ text: 'ضعف في الالتزام', cls: 'flag-danger' });
+            if (finalScore >= 85) flags.push({ text: 'سلوك ممتاز', cls: 'flag-success' });
+            if (!flags.length) flags.push({ text: 'مخاطر منخفضة', cls: 'flag-success' });
+
+            flagsBox.innerHTML = flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
 
         function buildNotificationText(type, tenant) {
@@ -1398,11 +1579,6 @@
             document.getElementById('notification_message').addEventListener('input', () => {
                 document.getElementById('notification_preview').innerText =
                     document.getElementById('notification_message').value || 'اكتب نص الرسالة العامة هنا';
-            });
-            document.getElementById('notification_title').addEventListener('input', () => {
-                if (!document.getElementById('notification_message').value.trim()) {
-                    document.getElementById('notification_preview').innerText = 'اكتب نص الرسالة العامة هنا';
-                }
             });
         };
     </script>
