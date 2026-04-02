@@ -764,65 +764,67 @@
             };
         }
 
-        function renderPieChart(paid, balance, percentTarget) {
-            const canvas = document.getElementById('balancePieChart');
+        function renderPieChart(paid, balance) {
+    const canvas = document.getElementById('balancePieChart');
 
-            if (pieChartInstance) pieChartInstance.destroy();
+    if (pieChartInstance) pieChartInstance.destroy();
 
-            pieChartInstance = new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['مدفوع', 'متبقي'],
-                    datasets: [{
-                        data: [paid, balance],
-                        backgroundColor: ['#2f9e6f', '#c95a52'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: '75%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: [{
-                    id: 'centerText',
-                    beforeDraw(chart) {
-                        const { width, height, ctx } = chart;
+    const paidValue = Math.max(0, toNumber(paid));
+    const balanceValue = Math.max(0, toNumber(balance));
+    const total = paidValue + balanceValue;
+    const percentTarget = total > 0 ? Math.round((paidValue / total) * 100) : 0;
 
-                        if (typeof chart._animatedValue !== 'number') {
-                            chart._animatedValue = 0;
-                        }
+    pieChartInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: ['مدفوع', 'متبقي'],
+            datasets: [{
+                data: [paidValue, balanceValue],
+                backgroundColor: ['#2f9e6f', '#c95a52'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '75%',
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw(chart) {
+                const { width, height, ctx } = chart;
 
-                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
-                        const currentValue = Math.round(chart._animatedValue);
+                if (typeof chart._animatedValue !== 'number') {
+                    chart._animatedValue = 0;
+                }
 
-                        ctx.restore();
-                        ctx.font = 'bold 52px Tajawal';
-                        ctx.fillStyle = '#2f2a24';
-                        ctx.textBaseline = 'middle';
+                chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
+                const currentValue = Math.round(chart._animatedValue);
 
-                        const text = currentValue + '%';
-                        const textWidth = ctx.measureText(text).width;
-                        ctx.fillText(text, (width - textWidth) / 2, height / 2 - 8);
+                ctx.save();
+                ctx.font = 'bold 52px Tajawal';
+                ctx.fillStyle = '#2f2a24';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${currentValue}%`, width / 2, height / 2 - 8);
+                ctx.restore();
 
-                        ctx.save();
-
-                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
-                            requestAnimationFrame(() => chart.draw());
-                        }
-                    }
-                }]
-            });
-        }
+                if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
+                    requestAnimationFrame(() => chart.draw());
+                }
+            }
+        }]
+    });
+}
 
         function renderTimelineChart(analytics) {
             const canvas = document.getElementById('timelineChart');
