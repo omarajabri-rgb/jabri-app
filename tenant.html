@@ -292,6 +292,200 @@
             align-items: center;
             justify-content: center;
             margin-top: 10px;
+            position: relative;
+        }
+
+        .timeline-wrap {
+            min-height: 300px;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .score-main {
+            border-radius: 22px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.70), rgba(247,244,237,0.72));
+            border: 1px solid rgba(201,164,107,0.18);
+            text-align: center;
+        }
+
+        .score-ring-wrap {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 12px;
+            position: relative;
+        }
+
+        .score-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .score-center b {
+            font-size: 34px;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .score-center span {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .score-grade {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .score-grade.excellent {
+            background: rgba(47,158,111,0.12);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.24);
+        }
+
+        .score-grade.good {
+            background: rgba(201,164,107,0.12);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.24);
+        }
+
+        .score-grade.watch {
+            background: rgba(195,138,46,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(195,138,46,0.24);
+        }
+
+        .score-grade.risk {
+            background: rgba(201,90,82,0.10);
+            color: var(--danger);
+            border: 1px solid rgba(201,90,82,0.24);
+        }
+
+        .score-caption {
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-card {
+            border-radius: 18px;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.60), rgba(247,244,237,0.70));
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 6px 18px rgba(120,95,56,0.06);
+        }
+
+        .metric-card span {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .metric-card b {
+            display: block;
+            font-size: 22px;
+            color: var(--text);
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .metric-card small {
+            display: block;
+            font-size: 11px;
+            line-height: 1.7;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .insight-card {
+            border-radius: 18px;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.60), rgba(247,244,237,0.70));
+            border: 1px solid rgba(201,164,107,0.18);
+            box-shadow: 0 6px 18px rgba(120,95,56,0.06);
+        }
+
+        .insight-card span {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .insight-card b {
+            display: block;
+            font-size: 15px;
+            color: var(--gold-deep);
+            font-weight: 900;
+            line-height: 1.7;
+        }
+
+        .insight-card p {
+            margin: 6px 0 0;
+            font-size: 11px;
+            line-height: 1.9;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .timeline-stats {
+            margin-top: 16px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .timeline-stats span {
+            padding: 8px 14px;
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(201,164,107,0.08);
+            border: 1px solid rgba(201,164,107,0.18);
+        }
+
+        .timeline-stats b {
+            color: var(--gold-deep);
+            margin-right: 4px;
         }
 
         #notifications_box {
@@ -410,6 +604,42 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        @media (max-width: 900px) {
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid,
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrap {
+                min-height: 240px;
+            }
+
+            .timeline-wrap {
+                min-height: 280px;
+            }
+
+            .hero-card h1 {
+                padding-left: 0;
+                padding-top: 34px;
+                font-size: 24px;
+            }
+
+            .hero-status {
+                left: 14px;
+                top: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -472,6 +702,82 @@
             </div>
         </div>
 
+        <div class="panel reveal">
+            <div class="chip-header">
+                <div class="chip">AI Smart Tenant Score</div>
+            </div>
+
+            <div class="score-grid">
+                <div class="score-main">
+                    <div class="score-ring-wrap">
+                        <canvas id="scoreGaugeChart"></canvas>
+                        <div class="score-center">
+                            <b id="score_value">0</b>
+                            <span>/100</span>
+                        </div>
+                    </div>
+                    <div id="score_grade" class="score-grade watch">-</div>
+                    <div id="score_caption" class="score-caption">جارٍ تحليل سلوك الدفع...</div>
+                </div>
+
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <span>نسبة التغطية</span>
+                        <b id="coverage_value">0%</b>
+                        <small id="coverage_note">-</small>
+                    </div>
+                    <div class="metric-card">
+                        <span>انتظام الدفع</span>
+                        <b id="regularity_value">0%</b>
+                        <small id="regularity_note">-</small>
+                    </div>
+                    <div class="metric-card">
+                        <span>النشاط الحديث</span>
+                        <b id="recent_value">0%</b>
+                        <small id="recent_note">-</small>
+                    </div>
+                    <div class="metric-card">
+                        <span>ضغط المديونية</span>
+                        <b id="risk_value">0%</b>
+                        <small id="risk_note">-</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <span>التقييم العام</span>
+                    <b id="main_insight">-</b>
+                    <p id="main_insight_text">-</p>
+                </div>
+                <div class="insight-card">
+                    <span>آخر دفعة</span>
+                    <b id="last_payment_label">-</b>
+                    <p id="last_payment_text">-</p>
+                </div>
+                <div class="insight-card">
+                    <span>التوصية الذكية</span>
+                    <b id="recommendation_label">-</b>
+                    <p id="recommendation_text">-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel reveal">
+            <div class="chip-header">
+                <div class="chip">الخط الزمني للدفع</div>
+            </div>
+            <div class="chart-wrap timeline-wrap">
+                <canvas id="timelineChart"></canvas>
+            </div>
+            <div class="timeline-stats">
+                <span>عدد الدفعات: <b id="timeline_payments_count">0</b></span>
+                <span>إجمالي الدفعات: <b id="timeline_payments_total">0</b></span>
+                <span>الرصيد الحالي: <b id="timeline_current_balance">0</b></span>
+                <span>عدد السنوات: <b id="timeline_years_count">0</b></span>
+            </div>
+        </div>
+
         <button class="action-btn reveal" onclick="goToStatement()">
             <i data-lucide="file-text"></i> كشف الحساب بالتفصيل
         </button>
@@ -489,8 +795,17 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
+        let pieChartInstance = null;
+        let scoreGaugeInstance = null;
+        let timelineChartInstance = null;
+
         function toNumber(v) {
-            return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+            const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatNumber(v) {
+            return Math.round(toNumber(v)).toLocaleString('en-US');
         }
 
         function isRentRow(desc) {
@@ -505,6 +820,20 @@
         function isCarryRow(desc) {
             const d = (desc || '').trim();
             return d.includes('رصيد سابق') || d.includes('رصيد مدور') || d.startsWith('رصيد عام');
+        }
+
+        function formatDateOnly(value) {
+            const d = new Date(value);
+            return isNaN(d) ? '-' : d.toLocaleDateString('en-GB');
+        }
+
+        function daysBetween(a, b) {
+            const oneDay = 24 * 60 * 60 * 1000;
+            return Math.max(0, Math.round((b - a) / oneDay));
+        }
+
+        function clamp(num, min, max) {
+            return Math.min(max, Math.max(min, num));
         }
 
         function getStatementYearAdvice(transactions, year = 2026) {
@@ -562,7 +891,7 @@
             }
 
             let recommended = advice.suggestedMonthly;
-            const monthsToClose = prediction.monthsToClose || '..';
+            const monthsToClose = prediction.monthsToClose || 0;
 
             if (prediction.level === 'excellent') recommended = advice.monthlyBase;
             else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
@@ -596,7 +925,7 @@
                 function update(currentTime) {
                     const progress = Math.min((currentTime - startTime) / duration, 1);
                     const eased = 1 - Math.pow(1 - progress, 3);
-                    el.innerText = Math.floor(eased * end);
+                    el.innerText = Math.floor(eased * end).toLocaleString('en-US');
                     if (progress < 1) requestAnimationFrame(update);
                 }
 
@@ -650,6 +979,440 @@
             }
         }
 
+        function buildAllYearsAnalytics(transactions) {
+            const sorted = [...(transactions || [])]
+                .filter(t => t?.date)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let runningBalance = 0;
+            let totalDebit = 0;
+            let totalCredit = 0;
+            let paymentCount = 0;
+            let highestBalance = 0;
+            let lastPayment = null;
+            let previousPaymentDate = null;
+            let longestGap = 0;
+
+            const labels = [];
+            const paymentSeries = [];
+            const balanceSeries = [];
+            const points = [];
+            const yearsSet = new Set();
+            const yearly = {};
+
+            sorted.forEach(row => {
+                const dateObj = new Date(row.date);
+                if (isNaN(dateObj)) return;
+
+                const year = dateObj.getFullYear();
+                const debit = toNumber(row.debit);
+                const credit = toNumber(row.credit);
+                const desc = (row.description || '').trim();
+
+                yearsSet.add(year);
+
+                if (!yearly[year]) {
+                    yearly[year] = { debit: 0, credit: 0 };
+                }
+
+                if (!isCarryRow(desc)) {
+                    runningBalance += debit - credit;
+                }
+
+                totalDebit += debit;
+                totalCredit += credit;
+                yearly[year].debit += debit;
+                yearly[year].credit += credit;
+
+                if (credit > 0) {
+                    paymentCount++;
+                    lastPayment = { date: row.date, amount: credit };
+
+                    if (previousPaymentDate) {
+                        const gap = daysBetween(previousPaymentDate, dateObj);
+                        if (gap > longestGap) longestGap = gap;
+                    }
+                    previousPaymentDate = dateObj;
+                }
+
+                highestBalance = Math.max(highestBalance, runningBalance);
+
+                labels.push(dateObj.toLocaleDateString('en-GB'));
+                paymentSeries.push(credit > 0 ? credit : null);
+                balanceSeries.push(runningBalance);
+                points.push({
+                    date: row.date,
+                    description: desc || 'حركة مالية',
+                    debit,
+                    credit,
+                    balance: runningBalance,
+                    year
+                });
+            });
+
+            const currentBalance = balanceSeries.length ? balanceSeries[balanceSeries.length - 1] : 0;
+            const coverageScore = totalDebit > 0 ? clamp(Math.round((totalCredit / totalDebit) * 100), 0, 100) : 0;
+
+            const yearRatios = Object.keys(yearly).map(y => {
+                const item = yearly[y];
+                return item.debit > 0 ? clamp(Math.round((item.credit / item.debit) * 100), 0, 100) : 0;
+            });
+
+            const regularityScore = yearRatios.length
+                ? Math.round(yearRatios.reduce((a, b) => a + b, 0) / yearRatios.length)
+                : 0;
+
+            let recentScore = 0;
+            if (lastPayment?.date) {
+                const days = daysBetween(new Date(lastPayment.date), new Date());
+                if (days <= 30) recentScore = 100;
+                else if (days <= 60) recentScore = 80;
+                else if (days <= 90) recentScore = 65;
+                else if (days <= 180) recentScore = 45;
+                else if (days <= 365) recentScore = 25;
+                else recentScore = 10;
+            }
+
+            const riskScore = highestBalance > 0
+                ? clamp(Math.round((1 - (currentBalance / highestBalance)) * 100), 0, 100)
+                : 0;
+
+            const score = Math.round(
+                coverageScore * 0.40 +
+                regularityScore * 0.25 +
+                recentScore * 0.20 +
+                riskScore * 0.15
+            );
+
+            return {
+                labels,
+                paymentSeries,
+                balanceSeries,
+                points,
+                totalDebit,
+                totalCredit,
+                currentBalance,
+                paymentCount,
+                yearsCount: yearsSet.size,
+                coverageScore,
+                regularityScore,
+                recentScore,
+                riskScore,
+                score,
+                lastPayment,
+                longestGap
+            };
+        }
+
+        function getScoreGrade(score) {
+            if (score >= 85) return { label: 'ممتاز', className: 'excellent' };
+            if (score >= 70) return { label: 'جيد جداً', className: 'good' };
+            if (score >= 50) return { label: 'تحت المراقبة', className: 'watch' };
+            return { label: 'مخاطرة عالية', className: 'risk' };
+        }
+
+        function getScoreColor(score) {
+            if (score >= 85) return '#2f9e6f';
+            if (score >= 70) return '#c9a46b';
+            if (score >= 50) return '#c38a2e';
+            return '#c95a52';
+        }
+
+        function renderPieChart(paid, balance, percentTarget) {
+            const canvas = document.getElementById('balancePieChart');
+
+            if (pieChartInstance) pieChartInstance.destroy();
+
+            pieChartInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مدفوع', 'متبقي'],
+                    datasets: [{
+                        data: [paid, balance],
+                        backgroundColor: ['#2f9e6f', '#c95a52'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const { width, height, ctx } = chart;
+
+                        if (typeof chart._animatedValue !== 'number') {
+                            chart._animatedValue = 0;
+                        }
+
+                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
+                        const currentValue = Math.round(chart._animatedValue);
+
+                        ctx.restore();
+                        ctx.font = 'bold 52px Tajawal';
+                        ctx.fillStyle = '#2f2a24';
+                        ctx.textBaseline = 'middle';
+
+                        const text = currentValue + '%';
+                        const textWidth = ctx.measureText(text).width;
+                        ctx.fillText(text, (width - textWidth) / 2, height / 2 - 8);
+
+                        ctx.save();
+
+                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
+                            requestAnimationFrame(() => chart.draw());
+                        }
+                    }
+                }]
+            });
+        }
+
+        function renderScoreGauge(score) {
+            const canvas = document.getElementById('scoreGaugeChart');
+            if (scoreGaugeInstance) scoreGaugeInstance.destroy();
+
+            scoreGaugeInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: [getScoreColor(score), 'rgba(201,164,107,0.12)'],
+                        borderWidth: 0,
+                        cutout: '78%',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        }
+
+        function renderScorePanel(analytics) {
+            const grade = getScoreGrade(analytics.score);
+
+            document.getElementById('score_value').innerText = analytics.score;
+            const gradeEl = document.getElementById('score_grade');
+            gradeEl.innerText = grade.label;
+            gradeEl.className = `score-grade ${grade.className}`;
+
+            document.getElementById('coverage_value').innerText = `${analytics.coverageScore}%`;
+            document.getElementById('regularity_value').innerText = `${analytics.regularityScore}%`;
+            document.getElementById('recent_value').innerText = `${analytics.recentScore}%`;
+            document.getElementById('risk_value').innerText = `${analytics.riskScore}%`;
+
+            document.getElementById('coverage_note').innerText =
+                analytics.coverageScore >= 85 ? 'تمت تغطية معظم المطلوب' :
+                analytics.coverageScore >= 60 ? 'التغطية متوسطة حتى الآن' :
+                'التغطية منخفضة مقارنة بالمطلوب';
+
+            document.getElementById('regularity_note').innerText =
+                analytics.regularityScore >= 80 ? 'الدفع منتظم عبر السنوات' :
+                analytics.regularityScore >= 55 ? 'الانتظام متوسط' :
+                'التفاوت واضح بين السنوات';
+
+            document.getElementById('recent_note').innerText =
+                analytics.lastPayment?.date ? `آخر نشاط: ${formatDateOnly(analytics.lastPayment.date)}` : 'لا توجد دفعات حديثة';
+
+            document.getElementById('risk_note').innerText =
+                analytics.currentBalance <= 0 ? 'لا يوجد ضغط مديونية فعلي' : `الرصيد الحالي ${formatNumber(analytics.currentBalance)}`;
+
+            let caption = 'سلوك الدفع يحتاج متابعة.';
+            if (analytics.score >= 85) caption = 'سلوك دفع ممتاز واستقرار قوي.';
+            else if (analytics.score >= 70) caption = 'سلوك جيد مع استمرارية مناسبة.';
+            else if (analytics.score >= 50) caption = 'الحساب تحت المراقبة ويحتاج انتظاماً أعلى.';
+            else caption = 'الحساب يحمل مخاطرة مرتفعة ويحتاج متابعة مباشرة.';
+            document.getElementById('score_caption').innerText = caption;
+
+            document.getElementById('main_insight').innerText =
+                analytics.score >= 85 ? 'مستأجر موثوق جداً' :
+                analytics.score >= 70 ? 'مستأجر جيد' :
+                analytics.score >= 50 ? 'مستأجر يحتاج متابعة' :
+                'مستأجر عالي المخاطرة';
+
+            document.getElementById('main_insight_text').innerText =
+                analytics.currentBalance <= 0
+                    ? 'الحساب قريب من الإغلاق أو مسدد.'
+                    : `يوجد رصيد قائم بقيمة ${formatNumber(analytics.currentBalance)} يؤثر على التقييم العام.`;
+
+            document.getElementById('last_payment_label').innerText =
+                analytics.lastPayment?.date
+                    ? `${formatDateOnly(analytics.lastPayment.date)} • ${formatNumber(analytics.lastPayment.amount)}`
+                    : 'لا توجد دفعات';
+
+            document.getElementById('last_payment_text').innerText =
+                analytics.lastPayment?.date
+                    ? (analytics.longestGap > 0 ? `أطول فترة بدون دفعة: ${analytics.longestGap} يوم.` : 'لا توجد فجوات طويلة واضحة.')
+                    : 'لم يتم تسجيل أي دفعة حتى الآن.';
+
+            let recommendationLabel = 'استمرار طبيعي';
+            let recommendationText = 'يُنصح بالمحافظة على نفس الوتيرة الحالية.';
+
+            if (analytics.score < 50) {
+                recommendationLabel = 'متابعة فورية';
+                recommendationText = 'يفضل تسريع السداد أو وضع جدول واضح للدفعات.';
+            } else if (analytics.score < 70) {
+                recommendationLabel = 'تحسين الانتظام';
+                recommendationText = 'الدفعات الأقرب زمنياً سترفع التقييم وتقلل الفجوات.';
+            } else if (analytics.currentBalance > 0) {
+                recommendationLabel = 'استكمال التغطية';
+                recommendationText = 'السلوك جيد لكن إنهاء الرصيد المتبقي سيرفع التقييم أكثر.';
+            }
+
+            document.getElementById('recommendation_label').innerText = recommendationLabel;
+            document.getElementById('recommendation_text').innerText = recommendationText;
+
+            renderScoreGauge(analytics.score);
+        }
+
+        function renderTimelineChart(analytics) {
+            const canvas = document.getElementById('timelineChart');
+            if (timelineChartInstance) timelineChartInstance.destroy();
+
+            timelineChartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: analytics.labels.length ? analytics.labels : ['—'],
+                    datasets: analytics.labels.length ? [
+                        {
+                            label: 'الدفعات',
+                            data: analytics.paymentSeries,
+                            yAxisID: 'yPayments',
+                            borderColor: '#2f9e6f',
+                            backgroundColor: 'rgba(47,158,111,0.08)',
+                            borderWidth: 3,
+                            tension: 0.35,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            spanGaps: true,
+                            fill: false
+                        },
+                        {
+                            label: 'الرصيد',
+                            data: analytics.balanceSeries,
+                            yAxisID: 'yBalance',
+                            borderColor: '#c95a52',
+                            backgroundColor: 'rgba(201,90,82,0.10)',
+                            borderWidth: 3,
+                            tension: 0.35,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            fill: true
+                        }
+                    ] : [{
+                        label: 'الرصيد',
+                        data: [0],
+                        borderColor: '#c9a46b',
+                        backgroundColor: 'rgba(201,164,107,0.10)',
+                        borderWidth: 3,
+                        tension: 0.35,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            rtl: true,
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 10,
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12,
+                                    weight: '700'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            titleAlign: 'right',
+                            bodyAlign: 'right',
+                            callbacks: {
+                                title: function(items) {
+                                    if (!analytics.points.length) return '—';
+                                    const idx = items[0]?.dataIndex ?? 0;
+                                    const point = analytics.points[idx];
+                                    return `${formatDateOnly(point.date)} | ${point.description}`;
+                                },
+                                label: function(context) {
+                                    if (!analytics.points.length) return `${context.dataset.label}: 0`;
+                                    const idx = context.dataIndex;
+                                    const point = analytics.points[idx];
+                                    if (context.dataset.label === 'الدفعات') {
+                                        return `الدفعة: ${formatNumber(point.credit)}`;
+                                    }
+                                    return `الرصيد: ${formatNumber(point.balance)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10,
+                                color: '#7a6c59',
+                                font: { size: 11, weight: '700' }
+                            }
+                        },
+                        yPayments: {
+                            position: 'left',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: '#7a6c59',
+                                callback: v => formatNumber(v)
+                            }
+                        },
+                        yBalance: {
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(201,164,107,0.12)'
+                            },
+                            ticks: {
+                                color: '#7a6c59',
+                                callback: v => formatNumber(v)
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('timeline_payments_count').innerText = formatNumber(analytics.paymentCount);
+            document.getElementById('timeline_payments_total').innerText = formatNumber(analytics.totalCredit);
+            document.getElementById('timeline_current_balance').innerText = formatNumber(analytics.currentBalance);
+            document.getElementById('timeline_years_count').innerText = formatNumber(analytics.yearsCount);
+        }
+
         async function init() {
             try {
                 const { data: tenant } = await supabaseClient
@@ -661,9 +1424,12 @@
                 const { data: tx } = await supabaseClient
                     .from('tenant_transactions')
                     .select('*')
-                    .eq('tenant_code', tenantCode);
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true });
 
-                const tx2026 = (tx || []).filter(t => new Date(t.date).getFullYear() === 2026);
+                const allTransactions = tx || [];
+                const tx2026 = allTransactions.filter(t => new Date(t.date).getFullYear() === 2026);
+
                 const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
                 const debit2026 = tx2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
                 const balance2026 = Math.max(0, debit2026 - daen2026);
@@ -682,66 +1448,16 @@
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(balance2026));
 
                 document.getElementById('smart_message').innerHTML =
-                    buildAdviceMessageFromStatement(tx || [], balance2026, 2026);
+                    buildAdviceMessageFromStatement(allTransactions, balance2026, 2026);
 
                 animateHighlights();
                 await loadNotifications();
 
-                const percentTarget = rate;
+                renderPieChart(daen2026, balance2026, rate);
 
-                new Chart(document.getElementById('balancePieChart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['مدفوع', 'متبقي'],
-                        datasets: [{
-                            data: [balance2026, daen2026],
-                            backgroundColor: ['#c95a52', '#2f9e6f'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        cutout: '75%',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 1500,
-                            easing: 'easeOutQuart'
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: [{
-                        id: 'centerText',
-                        beforeDraw(chart) {
-                            const { width, height, ctx } = chart;
-
-                            if (typeof chart._animatedValue !== 'number') {
-                                chart._animatedValue = 0;
-                            }
-
-                            chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
-                            const currentValue = Math.round(chart._animatedValue);
-
-                            ctx.restore();
-                            ctx.font = 'bold 52px Tajawal';
-                            ctx.fillStyle = '#2f2a24';
-                            ctx.textBaseline = 'middle';
-
-                            const text = currentValue + '%';
-                            const textWidth = ctx.measureText(text).width;
-                            ctx.fillText(text, (width - textWidth) / 2, height / 2 - 8);
-
-                            ctx.save();
-
-                            if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
-                                requestAnimationFrame(() => chart.draw());
-                            }
-                        }
-                    }]
-                });
+                const analytics = buildAllYearsAnalytics(allTransactions);
+                renderScorePanel(analytics);
+                renderTimelineChart(analytics);
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
