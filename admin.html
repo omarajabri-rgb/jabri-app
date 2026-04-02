@@ -128,14 +128,6 @@
             margin-bottom:18px;
         }
 
-        .panel-head{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-            margin-bottom:16px;
-        }
-
         .panel-title h3{
             margin:0;
             font-size:18px;
@@ -423,10 +415,28 @@
         .smart-ai-card{
             padding:14px;
             border-radius:16px;
-            background:#fff;
             border:1px solid var(--line);
             text-align:center;
+            background:#fff;
+            transition:.2s ease;
         }
+
+        .smart-ai-card.ai-good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.94));
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .smart-ai-card.ai-warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.94));
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .smart-ai-card.ai-bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.94));
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .smart-ai-card.ai-neutral{ background:#fff; }
 
         .smart-ai-card span{
             display:block;
@@ -457,6 +467,7 @@
             flex-wrap:wrap;
             gap:8px;
             margin-top:12px;
+            justify-content:center;
         }
 
         .risk-flag{
@@ -496,19 +507,6 @@
             gap:14px;
         }
 
-        .notify-preview{
-            padding:14px;
-            border-radius:16px;
-            background:#fff;
-            border:1px solid var(--line);
-            font-size:13px;
-            line-height:2;
-            font-weight:700;
-            color:#4e3c24;
-            white-space:pre-line;
-            min-height:120px;
-        }
-
         @keyframes spin{ to{ transform:rotate(360deg); } }
 
         @media (max-width: 768px){
@@ -517,28 +515,15 @@
                 gap:8px;
                 align-items:end;
             }
-
             .last-seen-chip{
                 font-size:11px;
                 padding:0 12px;
                 min-height:50px;
             }
-
-            .form-grid{
-                grid-template-columns:1fr;
-            }
-
-            .kpi-grid{
-                grid-template-columns:1fr 1fr;
-            }
-
-            .chart-grid{
-                grid-template-columns:1fr;
-            }
-
-            .smart-ai-grid{
-                grid-template-columns:1fr;
-            }
+            .form-grid{ grid-template-columns:1fr; }
+            .kpi-grid{ grid-template-columns:1fr 1fr; }
+            .chart-grid{ grid-template-columns:1fr; }
+            .smart-ai-grid{ grid-template-columns:1fr; }
         }
     </style>
 </head>
@@ -560,16 +545,11 @@
         </div>
 
         <section class="panel">
-            <div class="chip-header">
-                <div class="chip-title">اختيار المستأجر</div>
-            </div>
-
+            <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
             <div class="tenant-select-grid">
                 <div class="field">
                     <label>المستأجر</label>
-                    <select id="tenant_select">
-                        <option value="">اختر المستأجر</option>
-                    </select>
+                    <select id="tenant_select"><option value="">اختر المستأجر</option></select>
                 </div>
                 <div class="last-seen-chip" id="last_seen_chip">—</div>
             </div>
@@ -586,101 +566,41 @@
                 </div>
 
                 <div class="smart-ai-grid">
-                    <div class="smart-ai-card">
-                        <span>التقييم الذكي</span>
-                        <b id="ai_score_value">0 / 100</b>
-                        <small id="ai_score_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>نوع المستأجر</span>
-                        <b id="ai_tenant_type">—</b>
-                        <small id="ai_tenant_type_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>آخر دفعة</span>
-                        <b id="ai_last_payment">—</b>
-                        <small id="ai_last_payment_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>أشهر بدون دفعات</span>
-                        <b id="ai_months_without_payment">0</b>
-                        <small id="ai_months_without_payment_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>التزام آخر 3 سنوات</span>
-                        <b id="ai_last3_ratio">0%</b>
-                        <small id="ai_last3_ratio_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>إغلاق الرصيد المتوقع</span>
-                        <b id="ai_close_estimate">—</b>
-                        <small id="ai_close_estimate_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>تنبيه سلوكي</span>
-                        <b id="ai_behavior_alert">—</b>
-                        <small id="ai_behavior_alert_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>التوصية</span>
-                        <b id="ai_recommendation">—</b>
-                        <small id="ai_recommendation_text">—</small>
-                    </div>
-                    <div class="smart-ai-card">
-                        <span>أعلام المخاطر</span>
-                        <div class="risk-flags" id="ai_risk_flags"></div>
-                    </div>
+                    <div class="smart-ai-card" id="ai_card_score"><span>التقييم الذكي</span><b id="ai_score_value">0 / 100</b><small id="ai_score_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_type"><span>نوع المستأجر</span><b id="ai_tenant_type">—</b><small id="ai_tenant_type_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_last_payment"><span>آخر دفعة</span><b id="ai_last_payment">—</b><small id="ai_last_payment_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_months_without_payment"><span>أشهر بدون دفعات</span><b id="ai_months_without_payment">0</b><small id="ai_months_without_payment_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_last3_ratio"><span>التزام آخر 3 سنوات</span><b id="ai_last3_ratio">0%</b><small id="ai_last3_ratio_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_close_estimate"><span>إغلاق الرصيد المتوقع</span><b id="ai_close_estimate">—</b><small id="ai_close_estimate_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_behavior"><span>تنبيه سلوكي</span><b id="ai_behavior_alert">—</b><small id="ai_behavior_alert_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_recommendation"><span>التوصية</span><b id="ai_recommendation">—</b><small id="ai_recommendation_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_next_payment"><span>احتمال السداد الشهر القادم</span><b id="ai_next_payment_probability">0%</b><small id="ai_next_payment_probability_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_default_probability"><span>احتمال التعثر</span><b id="ai_default_probability">0%</b><small id="ai_default_probability_text">—</small></div>
+                    <div class="smart-ai-card" id="ai_card_flags"><span>أعلام المخاطر</span><div class="risk-flags" id="ai_risk_flags"></div></div>
                 </div>
             </div>
         </section>
 
         <section class="kpi-grid">
-            <div class="kpi-card card good-card" id="kpi_card_debit">
-                <div class="kpi-head"><span>إجمالي المدين</span></div>
-                <div class="kpi-value" id="kpi_total_debit">0 د.أ</div>
-            </div>
-            <div class="kpi-card card warn-card" id="kpi_card_credit">
-                <div class="kpi-head"><span>إجمالي الدائن</span></div>
-                <div class="kpi-value" id="kpi_total_credit">0 د.أ</div>
-            </div>
-            <div class="kpi-card card bad-card" id="kpi_card_balance">
-                <div class="kpi-head"><span>الرصيد المتبقي</span></div>
-                <div class="kpi-value" id="kpi_total_balance">0 د.أ</div>
-            </div>
-            <div class="kpi-card card warn-card" id="kpi_card_ratio">
-                <div class="kpi-head"><span>نسبة السداد</span></div>
-                <div class="kpi-value" id="kpi_total_ratio">0%</div>
-            </div>
+            <div class="kpi-card card good-card" id="kpi_card_debit"><div class="kpi-head"><span>إجمالي المدين</span></div><div class="kpi-value" id="kpi_total_debit">0 د.أ</div></div>
+            <div class="kpi-card card warn-card" id="kpi_card_credit"><div class="kpi-head"><span>إجمالي الدائن</span></div><div class="kpi-value" id="kpi_total_credit">0 د.أ</div></div>
+            <div class="kpi-card card bad-card" id="kpi_card_balance"><div class="kpi-head"><span>الرصيد المتبقي</span></div><div class="kpi-value" id="kpi_total_balance">0 د.أ</div></div>
+            <div class="kpi-card card warn-card" id="kpi_card_ratio"><div class="kpi-head"><span>نسبة السداد</span></div><div class="kpi-value" id="kpi_total_ratio">0%</div></div>
         </section>
 
         <section class="chart-grid">
-            <div class="panel">
-                <div class="chip-header">
-                    <div class="chip-title">مقارنة التحصيل</div>
-                </div>
-                <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
-            </div>
-            <div class="panel">
-                <div class="chip-header">
-                    <div class="chip-title">الحركة الشهرية</div>
-                </div>
-                <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
-            </div>
+            <div class="panel"><div class="chip-header"><div class="chip-title">مقارنة التحصيل</div></div><div class="chart-wrap"><canvas id="collectionChart"></canvas></div></div>
+            <div class="panel"><div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div><div class="chart-wrap"><canvas id="monthlyChart"></canvas></div></div>
         </section>
 
         <section class="panel">
-            <div class="chip-header">
-                <div class="chip-title">تحليل التوقع</div>
-            </div>
+            <div class="chip-header"><div class="chip-title">تحليل التوقع</div></div>
             <div id="prediction_text" class="prediction-box">—</div>
             <div class="chart-wrap"><canvas id="predictionChart"></canvas></div>
         </section>
 
         <section class="panel">
-            <div class="chip-header">
-                <div class="chip-title">إرسال إشعار</div>
-            </div>
-
+            <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
                 <div class="form-grid">
                     <div class="field">
@@ -698,30 +618,21 @@
                         <input type="text" id="notification_title" placeholder="عنوان الإشعار" />
                     </div>
                 </div>
-
                 <div class="field">
                     <label>الرسالة</label>
                     <textarea id="notification_message" placeholder="سيظهر النص هنا تلقائياً أو اكتب رسالة عامة"></textarea>
                 </div>
-
-                <div class="notify-preview" id="notification_preview">اختر موضوع الإشعار لعرض النص هنا</div>
-
                 <button id="notifyBtn" class="btn btn-gold" style="width:100%" onclick="sendNotification()">إرسال الإشعار</button>
             </div>
         </section>
 
         <section class="panel">
-            <div class="chip-header">
-                <div class="chip-title">إدخال حركة مالية</div>
-            </div>
+            <div class="chip-header"><div class="chip-title">إدخال حركة مالية</div></div>
             <div class="form-grid">
                 <div class="field"><label>التاريخ</label><input type="date" id="tx_date" /></div>
                 <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt" placeholder="اختياري" /></div>
             </div>
-            <div class="field" style="margin-top:12px;">
-                <label>البيان / الوصف</label>
-                <input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" />
-            </div>
+            <div class="field" style="margin-top:12px;"><label>البيان / الوصف</label><input type="text" id="tx_desc" placeholder="مثلاً: دفعة من الإيجار" /></div>
             <div class="form-grid" style="margin-top:12px;">
                 <div class="field"><label>مدين</label><input type="number" id="tx_debit" placeholder="0" step="1" /></div>
                 <div class="field"><label>دائن</label><input type="number" id="tx_credit" placeholder="0" step="1" /></div>
@@ -734,9 +645,7 @@
         </section>
 
         <section style="margin-top:20px;">
-            <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; font-size:16px;" onclick="openTenantStatement()" disabled>
-                كشف حساب هذا المستأجر
-            </button>
+            <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; font-size:16px;" onclick="openTenantStatement()" disabled>كشف حساب هذا المستأجر</button>
         </section>
 
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — لوحة الإدارة الذكية</div>
@@ -764,19 +673,15 @@
         function animateValue(el, start, end, duration = 900, isPercent = false, isCurrency = false) {
             if (!el) return;
             const startTime = performance.now();
-
             function update(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const value = start + (end - start) * progress;
-
                 if (isPercent) el.innerText = `${Math.round(value)}%`;
                 else if (isCurrency) el.innerText = formatCurrency(value);
                 else el.innerText = Math.round(value).toLocaleString('en-US');
-
                 if (progress < 1) requestAnimationFrame(update);
             }
-
             requestAnimationFrame(update);
         }
 
@@ -784,11 +689,9 @@
             if (!el) return;
             el.classList.remove('number-good', 'number-warn', 'number-bad');
             if (!tenant) return;
-
             const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
             const paid = toNumber(tenant.totalCredit);
             const ratio = totalReq > 0 ? (paid / totalReq) : 0;
-
             if (ratio >= 0.8) el.classList.add('number-good');
             else if (ratio >= 0.55) el.classList.add('number-warn');
             else el.classList.add('number-bad');
@@ -797,11 +700,16 @@
         function applyStatusColors(ratio) {
             const cards = document.querySelectorAll('.card');
             let color = '#d7921f';
-
             if (ratio >= 80) color = '#159a6f';
             else if (ratio < 55) color = '#d14d4d';
-
             cards.forEach(card => card.style.border = `1px solid ${color}30`);
+        }
+
+        function setAiCardMood(id, mood) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('ai-good', 'ai-warn', 'ai-bad', 'ai-neutral');
+            el.classList.add(mood || 'ai-neutral');
         }
 
         function updateCommitment(totalDebit, totalCredit) {
@@ -811,85 +719,58 @@
                 el.innerText = '—';
                 return;
             }
-
             const ratio = Math.round((totalCredit / totalDebit) * 100);
             el.innerText = `نسبة الالتزام: ${ratio}%`;
-
             if (ratio >= 80) el.style.color = '#159a6f';
             else if (ratio >= 55) el.style.color = '#d7921f';
             else el.style.color = '#d14d4d';
-
             applyStatusColors(ratio);
         }
 
         function updateSmartAlert(yearlyData) {
             const el = document.getElementById('smart_alert');
             if (!el) return;
-
             if (!yearlyData || yearlyData.length < 3) {
                 el.innerText = 'لا توجد بيانات كافية للتحليل التاريخي';
                 return;
             }
-
             const last3 = yearlyData.slice(-3).map(y => y.ratio);
-
-            if (last3[2] < last3[1] && last3[1] < last3[0]) {
-                el.innerText = '⚠️ انتباه: هبوط مستمر في الالتزام آخر 3 سنوات';
-            } else if (Math.max(...last3) - Math.min(...last3) > 25) {
-                el.innerText = '⚠️ تنبيه: سلوك دفع متذبذب وغير مستقر';
-            } else {
-                el.innerText = '✔️ حالة السداد السنوية مستقرة';
-            }
+            if (last3[2] < last3[1] && last3[1] < last3[0]) el.innerText = '⚠️ انتباه: هبوط مستمر في الالتزام آخر 3 سنوات';
+            else if (Math.max(...last3) - Math.min(...last3) > 25) el.innerText = '⚠️ تنبيه: سلوك دفع متذبذب وغير مستقر';
+            else el.innerText = '✔️ حالة السداد السنوية مستقرة';
         }
 
         function updateLastSeen(tenant) {
             const chip = document.getElementById('last_seen_chip');
             if (!chip) return;
-
             if (!tenant) {
                 chip.innerText = '—';
                 return;
             }
-
             const raw = tenant.lastSeen || tenant.last_seen || tenant.last_login || tenant.updated_at || tenant.created_at || null;
-
             if (!raw) {
                 chip.innerText = 'لا يوجد آخر ظهور';
                 return;
             }
-
             const d = new Date(raw);
             if (isNaN(d.getTime())) {
                 chip.innerText = 'لا يوجد آخر ظهور';
                 return;
             }
-
             const now = new Date();
             const diffMs = now - d;
             const diffMin = Math.floor(diffMs / 60000);
             const diffHour = Math.floor(diffMin / 60);
             const diffDay = Math.floor(diffHour / 24);
-
-            if (diffMin < 1) {
-                chip.innerText = 'آخر ظهور: الآن';
-                return;
+            if (diffMin < 1) chip.innerText = 'آخر ظهور: الآن';
+            else if (diffMin < 60) chip.innerText = `آخر ظهور: منذ ${diffMin} دقيقة`;
+            else if (diffHour < 24) chip.innerText = `آخر ظهور: منذ ${diffHour} ساعة`;
+            else if (diffDay <= 7) chip.innerText = `آخر ظهور: منذ ${diffDay} يوم`;
+            else {
+                const dateText = d.toLocaleDateString('ar-JO');
+                const timeText = d.toLocaleTimeString('ar-JO', { hour: 'numeric', minute: '2-digit' });
+                chip.innerText = `آخر ظهور: ${dateText} - ${timeText}`;
             }
-            if (diffMin < 60) {
-                chip.innerText = `آخر ظهور: منذ ${diffMin} دقيقة`;
-                return;
-            }
-            if (diffHour < 24) {
-                chip.innerText = `آخر ظهور: منذ ${diffHour} ساعة`;
-                return;
-            }
-            if (diffDay <= 7) {
-                chip.innerText = `آخر ظهور: منذ ${diffDay} يوم`;
-                return;
-            }
-
-            const dateText = d.toLocaleDateString('ar-JO');
-            const timeText = d.toLocaleTimeString('ar-JO', { hour: 'numeric', minute: '2-digit' });
-            chip.innerText = `آخر ظهور: ${dateText} - ${timeText}`;
         }
 
         async function loadData() {
@@ -897,16 +778,13 @@
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
                 supabaseClient.from('tenant_transactions').select('*').order('date')
             ]);
-
             allTenants = tenants || [];
             allTransactions = transactions || [];
-
             tenantBalances = allTenants.map(t => {
                 const tx = allTransactions.filter(x => x.tenant_code === t.tenant_code);
                 const prev = toNumber(t.previous_balance);
                 const deb = tx.reduce((s, r) => s + toNumber(r.debit), 0);
                 const cre = tx.reduce((s, r) => s + toNumber(r.credit), 0);
-
                 return {
                     ...t,
                     totalDebit: deb,
@@ -925,7 +803,6 @@
         function updateGlobalKpis() {
             const globalDebit = allTransactions.reduce((s, t) => s + toNumber(t.debit), 0);
             const globalCredit = allTransactions.reduce((s, t) => s + toNumber(t.credit), 0);
-
             animateValue(document.getElementById('kpi_total_debit'), 0, globalDebit, 900, false, true);
             animateValue(document.getElementById('kpi_total_credit'), 0, globalCredit, 900, false, true);
         }
@@ -933,35 +810,27 @@
         function updateTenantKpis(tenant) {
             const balanceEl = document.getElementById('kpi_total_balance');
             const ratioEl = document.getElementById('kpi_total_ratio');
-
             if (!tenant) {
                 balanceEl.innerText = '0 د.أ';
                 ratioEl.innerText = '0%';
                 document.getElementById('commitment_score').innerText = '—';
                 return;
             }
-
             const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
             const paid = toNumber(tenant.totalCredit);
             const bal = Math.max(0, totalReq - paid);
             const ratio = totalReq > 0 ? Math.round((paid / totalReq) * 100) : 0;
-
             animateValue(balanceEl, 0, bal, 900, false, true);
             animateValue(ratioEl, 0, Math.min(Math.max(ratio, 0), 100), 900, true, false);
-
             [balanceEl, ratioEl].forEach(el => applySmartNumberColor(el, tenant));
             updateCommitment(totalReq, paid);
         }
 
         function getSmartPrediction(yearlyData) {
-            if (!yearlyData || yearlyData.length < 2) {
-                return { label: 'غير كافٍ', trend: 'لا توجد بيانات كافية', color: '#7a7469' };
-            }
-
+            if (!yearlyData || yearlyData.length < 2) return { label: 'غير كافٍ', trend: 'لا توجد بيانات كافية', color: '#7a7469' };
             const ratios = yearlyData.map(y => y.ratio);
             const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length;
             const recent = yearlyData.slice(-3).map(y => y.ratio);
-
             let trend = 'مستقر';
             if (recent.length >= 2) {
                 const diff = recent[recent.length - 1] - recent[0];
@@ -969,21 +838,10 @@
                 else if (diff <= -10) trend = 'هابط';
                 else if (Math.max(...recent) - Math.min(...recent) >= 20) trend = 'متذبذب';
             }
-
             let label = 'متوسط', color = '#d7921f';
-            if (avg >= 80 && (trend === 'مستقر' || trend === 'صاعد')) {
-                label = 'ممتاز';
-                color = '#159a6f';
-            } else if (avg < 55) {
-                label = 'ضعيف';
-                color = '#d14d4d';
-            }
-
-            if (trend === 'هابط' && avg < 60) {
-                label = 'خطر';
-                color = '#d14d4d';
-            }
-
+            if (avg >= 80 && (trend === 'مستقر' || trend === 'صاعد')) { label = 'ممتاز'; color = '#159a6f'; }
+            else if (avg < 55) { label = 'ضعيف'; color = '#d14d4d'; }
+            if (trend === 'هابط' && avg < 60) { label = 'خطر'; color = '#d14d4d'; }
             return { label, trend, color, avg: Math.round(avg) };
         }
 
@@ -991,152 +849,68 @@
             const ctx = document.getElementById('predictionChart').getContext('2d');
             if (predictionChart) predictionChart.destroy();
             if (!tenant) return;
-
             const yearlyData = buildTenantYearlyPattern(tenant);
             const smart = getSmartPrediction(yearlyData);
             updateSmartAlert(yearlyData);
-
             if (!yearlyData.length) {
                 document.getElementById('prediction_text').innerText = '—';
                 return;
             }
-
             const ratioData = yearlyData.map(y => y.ratio);
             const labels = yearlyData.map((y, i) => i % 2 === 0 ? String(y.year) : '');
-
             predictionChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        data: ratioData,
-                        borderColor: smart.color,
-                        backgroundColor: 'transparent',
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            min: 0,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                callback: v => v + '%'
-                            }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    }
-                }
+                data: { labels, datasets: [{ data: ratioData, borderColor: smart.color, backgroundColor: 'transparent', tension: 0.4, borderWidth: 2, pointRadius: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, ticks: { stepSize: 20, callback: v => v + '%' } }, x: { grid: { display: false } } } }
             });
-
             document.getElementById('prediction_text').innerText = `التقييم: ${smart.label} — الاتجاه: ${smart.trend}`;
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
             const ctx = document.getElementById('collectionChart').getContext('2d');
             if (collectionChart) collectionChart.destroy();
-
             const paid = toNumber(totalCredit);
             const total = paid + toNumber(totalBalance);
             const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
             let color = ratio >= 80 ? '#159a6f' : (ratio >= 55 ? '#d7921f' : '#d14d4d');
-
             collectionChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['المدفوع', 'المتبقي'],
-                    datasets: [{
-                        data: [paid, total - paid],
-                        backgroundColor: [color, '#f0f0f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: '64%',
-                    responsive: true,
-                    maintainAspectRatio: false
-                },
-                plugins: [{
-                    id: 'centerText',
-                    afterDraw(chart) {
-                        const {x, y} = chart.getDatasetMeta(0).data[0];
-                        const ctx = chart.ctx;
-                        ctx.save();
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = '#4b3720';
-                        ctx.font = 'bold 24px Tajawal';
-                        ctx.fillText(`${ratio}%`, x, y);
-                        ctx.restore();
-                    }
-                }]
+                data: { labels: ['المدفوع', 'المتبقي'], datasets: [{ data: [paid, total - paid], backgroundColor: [color, '#f0f0f0'], borderWidth: 0 }] },
+                options: { cutout: '64%', responsive: true, maintainAspectRatio: false },
+                plugins: [{ id: 'centerText', afterDraw(chart) { const {x, y} = chart.getDatasetMeta(0).data[0]; const ctx = chart.ctx; ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4b3720'; ctx.font = 'bold 24px Tajawal'; ctx.fillText(`${ratio}%`, x, y); ctx.restore(); } }]
             });
         }
 
         function buildTenantYearlyPattern(tenant) {
             if (!tenant) return [];
-
             const tenantTx = allTransactions.filter(t => t.tenant_code === tenant.tenant_code);
             const yearlyMap = {};
-
             tenantTx.forEach(tx => {
                 const year = new Date(tx.date).getFullYear();
                 if (!yearlyMap[year]) yearlyMap[year] = { year, debit: 0, credit: 0 };
                 yearlyMap[year].debit += toNumber(tx.debit);
                 yearlyMap[year].credit += toNumber(tx.credit);
             });
-
-            return Object.values(yearlyMap)
-                .sort((a, b) => a.year - b.year)
-                .map(item => ({
-                    year: item.year,
-                    ratio: item.debit > 0 ? Math.min(100, Math.round((item.credit / item.debit) * 100)) : 0
-                }));
+            return Object.values(yearlyMap).sort((a, b) => a.year - b.year).map(item => ({ year: item.year, ratio: item.debit > 0 ? Math.min(100, Math.round((item.credit / item.debit) * 100)) : 0 }));
         }
 
         function drawMonthlyChart(tenant) {
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             if (monthlyChart) monthlyChart.destroy();
             if (!tenant) return;
-
             const labels = [], debits = [], credits = [];
-
             for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
-
                 labels.push(d.toLocaleDateString('ar-JO', { month: 'short' }));
-
-                const mTx = allTransactions.filter(tx =>
-                    tx.tenant_code === tenant.tenant_code &&
-                    new Date(tx.date).getMonth() === d.getMonth() &&
-                    new Date(tx.date).getFullYear() === d.getFullYear()
-                );
-
+                const mTx = allTransactions.filter(tx => tx.tenant_code === tenant.tenant_code && new Date(tx.date).getMonth() === d.getMonth() && new Date(tx.date).getFullYear() === d.getFullYear());
                 debits.push(mTx.reduce((s, t) => s + toNumber(t.debit), 0));
                 credits.push(mTx.reduce((s, t) => s + toNumber(t.credit), 0));
             }
-
             monthlyChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        { label: 'مدين', data: debits, borderColor: '#c9a46b', tension: 0.35 },
-                        { label: 'دائن', data: credits, borderColor: '#159a6f', tension: 0.35 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
+                data: { labels, datasets: [ { label: 'مدين', data: debits, borderColor: '#c9a46b', tension: 0.35 }, { label: 'دائن', data: credits, borderColor: '#159a6f', tension: 0.35 } ] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
@@ -1166,45 +940,37 @@
             const behaviorAlertText = document.getElementById('ai_behavior_alert_text');
             const recommendation = document.getElementById('ai_recommendation');
             const recommendationText = document.getElementById('ai_recommendation_text');
+            const nextPayEl = document.getElementById('ai_next_payment_probability');
+            const nextPayText = document.getElementById('ai_next_payment_probability_text');
+            const defaultEl = document.getElementById('ai_default_probability');
+            const defaultText = document.getElementById('ai_default_probability_text');
             const flagsBox = document.getElementById('ai_risk_flags');
 
             if (!tenant) {
                 badge.innerText = '—';
                 badge.className = 'smart-ai-badge badge-good';
-                scoreValue.innerText = '0 / 100';
-                scoreText.innerText = '—';
-                tenantType.innerText = '—';
-                tenantTypeText.innerText = '—';
-                lastPayment.innerText = '—';
-                lastPaymentText.innerText = '—';
-                monthsNoPay.innerText = '0';
-                monthsNoPayText.innerText = '—';
-                last3Ratio.innerText = '0%';
-                last3RatioText.innerText = '—';
-                closeEstimate.innerText = '—';
-                closeEstimateText.innerText = '—';
-                behaviorAlert.innerText = '—';
-                behaviorAlertText.innerText = '—';
-                recommendation.innerText = '—';
-                recommendationText.innerText = '—';
+                scoreValue.innerText = '0 / 100'; scoreText.innerText = '—';
+                tenantType.innerText = '—'; tenantTypeText.innerText = '—';
+                lastPayment.innerText = '—'; lastPaymentText.innerText = '—';
+                monthsNoPay.innerText = '0'; monthsNoPayText.innerText = '—';
+                last3Ratio.innerText = '0%'; last3RatioText.innerText = '—';
+                closeEstimate.innerText = '—'; closeEstimateText.innerText = '—';
+                behaviorAlert.innerText = '—'; behaviorAlertText.innerText = '—';
+                recommendation.innerText = '—'; recommendationText.innerText = '—';
+                nextPayEl.innerText = '0%'; nextPayText.innerText = '—';
+                defaultEl.innerText = '0%'; defaultText.innerText = '—';
                 flagsBox.innerHTML = '';
+                ['ai_card_score','ai_card_type','ai_card_last_payment','ai_card_months_without_payment','ai_card_last3_ratio','ai_card_close_estimate','ai_card_behavior','ai_card_recommendation','ai_card_next_payment','ai_card_default_probability','ai_card_flags'].forEach(id => setAiCardMood(id,'ai-neutral'));
                 return;
             }
 
-            const tx = allTransactions
-                .filter(x => x.tenant_code === tenant.tenant_code)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
+            const tx = allTransactions.filter(x => x.tenant_code === tenant.tenant_code).sort((a, b) => new Date(a.date) - new Date(b.date));
             const totalReq = toNumber(tenant.previous_balance) + toNumber(tenant.totalDebit);
             const paid = toNumber(tenant.totalCredit);
             const currentBalance = Math.max(0, totalReq - paid);
             const coverageScore = totalReq > 0 ? Math.min(100, Math.round((paid / totalReq) * 100)) : 0;
-
             const yearlyData = buildTenantYearlyPattern(tenant);
-            const regularityScore = yearlyData.length
-                ? Math.round(yearlyData.reduce((s, y) => s + y.ratio, 0) / yearlyData.length)
-                : 0;
-
+            const regularityScore = yearlyData.length ? Math.round(yearlyData.reduce((s, y) => s + y.ratio, 0) / yearlyData.length) : 0;
             const paymentRows = tx.filter(x => toNumber(x.credit) > 0);
             const lastPaymentRow = paymentRows[paymentRows.length - 1] || null;
 
@@ -1219,60 +985,29 @@
                 else recentScore = 10;
             }
 
-            const debtPressureScore = totalReq > 0
-                ? Math.max(0, Math.min(100, Math.round((1 - (currentBalance / totalReq)) * 100)))
-                : 0;
+            const debtPressureScore = totalReq > 0 ? Math.max(0, Math.min(100, Math.round((1 - (currentBalance / totalReq)) * 100))) : 0;
+            const finalScore = Math.round(coverageScore * 0.40 + regularityScore * 0.25 + recentScore * 0.20 + debtPressureScore * 0.15);
 
-            const finalScore = Math.round(
-                coverageScore * 0.40 +
-                regularityScore * 0.25 +
-                recentScore * 0.20 +
-                debtPressureScore * 0.15
-            );
-
-            let badgeText = 'جيد';
-            let badgeClass = 'badge-good';
-            let badgeDesc = 'سلوك مستقر إجمالاً';
-            if (finalScore >= 85) {
-                badgeText = 'ممتاز';
-                badgeClass = 'badge-excellent';
-                badgeDesc = 'مستأجر موثوق جداً';
-            } else if (finalScore >= 70) {
-                badgeText = 'جيد جداً';
-                badgeClass = 'badge-good';
-                badgeDesc = 'سلوك دفع جيد';
-            } else if (finalScore >= 50) {
-                badgeText = 'تحت المراقبة';
-                badgeClass = 'badge-watch';
-                badgeDesc = 'يحتاج انتظاماً أعلى';
-            } else {
-                badgeText = 'مخاطرة عالية';
-                badgeClass = 'badge-risk';
-                badgeDesc = 'يحتاج متابعة مباشرة';
-            }
+            let badgeText = 'جيد', badgeClass = 'badge-good', badgeDesc = 'سلوك مستقر إجمالاً';
+            if (finalScore >= 85) { badgeText = 'ممتاز'; badgeClass = 'badge-excellent'; badgeDesc = 'مستأجر موثوق جداً'; }
+            else if (finalScore >= 70) { badgeText = 'جيد جداً'; badgeClass = 'badge-good'; badgeDesc = 'سلوك دفع جيد'; }
+            else if (finalScore >= 50) { badgeText = 'تحت المراقبة'; badgeClass = 'badge-watch'; badgeDesc = 'يحتاج انتظاماً أعلى'; }
+            else { badgeText = 'مخاطرة عالية'; badgeClass = 'badge-risk'; badgeDesc = 'يحتاج متابعة مباشرة'; }
 
             badge.innerText = badgeText;
             badge.className = `smart-ai-badge ${badgeClass}`;
             scoreValue.innerText = `${finalScore} / 100`;
             scoreText.innerText = badgeDesc;
+            setAiCardMood('ai_card_score', finalScore >= 85 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
-            let typeLabel = 'متذبذب';
-            let typeText = 'سلوكه يحتاج مراقبة';
-            if (finalScore >= 85) {
-                typeLabel = 'ملتزم';
-                typeText = 'دفعه منتظم وتغطيته عالية';
-            } else if (finalScore >= 70) {
-                typeLabel = 'جيد';
-                typeText = 'أداء جيد مع بعض التفاوت المقبول';
-            } else if (recentScore >= 60 && currentBalance > 0) {
-                typeLabel = 'تحسن حديثاً';
-                typeText = 'هناك نشاط دفع حديث لكنه لم يغلق الرصيد بعد';
-            } else if (finalScore < 50) {
-                typeLabel = 'متأخر مزمن';
-                typeText = 'يحتاج متابعة إدارية أقوى';
-            }
+            let typeLabel = 'متذبذب', typeText = 'سلوكه يحتاج مراقبة';
+            if (finalScore >= 85) { typeLabel = 'ملتزم'; typeText = 'دفعه منتظم وتغطيته عالية'; }
+            else if (finalScore >= 70) { typeLabel = 'جيد'; typeText = 'أداء جيد مع بعض التفاوت المقبول'; }
+            else if (recentScore >= 60 && currentBalance > 0) { typeLabel = 'تحسن حديثاً'; typeText = 'هناك نشاط دفع حديث لكنه لم يغلق الرصيد بعد'; }
+            else if (finalScore < 50) { typeLabel = 'متأخر مزمن'; typeText = 'يحتاج متابعة إدارية أقوى'; }
             tenantType.innerText = typeLabel;
             tenantTypeText.innerText = typeText;
+            setAiCardMood('ai_card_type', finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
             if (lastPaymentRow?.date) {
                 lastPayment.innerText = `${new Date(lastPaymentRow.date).toLocaleDateString('ar-JO')} • ${formatCurrency(lastPaymentRow.credit)}`;
@@ -1282,22 +1017,22 @@
                 lastPayment.innerText = 'لا توجد دفعات';
                 lastPaymentText.innerText = 'لم يتم تسجيل أي دفعة حتى الآن';
             }
+            setAiCardMood('ai_card_last_payment', lastPaymentRow ? 'ai-good' : 'ai-bad');
 
             const monthsWithoutPayment = lastPaymentRow?.date ? (monthsSince(lastPaymentRow.date) ?? 0) : yearlyData.length ? 12 : 0;
             monthsNoPay.innerText = `${monthsWithoutPayment}`;
             monthsNoPayText.innerText = monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `انقطاع عن الدفع منذ ${monthsWithoutPayment} شهر`;
+            setAiCardMood('ai_card_months_without_payment', monthsWithoutPayment <= 1 ? 'ai-good' : monthsWithoutPayment <= 3 ? 'ai-warn' : 'ai-bad');
 
             const last3 = yearlyData.slice(-3);
             const last3Avg = last3.length ? Math.round(last3.reduce((s, y) => s + y.ratio, 0) / last3.length) : 0;
             last3Ratio.innerText = `${last3Avg}%`;
             last3RatioText.innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+            setAiCardMood('ai_card_last3_ratio', last3Avg >= 80 ? 'ai-good' : last3Avg >= 55 ? 'ai-warn' : 'ai-bad');
 
             let monthlyAverage = 0;
             if (paymentRows.length > 0) {
-                const monthsSet = new Set(paymentRows.map(r => {
-                    const d = new Date(r.date);
-                    return `${d.getFullYear()}-${d.getMonth()}`;
-                }));
+                const monthsSet = new Set(paymentRows.map(r => { const d = new Date(r.date); return `${d.getFullYear()}-${d.getMonth()}`; }));
                 const totalPaidPayments = paymentRows.reduce((s, r) => s + toNumber(r.credit), 0);
                 monthlyAverage = monthsSet.size ? Math.round(totalPaidPayments / monthsSet.size) : 0;
             }
@@ -1313,24 +1048,16 @@
                 closeEstimate.innerText = 'غير واضح';
                 closeEstimateText.innerText = 'لا توجد دفعات كافية لتقدير مدة الإغلاق';
             }
+            setAiCardMood('ai_card_close_estimate', currentBalance <= 0 ? 'ai-good' : monthlyAverage > 0 ? 'ai-warn' : 'ai-bad');
 
-            let behaviorTitle = 'سلوك مستقر';
-            let behaviorText = 'الدفع يسير بشكل متوازن نسبياً';
-            if (monthsWithoutPayment >= 3) {
-                behaviorTitle = 'انقطاع واضح';
-                behaviorText = 'هناك فترة توقف ملحوظة عن الدفع';
-            } else if (last3.length >= 3 && last3[2].ratio < last3[1].ratio && last3[1].ratio < last3[0].ratio) {
-                behaviorTitle = 'اتجاه هابط';
-                behaviorText = 'نسبة الالتزام تتراجع عبر السنوات الأخيرة';
-            } else if (last3.length >= 3 && last3[2].ratio > last3[1].ratio && last3[1].ratio > last3[0].ratio) {
-                behaviorTitle = 'تحسن تدريجي';
-                behaviorText = 'هناك تحسن واضح في الالتزام';
-            } else if (Math.abs(last3Avg - regularityScore) >= 15) {
-                behaviorTitle = 'تذبذب';
-                behaviorText = 'الأداء غير ثابت ويحتاج مراقبة';
-            }
+            let behaviorTitle = 'سلوك مستقر', behaviorText = 'الدفع يسير بشكل متوازن نسبياً';
+            if (monthsWithoutPayment >= 3) { behaviorTitle = 'انقطاع واضح'; behaviorText = 'هناك فترة توقف ملحوظة عن الدفع'; }
+            else if (last3.length >= 3 && last3[2].ratio < last3[1].ratio && last3[1].ratio < last3[0].ratio) { behaviorTitle = 'اتجاه هابط'; behaviorText = 'نسبة الالتزام تتراجع عبر السنوات الأخيرة'; }
+            else if (last3.length >= 3 && last3[2].ratio > last3[1].ratio && last3[1].ratio > last3[0].ratio) { behaviorTitle = 'تحسن تدريجي'; behaviorText = 'هناك تحسن واضح في الالتزام'; }
+            else if (Math.abs(last3Avg - regularityScore) >= 15) { behaviorTitle = 'تذبذب'; behaviorText = 'الأداء غير ثابت ويحتاج مراقبة'; }
             behaviorAlert.innerText = behaviorTitle;
             behaviorAlertText.innerText = behaviorText;
+            setAiCardMood('ai_card_behavior', behaviorTitle === 'تحسن تدريجي' || behaviorTitle === 'سلوك مستقر' ? 'ai-good' : behaviorTitle === 'تذبذب' ? 'ai-warn' : 'ai-bad');
 
             if (finalScore < 50) {
                 recommendation.innerText = 'إنذار أقوى';
@@ -1342,47 +1069,48 @@
                 recommendation.innerText = 'حالة جيدة';
                 recommendationText.innerText = 'الحساب مغطى بشكل جيد حالياً.';
             }
+            setAiCardMood('ai_card_recommendation', finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
+
+            const nextPaymentProbability = Math.max(5, Math.min(95, Math.round(finalScore * 0.55 + recentScore * 0.25 + Math.min(last3Avg,100) * 0.20 - monthsWithoutPayment * 6)));
+            nextPayEl.innerText = `${nextPaymentProbability}%`;
+            if (nextPaymentProbability >= 75) nextPayText.innerText = 'احتمال جيد لحدوث دفعة في الشهر القادم';
+            else if (nextPaymentProbability >= 50) nextPayText.innerText = 'الاحتمال متوسط ويحتاج متابعة';
+            else nextPayText.innerText = 'الاحتمال ضعيف حالياً';
+            setAiCardMood('ai_card_next_payment', nextPaymentProbability >= 75 ? 'ai-good' : nextPaymentProbability >= 50 ? 'ai-warn' : 'ai-bad');
+
+            const defaultProbability = Math.max(5, Math.min(95, 100 - nextPaymentProbability + (currentBalance > 1000 ? 10 : 0) + (monthsWithoutPayment >= 3 ? 10 : 0)));
+            defaultEl.innerText = `${defaultProbability}%`;
+            if (defaultProbability >= 70) defaultText.innerText = 'خطر تعثر مرتفع ويحتاج متابعة مباشرة';
+            else if (defaultProbability >= 45) defaultText.innerText = 'خطر متوسط ويحتاج مراقبة';
+            else defaultText.innerText = 'خطر تعثر منخفض';
+            setAiCardMood('ai_card_default_probability', defaultProbability < 45 ? 'ai-good' : defaultProbability < 70 ? 'ai-warn' : 'ai-bad');
 
             const flags = [];
             if (monthsWithoutPayment >= 3) flags.push({ text: 'لا توجد دفعات حديثة', cls: 'flag-danger' });
             if (currentBalance > 1000) flags.push({ text: 'رصيد مرتفع', cls: 'flag-warning' });
             if (last3Avg < 55) flags.push({ text: 'ضعف في الالتزام', cls: 'flag-danger' });
-            if (finalScore >= 85) flags.push({ text: 'سلوك ممتاز', cls: 'flag-success' });
+            if (nextPaymentProbability >= 75) flags.push({ text: 'فرصة سداد جيدة', cls: 'flag-success' });
+            if (defaultProbability >= 70) flags.push({ text: 'خطر تعثر', cls: 'flag-danger' });
             if (!flags.length) flags.push({ text: 'مخاطر منخفضة', cls: 'flag-success' });
-
             flagsBox.innerHTML = flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
+            setAiCardMood('ai_card_flags', flags.some(f => f.cls === 'flag-danger') ? 'ai-bad' : flags.some(f => f.cls === 'flag-warning') ? 'ai-warn' : 'ai-good');
         }
 
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
-
             const amount = formatCurrency(tenant.currentBalance);
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('ar-JO');
-
             if (type === 'first') {
-                return `نود لفت عنايتكم الكريمة بوجود رصيد مستحق على حسابكم بقيمة ${amount}. يرجى التكرم بتسوية هذا المبلغ في أقرب وقت ممكن لضمان تحديث سجلاتكم المالية لدينا.
-
-شاكرين لكم حسن تعاونكم،`;
+                return `نود لفت عنايتكم الكريمة بوجود رصيد مستحق على حسابكم بقيمة ${amount}. يرجى التكرم بتسوية هذا المبلغ في أقرب وقت ممكن لضمان تحديث سجلاتكم المالية لدينا.\n\nشاكرين لكم حسن تعاونكم،`;
             }
-
             if (type === 'second') {
-                return `إشارة إلى تذكيرنا السابق بخصوص الأرصدة المالية، يرجى العلم بأن الرصيد المستحق في كشف حسابكم والبالغ ${amount} لا يزال معلقاً حتى تاريخه.
-
-نرجو منكم التكرم بالمبادرة بتسديد المبلغ المطلوب خلال 48 ساعة، وذلك لتجنب تراكم الأرصدة وضمان تحديث سجلاتكم المالية لدينا بشكل دقيق.`;
+                return `إشارة إلى تذكيرنا السابق بخصوص الأرصدة المالية، يرجى العلم بأن الرصيد المستحق في كشف حسابكم والبالغ ${amount} لا يزال معلقاً حتى تاريخه.\n\nنرجو منكم التكرم بالمبادرة بتسديد المبلغ المطلوب خلال 48 ساعة، وذلك لتجنب تراكم الأرصدة وضمان تحديث سجلاتكم المالية لدينا بشكل دقيق.`;
             }
-
             if (type === 'third') {
-                return `إشعار نهائي بخصوص الذمم المستحقة
-
-يؤسفنا إبلاغكم بأنه وبالرغم من المخاطبات المتكررة، لم يتم تسوية الرصيد المستحق على ذمتكم لصالح مجمع جبري والبالغ ${amount}.
-
-وعليه، نرجو منكم مراجعة الإدارة للسداد الفوري في موعد أقصاه ${dueDateText}، لتجنب اضطرارنا لاتخاذ الإجراءات الإدارية والقانونية المنصوص عليها في عقد الإيجار، بما في ذلك تحويل المطالبة للقضاء أو وقف الخدمات.
-
-نأمل تعاونكم لإنهاء هذا الملف ودياً.`;
+                return `إشعار نهائي بخصوص الذمم المستحقة\n\nيؤسفنا إبلاغكم بأنه وبالرغم من المخاطبات المتكررة، لم يتم تسوية الرصيد المستحق على ذمتكم لصالح مجمع جبري والبالغ ${amount}.\n\nوعليه، نرجو منكم مراجعة الإدارة للسداد الفوري في موعد أقصاه ${dueDateText}، لتجنب اضطرارنا لاتخاذ الإجراءات الإدارية والقانونية المنصوص عليها في عقد الإيجار، بما في ذلك تحويل المطالبة للقضاء أو وقف الخدمات.\n\nنأمل تعاونكم لإنهاء هذا الملف ودياً.`;
             }
-
             return '';
         }
 
@@ -1391,73 +1119,34 @@
             const type = document.getElementById('notification_type').value;
             const titleInput = document.getElementById('notification_title');
             const messageInput = document.getElementById('notification_message');
-            const preview = document.getElementById('notification_preview');
-
-            if (!tenant || !type) {
-                preview.innerText = 'اختر المستأجر وموضوع الإشعار لعرض النص هنا';
-                return;
-            }
-
-            if (type === 'first') {
-                titleInput.value = 'الإنذار الأولى';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'second') {
-                titleInput.value = 'الإنذار الثانية';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'third') {
-                titleInput.value = 'الإنذار الثالثة';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'general') {
+            if (!tenant || !type) return;
+            if (type === 'first') { titleInput.value = 'الإنذار الأولى'; messageInput.value = buildNotificationText(type, tenant); }
+            else if (type === 'second') { titleInput.value = 'الإنذار الثانية'; messageInput.value = buildNotificationText(type, tenant); }
+            else if (type === 'third') { titleInput.value = 'الإنذار الثالثة'; messageInput.value = buildNotificationText(type, tenant); }
+            else if (type === 'general') {
                 titleInput.value = 'رسالة عامة';
-                if (!messageInput.value || messageInput.dataset.generated === 'true') {
-                    messageInput.value = '';
-                }
+                if (!messageInput.value || messageInput.dataset.generated === 'true') messageInput.value = '';
             }
-
             messageInput.dataset.generated = (type !== 'general') ? 'true' : 'false';
-            preview.innerText = messageInput.value || 'اكتب نص الرسالة العامة هنا';
         }
 
         async function submitTransaction() {
             const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
             const desc = document.getElementById('tx_desc').value;
-
-            if (!code || !desc || !date) {
-                return alert('أكمل البيانات');
-            }
-
-            const { error } = await supabaseClient.from('tenant_transactions').insert([{
-                tenant_code: code,
-                date,
-                description: desc,
-                debit: toNumber(document.getElementById('tx_debit').value) || null,
-                credit: toNumber(document.getElementById('tx_credit').value) || null,
-                receipt_no: document.getElementById('tx_receipt').value || null
-            }]);
-
-            if (!error) {
-                alert('تم الحفظ');
-                clearForm();
-                refreshDashboard();
-            } else {
-                alert('حدث خطأ أثناء الحفظ');
-            }
+            if (!code || !desc || !date) return alert('أكمل البيانات');
+            const { error } = await supabaseClient.from('tenant_transactions').insert([{ tenant_code: code, date, description: desc, debit: toNumber(document.getElementById('tx_debit').value) || null, credit: toNumber(document.getElementById('tx_credit').value) || null, receipt_no: document.getElementById('tx_receipt').value || null }]);
+            if (!error) { alert('تم الحفظ'); clearForm(); refreshDashboard(); }
+            else alert('حدث خطأ أثناء الحفظ');
         }
 
         async function refreshDashboard() {
             document.getElementById('loader').style.display = 'flex';
-
             try {
                 await loadData();
-
                 const s = document.getElementById('tenant_select');
-                s.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t =>
-                    `<option value="${t.tenant_code}">${t.tenant_name}</option>`
-                ).join('');
-
+                s.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name}</option>`).join('');
                 updateGlobalKpis();
-
                 const code = allTenants[0]?.tenant_code;
                 if (code) {
                     s.value = code;
@@ -1477,9 +1166,7 @@
         }
 
         function clearForm() {
-            ['tx_desc', 'tx_debit', 'tx_credit', 'tx_receipt'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
+            ['tx_desc', 'tx_debit', 'tx_credit', 'tx_receipt'].forEach(id => { document.getElementById(id).value = ''; });
         }
 
         function logoutAdmin() {
@@ -1489,15 +1176,9 @@
 
         function openTenantStatement() {
             const code = document.getElementById('tenant_select').value;
-
-            if (!code) {
-                alert('اختر المستأجر أولاً');
-                return;
-            }
-
+            if (!code) return alert('اختر المستأجر أولاً');
             localStorage.setItem('jabri_tenant_code', code);
             localStorage.setItem('jabri_admin_session', 'active');
-
             window.open('statement.html', '_blank');
         }
 
@@ -1506,80 +1187,41 @@
             const type = document.getElementById('notification_type').value;
             const title = document.getElementById('notification_title').value.trim();
             const message = document.getElementById('notification_message').value.trim();
-
-            if (!tenant) {
-                alert('اختر المستأجر أولاً');
-                return;
-            }
-
-            if (!type) {
-                alert('اختر موضوع الإشعار');
-                return;
-            }
-
-            if (!title) {
-                alert('أدخل عنوان الإشعار');
-                return;
-            }
-
-            if (!message) {
-                alert('أدخل نص الإشعار');
-                return;
-            }
-
-            const payload = {
-                tenant_code: tenant.tenant_code,
-                title,
-                message,
-                type,
-                is_read: false,
-                created_at: new Date().toISOString()
-            };
-
-            const { error } = await supabaseClient
-                .from('tenant_notifications')
-                .insert([payload]);
-
+            if (!tenant) return alert('اختر المستأجر أولاً');
+            if (!type) return alert('اختر موضوع الإشعار');
+            if (!title) return alert('أدخل عنوان الإشعار');
+            if (!message) return alert('أدخل نص الإشعار');
+            const payload = { tenant_code: tenant.tenant_code, title, message, type, is_read: false, created_at: new Date().toISOString() };
+            const { error } = await supabaseClient.from('tenant_notifications').insert([payload]);
             if (error) {
                 console.error(error);
                 alert('حدث خطأ أثناء إرسال الإشعار');
                 return;
             }
-
             alert('تم إرسال الإشعار بنجاح ✔️');
             document.getElementById('notification_type').value = '';
             document.getElementById('notification_title').value = '';
             document.getElementById('notification_message').value = '';
-            document.getElementById('notification_preview').innerText = 'اختر موضوع الإشعار لعرض النص هنا';
         }
 
         window.onload = async () => {
             document.body.style.opacity = '1';
             document.getElementById('tx_date').valueAsDate = new Date();
-
             await refreshDashboard();
-
             document.getElementById('tenant_select').addEventListener('change', function() {
                 const t = tenantBalances.find(x => x.tenant_code === this.value);
                 updateTenantKpis(t);
                 updateLastSeen(t);
                 renderAiTenantBox(t);
                 drawPredictionChart(t);
-
                 if (t) {
                     drawCollectionChart(t.totalCredit, (toNumber(t.previous_balance) + t.totalDebit) - t.totalCredit);
                     drawMonthlyChart(t);
                 }
-
                 updateNotificationComposer();
                 document.getElementById('statementBtn').disabled = !this.value;
             });
-
             document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
-            document.getElementById('notification_message').addEventListener('input', () => {
-                document.getElementById('notification_preview').innerText =
-                    document.getElementById('notification_message').value || 'اكتب نص الرسالة العامة هنا';
-            });
         };
     </script>
 </body>
