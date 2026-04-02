@@ -177,8 +177,34 @@
             align-items:end;
         }
 
-        .tenant-select-grid .field{
-            min-width:0;
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+
+        .field label{
+            font-size:11px;
+            font-weight:800;
+            color:#8b6a3a;
+            padding-right:4px;
+        }
+
+        input, select, textarea{
+            width:100%;
+            border-radius:16px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,0.84);
+            padding:14px 15px;
+            font-size:14px;
+            font-weight:700;
+            outline:none;
+        }
+
+        textarea{
+            min-height:150px;
+            resize:vertical;
+            line-height:1.9;
         }
 
         .last-seen-chip{
@@ -219,16 +245,319 @@
             text-align:center;
         }
 
-        .prediction-box{
-            text-align:center;
-            font-weight:800;
-            margin-bottom:10px;
+        .smart-ai-box{
+            margin-top:14px;
+            padding:16px;
+            border-radius:22px;
+            background:rgba(255,255,255,0.76);
+            border:1px solid var(--line);
+        }
+
+        .smart-ai-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+            flex-wrap:wrap;
+        }
+
+        .smart-ai-badge{
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+            border:1px solid transparent;
+        }
+
+        .badge-excellent{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .badge-good{
+            color:#8b6a3a;
+            background:rgba(201,164,107,0.14);
+            border-color:rgba(201,164,107,0.22);
+        }
+
+        .badge-watch{
+            color:var(--warning);
+            background:rgba(215,146,31,0.12);
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .badge-risk{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .hero-ai-card{
+            border-radius:24px;
+            padding:22px;
+            margin-bottom:14px;
+            background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(247,244,236,0.92));
+            border:1px solid rgba(201,164,107,0.20);
+            box-shadow:var(--soft-shadow);
+            display:grid;
+            grid-template-columns:1.2fr .8fr;
+            gap:14px;
+            align-items:center;
+        }
+
+        .hero-ai-main{
+            min-width:0;
+        }
+
+        .hero-ai-title{
             font-size:14px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:6px;
+        }
+
+        .hero-ai-score{
+            font-size:36px;
+            font-weight:900;
+            color:#4e3c24;
+            line-height:1.1;
+            margin-bottom:8px;
+        }
+
+        .hero-ai-desc{
+            font-size:14px;
+            font-weight:800;
+            color:#6b4f2b;
+            line-height:1.8;
+        }
+
+        .hero-ai-side{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        .hero-mini{
+            border-radius:18px;
+            padding:14px;
+            text-align:center;
+            background:#fff;
+            border:1px solid var(--line);
+        }
+
+        .hero-mini span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:4px;
+        }
+
+        .hero-mini b{
+            display:block;
+            font-size:20px;
+            color:#4e3c24;
+            font-weight:900;
+            line-height:1.35;
+        }
+
+        .hero-mini.good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .hero-mini.warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .hero-mini.bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .quick-ai-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:12px;
+            margin-bottom:14px;
+        }
+
+        .quick-ai-card{
+            border-radius:20px;
+            padding:16px;
+            text-align:center;
+            background:#fff;
+            border:1px solid var(--line);
+            box-shadow:var(--soft-shadow);
+            min-height:165px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .quick-ai-card span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:6px;
+        }
+
+        .quick-ai-card b{
+            display:block;
+            font-size:24px;
+            color:#4e3c24;
+            font-weight:900;
+            line-height:1.4;
+            margin-bottom:6px;
+        }
+
+        .quick-ai-card small{
+            display:block;
+            font-size:12px;
+            line-height:1.7;
+            color:#6b4f2b;
+            font-weight:700;
+        }
+
+        .ai-good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .ai-warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .ai-bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .ai-neutral{
+            background:#fff;
+        }
+
+        .insight-list{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            margin-bottom:12px;
+        }
+
+        .insight-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:14px 16px;
+            border-radius:18px;
+            background:#fff;
+            border:1px solid var(--line);
+            box-shadow:var(--soft-shadow);
+        }
+
+        .insight-row-content{
+            min-width:0;
+        }
+
+        .insight-row-content span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:4px;
+        }
+
+        .insight-row-content b{
+            display:block;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+            margin-bottom:4px;
+            line-height:1.4;
+        }
+
+        .insight-row-content small{
+            display:block;
+            font-size:12px;
+            line-height:1.7;
+            color:#6b4f2b;
+            font-weight:700;
+        }
+
+        .insight-dot{
+            width:14px;
+            height:14px;
+            border-radius:50%;
+            flex-shrink:0;
+            box-shadow:0 0 0 6px rgba(0,0,0,0.03);
+        }
+
+        .dot-good{ background:var(--success); }
+        .dot-warn{ background:var(--warning); }
+        .dot-bad{ background:var(--danger); }
+
+        .flags-strip{
+            padding:14px;
+            border-radius:18px;
+            background:rgba(255,255,255,0.74);
+            border:1px solid var(--line);
+        }
+
+        .flags-strip-title{
+            font-size:12px;
+            font-weight:900;
+            color:#6b4f2b;
+            margin-bottom:10px;
+            text-align:center;
+        }
+
+        .risk-flags{
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            justify-content:center;
+        }
+
+        .risk-flag{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:7px 12px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            color:#6b4f2b;
+            background:rgba(201,164,107,0.10);
+            border:1px solid rgba(201,164,107,0.18);
+        }
+
+        .flag-danger{
+            color:var(--danger);
+            background:rgba(209,77,77,0.10);
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .flag-warning{
+            color:var(--warning);
+            background:rgba(215,146,31,0.10);
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .flag-success{
+            color:var(--success);
+            background:rgba(21,154,111,0.10);
+            border-color:rgba(21,154,111,0.18);
         }
 
         .kpi-grid{
             display:grid;
-            grid-template-columns:repeat(3,1fr);
+            grid-template-columns:repeat(4,1fr);
             gap:14px;
             margin-bottom:18px;
         }
@@ -250,19 +579,8 @@
             overflow:hidden;
         }
 
-        .kpi-card:hover,
-        .smart-ai-card:hover{
+        .kpi-card:hover{
             transform:translateY(-2px);
-            box-shadow:0 16px 34px rgba(87,68,37,0.12);
-        }
-
-        .kpi-card::before,
-        .smart-ai-card::before{
-            content:"";
-            position:absolute;
-            inset:0;
-            background:radial-gradient(circle at top right, rgba(255,255,255,0.22), transparent 30%);
-            pointer-events:none;
         }
 
         .kpi-head span{
@@ -320,40 +638,23 @@
             height:280px !important;
         }
 
-        .field{
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-        }
-
-        .field label{
-            font-size:11px;
+        .prediction-box{
+            text-align:center;
             font-weight:800;
-            color:#8b6a3a;
-            padding-right:4px;
-        }
-
-        input, select, textarea{
-            width:100%;
-            border-radius:16px;
-            border:1px solid var(--line);
-            background:rgba(255,255,255,0.84);
-            padding:14px 15px;
+            margin-bottom:10px;
             font-size:14px;
-            font-weight:700;
-            outline:none;
-        }
-
-        textarea{
-            min-height:150px;
-            resize:vertical;
-            line-height:1.9;
         }
 
         .form-grid{
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:12px;
+        }
+
+        .notify-builder{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:14px;
         }
 
         .status-msg{
@@ -392,182 +693,28 @@
             animation:spin 1s linear infinite;
         }
 
-        .smart-ai-box{
-            margin-top:14px;
-            padding:16px;
-            border-radius:20px;
-            background:rgba(255,255,255,0.76);
-            border:1px solid var(--line);
-        }
-
-        .smart-ai-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-            margin-bottom:14px;
-            flex-wrap:wrap;
-        }
-
-        .smart-ai-badge{
-            padding:8px 14px;
-            border-radius:999px;
-            font-size:12px;
-            font-weight:900;
-            border:1px solid transparent;
-        }
-
-        .badge-excellent{
-            color:var(--success);
-            background:rgba(21,154,111,0.12);
-            border-color:rgba(21,154,111,0.18);
-        }
-
-        .badge-good{
-            color:#8b6a3a;
-            background:rgba(201,164,107,0.14);
-            border-color:rgba(201,164,107,0.22);
-        }
-
-        .badge-watch{
-            color:var(--warning);
-            background:rgba(215,146,31,0.12);
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .badge-risk{
-            color:var(--danger);
-            background:rgba(209,77,77,0.12);
-            border-color:rgba(209,77,77,0.18);
-        }
-
-        .smart-ai-grid{
-            display:grid;
-            grid-template-columns:repeat(3, 1fr);
-            gap:12px;
-        }
-
-        .smart-ai-card{
-            padding:14px;
-            border-radius:20px;
-            border:1px solid var(--line);
-            text-align:center;
-            background:#fff;
-            transition:.2s ease;
-            aspect-ratio:1/1;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            position:relative;
-            overflow:hidden;
-            box-shadow:var(--soft-shadow);
-        }
-
-        .smart-ai-card.primary-card{
-            border-width:1.5px;
-            box-shadow:0 18px 38px rgba(87,68,37,0.12);
-        }
-
-        .smart-ai-card.ai-good{
-            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.94));
-            border-color:rgba(21,154,111,0.18);
-        }
-
-        .smart-ai-card.ai-warn{
-            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.94));
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .smart-ai-card.ai-bad{
-            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.94));
-            border-color:rgba(209,77,77,0.18);
-        }
-
-        .smart-ai-card.ai-neutral{
-            background:#fff;
-        }
-
-        .smart-ai-card span{
-            display:block;
-            font-size:11px;
-            color:var(--muted);
-            font-weight:800;
-            margin-bottom:6px;
-        }
-
-        .smart-ai-card b{
-            display:block;
-            font-size:18px;
-            color:#4e3c24;
-            font-weight:900;
-            margin-bottom:6px;
-            line-height:1.35;
-        }
-
-        .smart-ai-card small{
-            display:block;
-            font-size:11px;
-            line-height:1.7;
-            color:#6b4f2b;
-            font-weight:700;
-            max-width:100%;
-        }
-
-        .risk-flags{
-            display:flex;
-            flex-wrap:wrap;
-            gap:8px;
-            margin-top:8px;
-            justify-content:center;
-            align-items:center;
-        }
-
-        .risk-flag{
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            padding:7px 12px;
-            border-radius:999px;
-            font-size:11px;
-            font-weight:900;
-            color:#6b4f2b;
-            background:rgba(201,164,107,0.10);
-            border:1px solid rgba(201,164,107,0.18);
-        }
-
-        .flag-danger{
-            color:var(--danger);
-            background:rgba(209,77,77,0.10);
-            border-color:rgba(209,77,77,0.18);
-        }
-
-        .flag-warning{
-            color:var(--warning);
-            background:rgba(215,146,31,0.10);
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .flag-success{
-            color:var(--success);
-            background:rgba(21,154,111,0.10);
-            border-color:rgba(21,154,111,0.18);
-        }
-
-        .notify-builder{
-            display:grid;
-            grid-template-columns:1fr;
-            gap:14px;
-        }
-
         @keyframes spin{
             to{ transform:rotate(360deg); }
         }
 
-        @media (max-width: 1100px){
-            .smart-ai-grid,
+        @media (max-width: 1200px){
+            .quick-ai-grid,
             .kpi-grid{
                 grid-template-columns:repeat(2,1fr);
+            }
+
+            .hero-ai-card{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 900px){
+            .insight-list{
+                grid-template-columns:1fr;
+            }
+
+            .chart-grid{
+                grid-template-columns:1fr;
             }
         }
 
@@ -587,25 +734,24 @@
             .form-grid{
                 grid-template-columns:1fr;
             }
-
-            .chart-grid{
-                grid-template-columns:1fr;
-            }
         }
 
         @media (max-width: 560px){
-            .smart-ai-grid,
+            .quick-ai-grid,
             .kpi-grid{
                 grid-template-columns:1fr 1fr;
             }
 
-            .smart-ai-card,
-            .kpi-card{
-                aspect-ratio:1/1;
+            .quick-ai-card{
+                min-height:150px;
             }
 
-            .smart-ai-card b{
-                font-size:16px;
+            .hero-ai-score{
+                font-size:30px;
+            }
+
+            .quick-ai-card b{
+                font-size:20px;
             }
 
             .kpi-value{
@@ -654,71 +800,98 @@
                     <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
 
-                <div class="smart-ai-grid">
-                    <div class="smart-ai-card primary-card" id="ai_card_score">
-                        <span>التقييم الذكي</span>
-                        <b id="ai_score_value">0 / 100</b>
-                        <small id="ai_score_text">—</small>
+                <div class="hero-ai-card" id="hero_ai_card">
+                    <div class="hero-ai-main">
+                        <div class="hero-ai-title">التقييم الذكي</div>
+                        <div class="hero-ai-score" id="ai_score_value">0 / 100</div>
+                        <div class="hero-ai-desc" id="ai_score_text">—</div>
                     </div>
 
-                    <div class="smart-ai-card primary-card" id="ai_card_next_payment">
-                        <span>احتمال السداد الشهر القادم</span>
-                        <b id="ai_next_payment_probability">0%</b>
-                        <small id="ai_next_payment_probability_text">—</small>
-                    </div>
+                    <div class="hero-ai-side">
+                        <div class="hero-mini" id="hero_next_payment_card">
+                            <span>احتمال السداد الشهر القادم</span>
+                            <b id="ai_next_payment_probability">0%</b>
+                        </div>
 
-                    <div class="smart-ai-card primary-card" id="ai_card_default_probability">
-                        <span>احتمال التعثر</span>
-                        <b id="ai_default_probability">0%</b>
-                        <small id="ai_default_probability_text">—</small>
+                        <div class="hero-mini" id="hero_default_card">
+                            <span>احتمال التعثر</span>
+                            <b id="ai_default_probability">0%</b>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="smart-ai-card" id="ai_card_type">
+                <div class="quick-ai-grid">
+                    <div class="quick-ai-card" id="ai_card_type">
                         <span>نوع المستأجر</span>
                         <b id="ai_tenant_type">—</b>
                         <small id="ai_tenant_type_text">—</small>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_last_payment">
+                    <div class="quick-ai-card" id="ai_card_last_payment">
                         <span>آخر دفعة</span>
                         <b id="ai_last_payment">—</b>
                         <small id="ai_last_payment_text">—</small>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_months_without_payment">
+                    <div class="quick-ai-card" id="ai_card_months_without_payment">
                         <span>أشهر بدون دفعات</span>
                         <b id="ai_months_without_payment">0</b>
                         <small id="ai_months_without_payment_text">—</small>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_last3_ratio">
+                    <div class="quick-ai-card" id="ai_card_last3_ratio">
                         <span>التزام آخر 3 سنوات</span>
                         <b id="ai_last3_ratio">0%</b>
                         <small id="ai_last3_ratio_text">—</small>
                     </div>
+                </div>
 
-                    <div class="smart-ai-card" id="ai_card_close_estimate">
-                        <span>إغلاق الرصيد المتوقع</span>
-                        <b id="ai_close_estimate">—</b>
-                        <small id="ai_close_estimate_text">—</small>
+                <div class="insight-list">
+                    <div class="insight-row" id="ai_row_close_estimate">
+                        <div class="insight-row-content">
+                            <span>إغلاق الرصيد المتوقع</span>
+                            <b id="ai_close_estimate">—</b>
+                            <small id="ai_close_estimate_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_behavior">
-                        <span>تنبيه سلوكي</span>
-                        <b id="ai_behavior_alert">—</b>
-                        <small id="ai_behavior_alert_text">—</small>
+                    <div class="insight-row" id="ai_row_behavior">
+                        <div class="insight-row-content">
+                            <span>تنبيه سلوكي</span>
+                            <b id="ai_behavior_alert">—</b>
+                            <small id="ai_behavior_alert_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_behavior"></div>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_recommendation">
-                        <span>التوصية</span>
-                        <b id="ai_recommendation">—</b>
-                        <small id="ai_recommendation_text">—</small>
+                    <div class="insight-row" id="ai_row_recommendation">
+                        <div class="insight-row-content">
+                            <span>التوصية</span>
+                            <b id="ai_recommendation">—</b>
+                            <small id="ai_recommendation_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-good" id="dot_recommendation"></div>
                     </div>
 
-                    <div class="smart-ai-card" id="ai_card_flags">
-                        <span>أعلام المخاطر</span>
-                        <div class="risk-flags" id="ai_risk_flags"></div>
+                    <div class="insight-row" id="ai_row_probabilities">
+                        <div class="insight-row-content">
+                            <span>الاحتمالات</span>
+                            <b id="ai_probability_summary">—</b>
+                            <small id="ai_probability_summary_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_probability_summary"></div>
                     </div>
+                </div>
+
+                <div class="flags-strip">
+                    <div class="flags-strip-title">أعلام المخاطر</div>
+                    <div class="risk-flags" id="ai_risk_flags"></div>
+                </div>
+
+                <div style="display:none;">
+                    <small id="ai_next_payment_probability_text">—</small>
+                    <small id="ai_default_probability_text">—</small>
                 </div>
             </div>
         </section>
@@ -853,13 +1026,9 @@
                 const progress = Math.min(elapsed / duration, 1);
                 const value = start + (end - start) * progress;
 
-                if (isPercent) {
-                    el.innerText = `${Math.round(value)}%`;
-                } else if (isCurrency) {
-                    el.innerText = formatCurrency(value);
-                } else {
-                    el.innerText = Math.round(value).toLocaleString('en-US');
-                }
+                if (isPercent) el.innerText = `${Math.round(value)}%`;
+                else if (isCurrency) el.innerText = formatCurrency(value);
+                else el.innerText = Math.round(value).toLocaleString('en-US');
 
                 if (progress < 1) requestAnimationFrame(update);
             }
@@ -881,23 +1050,25 @@
             else el.classList.add('number-bad');
         }
 
-        function applyStatusColors(ratio) {
-            const cards = document.querySelectorAll('.kpi-card, .smart-ai-card');
-            let color = '#d7921f';
-
-            if (ratio >= 80) color = '#159a6f';
-            else if (ratio < 55) color = '#d14d4d';
-
-            cards.forEach(card => {
-                card.style.boxShadow = `0 12px 26px ${color}10`;
-            });
+        function setMoodClass(el, mood) {
+            if (!el) return;
+            el.classList.remove('ai-good', 'ai-warn', 'ai-bad', 'ai-neutral', 'good', 'warn', 'bad');
+            if (mood === 'ai-good' || mood === 'good') {
+                el.classList.add(el.classList.contains('hero-mini') ? 'good' : 'ai-good');
+            } else if (mood === 'ai-warn' || mood === 'warn') {
+                el.classList.add(el.classList.contains('hero-mini') ? 'warn' : 'ai-warn');
+            } else if (mood === 'ai-bad' || mood === 'bad') {
+                el.classList.add(el.classList.contains('hero-mini') ? 'bad' : 'ai-bad');
+            } else {
+                el.classList.add('ai-neutral');
+            }
         }
 
-        function setAiCardMood(id, mood) {
+        function setDotMood(id, mood) {
             const el = document.getElementById(id);
             if (!el) return;
-            el.classList.remove('ai-good', 'ai-warn', 'ai-bad', 'ai-neutral');
-            el.classList.add(mood || 'ai-neutral');
+            el.classList.remove('dot-good', 'dot-warn', 'dot-bad');
+            el.classList.add(mood === 'good' ? 'dot-good' : mood === 'bad' ? 'dot-bad' : 'dot-warn');
         }
 
         function updateCommitment(totalDebit, totalCredit) {
@@ -915,8 +1086,6 @@
             if (ratio >= 80) el.style.color = '#159a6f';
             else if (ratio >= 55) el.style.color = '#d7921f';
             else el.style.color = '#d14d4d';
-
-            applyStatusColors(ratio);
         }
 
         function updateSmartAlert(yearlyData) {
@@ -956,7 +1125,6 @@
             }
 
             const d = new Date(raw);
-
             if (isNaN(d.getTime())) {
                 chip.innerText = 'لا يوجد آخر ظهور';
                 return;
@@ -1210,8 +1378,8 @@
                 const mTx = allTransactions.filter(tx => {
                     const txDate = new Date(tx.date);
                     return tx.tenant_code === tenant.tenant_code &&
-                           txDate.getMonth() === d.getMonth() &&
-                           txDate.getFullYear() === d.getFullYear();
+                        txDate.getMonth() === d.getMonth() &&
+                        txDate.getFullYear() === d.getFullYear();
                 });
 
                 debits.push(mTx.reduce((s, t) => s + toNumber(t.debit), 0));
@@ -1223,18 +1391,8 @@
                 data: {
                     labels,
                     datasets: [
-                        {
-                            label: 'مدين',
-                            data: debits,
-                            borderColor: '#c9a46b',
-                            tension: 0.35
-                        },
-                        {
-                            label: 'دائن',
-                            data: credits,
-                            borderColor: '#159a6f',
-                            tension: 0.35
-                        }
+                        { label: 'مدين', data: debits, borderColor: '#c9a46b', tension: 0.35 },
+                        { label: 'دائن', data: credits, borderColor: '#159a6f', tension: 0.35 }
                     ]
                 },
                 options: {
@@ -1276,36 +1434,40 @@
             const defaultEl = document.getElementById('ai_default_probability');
             const defaultText = document.getElementById('ai_default_probability_text');
             const flagsBox = document.getElementById('ai_risk_flags');
+            const probabilitySummary = document.getElementById('ai_probability_summary');
+            const probabilitySummaryText = document.getElementById('ai_probability_summary_text');
 
             if (!tenant) {
                 badge.innerText = '—';
                 badge.className = 'smart-ai-badge badge-good';
-                scoreValue.innerText = '0 / 100'; scoreText.innerText = '—';
-                tenantType.innerText = '—'; tenantTypeText.innerText = '—';
-                lastPayment.innerText = '—'; lastPaymentText.innerText = '—';
-                monthsNoPay.innerText = '0'; monthsNoPayText.innerText = '—';
-                last3Ratio.innerText = '0%'; last3RatioText.innerText = '—';
-                closeEstimate.innerText = '—'; closeEstimateText.innerText = '—';
-                behaviorAlert.innerText = '—'; behaviorAlertText.innerText = '—';
-                recommendation.innerText = '—'; recommendationText.innerText = '—';
-                nextPayEl.innerText = '0%'; nextPayText.innerText = '—';
-                defaultEl.innerText = '0%'; defaultText.innerText = '—';
+                scoreValue.innerText = '0 / 100';
+                scoreText.innerText = '—';
+                tenantType.innerText = '—';
+                tenantTypeText.innerText = '—';
+                lastPayment.innerText = '—';
+                lastPaymentText.innerText = '—';
+                monthsNoPay.innerText = '0';
+                monthsNoPayText.innerText = '—';
+                last3Ratio.innerText = '0%';
+                last3RatioText.innerText = '—';
+                closeEstimate.innerText = '—';
+                closeEstimateText.innerText = '—';
+                behaviorAlert.innerText = '—';
+                behaviorAlertText.innerText = '—';
+                recommendation.innerText = '—';
+                recommendationText.innerText = '—';
+                nextPayEl.innerText = '0%';
+                nextPayText.innerText = '—';
+                defaultEl.innerText = '0%';
+                defaultText.innerText = '—';
+                probabilitySummary.innerText = '—';
+                probabilitySummaryText.innerText = '—';
                 flagsBox.innerHTML = '';
 
-                [
-                    'ai_card_score',
-                    'ai_card_type',
-                    'ai_card_last_payment',
-                    'ai_card_months_without_payment',
-                    'ai_card_last3_ratio',
-                    'ai_card_close_estimate',
-                    'ai_card_behavior',
-                    'ai_card_recommendation',
-                    'ai_card_next_payment',
-                    'ai_card_default_probability',
-                    'ai_card_flags'
-                ].forEach(id => setAiCardMood(id, 'ai-neutral'));
-
+                ['ai_card_type','ai_card_last_payment','ai_card_months_without_payment','ai_card_last3_ratio'].forEach(id => setMoodClass(document.getElementById(id), 'ai-neutral'));
+                setMoodClass(document.getElementById('hero_next_payment_card'), 'warn');
+                setMoodClass(document.getElementById('hero_default_card'), 'warn');
+                ['dot_close_estimate','dot_behavior','dot_recommendation','dot_probability_summary'].forEach(id => setDotMood(id, 'warn'));
                 return;
             }
 
@@ -1325,7 +1487,6 @@
             let recentScore = 0;
             if (lastPaymentRow?.date) {
                 const diffDays = Math.max(0, Math.round((new Date() - new Date(lastPaymentRow.date)) / 86400000));
-
                 if (diffDays <= 30) recentScore = 100;
                 else if (diffDays <= 60) recentScore = 80;
                 else if (diffDays <= 90) recentScore = 65;
@@ -1360,7 +1521,6 @@
             badge.className = `smart-ai-badge ${badgeClass}`;
             scoreValue.innerText = `${finalScore} / 100`;
             scoreText.innerText = badgeDesc;
-            setAiCardMood('ai_card_score', finalScore >= 85 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
             let typeLabel = 'متذبذب', typeText = 'سلوكه يحتاج مراقبة';
             if (finalScore >= 85) {
@@ -1379,7 +1539,7 @@
 
             tenantType.innerText = typeLabel;
             tenantTypeText.innerText = typeText;
-            setAiCardMood('ai_card_type', finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
+            setMoodClass(document.getElementById('ai_card_type'), finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
             if (lastPaymentRow?.date) {
                 lastPayment.innerText = `${new Date(lastPaymentRow.date).toLocaleDateString('ar-JO')} • ${formatCurrency(lastPaymentRow.credit)}`;
@@ -1389,19 +1549,18 @@
                 lastPayment.innerText = 'لا توجد دفعات';
                 lastPaymentText.innerText = 'لم يتم تسجيل أي دفعة حتى الآن';
             }
-
-            setAiCardMood('ai_card_last_payment', lastPaymentRow ? 'ai-good' : 'ai-bad');
+            setMoodClass(document.getElementById('ai_card_last_payment'), lastPaymentRow ? 'ai-good' : 'ai-bad');
 
             const monthsWithoutPayment = lastPaymentRow?.date ? (monthsSince(lastPaymentRow.date) ?? 0) : yearlyData.length ? 12 : 0;
             monthsNoPay.innerText = `${monthsWithoutPayment}`;
             monthsNoPayText.innerText = monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `انقطاع عن الدفع منذ ${monthsWithoutPayment} شهر`;
-            setAiCardMood('ai_card_months_without_payment', monthsWithoutPayment <= 1 ? 'ai-good' : monthsWithoutPayment <= 3 ? 'ai-warn' : 'ai-bad');
+            setMoodClass(document.getElementById('ai_card_months_without_payment'), monthsWithoutPayment <= 1 ? 'ai-good' : monthsWithoutPayment <= 3 ? 'ai-warn' : 'ai-bad');
 
             const last3 = yearlyData.slice(-3);
             const last3Avg = last3.length ? Math.round(last3.reduce((s, y) => s + y.ratio, 0) / last3.length) : 0;
             last3Ratio.innerText = `${last3Avg}%`;
             last3RatioText.innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
-            setAiCardMood('ai_card_last3_ratio', last3Avg >= 80 ? 'ai-good' : last3Avg >= 55 ? 'ai-warn' : 'ai-bad');
+            setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Avg >= 80 ? 'ai-good' : last3Avg >= 55 ? 'ai-warn' : 'ai-bad');
 
             let monthlyAverage = 0;
             if (paymentRows.length > 0) {
@@ -1413,52 +1572,60 @@
                 monthlyAverage = monthsSet.size ? Math.round(totalPaidPayments / monthsSet.size) : 0;
             }
 
+            let closeMood = 'warn';
             if (currentBalance <= 0) {
                 closeEstimate.innerText = 'مغلق';
                 closeEstimateText.innerText = 'لا يوجد رصيد يحتاج إغلاق';
+                closeMood = 'good';
             } else if (monthlyAverage > 0) {
                 const monthsToClose = Math.ceil(currentBalance / monthlyAverage);
                 closeEstimate.innerText = monthsToClose <= 12 ? `${monthsToClose} شهر` : 'أكثر من 12 شهر';
                 closeEstimateText.innerText = `بناءً على متوسط دفع شهري ${formatCurrency(monthlyAverage)}`;
+                closeMood = monthsToClose <= 4 ? 'good' : monthsToClose <= 12 ? 'warn' : 'bad';
             } else {
                 closeEstimate.innerText = 'غير واضح';
                 closeEstimateText.innerText = 'لا توجد دفعات كافية لتقدير مدة الإغلاق';
+                closeMood = 'bad';
             }
+            setDotMood('dot_close_estimate', closeMood);
 
-            setAiCardMood('ai_card_close_estimate', currentBalance <= 0 ? 'ai-good' : monthlyAverage > 0 ? 'ai-warn' : 'ai-bad');
-
-            let behaviorTitle = 'سلوك مستقر', behaviorText = 'الدفع يسير بشكل متوازن نسبياً';
-
+            let behaviorTitle = 'سلوك مستقر', behaviorText = 'الدفع يسير بشكل متوازن نسبياً', behaviorMood = 'good';
             if (monthsWithoutPayment >= 3) {
                 behaviorTitle = 'انقطاع واضح';
                 behaviorText = 'هناك فترة توقف ملحوظة عن الدفع';
+                behaviorMood = 'bad';
             } else if (last3.length >= 3 && last3[2].ratio < last3[1].ratio && last3[1].ratio < last3[0].ratio) {
                 behaviorTitle = 'اتجاه هابط';
                 behaviorText = 'نسبة الالتزام تتراجع عبر السنوات الأخيرة';
+                behaviorMood = 'bad';
             } else if (last3.length >= 3 && last3[2].ratio > last3[1].ratio && last3[1].ratio > last3[0].ratio) {
                 behaviorTitle = 'تحسن تدريجي';
                 behaviorText = 'هناك تحسن واضح في الالتزام';
+                behaviorMood = 'good';
             } else if (Math.abs(last3Avg - regularityScore) >= 15) {
                 behaviorTitle = 'تذبذب';
                 behaviorText = 'الأداء غير ثابت ويحتاج مراقبة';
+                behaviorMood = 'warn';
             }
-
             behaviorAlert.innerText = behaviorTitle;
             behaviorAlertText.innerText = behaviorText;
-            setAiCardMood('ai_card_behavior', behaviorTitle === 'تحسن تدريجي' || behaviorTitle === 'سلوك مستقر' ? 'ai-good' : behaviorTitle === 'تذبذب' ? 'ai-warn' : 'ai-bad');
+            setDotMood('dot_behavior', behaviorMood);
 
+            let recommendationMood = 'warn';
             if (finalScore < 50) {
                 recommendation.innerText = 'إنذار أقوى';
                 recommendationText.innerText = 'يناسب إرسال الإنذار الثانية أو الثالثة حسب الموقف.';
+                recommendationMood = 'bad';
             } else if (currentBalance > 0) {
                 recommendation.innerText = 'متابعة مالية';
                 recommendationText.innerText = `يوجد رصيد متبقٍ بقيمة ${formatCurrency(currentBalance)} ويحتاج متابعة.`;
+                recommendationMood = 'warn';
             } else {
                 recommendation.innerText = 'حالة جيدة';
                 recommendationText.innerText = 'الحساب مغطى بشكل جيد حالياً.';
+                recommendationMood = 'good';
             }
-
-            setAiCardMood('ai_card_recommendation', finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
+            setDotMood('dot_recommendation', recommendationMood);
 
             const nextPaymentProbability = Math.max(
                 5,
@@ -1472,8 +1639,7 @@
             if (nextPaymentProbability >= 75) nextPayText.innerText = 'احتمال جيد لحدوث دفعة في الشهر القادم';
             else if (nextPaymentProbability >= 50) nextPayText.innerText = 'الاحتمال متوسط ويحتاج متابعة';
             else nextPayText.innerText = 'الاحتمال ضعيف حالياً';
-
-            setAiCardMood('ai_card_next_payment', nextPaymentProbability >= 75 ? 'ai-good' : nextPaymentProbability >= 50 ? 'ai-warn' : 'ai-bad');
+            setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
 
             const defaultProbability = Math.max(
                 5,
@@ -1487,8 +1653,13 @@
             if (defaultProbability >= 70) defaultText.innerText = 'خطر تعثر مرتفع ويحتاج متابعة مباشرة';
             else if (defaultProbability >= 45) defaultText.innerText = 'خطر متوسط ويحتاج مراقبة';
             else defaultText.innerText = 'خطر تعثر منخفض';
+            setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
 
-            setAiCardMood('ai_card_default_probability', defaultProbability < 45 ? 'ai-good' : defaultProbability < 70 ? 'ai-warn' : 'ai-bad');
+            probabilitySummary.innerText = `سداد ${nextPaymentProbability}% • تعثر ${defaultProbability}%`;
+            probabilitySummaryText.innerText = nextPaymentProbability >= defaultProbability
+                ? 'فرصة السداد أعلى من خطر التعثر حالياً'
+                : 'خطر التعثر أعلى من فرصة السداد حالياً';
+            setDotMood('dot_probability_summary', nextPaymentProbability >= defaultProbability ? 'good' : defaultProbability >= 70 ? 'bad' : 'warn');
 
             const flags = [];
             if (monthsWithoutPayment >= 3) flags.push({ text: 'لا توجد دفعات حديثة', cls: 'flag-danger' });
@@ -1499,7 +1670,6 @@
             if (!flags.length) flags.push({ text: 'مخاطر منخفضة', cls: 'flag-success' });
 
             flagsBox.innerHTML = flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
-            setAiCardMood('ai_card_flags', flags.some(f => f.cls === 'flag-danger') ? 'ai-bad' : flags.some(f => f.cls === 'flag-warning') ? 'ai-warn' : 'ai-good');
         }
 
         function buildNotificationText(type, tenant) {
