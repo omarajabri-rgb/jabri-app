@@ -620,16 +620,10 @@
                 const credit = toNumber(row.credit);
 
                 if (isCarryRow(desc)) {
-                    return {
-                        ...row,
-                        debit,
-                        credit,
-                        balance: running,
-                        isClosed: running <= 0
-                    };
+                    running += debit;
+                } else {
+                    running = running + debit - credit;
                 }
-
-                running = running + debit - credit;
 
                 return {
                     ...row,
@@ -696,6 +690,7 @@
 
             years.forEach(year => {
                 const rows = grouped[year] || [];
+                const hasCarryRow = rows.some(r => isCarryRow(r.description || ''));
 
                 const openingRows = rows
                     .filter(r =>
@@ -718,7 +713,6 @@
                         const orderB = getOpeningOrder(descB);
 
                         if (orderA !== orderB) return orderA - orderB;
-
                         return new Date(a.date) - new Date(b.date);
                     });
 
@@ -730,12 +724,10 @@
                     )
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                const yearRows = [
-                    ...openingRows,
-                    ...paymentRows
-                ];
+                const yearRows = [...openingRows, ...paymentRows];
+                const initialBalance = hasCarryRow ? 0 : carryBalance;
 
-                let items = calculateRunningBalance(yearRows, carryBalance);
+                let items = calculateRunningBalance(yearRows, initialBalance);
 
                 items = items.map((item, idx) => {
                     const desc = (item.description || '').trim();
@@ -757,7 +749,7 @@
                     };
                 });
 
-                const finalBalance = items.length ? items[items.length - 1].balance : carryBalance;
+                const finalBalance = items.length ? items[items.length - 1].balance : initialBalance;
                 const totalCredit = items.reduce((sum, r) => sum + toNumber(r.credit), 0);
 
                 let status = { text: 'متأخر', className: 'status-late', chip: 'late' };
