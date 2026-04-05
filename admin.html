@@ -991,7 +991,7 @@
         const { createClient } = supabase;
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'YOUR_SUPABASE_ANON_KEY'
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
         let allTenants = [], allTransactions = [], tenantBalances = [];
@@ -1167,10 +1167,13 @@
         }
 
         async function loadData() {
-            const [{ data: tenants }, { data: transactions }] = await Promise.all([
+            const [{ data: tenants, error: tenantsError }, { data: transactions, error: txError }] = await Promise.all([
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
                 supabaseClient.from('tenant_transactions').select('*').order('date')
             ]);
+
+            if (tenantsError) console.error('tenants error:', tenantsError);
+            if (txError) console.error('transactions error:', txError);
 
             allTenants = tenants || [];
             allTransactions = transactions || [];
@@ -1786,6 +1789,7 @@
                 clearForm();
                 refreshDashboard(code);
             } else {
+                console.error(error);
                 alert('حدث خطأ أثناء الحفظ');
             }
         }
@@ -1800,7 +1804,7 @@
                 const selectedCode = preselectedCode || s.value || allTenants[0]?.tenant_code || '';
 
                 s.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `
-                    <option value="${t.tenant_code}">${t.tenant_name}</option>
+                    <option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>
                 `).join('');
 
                 if (selectedCode) {
@@ -1811,7 +1815,7 @@
                     updateLastSeen(t);
                     renderAiTenantBox(t);
                     drawPredictionChart(t);
-                    drawCollectionChart(t.totalCredit, t.currentBalance);
+                    drawCollectionChart(t?.totalCredit || 0, t?.currentBalance || 0);
                     drawMonthlyChart(t);
                     updateNotificationComposer();
                     document.getElementById('statementBtn').disabled = false;
@@ -1902,6 +1906,8 @@
                 if (t) {
                     drawCollectionChart(t.totalCredit, t.currentBalance);
                     drawMonthlyChart(t);
+                } else {
+                    drawCollectionChart(0, 0);
                 }
 
                 updateNotificationComposer();
