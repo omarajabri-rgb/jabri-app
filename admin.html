@@ -557,7 +557,7 @@
 
         .kpi-grid{
             display:grid;
-            grid-template-columns:repeat(4,1fr);
+            grid-template-columns:repeat(2,1fr);
             gap:14px;
             margin-bottom:18px;
         }
@@ -737,9 +737,12 @@
         }
 
         @media (max-width: 560px){
-            .quick-ai-grid,
-            .kpi-grid{
+            .quick-ai-grid{
                 grid-template-columns:1fr 1fr;
+            }
+
+            .kpi-grid{
+                grid-template-columns:1fr;
             }
 
             .quick-ai-card{
@@ -897,11 +900,6 @@
         </section>
 
         <section class="kpi-grid">
-            <div class="kpi-card good-card" id="kpi_card_debit">
-                <div class="kpi-head"><span>إجمالي المدين</span></div>
-                <div class="kpi-value" id="kpi_total_debit">0</div>
-            </div>
-
             <div class="kpi-card warn-card" id="kpi_card_credit">
                 <div class="kpi-head"><span>إجمالي الدائن</span></div>
                 <div class="kpi-value" id="kpi_total_credit">0</div>
@@ -910,11 +908,6 @@
             <div class="kpi-card bad-card" id="kpi_card_balance">
                 <div class="kpi-head"><span>الرصيد المتبقي</span></div>
                 <div class="kpi-value" id="kpi_total_balance">0</div>
-            </div>
-
-            <div class="kpi-card warn-card" id="kpi_card_ratio">
-                <div class="kpi-head"><span>نسبة السداد</span></div>
-                <div class="kpi-value" id="kpi_total_ratio">0%</div>
             </div>
         </section>
 
@@ -1213,16 +1206,12 @@
         }
 
         function updateTenantKpis(tenant) {
-            const debitEl = document.getElementById('kpi_total_debit');
             const creditEl = document.getElementById('kpi_total_credit');
             const balanceEl = document.getElementById('kpi_total_balance');
-            const ratioEl = document.getElementById('kpi_total_ratio');
 
             if (!tenant) {
-                debitEl.innerText = '0';
-                creditEl.innerText = '0';
-                balanceEl.innerText = '0';
-                ratioEl.innerText = '0%';
+                if (creditEl) creditEl.innerText = '0';
+                if (balanceEl) balanceEl.innerText = '0';
                 document.getElementById('commitment_score').innerText = 'نسبة الالتزام: 0%';
                 return;
             }
@@ -1232,12 +1221,13 @@
             const bal = Math.max(0, totalDebit - paid);
             const ratio = totalDebit > 0 ? Math.round((paid / totalDebit) * 100) : 0;
 
-            animateValue(debitEl, 0, totalDebit, 900, false, true);
-            animateValue(creditEl, 0, paid, 900, false, true);
-            animateValue(balanceEl, 0, bal, 900, false, true);
-            animateValue(ratioEl, 0, Math.min(Math.max(ratio, 0), 100), 900, true, false);
+            if (creditEl) animateValue(creditEl, 0, paid, 900, false, true);
+            if (balanceEl) animateValue(balanceEl, 0, bal, 900, false, true);
 
-            [debitEl, creditEl, balanceEl, ratioEl].forEach(el => applySmartNumberColorByRatio(el, ratio));
+            [creditEl, balanceEl].forEach(el => {
+                if (el) applySmartNumberColorByRatio(el, ratio);
+            });
+
             updateCommitment(totalDebit, paid);
         }
 
@@ -1333,17 +1323,17 @@
             if (collectionChart) collectionChart.destroy();
 
             const paid = toNumber(totalCredit);
-            const total = paid + Math.max(0, toNumber(totalBalance));
+            const remaining = Math.max(0, toNumber(totalBalance));
+            const total = paid + remaining;
             const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
-            let color = ratio >= 80 ? '#159a6f' : (ratio >= 55 ? '#d7921f' : '#d14d4d');
 
             collectionChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['المدفوع', 'المتبقي'],
                     datasets: [{
-                        data: [paid, Math.max(0, total - paid)],
-                        backgroundColor: [color, '#f0f0f0'],
+                        data: [paid, remaining],
+                        backgroundColor: ['#159a6f', '#d14d4d'],
                         borderWidth: 0
                     }]
                 },
