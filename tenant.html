@@ -28,8 +28,6 @@
             --glass-shadow: 0 12px 28px rgba(120,95,56,0.08);
             --glass-soft-shadow: 0 14px 30px rgba(120,95,56,0.08);
             --glass-blur: blur(14px);
-
-            --chip-inner-glow: inset 0 1px 0 rgba(255,255,255,0.45);
         }
 
         * {
@@ -174,7 +172,6 @@
             min-width: 100px;
             font-size: 12px;
             font-weight: 900;
-            letter-spacing: 0;
             color: var(--gold-deep);
             background: rgba(201,164,107,0.12);
             border: 1px solid rgba(201,164,107,0.22);
@@ -336,11 +333,24 @@
             background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
 
+        .notify-card.legal::before {
+            background: linear-gradient(90deg, transparent, #c95a52, transparent);
+        }
+
+        .notify-card.lawyer::before {
+            background: linear-gradient(90deg, transparent, #7a1f1f, transparent);
+        }
+
         .notify-title {
             font-size: 14px;
             font-weight: 900;
             margin-bottom: 6px;
             color: var(--gold-deep);
+        }
+
+        .notify-card.legal .notify-title,
+        .notify-card.lawyer .notify-title {
+            color: var(--danger);
         }
 
         .notify-message {
@@ -530,6 +540,7 @@
 
         let pieChartInstance = null;
         let timelineChartInstance = null;
+        const PROFILE_YEARS = new Set([2025, 2026]);
 
         function toNumber(v) {
             const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
@@ -559,24 +570,53 @@
             return isNaN(d) ? '-' : d.toLocaleDateString('en-GB');
         }
 
-        function daysBetween(a, b) {
-            const oneDay = 24 * 60 * 60 * 1000;
-            return Math.max(0, Math.round((b - a) / oneDay));
+        function formatNotificationDate(value) {
+            const d = new Date(value);
+            return isNaN(d)
+                ? ''
+                : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
         }
 
-        function getStatementYearAdvice(transactions, year = 2026) {
-            const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
-            const rentRow = yearRows.find(t => isRentRow(t.description || ''));
-            const feesRow = yearRows.find(t => isFeesRow(t.description || ''));
-            const carryRow = yearRows.find(t => isCarryRow(t.description || ''));
+        function getProfileTransactions(transactions) {
+            return (transactions || []).filter(t => {
+                const year = new Date(t.date).getFullYear();
+                return PROFILE_YEARS.has(year);
+            });
+        }
 
-            const yearlyRent = toNumber(rentRow?.debit);
-            const yearlyFees = toNumber(feesRow?.debit);
-            const previousBalance = toNumber(carryRow?.debit);
-            const monthlyBase = Math.round((yearlyRent + yearlyFees) / 12);
+        function getPriorityByType(type) {
+            if (type === 'lawyer') return 1;
+            if (type === 'legal') return 2;
+            if (type === 'third') return 3;
+            if (type === 'second') return 4;
+            if (type === 'first') return 5;
+            return 6;
+        }
+
+        function getStatementYearAdvice(transactions, balance) {
+            const filtered = getProfileTransactions(transactions);
+            const rentRows = filtered.filter(t => isRentRow(t.description || ''));
+            const feesRows = filtered.filter(t => isFeesRow(t.description || ''));
+            const carryRows = filtered.filter(t => isCarryRow(t.description || ''));
+
+            const yearlyRent = rentRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
+            const yearlyFees = feesRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
+            const previousBalance = carryRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
+
+            const totalYears = PROFILE_YEARS.size;
+            const monthlyBase = totalYears > 0 ? Math.round((yearlyRent + yearlyFees) / (12 * totalYears)) : 0;
 
             let suggestedMonthly = monthlyBase;
-            if (previousBalance > 0) {
+
+            if (balance > 0) {
+                if (balance <= 600) suggestedMonthly += 25;
+                else if (balance <= 1200) suggestedMonthly += 50;
+                else if (balance <= 1800) suggestedMonthly += 100;
+                else suggestedMonthly += 150;
+            } else if (previousBalance > 0) {
                 if (previousBalance <= 600) suggestedMonthly += 25;
                 else if (previousBalance <= 1200) suggestedMonthly += 50;
                 else if (previousBalance <= 1800) suggestedMonthly += 100;
@@ -586,9 +626,9 @@
             return { yearlyRent, yearlyFees, previousBalance, monthlyBase, suggestedMonthly };
         }
 
-        function buildPredictionMeta(transactions, balance, year = 2026) {
-            const yearRows = (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
-            const payments = yearRows.filter(t => toNumber(t.credit) > 0);
+        function buildPredictionMeta(transactions, balance) {
+            const filtered = getProfileTransactions(transactions);
+            const payments = filtered.filter(t => toNumber(t.credit) > 0);
 
             if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
 
@@ -610,11 +650,11 @@
             return { level: 'weak', monthsToClose };
         }
 
-        function buildAdviceMessageFromStatement(transactions, balance, year = 2026) {
-            const advice = getStatementYearAdvice(transactions, year);
-            const prediction = buildPredictionMeta(transactions, balance, year);
+        function buildAdviceMessageFromStatement(transactions, balance) {
+            const advice = getStatementYearAdvice(transactions, balance);
+            const prediction = buildPredictionMeta(transactions, balance);
 
-            if (!advice.yearlyRent && !advice.yearlyFees) {
+            if (!advice.yearlyRent && !advice.yearlyFees && !balance) {
                 return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
             }
 
@@ -625,6 +665,10 @@
             else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
             else if (prediction.level === 'warning') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
             else if (prediction.level === 'weak') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
+
+            if (recommended <= 0 && balance <= 0) {
+                return 'الحساب ضمن وضع جيد حالياً، ولا يوجد رصيد متبقٍ يستدعي خطة سداد إضافية.';
+            }
 
             return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً
 سيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
@@ -661,32 +705,76 @@
             });
         }
 
-        function formatNotificationDate(value) {
-            const d = new Date(value);
-            return isNaN(d)
-                ? ''
-                : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+        async function deactivateExpiredNotifications() {
+            const nowIso = new Date().toISOString();
+
+            const { error } = await supabaseClient
+                .from('tenant_notifications')
+                .update({ is_active: false })
+                .eq('tenant_code', tenantCode)
+                .eq('is_active', true)
+                .not('expires_at', 'is', null)
+                .lt('expires_at', nowIso);
+
+            if (error) console.error('deactivateExpiredNotifications error:', error);
         }
 
-        async function loadNotifications() {
-            const box = document.getElementById('notifications_box');
+        async function fetchVisibleNotifications() {
+            const nowIso = new Date().toISOString();
 
             const { data, error } = await supabaseClient
                 .from('tenant_notifications')
                 .select('*')
                 .eq('tenant_code', tenantCode)
-                .order('created_at', { ascending: false })
-                .limit(5);
+                .eq('is_active', true);
 
-            if (error || !data || data.length === 0) {
+            if (error) {
+                console.error('fetchVisibleNotifications error:', error);
+                return [];
+            }
+
+            return (data || [])
+                .filter(item => {
+                    const notExpired = !item.expires_at || item.expires_at > nowIso;
+                    const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
+                    return notExpired && notHiddenAfterSeen;
+                })
+                .sort((a, b) => {
+                    const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
+                    if (priorityDiff !== 0) return priorityDiff;
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+        }
+
+        async function markNotificationsSeen(ids) {
+            if (!ids || !ids.length) return;
+
+            const nowIso = new Date().toISOString();
+
+            const { error } = await supabaseClient
+                .from('tenant_notifications')
+                .update({
+                    is_read: true,
+                    seen_at: nowIso
+                })
+                .in('id', ids);
+
+            if (error) console.error('markNotificationsSeen error:', error);
+        }
+
+        async function loadNotifications() {
+            const box = document.getElementById('notifications_box');
+
+            await deactivateExpiredNotifications();
+
+            const visibleBeforeSeen = await fetchVisibleNotifications();
+
+            if (!visibleBeforeSeen.length) {
                 box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
                 return;
             }
 
-            box.innerHTML = data.map(item => `
+            box.innerHTML = visibleBeforeSeen.map(item => `
                 <div class="notify-card ${item.type || 'normal'}">
                     ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
                     <div class="notify-message">${item.message || ''}</div>
@@ -694,36 +782,32 @@
                 </div>
             `).join('');
 
-            const unreadIds = data.filter(item => !item.is_read).map(item => item.id);
+            const unseenVisibleIds = visibleBeforeSeen
+                .filter(item => !item.seen_at || !item.is_read)
+                .map(item => item.id);
 
-            if (unreadIds.length > 0) {
-                await supabaseClient
-                    .from('tenant_notifications')
-                    .update({
-                        is_read: true,
-                        read_at: new Date().toISOString()
-                    })
-                    .in('id', unreadIds);
+            await markNotificationsSeen(unseenVisibleIds);
+
+            const visibleAfterSeen = await fetchVisibleNotifications();
+
+            if (!visibleAfterSeen.length) {
+                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
+                return;
             }
+
+            box.innerHTML = visibleAfterSeen.map(item => `
+                <div class="notify-card ${item.type || 'normal'}">
+                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
+                    <div class="notify-message">${item.message || ''}</div>
+                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
+                </div>
+            `).join('');
         }
 
-        function buildTimelineAnalyticsLast3Years(transactions) {
-            const sortedAll = [...(transactions || [])]
+        function buildTimelineAnalytics2025_2026(transactions) {
+            const filtered = [...getProfileTransactions(transactions)]
                 .filter(t => t?.date)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            const uniqueYears = [...new Set(
-                sortedAll
-                    .map(t => new Date(t.date).getFullYear())
-                    .filter(y => !isNaN(y))
-            )].sort((a, b) => a - b);
-
-            const lastYears = uniqueYears.slice(-3);
-
-            const filtered = sortedAll.filter(t => {
-                const y = new Date(t.date).getFullYear();
-                return lastYears.includes(y);
-            });
 
             let runningBalance = 0;
             const labels = [];
@@ -759,72 +843,71 @@
                 labels,
                 paymentSeries,
                 balanceSeries,
-                points,
-                visibleYears: lastYears
+                points
             };
         }
 
         function renderPieChart(paid, balance) {
-    const canvas = document.getElementById('balancePieChart');
+            const canvas = document.getElementById('balancePieChart');
 
-    if (pieChartInstance) pieChartInstance.destroy();
+            if (pieChartInstance) pieChartInstance.destroy();
 
-    const paidValue = Math.max(0, toNumber(paid));
-    const balanceValue = Math.max(0, toNumber(balance));
-    const total = paidValue + balanceValue;
-    const percentTarget = total > 0 ? Math.round((paidValue / total) * 100) : 0;
+            const paidValue = Math.max(0, toNumber(paid));
+            const balanceValue = Math.max(0, toNumber(balance));
+            const total = paidValue + balanceValue;
+            const percentTarget = total > 0 ? Math.round((paidValue / total) * 100) : 0;
 
-    pieChartInstance = new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: ['مدفوع', 'متبقي'],
-            datasets: [{
-                data: [paidValue, balanceValue],
-                backgroundColor: ['#2f9e6f', '#c95a52'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '75%',
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 1500,
-                easing: 'easeOutQuart'
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        },
-        plugins: [{
-            id: 'centerText',
-            beforeDraw(chart) {
-                const { width, height, ctx } = chart;
+            pieChartInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مدفوع', 'متبقي'],
+                    datasets: [{
+                        data: [paidValue, balanceValue],
+                        backgroundColor: ['#2f9e6f', '#c95a52'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const { width, height, ctx } = chart;
 
-                if (typeof chart._animatedValue !== 'number') {
-                    chart._animatedValue = 0;
-                }
+                        if (typeof chart._animatedValue !== 'number') {
+                            chart._animatedValue = 0;
+                        }
 
-                chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
-                const currentValue = Math.round(chart._animatedValue);
+                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
+                        const currentValue = Math.round(chart._animatedValue);
 
-                ctx.save();
-                ctx.font = 'bold 52px Tajawal';
-                ctx.fillStyle = '#2f2a24';
-                ctx.textBaseline = 'middle';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${currentValue}%`, width / 2, height / 2 - 8);
-                ctx.restore();
+                        ctx.save();
+                        ctx.font = 'bold 52px Tajawal';
+                        ctx.fillStyle = '#2f2a24';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${currentValue}%`, width / 2, height / 2 - 8);
+                        ctx.restore();
 
-                if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
-                    requestAnimationFrame(() => chart.draw());
-                }
-            }
-        }]
-    });
-}
+                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
+                            requestAnimationFrame(() => chart.draw());
+                        }
+                    }
+                }]
+            });
+        }
 
         function renderTimelineChart(analytics) {
             const canvas = document.getElementById('timelineChart');
@@ -952,47 +1035,49 @@
 
         async function init() {
             try {
-                const { data: tenant } = await supabaseClient
+                const { data: tenant, error: tenantError } = await supabaseClient
                     .from('tenants')
                     .select('*')
                     .eq('tenant_code', tenantCode)
                     .maybeSingle();
 
-                const { data: tx } = await supabaseClient
+                const { data: tx, error: txError } = await supabaseClient
                     .from('tenant_transactions')
                     .select('*')
                     .eq('tenant_code', tenantCode)
                     .order('date', { ascending: true });
 
-                const allTransactions = tx || [];
-                const tx2026 = allTransactions.filter(t => new Date(t.date).getFullYear() === 2026);
+                if (tenantError) console.error('tenant error:', tenantError);
+                if (txError) console.error('transactions error:', txError);
 
-                const daen2026 = tx2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
-                const debit2026 = tx2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
-                const balance2026 = Math.max(0, debit2026 - daen2026);
-                const rate = debit2026 > 0 ? Math.round((daen2026 / debit2026) * 100) : 0;
+                const allTransactions = tx || [];
+                const profileTransactions = getProfileTransactions(allTransactions);
+
+                const totalCredit = profileTransactions.reduce((sum, t) => sum + toNumber(t.credit), 0);
+                const totalDebit = profileTransactions.reduce((sum, t) => sum + toNumber(t.debit), 0);
+                const balance = Math.max(0, totalDebit - totalCredit);
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
                 document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
 
                 const chip = document.getElementById('account_status_chip');
-                chip.innerText = balance2026 === 0 ? '✔ مسدد' : '⚠ جزئي';
-                chip.className = balance2026 === 0 ? 'hero-status paid' : 'hero-status partial';
+                chip.innerText = balance === 0 ? '✔ مسدد' : '⚠ جزئي';
+                chip.className = balance === 0 ? 'hero-status paid' : 'hero-status partial';
 
-                animateNumber(document.getElementById('val_credit'), Math.round(daen2026));
-                animateNumber(document.getElementById('val_balance'), Math.round(balance2026));
-                animateNumber(document.getElementById('pie_paid_value'), Math.round(daen2026));
-                animateNumber(document.getElementById('pie_balance_value'), Math.round(balance2026));
+                animateNumber(document.getElementById('val_credit'), Math.round(totalCredit));
+                animateNumber(document.getElementById('val_balance'), Math.round(balance));
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(totalCredit));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(balance));
 
                 document.getElementById('smart_message').innerHTML =
-                    buildAdviceMessageFromStatement(allTransactions, balance2026, 2026);
+                    buildAdviceMessageFromStatement(allTransactions, balance);
 
                 animateHighlights();
                 await loadNotifications();
 
-                renderPieChart(daen2026, balance2026, rate);
+                renderPieChart(totalCredit, balance);
 
-                const timelineAnalytics = buildTimelineAnalyticsLast3Years(allTransactions);
+                const timelineAnalytics = buildTimelineAnalytics2025_2026(allTransactions);
                 renderTimelineChart(timelineAnalytics);
 
                 document.getElementById('loader').style.display = 'none';
