@@ -932,21 +932,17 @@
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
-                <div class="form-grid">
-                    <div class="field">
-                        <label>موضوع الإشعار</label>
-                        <select id="notification_type">
-                            <option value="">اختر موضوع الإشعار</option>
-                            <option value="first">الإنذار الأولى</option>
-                            <option value="second">الإنذار الثانية</option>
-                            <option value="third">الإنذار الثالثة</option>
-                            <option value="general">رسالة عامة</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>عنوان الإشعار</label>
-                        <input type="text" id="notification_title" placeholder="عنوان الإشعار" />
-                    </div>
+                <div class="field">
+                    <label>موضوع الإشعار</label>
+                    <select id="notification_type">
+                        <option value="">اختر موضوع الإشعار</option>
+                        <option value="first">الإنذار الأولى</option>
+                        <option value="second">الإنذار الثانية</option>
+                        <option value="third">الإنذار الثالثة</option>
+                        <option value="legal">إنذار عدلي</option>
+                        <option value="lawyer">تحويل للمحامي</option>
+                        <option value="general">رسالة عامة</option>
+                    </select>
                 </div>
 
                 <div class="field">
@@ -995,7 +991,7 @@
         const { createClient } = supabase;
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+            'YOUR_SUPABASE_ANON_KEY'
         );
 
         let allTenants = [], allTransactions = [], tenantBalances = [];
@@ -1015,7 +1011,7 @@
         }
 
         function formatCurrency(v) {
-            return formatNumber(v);
+            return `${formatNumber(v)} د.أ`;
         }
 
         function formatEnglishDate(dateStr) {
@@ -1046,13 +1042,7 @@
             const balance = Math.max(0, debit - credit);
             const ratio = debit > 0 ? Math.round((credit / debit) * 100) : 0;
 
-            return {
-                yearTx,
-                debit,
-                credit,
-                balance,
-                ratio
-            };
+            return { yearTx, debit, credit, balance, ratio };
         }
 
         function animateValue(el, start, end, duration = 900, isPercent = false, isCurrency = false) {
@@ -1065,7 +1055,7 @@
                 const value = start + (end - start) * progress;
 
                 if (isPercent) el.innerText = `${Math.round(value)}%`;
-                else if (isCurrency) el.innerText = formatCurrency(value);
+                else if (isCurrency) el.innerText = formatNumber(value);
                 else el.innerText = formatNumber(value);
 
                 if (progress < 1) requestAnimationFrame(update);
@@ -1566,7 +1556,7 @@
             setMoodClass(document.getElementById('ai_card_type'), finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
             if (lastPaymentRow?.date) {
-                lastPayment.innerText = `${formatEnglishDate(lastPaymentRow.date)} • ${formatCurrency(lastPaymentRow.credit)}`;
+                lastPayment.innerText = `${formatEnglishDate(lastPaymentRow.date)} • ${formatNumber(lastPaymentRow.credit)} د.أ`;
                 const monthsGap = monthsSince(lastPaymentRow.date);
                 lastPaymentText.innerText = monthsGap === 0 ? 'آخر دفعة هذا الشهر' : `آخر دفعة منذ ${monthsGap} شهر`;
             } else {
@@ -1604,7 +1594,7 @@
             } else if (monthlyAverage > 0) {
                 const monthsToClose = Math.ceil(currentBalance / monthlyAverage);
                 closeEstimate.innerText = monthsToClose <= 12 ? `${monthsToClose} شهر` : 'أكثر من 12 شهر';
-                closeEstimateText.innerText = `بناءً على متوسط دفع شهري ${formatCurrency(monthlyAverage)}`;
+                closeEstimateText.innerText = `بناءً على متوسط دفع شهري ${formatNumber(monthlyAverage)} د.أ`;
                 closeMood = monthsToClose <= 4 ? 'good' : monthsToClose <= 12 ? 'warn' : 'bad';
             } else {
                 closeEstimate.innerText = 'غير واضح';
@@ -1642,7 +1632,7 @@
                 recommendationMood = 'bad';
             } else if (currentBalance > 0) {
                 recommendation.innerText = 'متابعة مالية';
-                recommendationText.innerText = `يوجد رصيد متبقٍ بقيمة ${formatCurrency(currentBalance)} ويحتاج متابعة`;
+                recommendationText.innerText = `يوجد رصيد متبقٍ بقيمة ${formatNumber(currentBalance)} د.أ ويحتاج متابعة`;
                 recommendationMood = 'warn';
             } else {
                 recommendation.innerText = 'حالة جيدة';
@@ -1696,24 +1686,56 @@
             flagsBox.innerHTML = flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
 
+        function getNotificationTitle(type) {
+            if (type === 'first') return 'الإنذار الأولى';
+            if (type === 'second') return 'الإنذار الثانية';
+            if (type === 'third') return 'الإنذار الثالثة';
+            if (type === 'legal') return 'إنذار عدلي';
+            if (type === 'lawyer') return 'تحويل للمحامي';
+            return 'رسالة عامة';
+        }
+
+        function getNotificationLifetimeDays(type) {
+            if (type === 'first') return 5;
+            if (type === 'second') return 5;
+            if (type === 'third') return 10;
+            if (type === 'legal') return 15;
+            if (type === 'lawyer') return 30;
+            return 7;
+        }
+
+        function shouldHideAfterSeen(type) {
+            if (type === 'legal') return false;
+            if (type === 'lawyer') return false;
+            return true;
+        }
+
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
 
-            const amount = formatCurrency(tenant.currentBalance);
+            const amount = `${formatNumber(tenant.currentBalance)} د.أ`;
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
 
             if (type === 'first') {
-                return `نود لفت عنايتكم الكريمة بوجود رصيد مستحق على حسابكم بقيمة ${amount}. يرجى التكرم بتسوية هذا المبلغ في أقرب وقت ممكن لضمان تحديث سجلاتكم المالية لدينا.\n\nشاكرين لكم حسن تعاونكم،`;
+                return `نود إعلامكم بوجود رصيد مستحق عليكم بقيمة ${amount}، نرجو التكرم بتسديده في أقرب وقت ممكن.`;
             }
 
             if (type === 'second') {
-                return `إشارة إلى تذكيرنا السابق بخصوص الأرصدة المالية، يرجى العلم بأن الرصيد المستحق في كشف حسابكم والبالغ ${amount} لا يزال معلقاً حتى تاريخه.\n\nنرجو منكم التكرم بالمبادرة بتسديد المبلغ المطلوب خلال 48 ساعة، وذلك لتجنب تراكم الأرصدة وضمان تحديث سجلاتكم المالية لدينا بشكل دقيق.`;
+                return `إشارة إلى التذكير السابق، نرجو التكرم بتسديد الرصيد المستحق عليكم والبالغ ${amount} خلال 48 ساعة.`;
             }
 
             if (type === 'third') {
-                return `إشعار نهائي بخصوص الذمم المستحقة\n\nيؤسفنا إبلاغكم بأنه وبالرغم من المخاطبات المتكررة، لم يتم تسوية الرصيد المستحق على ذمتكم لصالح مجمع جبري والبالغ ${amount}.\n\nوعليه، نرجو منكم مراجعة الإدارة للسداد الفوري في موعد أقصاه ${dueDateText}، لتجنب اضطرارنا لاتخاذ الإجراءات الإدارية والقانونية المنصوص عليها في عقد الإيجار، بما في ذلك تحويل المطالبة للقضاء أو وقف الخدمات.\n\nنأمل تعاونكم لإنهاء هذا الملف ودياً.`;
+                return `إنذار نهائي: نرجو التكرم بتسديد الرصيد المستحق وقدره ${amount} قبل ${dueDateText} لتجنب الإجراءات القانونية.`;
+            }
+
+            if (type === 'legal') {
+                return `إنذار عدلي: نرجو تسديد الرصيد المستحق وقدره ${amount} خلال 48 ساعة من تاريخ هذا الإشعار، خلافاً لذلك سيتم اتخاذ الإجراءات القانونية.`;
+            }
+
+            if (type === 'lawyer') {
+                return `إشعار قانوني: تم تحويل ملفكم إلى المحامي المختص بخصوص الرصيد المستحق وقدره ${amount}، وسيتم استكمال الإجراءات القانونية حسب الأصول.`;
             }
 
             return '';
@@ -1722,26 +1744,25 @@
         function updateNotificationComposer() {
             const tenant = getSelectedTenant();
             const type = document.getElementById('notification_type').value;
-            const titleInput = document.getElementById('notification_title');
             const messageInput = document.getElementById('notification_message');
 
-            if (!tenant || !type) return;
-
-            if (type === 'first') {
-                titleInput.value = 'الإنذار الأولى';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'second') {
-                titleInput.value = 'الإنذار الثانية';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'third') {
-                titleInput.value = 'الإنذار الثالثة';
-                messageInput.value = buildNotificationText(type, tenant);
-            } else if (type === 'general') {
-                titleInput.value = 'رسالة عامة';
-                if (!messageInput.value || messageInput.dataset.generated === 'true') messageInput.value = '';
+            if (!type) {
+                messageInput.value = '';
+                return;
             }
 
-            messageInput.dataset.generated = (type !== 'general') ? 'true' : 'false';
+            if (type === 'general') {
+                if (!messageInput.value || messageInput.dataset.generated === 'true') {
+                    messageInput.value = '';
+                }
+                messageInput.dataset.generated = 'false';
+                return;
+            }
+
+            if (!tenant) return;
+
+            messageInput.value = buildNotificationText(type, tenant);
+            messageInput.dataset.generated = 'true';
         }
 
         async function submitTransaction() {
@@ -1825,13 +1846,17 @@
         async function sendNotification() {
             const tenant = getSelectedTenant();
             const type = document.getElementById('notification_type').value;
-            const title = document.getElementById('notification_title').value.trim();
             const message = document.getElementById('notification_message').value.trim();
 
             if (!tenant) return alert('اختر المستأجر أولاً');
             if (!type) return alert('اختر موضوع الإشعار');
-            if (!title) return alert('أدخل عنوان الإشعار');
             if (!message) return alert('أدخل نص الإشعار');
+
+            const title = getNotificationTitle(type);
+            const now = new Date();
+            const lifetimeDays = getNotificationLifetimeDays(type);
+            const expiresAt = new Date(now);
+            expiresAt.setDate(expiresAt.getDate() + lifetimeDays);
 
             const payload = {
                 tenant_code: tenant.tenant_code,
@@ -1839,7 +1864,11 @@
                 message,
                 type,
                 is_read: false,
-                created_at: new Date().toISOString()
+                is_active: true,
+                hide_after_seen: shouldHideAfterSeen(type),
+                seen_at: null,
+                created_at: now.toISOString(),
+                expires_at: expiresAt.toISOString()
             };
 
             const { error } = await supabaseClient.from('tenant_notifications').insert([payload]);
@@ -1852,8 +1881,8 @@
 
             alert('تم إرسال الإشعار بنجاح ✔️');
             document.getElementById('notification_type').value = '';
-            document.getElementById('notification_title').value = '';
             document.getElementById('notification_message').value = '';
+            document.getElementById('notification_message').dataset.generated = 'false';
         }
 
         window.onload = async () => {
