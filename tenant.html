@@ -540,7 +540,7 @@
 
         let pieChartInstance = null;
         let timelineChartInstance = null;
-        const PROFILE_YEARS = new Set([2025, 2026]);
+        const CHART_YEARS = new Set([2025, 2026]);
 
         function toNumber(v) {
             const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
@@ -580,11 +580,15 @@
                 });
         }
 
-        function getProfileTransactions(transactions) {
+        function getChartTransactions(transactions) {
             return (transactions || []).filter(t => {
                 const year = new Date(t.date).getFullYear();
-                return PROFILE_YEARS.has(year);
+                return CHART_YEARS.has(year);
             });
+        }
+
+        function getTransactionsByYear(transactions, year) {
+            return (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
         }
 
         function getPriorityByType(type) {
@@ -597,17 +601,27 @@
         }
 
         function getStatementYearAdvice(transactions, balance) {
-            const filtered = getProfileTransactions(transactions);
-            const rentRows = filtered.filter(t => isRentRow(t.description || ''));
-            const feesRows = filtered.filter(t => isFeesRow(t.description || ''));
-            const carryRows = filtered.filter(t => isCarryRow(t.description || ''));
+            const chartRows = getChartTransactions(transactions);
+            const rows2026 = getTransactionsByYear(transactions, 2026);
+
+            const rentRows = rows2026.filter(t => isRentRow(t.description || ''));
+            const feesRows = rows2026.filter(t => isFeesRow(t.description || ''));
+            const carryRows = rows2026.filter(t => isCarryRow(t.description || ''));
 
             const yearlyRent = rentRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
             const yearlyFees = feesRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
             const previousBalance = carryRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
 
-            const totalYears = PROFILE_YEARS.size;
-            const monthlyBase = totalYears > 0 ? Math.round((yearlyRent + yearlyFees) / (12 * totalYears)) : 0;
+            const payments2025_2026 = chartRows.filter(t => toNumber(t.credit) > 0);
+            const months = new Set(
+                payments2025_2026.map(t => {
+                    const d = new Date(t.date);
+                    return `${d.getFullYear()}-${d.getMonth()}`;
+                })
+            ).size;
+
+            const totalPaid = payments2025_2026.reduce((sum, row) => sum + toNumber(row.credit), 0);
+            const monthlyBase = months > 0 ? Math.round(totalPaid / months) : Math.round((yearlyRent + yearlyFees) / 12);
 
             let suggestedMonthly = monthlyBase;
 
@@ -627,7 +641,7 @@
         }
 
         function buildPredictionMeta(transactions, balance) {
-            const filtered = getProfileTransactions(transactions);
+            const filtered = getChartTransactions(transactions);
             const payments = filtered.filter(t => toNumber(t.credit) > 0);
 
             if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
@@ -805,7 +819,7 @@
         }
 
         function buildTimelineAnalytics2025_2026(transactions) {
-            const filtered = [...getProfileTransactions(transactions)]
+            const filtered = [...getChartTransactions(transactions)]
                 .filter(t => t?.date)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -1051,10 +1065,10 @@
                 if (txError) console.error('transactions error:', txError);
 
                 const allTransactions = tx || [];
-                const profileTransactions = getProfileTransactions(allTransactions);
+                const transactions2026 = getTransactionsByYear(allTransactions, 2026);
 
-                const totalCredit = profileTransactions.reduce((sum, t) => sum + toNumber(t.credit), 0);
-                const totalDebit = profileTransactions.reduce((sum, t) => sum + toNumber(t.debit), 0);
+                const totalCredit = transactions2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
+                const totalDebit = transactions2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
                 const balance = Math.max(0, totalDebit - totalCredit);
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
