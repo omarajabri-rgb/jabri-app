@@ -98,20 +98,9 @@
             min-height: 32px;
         }
 
-        .controls-bar {
-            display: flex;
-            gap: 12px;
-            align-items: stretch;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-        }
-
-        .filter-card,
-        .summary-strip,
         .search-card,
         .year-card,
-        .search-results-card,
-        .smart-note {
+        .search-results-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(247,244,237,0.74));
             border: 1px solid rgba(201,164,107,0.16);
             border-radius: 22px;
@@ -120,123 +109,17 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        .filter-card {
+        .search-card {
+            margin-bottom: 18px;
             padding: 14px;
-            min-width: 240px;
-            flex: 0 0 260px;
         }
 
-        .filter-card label,
         .search-title {
             display: block;
             margin-bottom: 8px;
             font-size: 12px;
             font-weight: 900;
             color: var(--muted);
-        }
-
-        .year-filter,
-        .search-input {
-            width: 100%;
-            height: 46px;
-            border-radius: 16px;
-            border: 1px solid rgba(201,164,107,0.20);
-            background: rgba(255,255,255,0.72);
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 900;
-            padding: 0 14px;
-            outline: none;
-        }
-
-        .year-filter {
-            cursor: pointer;
-        }
-
-        .summary-strip {
-            flex: 1;
-            padding: 12px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .summary-box {
-            padding: 14px;
-            border-radius: 18px;
-            text-align: center;
-            border: 1px solid rgba(201,164,107,0.18);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
-        }
-
-        .summary-box span {
-            display: block;
-            color: #7a6c59;
-            font-size: 11px;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .summary-box b {
-            display: block;
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        .summary-opening {
-            background: linear-gradient(135deg, rgba(201,164,107,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-debit {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-debit b { color: var(--danger); }
-
-        .summary-credit {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
-        }
-
-        .summary-credit b { color: var(--success); }
-
-        .summary-balance.ok {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
-        }
-
-        .summary-balance.due {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-balance.ok b { color: var(--success); }
-        .summary-balance.due b { color: var(--danger); }
-
-        .smart-note {
-            margin-bottom: 18px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .smart-note .note-main {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .smart-note .note-sub {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .search-card {
-            margin-bottom: 18px;
-            padding: 14px;
         }
 
         .search-row {
@@ -253,8 +136,16 @@
         }
 
         .search-input {
-            padding-right: 16px;
-            padding-left: 16px;
+            width: 100%;
+            height: 46px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.20);
+            background: rgba(255,255,255,0.72);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 900;
+            padding: 0 16px;
+            outline: none;
         }
 
         .search-btn,
@@ -528,6 +419,57 @@
             gap: 10px;
         }
 
+        .summary-box {
+            padding: 14px;
+            border-radius: 18px;
+            text-align: center;
+            border: 1px solid rgba(201,164,107,0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+        }
+
+        .summary-box span {
+            display: block;
+            color: #7a6c59;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .summary-box b {
+            display: block;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .summary-opening {
+            background: linear-gradient(135deg, rgba(201,164,107,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-debit {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-debit b { color: var(--danger); }
+
+        .summary-credit {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+        }
+
+        .summary-credit b { color: var(--success); }
+
+        .summary-balance.ok {
+            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+        }
+
+        .summary-balance.due {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-balance.ok b { color: var(--success); }
+        .summary-balance.due b { color: var(--danger); }
+
         .empty-state {
             border-radius: 24px;
             padding: 28px 18px;
@@ -583,16 +525,6 @@
         }
 
         @media screen and (max-width: 980px) {
-            .controls-bar {
-                flex-direction: column;
-            }
-
-            .filter-card {
-                min-width: 100%;
-                flex: 1 1 auto;
-            }
-
-            .summary-strip,
             .year-summary-only,
             .result-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -614,7 +546,6 @@
         }
 
         @media screen and (max-width: 560px) {
-            .summary-strip,
             .year-summary-only,
             .result-grid {
                 grid-template-columns: 1fr;
@@ -659,7 +590,6 @@
                 padding: 0 !important;
             }
 
-            .controls-bar,
             .year-card,
             .statement-header {
                 break-inside: avoid !important;
@@ -681,27 +611,8 @@
             </div>
         </div>
 
-        <div class="smart-note">
-            <div>
-                <div class="note-main">كشف الحساب الذكي السنوي</div>
-                <div class="note-sub">الملخص السنوي معتمد من النظام، ويمكنك البحث عن أي سند للتأكد أنه موجود ومحتسب.</div>
-            </div>
-            <span class="chip" id="smart_note_status">جاهز</span>
-        </div>
-
-        <div class="controls-bar">
-            <div class="filter-card">
-                <label for="year_filter">عرض السنة</label>
-                <select id="year_filter" class="year-filter">
-                    <option value="all">كل السنوات</option>
-                </select>
-            </div>
-
-            <div class="summary-strip" id="summary_strip"></div>
-        </div>
-
         <div class="search-card">
-            <div class="search-title">بحث ذكي عن السند أو الدفعة</div>
+            <div class="search-title">بحث عن السند أو الدفعة</div>
             <div class="search-row">
                 <div class="search-input-wrap">
                     <input
@@ -747,7 +658,6 @@
 
         let ALL_TRANSACTIONS = [];
         let ALL_SUMMARIES = [];
-        let YEARS = [];
 
         function toNumber(v) {
             return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
@@ -801,10 +711,6 @@
             return toNumber(balance) <= 0 ? 'ok' : 'due';
         }
 
-        function getSummaryByYear(year) {
-            return ALL_SUMMARIES.find(s => Number(s.year) === Number(year)) || null;
-        }
-
         function normalizeSearchText(value) {
             return String(value || '')
                 .trim()
@@ -830,80 +736,6 @@
                 .filter(Boolean);
 
             return fields.some(field => field.includes(q));
-        }
-
-        function getTransactionsByYear(year) {
-            return ALL_TRANSACTIONS.filter(t => {
-                const y = new Date(t.date).getFullYear();
-                return Number(y) === Number(year);
-            });
-        }
-
-        function populateYearFilter() {
-            const select = document.getElementById('year_filter');
-            select.innerHTML = `<option value="all">كل السنوات</option>`;
-
-            YEARS.forEach(year => {
-                const option = document.createElement('option');
-                option.value = String(year);
-                option.textContent = year;
-                select.appendChild(option);
-            });
-
-            select.addEventListener('change', renderView);
-        }
-
-        function updateSummaryStrip(selectedYear) {
-            const summaryStrip = document.getElementById('summary_strip');
-
-            if (selectedYear === 'all') {
-                const totalOpening = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.opening_balance), 0);
-                const totalDebit = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.total_debit), 0);
-                const totalCredit = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.total_credit), 0);
-                const latestSummary = [...ALL_SUMMARIES].sort((a, b) => Number(b.year) - Number(a.year))[0];
-                const finalBalance = latestSummary ? toNumber(latestSummary.final_balance) : 0;
-
-                summaryStrip.innerHTML = `
-                    <div class="summary-box summary-opening">
-                        <span>إجمالي الأرصدة السابقة</span>
-                        <b>${formatCurrency(totalOpening)}</b>
-                    </div>
-                    <div class="summary-box summary-debit">
-                        <span>إجمالي المدين</span>
-                        <b>${formatCurrency(totalDebit)}</b>
-                    </div>
-                    <div class="summary-box summary-credit">
-                        <span>إجمالي الدائن</span>
-                        <b>${formatCurrency(totalCredit)}</b>
-                    </div>
-                    <div class="summary-box summary-balance ${getBalanceBoxClass(finalBalance)}">
-                        <span>الرصيد الحالي</span>
-                        <b>${formatCurrency(finalBalance)}</b>
-                    </div>
-                `;
-                return;
-            }
-
-            const summary = getSummaryByYear(selectedYear);
-
-            summaryStrip.innerHTML = `
-                <div class="summary-box summary-opening">
-                    <span>الرصيد السابق</span>
-                    <b>${formatCurrency(summary?.opening_balance || 0)}</b>
-                </div>
-                <div class="summary-box summary-debit">
-                    <span>مدين السنة</span>
-                    <b>${formatCurrency(summary?.total_debit || 0)}</b>
-                </div>
-                <div class="summary-box summary-credit">
-                    <span>دائن السنة</span>
-                    <b>${formatCurrency(summary?.total_credit || 0)}</b>
-                </div>
-                <div class="summary-box summary-balance ${getBalanceBoxClass(summary?.final_balance || 0)}">
-                    <span>رصيد آخر السنة</span>
-                    <b>${formatCurrency(summary?.final_balance || 0)}</b>
-                </div>
-            `;
         }
 
         function buildYearCard(summary) {
@@ -946,31 +778,16 @@
 
         function renderView() {
             const container = document.getElementById('years_container');
-            const selectedYear = document.getElementById('year_filter').value;
 
-            updateSummaryStrip(selectedYear);
-            container.innerHTML = '';
-
-            if (selectedYear === 'all') {
-                if (!ALL_SUMMARIES.length) {
-                    container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
-                    return;
-                }
-
-                container.innerHTML = ALL_SUMMARIES
-                    .sort((a, b) => Number(a.year) - Number(b.year))
-                    .map(summary => buildYearCard(summary))
-                    .join('');
+            if (!ALL_SUMMARIES.length) {
+                container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
                 return;
             }
 
-            const summary = getSummaryByYear(selectedYear);
-            if (!summary) {
-                container.innerHTML = `<div class="empty-state">لا توجد بيانات لهذه السنة.</div>`;
-                return;
-            }
-
-            container.innerHTML = buildYearCard(summary);
+            container.innerHTML = [...ALL_SUMMARIES]
+                .sort((a, b) => Number(a.year) - Number(b.year))
+                .map(summary => buildYearCard(summary))
+                .join('');
         }
 
         function setSearchStatus(type, text) {
@@ -994,19 +811,13 @@
             const card = document.getElementById('search_results_card');
             const body = document.getElementById('search_results_body');
             const title = document.getElementById('search_results_title');
-            const selectedYear = document.getElementById('year_filter').value;
 
             if (!q) {
                 clearSearchResults();
                 return;
             }
 
-            let pool = ALL_TRANSACTIONS;
-            if (selectedYear !== 'all') {
-                pool = getTransactionsByYear(Number(selectedYear));
-            }
-
-            const results = pool.filter(item => transactionMatchesQuery(item, q));
+            const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
 
             title.textContent = `نتائج البحث عن: ${query}`;
 
@@ -1014,7 +825,7 @@
                 setSearchStatus('not-found', 'غير موجود');
                 body.innerHTML = `
                     <div class="search-empty">
-                        لم يتم العثور على أي حركة مطابقة. هذا يعني أن السند أو البيان غير موجود حاليًا ضمن الحركات المحتسبة.
+                        لم يتم العثور على أي حركة مطابقة. هذا يعني أن السند أو البيان غير موجود حاليًا ضمن tenant_transactions.
                     </div>
                 `;
                 card.classList.add('active');
@@ -1061,7 +872,7 @@
                                     </div>
                                     <div class="result-cell">
                                         <span>الحالة</span>
-                                        <b>${selectedYear === 'all' ? 'محتسب ضمن النظام' : 'موجود في هذه السنة'}</b>
+                                        <b>موجود في الحركات</b>
                                     </div>
                                 </div>
                             </div>
@@ -1135,19 +946,12 @@
                 ALL_TRANSACTIONS = tx || [];
                 ALL_SUMMARIES = summaries || [];
 
-                YEARS = [...new Set(ALL_SUMMARIES.map(s => Number(s.year)))]
-                    .filter(Boolean)
-                    .sort((a, b) => a - b);
-
                 document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
                 document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
                 document.getElementById('statement_date').innerText = formatLastUpdate();
 
-                populateYearFilter();
                 bindSearchEvents();
                 renderView();
-
-                document.getElementById('smart_note_status').textContent = ALL_SUMMARIES.length ? 'محدث' : 'لا توجد بيانات';
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
