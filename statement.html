@@ -239,7 +239,8 @@
             box-shadow: inset 0 -1px 0 rgba(201,164,107,0.35);
         }
 
-        .statement-table td:nth-child(2) {
+        .statement-table td:nth-child(2),
+        .statement-table td:nth-child(4) {
             color: var(--danger);
             font-weight: 900;
             font-variant-numeric: tabular-nums;
@@ -251,10 +252,18 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .statement-table td:nth-child(4),
-        .statement-table th:nth-child(4) {
+        .statement-table td:nth-child(5),
+        .statement-table th:nth-child(5) {
             color: #000000;
             font-weight: 800;
+        }
+
+        .balance-paid {
+            color: var(--success) !important;
+        }
+
+        .balance-late {
+            color: var(--danger) !important;
         }
 
         .main-row td {
@@ -625,9 +634,14 @@
                         if (match) fixedDate = `${match[0]}-01-01`;
                     }
 
+                    const rowBalance = item.balance !== undefined && item.balance !== null && String(item.balance).trim() !== ''
+                        ? toNumber(item.balance)
+                        : null;
+
                     return {
                         ...item,
                         date: fixedDate,
+                        balance: rowBalance,
                         isCarry: isCarryRow(desc),
                         isMain: isRentRow(desc) || isFeesRow(desc),
                         isLast: idx === arr.length - 1
@@ -656,6 +670,7 @@
                                 <th>التاريخ</th>
                                 <th>مدين</th>
                                 <th>دائن</th>
+                                <th>الرصيد</th>
                                 <th>البيان</th>
                                 <th>سند</th>
                             </tr>
@@ -666,6 +681,9 @@
                                     <td><span class="chip">${formatShortDate(item.date)}</span></td>
                                     <td>${item.debit ? formatCurrency(item.debit) : ''}</td>
                                     <td>${item.credit ? formatCurrency(item.credit) : ''}</td>
+                                    <td class="${item.balance !== null && item.balance <= 0 ? 'balance-paid' : (item.balance !== null ? 'balance-late' : '')}">
+                                        ${item.balance !== null ? formatCurrency(item.balance) : ''}
+                                    </td>
                                     <td>${item.description || ''}</td>
                                     <td>
                                         <span class="chip" style="${!item.receipt_no || item.receipt_no === '-' ? 'opacity:0.4' : 'opacity:1'}">
