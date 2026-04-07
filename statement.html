@@ -647,342 +647,339 @@
     </div>
 
     <script type="module">
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const tenantFromURL = urlParams.get('tenant');
-        const tenantCode = tenantFromURL || localStorage.getItem('jabri_tenant_code');
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantFromURL = urlParams.get('tenant');
+    const tenantCode = tenantFromURL || localStorage.getItem('jabri_tenant_code');
 
-        const supabase = createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
+    const supabase = createClient(
+        'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+    );
 
-        // IMPORTANT:
-        // Summary cards use tenant_yearly_summary only.
-        // tenant_transactions is used for search only.
-        let ALL_TRANSACTIONS = [];
-        let ALL_SUMMARIES = [];
+    let ALL_TRANSACTIONS = [];
+    let ALL_SUMMARIES = [];
 
-        function toNumber(v) {
-            return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
+    function toNumber(v) {
+        return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
+    }
+
+    function formatCurrency(v) {
+        return String(Number(toNumber(v).toFixed(2)).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }));
+    }
+
+    function formatShortDate(dateValue) {
+        if (!dateValue) return '-';
+        const d = new Date(dateValue);
+        if (isNaN(d)) return dateValue;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function formatLastUpdate() {
+        const now = new Date();
+        return `تاريخ الإصدار: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
+    }
+
+    function escapeHtml(text = '') {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getStatus(totalCredit, finalBalance) {
+        if (toNumber(finalBalance) <= 0) {
+            return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
+        }
+        if (toNumber(totalCredit) > 0) {
+            return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+        }
+        return { text: 'متأخر', className: 'status-late', chip: 'late' };
+    }
+
+    function getBalanceBoxClass(balance) {
+        return toNumber(balance) <= 0 ? 'ok' : 'due';
+    }
+
+    function normalizeSearchText(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, ' ');
+    }
+
+    function transactionMatchesQuery(item, rawQuery) {
+        const q = normalizeSearchText(rawQuery);
+        if (!q) return false;
+
+        const dateObj = item.date ? new Date(item.date) : null;
+        const yearText = dateObj && !isNaN(dateObj) ? String(dateObj.getFullYear()) : '';
+        const dateText = formatShortDate(item.date);
+
+        if (/^\d{4}$/.test(q) && q === yearText) {
+            return true;
         }
 
-        function formatCurrency(v) {
-            return String(Number(toNumber(v).toFixed(2)).toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }));
-        }
+        const fields = [
+            item.receipt_no,
+            item.description,
+            item.debit,
+            item.credit,
+            item.balance,
+            item.date,
+            dateText,
+            yearText
+        ]
+            .map(v => normalizeSearchText(v))
+            .filter(Boolean);
 
-        function formatShortDate(dateValue) {
-            if (!dateValue) return '-';
-            const d = new Date(dateValue);
-            if (isNaN(d)) return dateValue;
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
+        return fields.some(field => field.includes(q));
+    }
 
-        function formatLastUpdate() {
-            const now = new Date();
-            return `تاريخ الإصدار: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            })}`;
-        }
+    function buildYearCard(summary) {
+        const totalCredit = toNumber(summary?.total_credit || 0);
+        const finalBalance = toNumber(summary?.final_balance || 0);
+        const status = getStatus(totalCredit, finalBalance);
 
-        function escapeHtml(text = '') {
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function getStatus(totalCredit, finalBalance) {
-            if (toNumber(finalBalance) <= 0) {
-                return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
-            }
-            if (toNumber(totalCredit) > 0) {
-                return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
-            }
-            return { text: 'متأخر', className: 'status-late', chip: 'late' };
-        }
-
-        function getBalanceBoxClass(balance) {
-            return toNumber(balance) <= 0 ? 'ok' : 'due';
-        }
-
-        function normalizeSearchText(value) {
-            return String(value || '')
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, ' ');
-        }
-
-        function transactionMatchesQuery(item, rawQuery) {
-            const q = normalizeSearchText(rawQuery);
-            if (!q) return false;
-
-            const dateObj = item.date ? new Date(item.date) : null;
-            const yearText = dateObj && !isNaN(dateObj) ? String(dateObj.getFullYear()) : '';
-            const dateText = formatShortDate(item.date);
-
-            if (/^\d{4}$/.test(q) && q === yearText) {
-                return true;
-            }
-
-            const fields = [
-                item.receipt_no,
-                item.description,
-                item.debit,
-                item.credit,
-                item.balance,
-                item.date,
-                dateText,
-                yearText
-            ]
-                .map(v => normalizeSearchText(v))
-                .filter(Boolean);
-
-            return fields.some(field => field.includes(q));
-        }
-
-        function buildYearCard(summary) {
-            const totalCredit = toNumber(summary?.total_credit || 0);
-            const finalBalance = toNumber(summary?.final_balance || 0);
-            const status = getStatus(totalCredit, finalBalance);
-
-            return `
-                <div class="year-card ${status.className}">
-                    <div class="year-head">
-                        <div class="year-status ${status.className}">${status.text}</div>
-                        <div class="year-title">
-                            <span class="year-chip ${status.chip}">${summary.year}</span>
-                        </div>
+        return `
+            <div class="year-card ${status.className}">
+                <div class="year-head">
+                    <div class="year-status ${status.className}">${status.text}</div>
+                    <div class="year-title">
+                        <span class="year-chip ${status.chip}">${summary.year}</span>
                     </div>
+                </div>
 
-                    <div class="year-body">
-                        <div class="year-summary-only">
-                            <div class="summary-box summary-opening">
-                                <span>الرصيد السابق</span>
-                                <b>${formatCurrency(summary.opening_balance)}</b>
-                            </div>
-                            <div class="summary-box summary-debit">
-                                <span>مدين السنة</span>
-                                <b>${formatCurrency(summary.total_debit)}</b>
-                            </div>
-                            <div class="summary-box summary-credit">
-                                <span>دائن السنة</span>
-                                <b>${formatCurrency(summary.total_credit)}</b>
-                            </div>
-                            <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)}">
-                                <span>رصيد آخر السنة</span>
-                                <b>${formatCurrency(summary.final_balance)}</b>
-                            </div>
+                <div class="year-body">
+                    <div class="year-summary-only">
+                        <div class="summary-box summary-opening">
+                            <span>الرصيد السابق</span>
+                            <b>${formatCurrency(summary.opening_balance)}</b>
+                        </div>
+                        <div class="summary-box summary-debit">
+                            <span>مدين السنة</span>
+                            <b>${formatCurrency(summary.total_debit)}</b>
+                        </div>
+                        <div class="summary-box summary-credit">
+                            <span>دائن السنة</span>
+                            <b>${formatCurrency(summary.total_credit)}</b>
+                        </div>
+                        <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)}">
+                            <span>رصيد آخر السنة</span>
+                            <b>${formatCurrency(summary.final_balance)}</b>
                         </div>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
+    }
+
+    function renderView() {
+        const container = document.getElementById('years_container');
+
+        if (!ALL_SUMMARIES.length) {
+            container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
+            return;
         }
 
-        function renderView() {
-            const container = document.getElementById('years_container');
+        container.innerHTML = [...ALL_SUMMARIES]
+            .sort((a, b) => Number(a.year) - Number(b.year))
+            .map(summary => buildYearCard(summary))
+            .join('');
+    }
 
-            if (!ALL_SUMMARIES.length) {
-                container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
-                return;
-            }
+    function setSearchStatus(type, text) {
+        const badge = document.getElementById('search_status_badge');
+        badge.className = `search-status-badge ${type}`;
+        badge.textContent = text;
+    }
 
-            container.innerHTML = [...ALL_SUMMARIES]
-                .sort((a, b) => Number(a.year) - Number(b.year))
-                .map(summary => buildYearCard(summary))
-                .join('');
+    function clearSearchResults() {
+        const card = document.getElementById('search_results_card');
+        const body = document.getElementById('search_results_body');
+        const title = document.getElementById('search_results_title');
+
+        title.textContent = 'نتائج البحث';
+        body.innerHTML = '';
+        card.classList.remove('active');
+    }
+
+    function renderSearchResults(query) {
+        const q = normalizeSearchText(query);
+        const card = document.getElementById('search_results_card');
+        const body = document.getElementById('search_results_body');
+        const title = document.getElementById('search_results_title');
+
+        if (!q) {
+            clearSearchResults();
+            return;
         }
 
-        function setSearchStatus(type, text) {
-            const badge = document.getElementById('search_status_badge');
-            badge.className = `search-status-badge ${type}`;
-            badge.textContent = text;
-        }
+        const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
 
-        function clearSearchResults() {
-            const card = document.getElementById('search_results_card');
-            const body = document.getElementById('search_results_body');
-            const title = document.getElementById('search_results_title');
+        title.textContent = /^\d{4}$/.test(query.trim())
+            ? `نتائج سنة ${query.trim()}`
+            : `نتائج البحث عن: ${query}`;
 
-            title.textContent = 'نتائج البحث';
-            body.innerHTML = '';
-            card.classList.remove('active');
-        }
-
-        function renderSearchResults(query) {
-            const q = normalizeSearchText(query);
-            const card = document.getElementById('search_results_card');
-            const body = document.getElementById('search_results_body');
-            const title = document.getElementById('search_results_title');
-
-            if (!q) {
-                clearSearchResults();
-                return;
-            }
-
-            const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
-
-            title.textContent = /^\d{4}$/.test(query.trim())
-                ? `نتائج سنة ${query.trim()}`
-                : `نتائج البحث عن: ${query}`;
-
-            if (!results.length) {
-                setSearchStatus('not-found', 'غير موجود');
-                body.innerHTML = `
-                    <div class="search-empty">
-                        لم يتم العثور على أي حركة مطابقة. هذا يعني أن السند أو البيان غير موجود حاليًا ضمن الحركات التفصيلية.
-                    </div>
-                `;
-                card.classList.add('active');
-                return;
-            }
-
-            if (results.length === 1) {
-                setSearchStatus('found', 'موجود ومحتسب');
-            } else {
-                setSearchStatus('multi', `${results.length} نتائج`);
-            }
-
+        if (!results.length) {
+            setSearchStatus('not-found', 'غير موجود');
             body.innerHTML = `
-                <div class="search-results-grid">
-                    ${results.map(item => {
-                        const year = new Date(item.date).getFullYear();
-                        return `
-                            <div class="result-item">
-                                <div class="result-top">
-                                    <div class="result-title">${escapeHtml(item.description || 'حركة مالية')}</div>
-                                    <span class="chip">سنة ${year}</span>
-                                </div>
-
-                                <div class="result-grid">
-                                    <div class="result-cell">
-                                        <span>التاريخ</span>
-                                        <b>${escapeHtml(formatShortDate(item.date))}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>رقم السند</span>
-                                        <b>${escapeHtml(item.receipt_no || '—')}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>مدين</span>
-                                        <b class="money-debit">${toNumber(item.debit) ? formatCurrency(item.debit) : '—'}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>دائن</span>
-                                        <b class="money-credit">${toNumber(item.credit) ? formatCurrency(item.credit) : '—'}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>الرصيد</span>
-                                        <b>${item.balance !== null && item.balance !== undefined && String(item.balance).trim() !== '' ? formatCurrency(item.balance) : '—'}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>الحالة</span>
-                                        <b>موجود في الحركات</b>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
+                <div class="search-empty">
+                    لم يتم العثور على أي حركة مطابقة.
                 </div>
             `;
-
             card.classList.add('active');
+            return;
         }
 
-        function bindSearchEvents() {
-            const input = document.getElementById('receipt_search');
-            const searchBtn = document.getElementById('search_btn');
-            const clearBtn = document.getElementById('clear_search_btn');
+        if (results.length === 1) {
+            setSearchStatus('found', 'موجود ومحتسب');
+        } else {
+            setSearchStatus('multi', `${results.length} نتائج`);
+        }
 
-            searchBtn.addEventListener('click', () => {
+        body.innerHTML = `
+            <div class="search-results-grid">
+                ${results.map(item => {
+                    const year = new Date(item.date).getFullYear();
+                    return `
+                        <div class="result-item">
+                            <div class="result-top">
+                                <div class="result-title">${escapeHtml(item.description || 'حركة مالية')}</div>
+                                <span class="chip">سنة ${year}</span>
+                            </div>
+
+                            <div class="result-grid">
+                                <div class="result-cell">
+                                    <span>التاريخ</span>
+                                    <b>${escapeHtml(formatShortDate(item.date))}</b>
+                                </div>
+                                <div class="result-cell">
+                                    <span>رقم السند</span>
+                                    <b>${escapeHtml(item.receipt_no || '—')}</b>
+                                </div>
+                                <div class="result-cell">
+                                    <span>مدين</span>
+                                    <b class="money-debit">${toNumber(item.debit) ? formatCurrency(item.debit) : '—'}</b>
+                                </div>
+                                <div class="result-cell">
+                                    <span>دائن</span>
+                                    <b class="money-credit">${toNumber(item.credit) ? formatCurrency(item.credit) : '—'}</b>
+                                </div>
+                                <div class="result-cell">
+                                    <span>الرصيد</span>
+                                    <b>${item.balance !== null && item.balance !== undefined && String(item.balance).trim() !== '' ? formatCurrency(item.balance) : '—'}</b>
+                                </div>
+                                <div class="result-cell">
+                                    <span>الحالة</span>
+                                    <b>موجود في الحركات</b>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        card.classList.add('active');
+    }
+
+    function bindSearchEvents() {
+        const input = document.getElementById('receipt_search');
+        const searchBtn = document.getElementById('search_btn');
+        const clearBtn = document.getElementById('clear_search_btn');
+
+        searchBtn.addEventListener('click', () => {
+            renderSearchResults(input.value);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            clearSearchResults();
+            input.focus();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
                 renderSearchResults(input.value);
-            });
+            }
+        });
 
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
+        input.addEventListener('input', () => {
+            if (!input.value.trim()) {
                 clearSearchResults();
-                input.focus();
-            });
+            }
+        });
+    }
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    renderSearchResults(input.value);
-                }
-            });
-
-            input.addEventListener('input', () => {
-                if (!input.value.trim()) {
-                    clearSearchResults();
-                }
-            });
+    async function init() {
+        if (!tenantCode) {
+            document.getElementById('loader').style.display = 'none';
+            document.body.classList.add('loaded');
+            document.getElementById('years_container').innerHTML = `<div class="empty-state">لم يتم العثور على كود المستأجر.</div>`;
+            return;
         }
 
-        async function init() {
-            if (!tenantCode) {
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-                document.getElementById('years_container').innerHTML = `<div class="empty-state">لم يتم العثور على كود المستأجر.</div>`;
-                return;
-            }
+        try {
+            document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
+            document.getElementById('statement_date').innerText = formatLastUpdate();
 
-            try {
-                const [{ data: tenant, error: tenantError }, { data: tx, error: txError }, { data: summaries, error: summariesError }] = await Promise.all([
-                    supabase
-                        .from('tenants')
-                        .select('*')
-                        .eq('tenant_code', tenantCode)
-                        .single(),
-                    supabase
-                        .from('tenant_transactions')
-                        .select('date, description, debit, credit, balance, receipt_no')
-                        .eq('tenant_code', tenantCode)
-                        .order('date', { ascending: true }),
-                    supabase
-                        .from('tenant_yearly_summary')
-                        .select('year, opening_balance, total_debit, total_credit, final_balance')
-                        .eq('tenant_code', tenantCode)
-                        .order('year', { ascending: true })
-                ]);
+            const [{ data: tenant }, { data: tx, error: txError }, { data: summaries, error: summariesError }] = await Promise.all([
+                supabase
+                    .from('tenants')
+                    .select('tenant_name')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle(),
+                supabase
+                    .from('tenant_transactions')
+                    .select('date, description, debit, credit, balance, receipt_no')
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true }),
+                supabase
+                    .from('tenant_yearly_summary')
+                    .select('tenant_code, year, opening_balance, total_debit, total_credit, final_balance')
+                    .eq('tenant_code', tenantCode)
+                    .order('year', { ascending: true })
+            ]);
 
-                if (tenantError) throw tenantError;
-                if (txError) throw txError;
-                if (summariesError) throw summariesError;
+            if (txError) throw txError;
+            if (summariesError) throw summariesError;
 
-                ALL_TRANSACTIONS = tx || [];
-                ALL_SUMMARIES = summaries || [];
+            ALL_TRANSACTIONS = tx || [];
+            ALL_SUMMARIES = summaries || [];
 
-                document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
-                document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
-                document.getElementById('statement_date').innerText = formatLastUpdate();
+            document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || tenantCode;
 
-                bindSearchEvents();
-                renderView();
+            bindSearchEvents();
+            renderView();
 
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-                document.getElementById('years_container').innerHTML = `
-                    <div class="empty-state">
-                        حدث خطأ أثناء تحميل كشف الحساب.
-                    </div>
-                `;
-            }
+            document.getElementById('loader').style.display = 'none';
+            document.body.classList.add('loaded');
+        } catch (e) {
+            console.error('STATEMENT ERROR:', e);
+            document.getElementById('loader').style.display = 'none';
+            document.body.classList.add('loaded');
+            document.getElementById('years_container').innerHTML = `
+                <div class="empty-state">
+                    حدث خطأ أثناء تحميل كشف الحساب.
+                </div>
+            `;
         }
+    }
 
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
