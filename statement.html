@@ -19,8 +19,6 @@
             --danger: #c95a52;
             --warning: #c38a2e;
             --line: rgba(201,164,107,0.16);
-            --surface: rgba(255,255,255,0.72);
-            --surface-2: rgba(255,255,255,0.88);
         }
 
         * {
@@ -84,7 +82,6 @@
             flex-wrap: wrap;
         }
 
-        .header-chip,
         .chip {
             display: inline-flex;
             align-items: center;
@@ -100,42 +97,118 @@
             border: 1px solid rgba(201,164,107,0.22);
         }
 
-        .top-summary {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+        .controls-bar {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
             gap: 12px;
+            flex-wrap: wrap;
             margin-bottom: 18px;
         }
 
-        .top-summary-card {
-            border-radius: 22px;
-            padding: 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(247,244,237,0.70));
+        .filter-card,
+        .summary-strip {
+            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(247,244,237,0.74));
             border: 1px solid rgba(201,164,107,0.16);
+            border-radius: 22px;
             box-shadow: 0 10px 24px rgba(120,95,56,0.06);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            text-align: center;
         }
 
-        .top-summary-card span {
+        .filter-card {
+            padding: 14px;
+            min-width: 240px;
+            flex: 0 0 260px;
+        }
+
+        .filter-card label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--muted);
+        }
+
+        .year-filter {
+            width: 100%;
+            height: 46px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.20);
+            background: rgba(255,255,255,0.72);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 900;
+            padding: 0 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .summary-strip {
+            flex: 1;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .summary-box {
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid rgba(201,164,107,0.14);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.05);
+        }
+
+        .summary-box span {
             display: block;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        .top-summary-card b {
+        .summary-box b {
             display: block;
-            font-size: 21px;
+            font-size: 19px;
             font-weight: 900;
         }
 
-        .top-summary-card.debit b { color: var(--danger); }
-        .top-summary-card.credit b { color: var(--success); }
-        .top-summary-card.balance.due b { color: var(--danger); }
-        .top-summary-card.balance.ok b { color: var(--success); }
+        .summary-opening {
+            background: linear-gradient(135deg, rgba(201,164,107,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-debit {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-debit b {
+            color: var(--danger);
+        }
+
+        .summary-credit {
+            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
+        }
+
+        .summary-credit b {
+            color: var(--success);
+        }
+
+        .summary-balance.ok {
+            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
+        }
+
+        .summary-balance.due {
+            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+        }
+
+        .summary-balance.ok b {
+            color: var(--success);
+        }
+
+        .summary-balance.due b {
+            color: var(--danger);
+        }
 
         .year-card {
             border-radius: 28px;
@@ -160,7 +233,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 10px;
         }
 
@@ -341,73 +413,6 @@
             background: rgba(201,164,107,0.08);
         }
 
-        .year-summary {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            padding: 0 15px 16px;
-        }
-
-        .year-summary-box {
-            padding: 15px 14px;
-            border-radius: 18px;
-            text-align: center;
-            border: 1px solid rgba(201,164,107,0.16);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 18px rgba(120,95,56,0.06);
-        }
-
-        .year-summary-box span {
-            display: block;
-            color: #7a6c59;
-            font-size: 11px;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .year-summary-box b {
-            display: block;
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        .summary-opening {
-            background: linear-gradient(135deg, rgba(201,164,107,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-debit {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-debit b {
-            color: var(--danger);
-        }
-
-        .summary-credit {
-            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
-        }
-
-        .summary-credit b {
-            color: var(--success);
-        }
-
-        .summary-balance.ok {
-            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
-        }
-
-        .summary-balance.due {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
-        }
-
-        .summary-balance.ok b {
-            color: var(--success);
-        }
-
-        .summary-balance.due b {
-            color: var(--danger);
-        }
-
         .empty-state {
             border-radius: 24px;
             padding: 28px 18px;
@@ -487,12 +492,17 @@
             to { transform: rotate(360deg); }
         }
 
-        @media screen and (max-width: 900px) {
-            .top-summary {
-                grid-template-columns: repeat(2, 1fr);
+        @media screen and (max-width: 980px) {
+            .controls-bar {
+                flex-direction: column;
             }
 
-            .year-summary {
+            .filter-card {
+                min-width: 100%;
+                flex: 1 1 auto;
+            }
+
+            .summary-strip {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -513,11 +523,7 @@
         }
 
         @media screen and (max-width: 560px) {
-            .top-summary {
-                grid-template-columns: 1fr;
-            }
-
-            .year-summary {
+            .summary-strip {
                 grid-template-columns: 1fr;
             }
 
@@ -552,10 +558,9 @@
                 padding: 0 !important;
             }
 
-            .top-summary-card,
+            .controls-bar,
             .year-card,
             .statement-header,
-            .year-summary,
             .statement-table tr {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
@@ -585,12 +590,38 @@
             <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">-</h2>
             <div class="header-meta">
-                <span class="header-chip" id="statement_tenant_code">-</span>
-                <span class="header-chip" id="statement_date">-</span>
+                <span class="chip" id="statement_tenant_code">-</span>
+                <span class="chip" id="statement_date">-</span>
             </div>
         </div>
 
-        <div class="top-summary" id="top_summary"></div>
+        <div class="controls-bar">
+            <div class="filter-card">
+                <label for="year_filter">عرض السنة</label>
+                <select id="year_filter" class="year-filter">
+                    <option value="all">كل السنوات</option>
+                </select>
+            </div>
+
+            <div class="summary-strip" id="summary_strip">
+                <div class="summary-box summary-opening">
+                    <span>الرصيد السابق</span>
+                    <b>0</b>
+                </div>
+                <div class="summary-box summary-debit">
+                    <span>مدين السنة</span>
+                    <b>0</b>
+                </div>
+                <div class="summary-box summary-credit">
+                    <span>دائن السنة</span>
+                    <b>0</b>
+                </div>
+                <div class="summary-box summary-balance due">
+                    <span>رصيد آخر السنة</span>
+                    <b>0</b>
+                </div>
+            </div>
+        </div>
 
         <div id="years_container"></div>
 
@@ -604,10 +635,15 @@
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const tenantCode = localStorage.getItem('jabri_tenant_code');
+
         const supabase = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
+
+        let ALL_TRANSACTIONS = [];
+        let ALL_SUMMARIES = [];
+        let YEARS = [];
 
         function toNumber(v) {
             return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
@@ -647,20 +683,6 @@
                 .replace(/'/g, '&#039;');
         }
 
-        function getStatus(totalCredit, finalBalance) {
-            if (toNumber(finalBalance) <= 0) {
-                return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
-            }
-            if (toNumber(totalCredit) > 0) {
-                return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
-            }
-            return { text: 'متأخر', className: 'status-late', chip: 'late' };
-        }
-
-        function getBalanceClass(balance) {
-            return toNumber(balance) <= 0 ? 'ok' : 'due';
-        }
-
         function isRentRow(desc) {
             const d = String(desc || '').trim();
             return d.startsWith('ايجار') || d.startsWith('الإيجار') || d.startsWith('الايجار');
@@ -683,6 +705,20 @@
             return 99;
         }
 
+        function getStatus(totalCredit, finalBalance) {
+            if (toNumber(finalBalance) <= 0) {
+                return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
+            }
+            if (toNumber(totalCredit) > 0) {
+                return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
+            }
+            return { text: 'متأخر', className: 'status-late', chip: 'late' };
+        }
+
+        function getBalanceClass(balance) {
+            return toNumber(balance) <= 0 ? 'ok' : 'due';
+        }
+
         function normalizeRows(rows) {
             const openingRows = rows
                 .filter(r => isRentRow(r.description) || isFeesRow(r.description) || isCarryRow(r.description))
@@ -700,6 +736,7 @@
 
             return ordered.map((item, idx, arr) => {
                 let fixedDate = item.date;
+
                 if (isCarryRow(item.description)) {
                     const match = String(item.description || '').match(/\d{4}/);
                     if (match) fixedDate = `${match[0]}-01-01`;
@@ -720,63 +757,112 @@
             });
         }
 
-        function buildTopSummary(summaries, transactions) {
-            const top = document.getElementById('top_summary');
+        function getSummaryByYear(year) {
+            return ALL_SUMMARIES.find(s => Number(s.year) === Number(year)) || null;
+        }
 
-            const totalDebit = (summaries && summaries.length)
-                ? summaries.reduce((sum, s) => sum + toNumber(s.total_debit), 0)
-                : transactions.reduce((sum, t) => sum + toNumber(t.debit), 0);
+        function getTransactionsByYear(year) {
+            return ALL_TRANSACTIONS.filter(t => {
+                const y = new Date(t.date).getFullYear();
+                return Number(y) === Number(year);
+            });
+        }
 
-            const totalCredit = (summaries && summaries.length)
-                ? summaries.reduce((sum, s) => sum + toNumber(s.total_credit), 0)
-                : transactions.reduce((sum, t) => sum + toNumber(t.credit), 0);
+        function populateYearFilter() {
+            const select = document.getElementById('year_filter');
+            select.innerHTML = `<option value="all">كل السنوات</option>`;
 
-            const latestSummary = (summaries && summaries.length)
-                ? [...summaries].sort((a, b) => Number(b.year) - Number(a.year))[0]
-                : null;
+            YEARS.forEach(year => {
+                const option = document.createElement('option');
+                option.value = String(year);
+                option.textContent = year;
+                select.appendChild(option);
+            });
 
-            const currentBalance = latestSummary
-                ? toNumber(latestSummary.final_balance)
-                : 0;
+            select.addEventListener('change', renderView);
+        }
 
-            const paidPercent = totalDebit > 0
-                ? Math.min(100, Math.round((totalCredit / totalDebit) * 100))
-                : 0;
+        function updateSummaryStrip(selectedYear) {
+            const summaryStrip = document.getElementById('summary_strip');
 
-            top.innerHTML = `
-                <div class="top-summary-card debit">
-                    <span>إجمالي المدين</span>
-                    <b>${formatCurrency(totalDebit)}</b>
+            if (selectedYear === 'all') {
+                const totalOpening = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.opening_balance), 0);
+                const totalDebit = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.total_debit), 0);
+                const totalCredit = ALL_SUMMARIES.reduce((sum, s) => sum + toNumber(s.total_credit), 0);
+
+                const latestSummary = [...ALL_SUMMARIES].sort((a, b) => Number(b.year) - Number(a.year))[0];
+                const finalBalance = latestSummary ? toNumber(latestSummary.final_balance) : 0;
+
+                summaryStrip.innerHTML = `
+                    <div class="summary-box summary-opening">
+                        <span>إجمالي الأرصدة السابقة</span>
+                        <b>${formatCurrency(totalOpening)}</b>
+                    </div>
+                    <div class="summary-box summary-debit">
+                        <span>إجمالي المدين</span>
+                        <b>${formatCurrency(totalDebit)}</b>
+                    </div>
+                    <div class="summary-box summary-credit">
+                        <span>إجمالي الدائن</span>
+                        <b>${formatCurrency(totalCredit)}</b>
+                    </div>
+                    <div class="summary-box summary-balance ${getBalanceClass(finalBalance)}">
+                        <span>الرصيد الحالي</span>
+                        <b>${formatCurrency(finalBalance)}</b>
+                    </div>
+                `;
+                return;
+            }
+
+            const summary = getSummaryByYear(selectedYear);
+
+            if (!summary) {
+                summaryStrip.innerHTML = `
+                    <div class="summary-box summary-opening">
+                        <span>الرصيد السابق</span>
+                        <b>0</b>
+                    </div>
+                    <div class="summary-box summary-debit">
+                        <span>مدين السنة</span>
+                        <b>0</b>
+                    </div>
+                    <div class="summary-box summary-credit">
+                        <span>دائن السنة</span>
+                        <b>0</b>
+                    </div>
+                    <div class="summary-box summary-balance due">
+                        <span>رصيد آخر السنة</span>
+                        <b>0</b>
+                    </div>
+                `;
+                return;
+            }
+
+            summaryStrip.innerHTML = `
+                <div class="summary-box summary-opening">
+                    <span>الرصيد السابق</span>
+                    <b>${formatCurrency(summary.opening_balance)}</b>
                 </div>
-                <div class="top-summary-card credit">
-                    <span>إجمالي الدائن</span>
-                    <b>${formatCurrency(totalCredit)}</b>
+                <div class="summary-box summary-debit">
+                    <span>مدين السنة</span>
+                    <b>${formatCurrency(summary.total_debit)}</b>
                 </div>
-                <div class="top-summary-card balance ${getBalanceClass(currentBalance)}">
-                    <span>الرصيد الحالي</span>
-                    <b>${formatCurrency(currentBalance)}</b>
+                <div class="summary-box summary-credit">
+                    <span>دائن السنة</span>
+                    <b>${formatCurrency(summary.total_credit)}</b>
                 </div>
-                <div class="top-summary-card">
-                    <span>نسبة السداد</span>
-                    <b>${paidPercent}%</b>
+                <div class="summary-box summary-balance ${getBalanceClass(summary.final_balance)}">
+                    <span>رصيد آخر السنة</span>
+                    <b>${formatCurrency(summary.final_balance)}</b>
                 </div>
             `;
         }
 
-        function buildYearCard(year, rows, summary) {
-            const items = normalizeRows(rows);
-
-            const openingBalance = summary
-                ? toNumber(summary.opening_balance)
-                : 0;
-
-            const totalDebit = summary
-                ? toNumber(summary.total_debit)
-                : items.reduce((sum, r) => sum + toNumber(r.debit), 0);
-
-            const totalCredit = summary
-                ? toNumber(summary.total_credit)
-                : items.reduce((sum, r) => sum + toNumber(r.credit), 0);
+        function buildYearCard(year, transactions, summary) {
+            const items = normalizeRows(transactions);
+            const openingBalance = summary ? toNumber(summary.opening_balance) : 0;
+            const totalDebit = summary ? toNumber(summary.total_debit) : items.reduce((sum, r) => sum + toNumber(r.debit), 0);
+            const totalCredit = summary ? toNumber(summary.total_credit) : items.reduce((sum, r) => sum + toNumber(r.credit), 0);
 
             const finalBalance = summary
                 ? toNumber(summary.final_balance)
@@ -791,7 +877,7 @@
                             <div class="year-status ${status.className}">${status.text}</div>
                             <span class="year-chip ${status.chip}">${year}</span>
                         </div>
-                        <div class="year-subtitle">ملخص وحركات سنة ${year}</div>
+                        <div class="year-subtitle">تفاصيل الحركات لسنة ${year}</div>
                     </div>
 
                     <div class="table-wrap">
@@ -830,27 +916,37 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <div class="year-summary">
-                        <div class="year-summary-box summary-opening">
-                            <span>الرصيد السابق</span>
-                            <b>${formatCurrency(openingBalance)}</b>
-                        </div>
-                        <div class="year-summary-box summary-debit">
-                            <span>مدين السنة</span>
-                            <b>${formatCurrency(totalDebit)}</b>
-                        </div>
-                        <div class="year-summary-box summary-credit">
-                            <span>دائن السنة</span>
-                            <b>${formatCurrency(totalCredit)}</b>
-                        </div>
-                        <div class="year-summary-box summary-balance ${getBalanceClass(finalBalance)}">
-                            <span>رصيد آخر السنة</span>
-                            <b>${formatCurrency(finalBalance)}</b>
-                        </div>
-                    </div>
                 </div>
             `;
+        }
+
+        function renderView() {
+            const container = document.getElementById('years_container');
+            const selectedYear = document.getElementById('year_filter').value;
+
+            updateSummaryStrip(selectedYear);
+            container.innerHTML = '';
+
+            if (selectedYear === 'all') {
+                if (!YEARS.length) {
+                    container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
+                    return;
+                }
+
+                container.innerHTML = YEARS.map(year => {
+                    const tx = getTransactionsByYear(year);
+                    const summary = getSummaryByYear(year);
+                    return buildYearCard(year, tx, summary);
+                }).join('');
+
+                return;
+            }
+
+            const year = Number(selectedYear);
+            const tx = getTransactionsByYear(year);
+            const summary = getSummaryByYear(year);
+
+            container.innerHTML = buildYearCard(year, tx, summary);
         }
 
         async function init() {
@@ -886,11 +982,22 @@
                 if (txError) throw txError;
                 if (summariesError) throw summariesError;
 
+                ALL_TRANSACTIONS = tx || [];
+                ALL_SUMMARIES = summaries || [];
+
+                const yearsFromTx = ALL_TRANSACTIONS.map(t => new Date(t.date).getFullYear());
+                const yearsFromSummary = ALL_SUMMARIES.map(s => Number(s.year));
+
+                YEARS = [...new Set([...yearsFromTx, ...yearsFromSummary])]
+                    .filter(Boolean)
+                    .sort((a, b) => a - b);
+
                 document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || '-';
                 document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
                 document.getElementById('statement_date').innerText = formatLastUpdate();
 
-                render(tx || [], summaries || []);
+                populateYearFilter();
+                renderView();
             } catch (e) {
                 console.error(e);
                 document.getElementById('years_container').innerHTML = `
@@ -902,39 +1009,6 @@
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
             }
-        }
-
-        function render(transactions, summaries) {
-            const container = document.getElementById('years_container');
-            container.innerHTML = '';
-
-            buildTopSummary(summaries, transactions);
-
-            const grouped = {};
-            transactions.forEach(t => {
-                const y = new Date(t.date).getFullYear();
-                if (!grouped[y]) grouped[y] = [];
-                grouped[y].push(t);
-            });
-
-            const summaryMap = new Map(
-                (summaries || []).map(s => [Number(s.year), s])
-            );
-
-            const yearsFromTx = Object.keys(grouped).map(Number);
-            const yearsFromSummary = (summaries || []).map(s => Number(s.year));
-            const years = [...new Set([...yearsFromTx, ...yearsFromSummary])].sort((a, b) => a - b);
-
-            if (!years.length) {
-                container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
-                return;
-            }
-
-            container.innerHTML = years.map(year => {
-                const rows = grouped[year] || [];
-                const summary = summaryMap.get(year) || null;
-                return buildYearCard(year, rows, summary);
-            }).join('');
         }
 
         init();
