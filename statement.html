@@ -649,7 +649,9 @@
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenantFromURL = urlParams.get('tenant');
+        const tenantCode = tenantFromURL || localStorage.getItem('jabri_tenant_code');
 
         const supabase = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
@@ -725,7 +727,14 @@
             const q = normalizeSearchText(rawQuery);
             if (!q) return false;
 
+            const dateObj = item.date ? new Date(item.date) : null;
+            const yearText = dateObj && !isNaN(dateObj) ? String(dateObj.getFullYear()) : '';
             const dateText = formatShortDate(item.date);
+
+            if (/^\d{4}$/.test(q) && q === yearText) {
+                return true;
+            }
+
             const fields = [
                 item.receipt_no,
                 item.description,
@@ -733,7 +742,8 @@
                 item.credit,
                 item.balance,
                 item.date,
-                dateText
+                dateText,
+                yearText
             ]
                 .map(v => normalizeSearchText(v))
                 .filter(Boolean);
@@ -822,7 +832,9 @@
 
             const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
 
-            title.textContent = `نتائج البحث عن: ${query}`;
+            title.textContent = /^\d{4}$/.test(query.trim())
+                ? `نتائج سنة ${query.trim()}`
+                : `نتائج البحث عن: ${query}`;
 
             if (!results.length) {
                 setSearchStatus('not-found', 'غير موجود');
