@@ -718,45 +718,60 @@
             return String(value || '')
                 .trim()
                 .toLowerCase()
-                .replace(/\s+/g, ' ');
+                .replace(/\s+/g, ' ')
+                .replace(/[-_.]/g, '/');
         }
 
         function transactionMatchesQuery(item, rawQuery) {
-    const q = normalizeSearchText(rawQuery);
-    if (!q) return false;
+            const q = normalizeSearchText(rawQuery);
+            if (!q) return false;
 
-    const dateObj = item.date ? new Date(item.date) : null;
+            const dateObj = item.date ? new Date(item.date) : null;
+            const hasValidDate = dateObj && !isNaN(dateObj);
 
-    const year = dateObj ? String(dateObj.getFullYear()) : '';
-    const month = dateObj ? String(dateObj.getMonth() + 1) : '';
-    const day = dateObj ? String(dateObj.getDate()) : '';
+            const year = hasValidDate ? String(dateObj.getFullYear()) : '';
+            const month = hasValidDate ? String(dateObj.getMonth() + 1) : '';
+            const month2 = hasValidDate ? String(dateObj.getMonth() + 1).padStart(2, '0') : '';
+            const day = hasValidDate ? String(dateObj.getDate()) : '';
+            const day2 = hasValidDate ? String(dateObj.getDate()).padStart(2, '0') : '';
 
-    const formats = [
-        `${day}/${month}/${year}`,
-        `${year}-${month}-${day}`,
-        `${year}`,
-        `${month}/${year}`,
-        `${day}/${year}`
-    ];
+            const dateFormats = [
+                `${day}/${month}/${year}`,
+                `${day2}/${month2}/${year}`,
+                `${day}/${month2}/${year}`,
+                `${day2}/${month}/${year}`,
+                `${year}/${month}/${day}`,
+                `${year}/${month2}/${day2}`,
+                `${year}-${month2}-${day2}`,
+                `${year}-${month}-${day}`,
+                `${month}/${year}`,
+                `${month2}/${year}`,
+                `${year}`
+            ]
+                .map(v => normalizeSearchText(v))
+                .filter(Boolean);
 
-    // 🔥 لو كتب أي رقم من التاريخ
-    if (formats.some(f => f.includes(q))) {
-        return true;
-    }
+            if (dateFormats.some(f => f.includes(q) || q.includes(f))) {
+                return true;
+            }
 
-    const fields = [
-        item.receipt_no,
-        item.description,
-        item.debit,
-        item.credit,
-        item.balance,
-        item.date
-    ]
-        .map(v => normalizeSearchText(v))
-        .filter(Boolean);
+            const fields = [
+                item.receipt_no,
+                item.description,
+                item.debit,
+                item.credit,
+                item.balance,
+                item.date,
+                year,
+                `${day}/${month}/${year}`,
+                `${day2}/${month2}/${year}`,
+                `${year}-${month2}-${day2}`
+            ]
+                .map(v => normalizeSearchText(v))
+                .filter(Boolean);
 
-    return fields.some(field => field.includes(q));
-}
+            return fields.some(field => field.includes(q) || q.includes(field));
+        }
 
         function buildYearCard(summary) {
             const totalCredit = toNumber(summary?.total_credit || 0);
@@ -839,9 +854,10 @@
 
             const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
 
-            title.textContent = /^\d{4}$/.test(query.trim())
-                ? `نتائج سنة ${query.trim()}`
-                : `نتائج البحث عن: ${query}`;
+            const cleanedQuery = query.trim();
+            title.textContent = /^\d{4}$/.test(cleanedQuery)
+                ? `نتائج سنة ${cleanedQuery}`
+                : `نتائج البحث عن: ${cleanedQuery}`;
 
             if (!results.length) {
                 setSearchStatus('not-found', 'غير موجود');
