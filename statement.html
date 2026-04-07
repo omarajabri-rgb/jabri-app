@@ -656,6 +656,9 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
+        // IMPORTANT:
+        // Summary cards use tenant_yearly_summary only.
+        // tenant_transactions is used for search only.
         let ALL_TRANSACTIONS = [];
         let ALL_SUMMARIES = [];
 
@@ -825,7 +828,7 @@
                 setSearchStatus('not-found', 'غير موجود');
                 body.innerHTML = `
                     <div class="search-empty">
-                        لم يتم العثور على أي حركة مطابقة. هذا يعني أن السند أو البيان غير موجود حاليًا ضمن tenant_transactions.
+                        لم يتم العثور على أي حركة مطابقة. هذا يعني أن السند أو البيان غير موجود حاليًا ضمن الحركات التفصيلية.
                     </div>
                 `;
                 card.classList.add('active');
@@ -929,12 +932,12 @@
                         .single(),
                     supabase
                         .from('tenant_transactions')
-                        .select('*')
+                        .select('date, description, debit, credit, balance, receipt_no')
                         .eq('tenant_code', tenantCode)
                         .order('date', { ascending: true }),
                     supabase
                         .from('tenant_yearly_summary')
-                        .select('*')
+                        .select('year, opening_balance, total_debit, total_credit, final_balance')
                         .eq('tenant_code', tenantCode)
                         .order('year', { ascending: true })
                 ]);
