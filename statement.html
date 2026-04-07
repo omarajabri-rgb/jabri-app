@@ -1055,7 +1055,7 @@
             try {
                 const { data, error } = await supabase
                     .from('tenant_transactions')
-                    .select('date, debit, credit, balance, receipt_no')
+                    .select('date, debit, credit, receipt_no')
                     .eq('tenant_code', tenantCode)
                     .order('date', { ascending: true });
 
