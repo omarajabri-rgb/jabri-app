@@ -284,7 +284,7 @@
 
         .result-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
 
@@ -317,9 +317,6 @@
             border-radius: 6px;
             padding: 0 3px;
         }
-
-        .money-credit { color: var(--success) !important; }
-        .money-debit { color: var(--danger) !important; }
 
         .year-card {
             border-radius: 26px;
@@ -619,21 +616,21 @@
         </div>
 
         <div class="search-card">
-            <div class="search-title">بحث عن السند أو السنة أو التاريخ أو المبلغ</div>
+            <div class="search-title">بحث عن السند أو التاريخ</div>
             <div class="search-row">
                 <div class="search-input-wrap">
                     <input
                         id="receipt_search"
                         class="search-input"
                         type="text"
-                        placeholder="ابحث برقم السند أو السنة أو التاريخ أو المبلغ"
+                        placeholder="ابحث برقم السند أو التاريخ"
                     />
                 </div>
                 <button id="search_btn" class="search-btn" type="button">بحث</button>
                 <button id="clear_search_btn" class="clear-btn" type="button">مسح</button>
             </div>
             <div class="search-hint">
-                مثال: 878 أو 2026 أو 01/01/2026 أو 150
+                مثال: 878 أو 01/01/2026 أو 2026-01-01
             </div>
         </div>
 
@@ -803,10 +800,7 @@
                 `${year}/${month}/${day}`,
                 `${year}/${month2}/${day2}`,
                 `${year}-${month2}-${day2}`,
-                `${year}-${month}-${day}`,
-                `${month}/${year}`,
-                `${month2}/${year}`,
-                `${year}`
+                `${year}-${month}-${day}`
             ]
                 .map(v => normalizeSearchText(v))
                 .filter(Boolean);
@@ -828,26 +822,12 @@
             if (!q) return false;
 
             const dateParts = extractDateParts(item.date);
+            const receiptField = normalizeSearchText(item.receipt_no || '');
 
-            if (dateParts.dateFormats.some(f => f.includes(q) || q.includes(f))) {
-                return true;
-            }
+            const matchDate = dateParts.dateFormats.some(field => field.includes(q) || q.includes(field));
+            const matchReceipt = receiptField.includes(q) || q.includes(receiptField);
 
-            const fields = [
-                item.receipt_no,
-                item.debit,
-                item.credit,
-                item.balance,
-                item.date,
-                dateParts.year,
-                `${dateParts.day}/${dateParts.month}/${dateParts.year}`,
-                `${dateParts.day2}/${dateParts.month2}/${dateParts.year}`,
-                `${dateParts.year}-${dateParts.month2}-${dateParts.day2}`
-            ]
-                .map(v => normalizeSearchText(v))
-                .filter(Boolean);
-
-            return fields.some(field => field.includes(q) || q.includes(field));
+            return matchDate || matchReceipt;
         }
 
         function buildYearCard(summary) {
@@ -932,9 +912,7 @@
             const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
             const cleanedQuery = query.trim();
 
-            title.textContent = /^\d{4}$/.test(cleanedQuery)
-                ? `نتائج سنة ${cleanedQuery}`
-                : `نتائج البحث عن: ${cleanedQuery}`;
+            title.textContent = `نتائج البحث عن: ${cleanedQuery}`;
 
             if (!results.length) {
                 setSearchStatus('not-found', 'غير موجود');
@@ -956,14 +934,11 @@
             body.innerHTML = `
                 <div class="search-results-grid">
                     ${results.map(item => {
-                        const dateParts = extractDateParts(item.date);
-                        const yearLabel = dateParts.year || '—';
-
                         return `
                             <div class="result-item">
                                 <div class="result-top">
                                     <div class="result-title">حركة مالية</div>
-                                    <span class="chip">سنة ${highlightMatch(yearLabel, cleanedQuery)}</span>
+                                    <span class="chip">مطابقة</span>
                                 </div>
 
                                 <div class="result-grid">
@@ -977,19 +952,11 @@
                                     </div>
                                     <div class="result-cell">
                                         <span>مدين</span>
-                                        <b class="money-debit">${highlightMatch(toNumber(item.debit) ? formatCurrency(item.debit) : '—', cleanedQuery)}</b>
+                                        <b>${toNumber(item.debit) ? formatCurrency(item.debit) : '—'}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>دائن</span>
-                                        <b class="money-credit">${highlightMatch(toNumber(item.credit) ? formatCurrency(item.credit) : '—', cleanedQuery)}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>الرصيد</span>
-                                        <b>${highlightMatch(item.balance !== null && item.balance !== undefined && String(item.balance).trim() !== '' ? formatCurrency(item.balance) : '—', cleanedQuery)}</b>
-                                    </div>
-                                    <div class="result-cell">
-                                        <span>الحالة</span>
-                                        <b>موجود في الحركات</b>
+                                        <b>${toNumber(item.credit) ? formatCurrency(item.credit) : '—'}</b>
                                     </div>
                                 </div>
                             </div>
