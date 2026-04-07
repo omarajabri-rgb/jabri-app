@@ -722,32 +722,41 @@
         }
 
         function transactionMatchesQuery(item, rawQuery) {
-            const q = normalizeSearchText(rawQuery);
-            if (!q) return false;
+    const q = normalizeSearchText(rawQuery);
+    if (!q) return false;
 
-            const dateObj = item.date ? new Date(item.date) : null;
-            const yearText = dateObj && !isNaN(dateObj) ? String(dateObj.getFullYear()) : '';
-            const dateText = formatShortDate(item.date);
+    const dateObj = item.date ? new Date(item.date) : null;
 
-            if (/^\d{4}$/.test(q) && q === yearText) {
-                return true;
-            }
+    const year = dateObj ? String(dateObj.getFullYear()) : '';
+    const month = dateObj ? String(dateObj.getMonth() + 1) : '';
+    const day = dateObj ? String(dateObj.getDate()) : '';
 
-            const fields = [
-                item.receipt_no,
-                item.description,
-                item.debit,
-                item.credit,
-                item.balance,
-                item.date,
-                dateText,
-                yearText
-            ]
-                .map(v => normalizeSearchText(v))
-                .filter(Boolean);
+    const formats = [
+        `${day}/${month}/${year}`,
+        `${year}-${month}-${day}`,
+        `${year}`,
+        `${month}/${year}`,
+        `${day}/${year}`
+    ];
 
-            return fields.some(field => field.includes(q));
-        }
+    // 🔥 لو كتب أي رقم من التاريخ
+    if (formats.some(f => f.includes(q))) {
+        return true;
+    }
+
+    const fields = [
+        item.receipt_no,
+        item.description,
+        item.debit,
+        item.credit,
+        item.balance,
+        item.date
+    ]
+        .map(v => normalizeSearchText(v))
+        .filter(Boolean);
+
+    return fields.some(field => field.includes(q));
+}
 
         function buildYearCard(summary) {
             const totalCredit = toNumber(summary?.total_credit || 0);
