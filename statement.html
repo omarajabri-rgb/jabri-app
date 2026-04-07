@@ -19,6 +19,7 @@
             --danger: #c95a52;
             --warning: #c38a2e;
             --info: #5e7fd8;
+            --highlight: rgba(201,164,107,0.22);
         }
 
         * {
@@ -309,6 +310,12 @@
             font-weight: 900;
             color: var(--text);
             word-break: break-word;
+        }
+
+        .highlight {
+            background: var(--highlight);
+            border-radius: 6px;
+            padding: 0 3px;
         }
 
         .money-credit { color: var(--success) !important; }
@@ -612,21 +619,21 @@
         </div>
 
         <div class="search-card">
-            <div class="search-title">بحث عن السند أو الدفعة</div>
+            <div class="search-title">بحث عن السند أو السنة أو التاريخ أو المبلغ</div>
             <div class="search-row">
                 <div class="search-input-wrap">
                     <input
                         id="receipt_search"
                         class="search-input"
                         type="text"
-                        placeholder="ابحث برقم السند أو البيان أو المبلغ أو التاريخ"
+                        placeholder="ابحث برقم السند أو السنة أو التاريخ أو المبلغ"
                     />
                 </div>
                 <button id="search_btn" class="search-btn" type="button">بحث</button>
                 <button id="clear_search_btn" class="clear-btn" type="button">مسح</button>
             </div>
             <div class="search-hint">
-                مثال: 1718 أو دفعة من الايجار أو 150 أو 26/01/2025
+                مثال: 878 أو 2026 أو 01/01/2026 أو 150
             </div>
         </div>
 
@@ -676,11 +683,20 @@
         function formatShortDate(dateValue) {
             if (!dateValue) return '-';
             const d = new Date(dateValue);
-            if (isNaN(d)) return dateValue;
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}/${month}/${year}`;
+            if (!isNaN(d)) {
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            const raw = String(dateValue);
+            const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (iso) {
+                return `${iso[3]}/${iso[2]}/${iso[1]}`;
+            }
+
+            return raw;
         }
 
         function formatLastUpdate() {
@@ -698,6 +714,20 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+
+        function escapeRegex(text = '') {
+            return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function highlightMatch(value, query) {
+            const safeValue = String(value ?? '');
+            const cleanedQuery = String(query || '').trim();
+            if (!cleanedQuery) return escapeHtml(safeValue);
+
+            const escapedValue = escapeHtml(safeValue);
+            const regex = new RegExp(`(${escapeRegex(cleanedQuery)})`, 'ig');
+            return escapedValue.replace(regex, '<span class="highlight">$1</span>');
         }
 
         function getStatus(totalCredit, finalBalance) {
@@ -722,20 +752,50 @@
                 .replace(/[-_.]/g, '/');
         }
 
-        function transactionMatchesQuery(item, rawQuery) {
-            const q = normalizeSearchText(rawQuery);
-            if (!q) return false;
+        function extractDateParts(rawDate) {
+            const raw = String(rawDate || '').trim();
+            if (!raw) {
+                return {
+                    raw: '',
+                    rawNormalized: '',
+                    year: '',
+                    month: '',
+                    month2: '',
+                    day: '',
+                    day2: '',
+                    dateFormats: []
+                };
+            }
 
-            const dateObj = item.date ? new Date(item.date) : null;
-            const hasValidDate = dateObj && !isNaN(dateObj);
+            const parsed = new Date(raw);
+            let year = '';
+            let month = '';
+            let day = '';
 
-            const year = hasValidDate ? String(dateObj.getFullYear()) : '';
-            const month = hasValidDate ? String(dateObj.getMonth() + 1) : '';
-            const month2 = hasValidDate ? String(dateObj.getMonth() + 1).padStart(2, '0') : '';
-            const day = hasValidDate ? String(dateObj.getDate()) : '';
-            const day2 = hasValidDate ? String(dateObj.getDate()).padStart(2, '0') : '';
+            if (!isNaN(parsed)) {
+                year = String(parsed.getFullYear());
+                month = String(parsed.getMonth() + 1);
+                day = String(parsed.getDate());
+            } else {
+                const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+
+                if (isoMatch) {
+                    year = isoMatch[1];
+                    month = String(Number(isoMatch[2]));
+                    day = String(Number(isoMatch[3]));
+                } else if (slashMatch) {
+                    day = String(Number(slashMatch[1]));
+                    month = String(Number(slashMatch[2]));
+                    year = slashMatch[3];
+                }
+            }
+
+            const month2 = month ? month.padStart(2, '0') : '';
+            const day2 = day ? day.padStart(2, '0') : '';
 
             const dateFormats = [
+                raw,
                 `${day}/${month}/${year}`,
                 `${day2}/${month2}/${year}`,
                 `${day}/${month2}/${year}`,
@@ -751,21 +811,38 @@
                 .map(v => normalizeSearchText(v))
                 .filter(Boolean);
 
-            if (dateFormats.some(f => f.includes(q) || q.includes(f))) {
+            return {
+                raw,
+                rawNormalized: normalizeSearchText(raw),
+                year,
+                month,
+                month2,
+                day,
+                day2,
+                dateFormats
+            };
+        }
+
+        function transactionMatchesQuery(item, rawQuery) {
+            const q = normalizeSearchText(rawQuery);
+            if (!q) return false;
+
+            const dateParts = extractDateParts(item.date);
+
+            if (dateParts.dateFormats.some(f => f.includes(q) || q.includes(f))) {
                 return true;
             }
 
             const fields = [
                 item.receipt_no,
-                item.description,
                 item.debit,
                 item.credit,
                 item.balance,
                 item.date,
-                year,
-                `${day}/${month}/${year}`,
-                `${day2}/${month2}/${year}`,
-                `${year}-${month2}-${day2}`
+                dateParts.year,
+                `${dateParts.day}/${dateParts.month}/${dateParts.year}`,
+                `${dateParts.day2}/${dateParts.month2}/${dateParts.year}`,
+                `${dateParts.year}-${dateParts.month2}-${dateParts.day2}`
             ]
                 .map(v => normalizeSearchText(v))
                 .filter(Boolean);
@@ -853,8 +930,8 @@
             }
 
             const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, q));
-
             const cleanedQuery = query.trim();
+
             title.textContent = /^\d{4}$/.test(cleanedQuery)
                 ? `نتائج سنة ${cleanedQuery}`
                 : `نتائج البحث عن: ${cleanedQuery}`;
@@ -879,34 +956,36 @@
             body.innerHTML = `
                 <div class="search-results-grid">
                     ${results.map(item => {
-                        const year = new Date(item.date).getFullYear();
+                        const dateParts = extractDateParts(item.date);
+                        const yearLabel = dateParts.year || '—';
+
                         return `
                             <div class="result-item">
                                 <div class="result-top">
-                                    <div class="result-title">${escapeHtml(item.description || 'حركة مالية')}</div>
-                                    <span class="chip">سنة ${year}</span>
+                                    <div class="result-title">حركة مالية</div>
+                                    <span class="chip">سنة ${highlightMatch(yearLabel, cleanedQuery)}</span>
                                 </div>
 
                                 <div class="result-grid">
                                     <div class="result-cell">
                                         <span>التاريخ</span>
-                                        <b>${escapeHtml(formatShortDate(item.date))}</b>
+                                        <b>${highlightMatch(formatShortDate(item.date), cleanedQuery)}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>رقم السند</span>
-                                        <b>${escapeHtml(item.receipt_no || '—')}</b>
+                                        <b>${highlightMatch(item.receipt_no || '—', cleanedQuery)}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>مدين</span>
-                                        <b class="money-debit">${toNumber(item.debit) ? formatCurrency(item.debit) : '—'}</b>
+                                        <b class="money-debit">${highlightMatch(toNumber(item.debit) ? formatCurrency(item.debit) : '—', cleanedQuery)}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>دائن</span>
-                                        <b class="money-credit">${toNumber(item.credit) ? formatCurrency(item.credit) : '—'}</b>
+                                        <b class="money-credit">${highlightMatch(toNumber(item.credit) ? formatCurrency(item.credit) : '—', cleanedQuery)}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>الرصيد</span>
-                                        <b>${item.balance !== null && item.balance !== undefined && String(item.balance).trim() !== '' ? formatCurrency(item.balance) : '—'}</b>
+                                        <b>${highlightMatch(item.balance !== null && item.balance !== undefined && String(item.balance).trim() !== '' ? formatCurrency(item.balance) : '—', cleanedQuery)}</b>
                                     </div>
                                     <div class="result-cell">
                                         <span>الحالة</span>
@@ -976,7 +1055,7 @@
             try {
                 const { data, error } = await supabase
                     .from('tenant_transactions')
-                    .select('date, description, debit, credit, balance, receipt_no')
+                    .select('date, debit, credit, balance, receipt_no')
                     .eq('tenant_code', tenantCode)
                     .order('date', { ascending: true });
 
