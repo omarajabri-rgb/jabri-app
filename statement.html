@@ -936,31 +936,44 @@
                 document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
                 document.getElementById('statement_date').innerText = formatLastUpdate();
 
-                const [{ data: tenant }, { data: tx, error: txError }, { data: summaries, error: summariesError }] = await Promise.all([
-                    supabase
-                        .from('tenants')
-                        .select('tenant_name')
-                        .eq('tenant_code', tenantCode)
-                        .maybeSingle(),
-                    supabase
-                        .from('tenant_transactions')
-                        .select('date, description, debit, credit, balance, receipt_no')
-                        .eq('tenant_code', tenantCode)
-                        .order('date', { ascending: true }),
-                    supabase
-                        .from('tenant_yearly_summary')
-                        .select('tenant_code, year, opening_balance, total_debit, total_credit, final_balance')
-                        .eq('tenant_code', tenantCode)
-                        .order('year', { ascending: true })
-                ]);
+                const tenantPromise = supabase
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                const txPromise = supabase
+                    .from('tenant_transactions')
+                    .select('date, description, debit, credit, balance, receipt_no')
+                    .eq('tenant_code', tenantCode)
+                    .order('date', { ascending: true });
+
+                const summariesPromise = supabase
+                    .from('tenant_yearly_summary')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('year', { ascending: true });
+
+                const [
+                    { data: tenantData, error: tenantError },
+                    { data: txData, error: txError },
+                    { data: summariesData, error: summariesError }
+                ] = await Promise.all([tenantPromise, txPromise, summariesPromise]);
+
+                if (tenantError) {
+                    console.warn('TENANT QUERY WARNING:', tenantError);
+                }
 
                 if (txError) throw txError;
                 if (summariesError) throw summariesError;
 
-                ALL_TRANSACTIONS = tx || [];
-                ALL_SUMMARIES = summaries || [];
+                ALL_TRANSACTIONS = Array.isArray(txData) ? txData : [];
+                ALL_SUMMARIES = Array.isArray(summariesData) ? summariesData : [];
 
-                document.getElementById('statement_tenant_name').innerText = tenant?.tenant_name || tenantCode;
+                document.getElementById('statement_tenant_name').innerText =
+                    tenantData?.tenant_name ||
+                    tenantData?.name ||
+                    tenantCode;
 
                 bindSearchEvents();
                 renderView();
