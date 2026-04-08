@@ -316,6 +316,192 @@
             color: var(--success) !important;
         }
 
+        .search-table-wrap {
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        .search-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            min-width: 520px;
+        }
+
+        .search-table th {
+            padding: 0 8px 6px;
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .search-table td {
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(201,164,107,0.14);
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .search-table tbody tr td:first-child {
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        .search-table tbody tr td:last-child {
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+        }
+
+        .search-table tbody tr.highlight-2026 td {
+            background: rgba(47,158,111,0.10);
+            border-color: rgba(47,158,111,0.18);
+        }
+
+        .search-date-chip,
+        .search-receipt-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            white-space: nowrap;
+            border: 1px solid rgba(201,164,107,0.18);
+            background: rgba(201,164,107,0.10);
+        }
+
+        .search-receipt-chip {
+            color: #5b6fcf;
+            border-color: rgba(94,127,216,0.20);
+            background: rgba(94,127,216,0.10);
+        }
+
+        .search-amount {
+            color: var(--success);
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .search-total-box {
+            margin-top: 14px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(201,164,107,0.18);
+            border-radius: 18px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 8px 18px rgba(120,95,56,0.05);
+            flex-wrap: wrap;
+        }
+
+        .search-total-box span {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .search-total-box strong {
+            color: var(--success);
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .search-ai-box {
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,252,249,0.74));
+            border: 1px solid rgba(47,158,111,0.16);
+            box-shadow: 0 10px 24px rgba(47,158,111,0.06);
+        }
+
+        .search-ai-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-ai-head h4 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .search-ai-badge {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(47,158,111,0.10);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.20);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .search-ai-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .search-ai-item {
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(201,164,107,0.12);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .search-ai-item span {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .search-ai-item b {
+            display: block;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .search-ai-note {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 900;
+            text-align: center;
+            background: rgba(47,158,111,0.10);
+            border: 1px solid rgba(47,158,111,0.18);
+            color: var(--success);
+        }
+
+        .search-ai-note.warning {
+            background: rgba(195,138,46,0.10);
+            border-color: rgba(195,138,46,0.18);
+            color: var(--warning);
+        }
+
+        .search-ai-note.danger {
+            background: rgba(201,90,82,0.10);
+            border-color: rgba(201,90,82,0.18);
+            color: var(--danger);
+        }
+
         .year-card {
             border-radius: 26px;
             margin-bottom: 18px;
@@ -330,6 +516,22 @@
         .year-card.status-paid { border-color: rgba(47,158,111,0.18); }
         .year-card.status-partial { border-color: rgba(195,138,46,0.18); }
         .year-card.status-late { border-color: rgba(204,90,80,0.16); }
+
+        .year-card.year-2026 {
+            position: relative;
+            border-color: rgba(201,164,107,0.32);
+            box-shadow: 0 16px 38px rgba(177,138,82,0.14);
+            background: linear-gradient(135deg, rgba(255,252,246,0.98), rgba(247,244,237,0.90));
+        }
+
+        .year-card.year-2026::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: 26px;
+            background: linear-gradient(135deg, rgba(201,164,107,0.08), transparent 38%, transparent 65%, rgba(47,158,111,0.05));
+        }
 
         .year-head {
             position: relative;
@@ -351,6 +553,25 @@
             font-weight: 900;
             line-height: 1;
             white-space: nowrap;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(120,95,56,0.08);
+        }
+
+        .current-year-badge {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+            color: var(--gold-deep);
+            border: 1px solid rgba(201,164,107,0.24);
+            background: rgba(201,164,107,0.12);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 4px 12px rgba(120,95,56,0.08);
@@ -472,6 +693,97 @@
         .summary-balance.ok b { color: var(--success); }
         .summary-balance.due b { color: var(--danger); }
 
+        .year-ai-box {
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,252,249,0.72));
+            border: 1px solid rgba(47,158,111,0.14);
+            box-shadow: 0 10px 24px rgba(47,158,111,0.06);
+        }
+
+        .year-ai-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .year-ai-head h4 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .year-ai-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(47,158,111,0.10);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.18);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .year-ai-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .year-ai-item {
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(201,164,107,0.12);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .year-ai-item span {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .year-ai-item b {
+            display: block;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .year-ai-note {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 900;
+            text-align: center;
+            background: rgba(47,158,111,0.10);
+            border: 1px solid rgba(47,158,111,0.18);
+            color: var(--success);
+        }
+
+        .year-ai-note.warning {
+            background: rgba(195,138,46,0.10);
+            border-color: rgba(195,138,46,0.18);
+            color: var(--warning);
+        }
+
+        .year-ai-note.danger {
+            background: rgba(201,90,82,0.10);
+            border-color: rgba(201,90,82,0.18);
+            color: var(--danger);
+        }
+
         .empty-state {
             border-radius: 24px;
             padding: 28px 18px;
@@ -528,7 +840,9 @@
 
         @media screen and (max-width: 980px) {
             .year-summary-only,
-            .result-grid {
+            .result-grid,
+            .search-ai-grid,
+            .year-ai-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -542,6 +856,11 @@
                 font-size: 11px;
                 padding: 7px 12px;
             }
+            .current-year-badge {
+                right: 12px;
+                font-size: 11px;
+                padding: 7px 12px;
+            }
             .year-chip { font-size: 17px; }
             .bottom-actions { flex-wrap: nowrap; }
             .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; }
@@ -549,12 +868,15 @@
 
         @media screen and (max-width: 560px) {
             .year-summary-only,
-            .result-grid {
+            .result-grid,
+            .search-ai-grid,
+            .year-ai-grid {
                 grid-template-columns: 1fr;
             }
 
             .header-meta,
-            .search-row {
+            .search-row,
+            .search-total-box {
                 flex-direction: column;
             }
 
@@ -562,6 +884,37 @@
             .search-btn,
             .clear-btn {
                 width: 100%;
+            }
+
+            .search-table {
+                min-width: 100%;
+            }
+
+            .search-table th,
+            .search-table td {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+
+            .search-amount {
+                font-size: 16px;
+            }
+
+            .search-total-box strong {
+                font-size: 20px;
+            }
+
+            .year-head {
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
+
+            .year-status,
+            .current-year-badge {
+                position: static;
+                transform: none;
             }
         }
 
@@ -658,7 +1011,7 @@
 
         const supabase = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
         let ALL_TRANSACTIONS = [];
@@ -677,18 +1030,22 @@
 
         function formatShortDate(dateValue) {
             if (!dateValue) return '-';
-            const d = new Date(dateValue);
+
+            const raw = String(dateValue).trim();
+            const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+
+            const slash = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slash) {
+                return `${String(Number(slash[1])).padStart(2,'0')}/${String(Number(slash[2])).padStart(2,'0')}/${slash[3]}`;
+            }
+
+            const d = new Date(raw);
             if (!isNaN(d)) {
                 const day = String(d.getDate()).padStart(2, '0');
                 const month = String(d.getMonth() + 1).padStart(2, '0');
                 const year = d.getFullYear();
                 return `${day}/${month}/${year}`;
-            }
-
-            const raw = String(dateValue);
-            const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (iso) {
-                return `${iso[3]}/${iso[2]}/${iso[1]}`;
             }
 
             return raw;
@@ -747,6 +1104,38 @@
                 };
             }
 
+            const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) {
+                const year = isoMatch[1];
+                const month = String(Number(isoMatch[2]));
+                const day = String(Number(isoMatch[3]));
+                return {
+                    raw,
+                    rawNormalized: normalizeSearchText(raw),
+                    year,
+                    month,
+                    month2: month.padStart(2, '0'),
+                    day,
+                    day2: day.padStart(2, '0')
+                };
+            }
+
+            const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const day = String(Number(slashMatch[1]));
+                const month = String(Number(slashMatch[2]));
+                const year = slashMatch[3];
+                return {
+                    raw,
+                    rawNormalized: normalizeSearchText(raw),
+                    year,
+                    month,
+                    month2: month.padStart(2, '0'),
+                    day,
+                    day2: day.padStart(2, '0')
+                };
+            }
+
             const parsed = new Date(raw);
             let year = '';
             let month = '';
@@ -756,19 +1145,6 @@
                 year = String(parsed.getFullYear());
                 month = String(parsed.getMonth() + 1);
                 day = String(parsed.getDate());
-            } else {
-                const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-                const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-
-                if (isoMatch) {
-                    year = isoMatch[1];
-                    month = String(Number(isoMatch[2]));
-                    day = String(Number(isoMatch[3]));
-                } else if (slashMatch) {
-                    day = String(Number(slashMatch[1]));
-                    month = String(Number(slashMatch[2]));
-                    year = slashMatch[3];
-                }
             }
 
             return {
@@ -780,6 +1156,41 @@
                 day,
                 day2: day ? day.padStart(2, '0') : ''
             };
+        }
+
+        function getRecordYear(item) {
+            return extractDateParts(item?.date).year || String(item?.year || '').trim();
+        }
+
+        function getAmount(item) {
+            return toNumber(item?.credit) || toNumber(item?.debit) || 0;
+        }
+
+        function safeDateValue(raw) {
+            const text = String(raw || '').trim();
+            if (!text) return 0;
+
+            const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) return new Date(`${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T00:00:00`).getTime();
+
+            const slashMatch = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const dd = String(Number(slashMatch[1])).padStart(2, '0');
+                const mm = String(Number(slashMatch[2])).padStart(2, '0');
+                const yy = slashMatch[3];
+                return new Date(`${yy}-${mm}-${dd}T00:00:00`).getTime();
+            }
+
+            const parsed = new Date(text);
+            return isNaN(parsed) ? 0 : parsed.getTime();
+        }
+
+        function sortTransactionsAsc(list) {
+            return [...list].sort((a, b) => safeDateValue(a.date) - safeDateValue(b.date));
+        }
+
+        function sortTransactionsDesc(list) {
+            return [...list].sort((a, b) => safeDateValue(b.date) - safeDateValue(a.date));
         }
 
         function isRealReceipt(item) {
@@ -801,18 +1212,73 @@
             return isRealReceipt(item) && receipt.includes(q);
         }
 
+        function buildAIDataForReceipts(receipts) {
+            const sortedAsc = sortTransactionsAsc(receipts);
+            const count = sortedAsc.length;
+            const total = sortedAsc.reduce((sum, item) => sum + getAmount(item), 0);
+            const lastItem = count ? sortedAsc[count - 1] : null;
+            const firstItem = count ? sortedAsc[0] : null;
+            const lastPayment = lastItem ? formatCurrency(getAmount(lastItem)) : '-';
+            const lastDate = lastItem ? formatShortDate(lastItem.date) : '-';
+            const averagePayment = count ? formatCurrency(total / count) : '0';
+
+            let monthsBetween = 0;
+            if (firstItem && lastItem) {
+                const firstDate = new Date(safeDateValue(firstItem.date));
+                const lastDateObj = new Date(safeDateValue(lastItem.date));
+                monthsBetween =
+                    ((lastDateObj.getFullYear() - firstDate.getFullYear()) * 12) +
+                    (lastDateObj.getMonth() - firstDate.getMonth()) + 1;
+                if (monthsBetween < 1) monthsBetween = 1;
+            }
+
+            const frequency = count >= 3 ? 'نشط' : count >= 1 ? 'متوسط' : 'ضعيف';
+            let noteText = 'لا توجد دفعات مسجلة';
+            let noteClass = 'danger';
+
+            if (count >= 3 && total >= 1000) {
+                noteText = 'مؤشر جيد: يوجد نشاط دفع واضح في هذه السنة';
+                noteClass = '';
+            } else if (count >= 1) {
+                noteText = 'مؤشر متوسط: توجد دفعات لكن تحتاج متابعة';
+                noteClass = 'warning';
+            }
+
+            return {
+                count,
+                total,
+                lastPayment,
+                lastDate,
+                averagePayment,
+                frequency,
+                noteText,
+                noteClass
+            };
+        }
+
         function buildYearCard(summary) {
             const totalCredit = toNumber(summary?.total_credit || 0);
             const finalBalance = toNumber(summary?.final_balance || 0);
             const status = getStatus(totalCredit, finalBalance);
+            const year = String(summary.year);
+            const is2026 = year === '2026';
+
+            const yearReceipts = sortTransactionsAsc(
+                ALL_TRANSACTIONS.filter(item => getRecordYear(item) === year && isRealReceipt(item))
+            );
+
+            const ai = buildAIDataForReceipts(yearReceipts);
 
             return `
-                <div class="year-card ${status.className}">
+                <div class="year-card ${status.className} ${is2026 ? 'year-2026' : ''}">
                     <div class="year-head">
                         <div class="year-status ${status.className}">${status.text}</div>
+
                         <div class="year-title">
                             <span class="year-chip ${status.chip}">${summary.year}</span>
                         </div>
+
+                        ${is2026 ? `<div class="current-year-badge">آخر سنة</div>` : ''}
                     </div>
 
                     <div class="year-body">
@@ -834,6 +1300,57 @@
                                 <b>${formatCurrency(summary.final_balance)}</b>
                             </div>
                         </div>
+
+                        ${is2026 ? `
+                            <div class="year-ai-box">
+                                <div class="year-ai-head">
+                                    <h4>التحليل الذكي لسنة 2026</h4>
+                                    <span class="year-ai-badge">AI 2026</span>
+                                </div>
+
+                                <div class="year-ai-grid">
+                                    <div class="year-ai-item">
+                                        <span>عدد السندات</span>
+                                        <b>${ai.count}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>إجمالي السندات</span>
+                                        <b>${formatCurrency(ai.total)}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>آخر دفعة</span>
+                                        <b>${ai.lastPayment}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>تاريخ آخر دفعة</span>
+                                        <b>${ai.lastDate}</b>
+                                    </div>
+                                </div>
+
+                                <div class="year-ai-grid" style="margin-top:10px;">
+                                    <div class="year-ai-item">
+                                        <span>متوسط السند</span>
+                                        <b>${ai.averagePayment}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>مؤشر النشاط</span>
+                                        <b>${ai.frequency}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>دائن السنة</span>
+                                        <b>${formatCurrency(summary.total_credit)}</b>
+                                    </div>
+                                    <div class="year-ai-item">
+                                        <span>الرصيد الحالي</span>
+                                        <b>${formatCurrency(summary.final_balance)}</b>
+                                    </div>
+                                </div>
+
+                                <div class="year-ai-note ${ai.noteClass}">
+                                    ${ai.noteText}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -869,6 +1386,90 @@
             card.classList.remove('active');
         }
 
+        function buildYearSearchTable(receipts, year) {
+            const sorted = sortTransactionsAsc(receipts);
+            let total = 0;
+
+            const rows = sorted.map((item, index) => {
+                const amount = getAmount(item);
+                total += amount;
+
+                const isLastRow2026 = String(year) === '2026' && index === sorted.length - 1;
+
+                return `
+                    <tr class="${isLastRow2026 ? 'highlight-2026' : ''}">
+                        <td>
+                            <span class="search-date-chip">${formatShortDate(item.date)}</span>
+                        </td>
+                        <td>
+                            <span class="search-amount">${formatCurrency(amount)}</span>
+                        </td>
+                        <td>
+                            <span class="search-receipt-chip">${escapeHtml(item.receipt_no)}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const ai = buildAIDataForReceipts(sorted);
+
+            return `
+                <div class="result-item">
+                    <div class="search-table-wrap">
+                        <table class="search-table">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>المبلغ</th>
+                                    <th>رقم السند</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="search-total-box">
+                        <span>إجمالي قيمة السندات (${sorted.length} سند)</span>
+                        <strong>${formatCurrency(total)}</strong>
+                    </div>
+
+                    ${String(year) === '2026' ? `
+                        <div class="search-ai-box">
+                            <div class="search-ai-head">
+                                <h4>تحليل ذكي لسندات سنة 2026</h4>
+                                <span class="search-ai-badge">AI 2026</span>
+                            </div>
+
+                            <div class="search-ai-grid">
+                                <div class="search-ai-item">
+                                    <span>آخر دفعة</span>
+                                    <b>${ai.lastPayment}</b>
+                                </div>
+                                <div class="search-ai-item">
+                                    <span>تاريخ آخر دفعة</span>
+                                    <b>${ai.lastDate}</b>
+                                </div>
+                                <div class="search-ai-item">
+                                    <span>متوسط السند</span>
+                                    <b>${ai.averagePayment}</b>
+                                </div>
+                                <div class="search-ai-item">
+                                    <span>مؤشر النشاط</span>
+                                    <b>${ai.frequency}</b>
+                                </div>
+                            </div>
+
+                            <div class="search-ai-note ${ai.noteClass}">
+                                ${ai.noteText}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
         function renderSearchResults(query) {
             const q = normalizeSearchText(query);
             const card = document.getElementById('search_results_card');
@@ -885,9 +1486,10 @@
 
             let results = ALL_TRANSACTIONS
                 .filter(item => transactionMatchesQuery(item, cleanedQuery))
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
+                .sort((a, b) => safeDateValue(b.date) - safeDateValue(a.date));
 
             if (!results.length) {
+                title.textContent = 'نتائج البحث';
                 setSearchStatus('not-found', 'غير موجود ❌');
                 body.innerHTML = `<div class="search-empty">لا توجد نتائج</div>`;
                 card.classList.add('active');
@@ -906,65 +1508,20 @@
                     return;
                 }
 
-                let total = 0;
-
-                body.innerHTML = `
-                    <div class="result-item">
-
-                        <div class="result-grid" style="font-weight:900; opacity:.7">
-                            <div class="result-cell">التاريخ</div>
-                            <div class="result-cell">رقم السند</div>
-                            <div class="result-cell">المبلغ</div>
-                        </div>
-
-                        ${receipts.map(item => {
-                            const amount = toNumber(item.credit) || toNumber(item.debit);
-                            total += amount;
-
-                            return `
-                                <div class="result-grid">
-                                    <div class="result-cell">
-                                        <b>${formatShortDate(item.date)}</b>
-                                    </div>
-
-                                    <div class="result-cell">
-                                        <b>${escapeHtml(item.receipt_no)}</b>
-                                    </div>
-
-                                    <div class="result-cell">
-                                        <b class="result-amount">${formatCurrency(amount)}</b>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-
-                        <div class="result-grid" style="margin-top:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
-                            <div class="result-cell"></div>
-
-                            <div class="result-cell" style="font-weight:900;">
-                                إجمالي المدفوع
-                            </div>
-
-                            <div class="result-cell">
-                                <b class="result-amount">${formatCurrency(total)}</b>
-                            </div>
-                        </div>
-
-                    </div>
-                `;
-
+                body.innerHTML = buildYearSearchTable(receipts, cleanedQuery);
                 setSearchStatus('multi', `${receipts.length} سند`);
             } else {
                 const item = results.find(isRealReceipt);
 
                 if (!item) {
+                    title.textContent = 'نتائج البحث';
                     setSearchStatus('not-found', 'غير موجود ❌');
                     body.innerHTML = `<div class="search-empty">السند غير موجود</div>`;
                     card.classList.add('active');
                     return;
                 }
 
-                const amount = toNumber(item.credit) || toNumber(item.debit);
+                const amount = getAmount(item);
 
                 title.textContent = `السند ${cleanedQuery}`;
                 setSearchStatus('found', 'محسوب ✅');
@@ -978,13 +1535,13 @@
                             </div>
 
                             <div class="result-cell">
-                                <span>رقم السند</span>
-                                <b>${escapeHtml(item.receipt_no)}</b>
+                                <span>المبلغ</span>
+                                <b class="result-amount">${formatCurrency(amount)}</b>
                             </div>
 
                             <div class="result-cell">
-                                <span>المبلغ</span>
-                                <b class="result-amount">${formatCurrency(amount)}</b>
+                                <span>رقم السند</span>
+                                <b>${escapeHtml(item.receipt_no)}</b>
                             </div>
                         </div>
                     </div>
