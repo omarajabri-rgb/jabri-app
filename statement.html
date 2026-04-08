@@ -312,10 +312,8 @@
             word-break: break-word;
         }
 
-        .highlight {
-            background: var(--highlight);
-            border-radius: 6px;
-            padding: 0 3px;
+        .result-amount {
+            color: var(--success) !important;
         }
 
         .year-card {
@@ -784,6 +782,11 @@
             };
         }
 
+        function isRealReceipt(item) {
+            const receipt = String(item.receipt_no || '').trim();
+            return receipt !== '' && receipt !== '-' && receipt.toLowerCase() !== 'null';
+        }
+
         function transactionMatchesQuery(item, rawQuery) {
             const q = normalizeSearchText(rawQuery);
             if (!q) return false;
@@ -792,10 +795,10 @@
             const receipt = normalizeSearchText(item.receipt_no || '');
 
             if (/^\d{4}$/.test(q)) {
-                return dateParts.year === q;
+                return dateParts.year === q && isRealReceipt(item);
             }
 
-            return receipt.includes(q);
+            return isRealReceipt(item) && receipt.includes(q);
         }
 
         function buildYearCard(summary) {
@@ -880,7 +883,9 @@
             const cleanedQuery = query.trim();
             const isYearSearch = /^\d{4}$/.test(cleanedQuery);
 
-            const results = ALL_TRANSACTIONS.filter(item => transactionMatchesQuery(item, cleanedQuery));
+            let results = ALL_TRANSACTIONS
+                .filter(item => transactionMatchesQuery(item, cleanedQuery))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (!results.length) {
                 setSearchStatus('not-found', 'غير موجود ❌');
@@ -889,91 +894,97 @@
                 return;
             }
 
-            results.sort((a, b) => new Date(b.date) - new Date(a.date));
-
             if (isYearSearch) {
                 title.textContent = `سندات سنة ${cleanedQuery}`;
+
+                const receipts = results.filter(isRealReceipt);
+
+                if (!receipts.length) {
+                    setSearchStatus('not-found', 'لا يوجد سندات');
+                    body.innerHTML = `<div class="search-empty">لا يوجد سندات لهذه السنة</div>`;
+                    card.classList.add('active');
+                    return;
+                }
 
                 let total = 0;
 
                 body.innerHTML = `
-                    <div class="search-results-grid">
-                        ${results.map(item => {
+                    <div class="result-item">
+
+                        <div class="result-grid" style="font-weight:900; opacity:.7">
+                            <div class="result-cell">التاريخ</div>
+                            <div class="result-cell">رقم السند</div>
+                            <div class="result-cell">المبلغ</div>
+                        </div>
+
+                        ${receipts.map(item => {
                             const amount = toNumber(item.credit) || toNumber(item.debit);
                             total += amount;
 
                             return `
-                                <div class="result-item">
-                                    <div class="result-top">
-                                        <div class="result-title">سند مالي</div>
-                                        <span class="chip">محسوب</span>
+                                <div class="result-grid">
+                                    <div class="result-cell">
+                                        <b>${formatShortDate(item.date)}</b>
                                     </div>
 
-                                    <div class="result-grid">
-                                        <div class="result-cell">
-                                            <span>التاريخ</span>
-                                            <b>${formatShortDate(item.date)}</b>
-                                        </div>
+                                    <div class="result-cell">
+                                        <b>${escapeHtml(item.receipt_no)}</b>
+                                    </div>
 
-                                        <div class="result-cell">
-                                            <span>رقم السند</span>
-                                            <b>${item.receipt_no || '-'}</b>
-                                        </div>
-
-                                        <div class="result-cell">
-                                            <span>المبلغ</span>
-                                            <b>${formatCurrency(amount)}</b>
-                                        </div>
+                                    <div class="result-cell">
+                                        <b class="result-amount">${formatCurrency(amount)}</b>
                                     </div>
                                 </div>
                             `;
                         }).join('')}
 
-                        <div class="result-item">
-                            <div class="result-top">
-                                <div class="result-title">💰 إجمالي السنة</div>
+                        <div class="result-grid" style="margin-top:10px; border-top:1px solid rgba(0,0,0,0.1); padding-top:10px;">
+                            <div class="result-cell"></div>
+
+                            <div class="result-cell" style="font-weight:900;">
+                                إجمالي المدفوع
                             </div>
-                            <div class="result-grid">
-                                <div class="result-cell">
-                                    <span>المجموع</span>
-                                    <b>${formatCurrency(total)}</b>
-                                </div>
+
+                            <div class="result-cell">
+                                <b class="result-amount">${formatCurrency(total)}</b>
                             </div>
                         </div>
+
                     </div>
                 `;
 
-                setSearchStatus('multi', `${results.length} سند`);
+                setSearchStatus('multi', `${receipts.length} سند`);
             } else {
-                const item = results[0];
+                const item = results.find(isRealReceipt);
+
+                if (!item) {
+                    setSearchStatus('not-found', 'غير موجود ❌');
+                    body.innerHTML = `<div class="search-empty">السند غير موجود</div>`;
+                    card.classList.add('active');
+                    return;
+                }
+
                 const amount = toNumber(item.credit) || toNumber(item.debit);
 
                 title.textContent = `السند ${cleanedQuery}`;
                 setSearchStatus('found', 'محسوب ✅');
 
                 body.innerHTML = `
-                    <div class="search-results-grid">
-                        <div class="result-item">
-                            <div class="result-top">
-                                <div class="result-title">سند مالي</div>
-                                <span class="chip">محسوب</span>
+                    <div class="result-item">
+                        <div class="result-grid">
+                            <div class="result-cell">
+                                <span>التاريخ</span>
+                                <b>${formatShortDate(item.date)}</b>
                             </div>
 
-                            <div class="result-grid">
-                                <div class="result-cell">
-                                    <span>التاريخ</span>
-                                    <b>${formatShortDate(item.date)}</b>
-                                </div>
+                            <div class="result-cell">
+                                <span>رقم السند</span>
+                                <b>${escapeHtml(item.receipt_no)}</b>
+                            </div>
 
-                                <div class="result-cell">
-                                    <span>رقم السند</span>
-                                    <b>${item.receipt_no || '-'}</b>
-                                </div>
-
-                                <div class="result-cell">
-                                    <span>المبلغ</span>
-                                    <b>${formatCurrency(amount)}</b>
-                                </div>
+                            <div class="result-cell">
+                                <span>المبلغ</span>
+                                <b class="result-amount">${formatCurrency(amount)}</b>
                             </div>
                         </div>
                     </div>
