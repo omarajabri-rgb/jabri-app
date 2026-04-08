@@ -1,3 +1,12 @@
+أكيد — هذا هو الكود كامل محدث مع تصحيح الغلطة، ومبني على v1 مع التحسينات التي اتفقنا عليها:
+	•	كل سنة منفصلة
+	•	Smart layout
+	•	نسبة السداد
+	•	Animated
+	•	الأرقام بدون فواصل
+	•	بدون تخريب البحث
+	•	والغلطة في results.filter(...) تم إصلاحها
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -490,6 +499,9 @@
             background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
             break-inside: avoid;
             page-break-inside: avoid;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: cardIn .55s ease forwards;
         }
 
         .year-card.status-paid { border-color: rgba(47,158,111,0.18); }
@@ -580,34 +592,51 @@
             padding: 0 16px 16px;
         }
 
-        .year-summary-only {
+        .year-summary-smart {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 12px;
+            align-items: stretch;
         }
 
         .summary-box {
-            padding: 14px;
+            min-height: 116px;
+            padding: 16px 14px;
             border-radius: 18px;
             text-align: center;
             border: 1px solid rgba(201,164,107,0.18);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform .25s ease, box-shadow .25s ease;
         }
+
+        .summary-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(120,95,56,0.12);
+        }
+
+        .summary-box.span-3 { grid-column: span 3; }
+        .summary-box.span-6 { grid-column: span 6; }
 
         .summary-box span {
             display: block;
             color: #7a6c59;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .summary-box b {
             display: block;
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 900;
+            line-height: 1.15;
         }
 
         .summary-opening {
@@ -636,6 +665,96 @@
 
         .summary-balance.ok b { color: var(--success); }
         .summary-balance.due b { color: var(--danger); }
+
+        .summary-smart {
+            background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(248,245,238,0.78));
+        }
+
+        .smart-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .smart-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .smart-rate {
+            font-size: 24px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .smart-rate.paid { color: var(--success); }
+        .smart-rate.partial { color: var(--warning); }
+        .smart-rate.late { color: var(--danger); }
+
+        .smart-progress {
+            position: relative;
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(47,42,36,0.08);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .smart-progress-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 999px;
+            transition: width 1s ease;
+        }
+
+        .smart-progress-fill.paid {
+            background: linear-gradient(90deg, rgba(47,158,111,0.68), rgba(47,158,111,1));
+        }
+
+        .smart-progress-fill.partial {
+            background: linear-gradient(90deg, rgba(195,138,46,0.68), rgba(195,138,46,1));
+        }
+
+        .smart-progress-fill.late {
+            background: linear-gradient(90deg, rgba(201,90,82,0.68), rgba(201,90,82,1));
+        }
+
+        .smart-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .smart-pill {
+            min-height: 58px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(201,164,107,0.14);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .smart-pill span {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .smart-pill b {
+            font-size: 16px;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--text);
+        }
 
         .empty-state {
             border-radius: 24px;
@@ -691,11 +810,22 @@
             to { transform: rotate(360deg); }
         }
 
+        @keyframes cardIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media screen and (max-width: 980px) {
-            .year-summary-only,
             .result-grid,
             .search-ai-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .summary-box.span-3,
+            .summary-box.span-6 {
+                grid-column: span 6;
             }
         }
 
@@ -711,12 +841,16 @@
             .year-chip { font-size: 17px; }
             .bottom-actions { flex-wrap: nowrap; }
             .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; }
+
+            .summary-box b {
+                font-size: 21px;
+            }
         }
 
         @media screen and (max-width: 560px) {
-            .year-summary-only,
             .result-grid,
-            .search-ai-grid {
+            .search-ai-grid,
+            .smart-meta {
                 grid-template-columns: 1fr;
             }
 
@@ -734,6 +868,22 @@
 
             .search-table {
                 min-width: 100%;
+            }
+
+            .summary-box.span-3,
+            .summary-box.span-6 {
+                grid-column: span 12;
+            }
+
+            .year-status {
+                position: static;
+                transform: none;
+                margin-bottom: 8px;
+            }
+
+            .year-head {
+                flex-direction: column;
+                gap: 8px;
             }
         }
 
@@ -768,6 +918,10 @@
             .statement-header {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
+            }
+
+            .smart-progress-fill {
+                width: var(--print-width, 0%) !important;
             }
         }
     </style>
@@ -841,10 +995,7 @@
         }
 
         function formatCurrency(v) {
-            return String(Number(toNumber(v).toFixed(2)).toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }));
+            return String(toNumber(v).toFixed(0));
         }
 
         function formatShortDate(dateValue) {
@@ -889,11 +1040,11 @@
                 .replace(/'/g, '&#039;');
         }
 
-        function getStatus(totalCredit, finalBalance) {
+        function getStatus(totalCredit, finalBalance, paymentRate = 0) {
             if (toNumber(finalBalance) <= 0) {
                 return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
             }
-            if (toNumber(totalCredit) > 0) {
+            if (paymentRate >= 50 || toNumber(totalCredit) > 0) {
                 return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
             }
             return { text: 'متأخر', className: 'status-late', chip: 'late' };
@@ -1058,13 +1209,22 @@
             };
         }
 
-        function buildYearCard(summary) {
+        function getPaymentRate(totalDebit, totalCredit) {
+            const debit = toNumber(totalDebit);
+            const credit = toNumber(totalCredit);
+            if (debit <= 0) return 0;
+            return Math.max(0, Math.min(100, Math.round((credit / debit) * 100)));
+        }
+
+        function buildYearCard(summary, index) {
+            const totalDebit = toNumber(summary?.total_debit || 0);
             const totalCredit = toNumber(summary?.total_credit || 0);
             const finalBalance = toNumber(summary?.final_balance || 0);
-            const status = getStatus(totalCredit, finalBalance);
+            const paymentRate = getPaymentRate(totalDebit, totalCredit);
+            const status = getStatus(totalCredit, finalBalance, paymentRate);
 
             return `
-                <div class="year-card ${status.className}">
+                <div class="year-card ${status.className}" style="animation-delay:${index * 0.06}s;">
                     <div class="year-head">
                         <div class="year-status ${status.className}">${status.text}</div>
                         <div class="year-title">
@@ -1073,27 +1233,90 @@
                     </div>
 
                     <div class="year-body">
-                        <div class="year-summary-only">
-                            <div class="summary-box summary-opening">
+                        <div class="year-summary-smart">
+                            <div class="summary-box summary-opening span-3">
                                 <span>الرصيد السابق</span>
                                 <b>${formatCurrency(summary.opening_balance)}</b>
                             </div>
-                            <div class="summary-box summary-debit">
+
+                            <div class="summary-box summary-debit span-3">
                                 <span>مدين السنة</span>
                                 <b>${formatCurrency(summary.total_debit)}</b>
                             </div>
-                            <div class="summary-box summary-credit">
+
+                            <div class="summary-box summary-credit span-3">
                                 <span>دائن السنة</span>
                                 <b>${formatCurrency(summary.total_credit)}</b>
                             </div>
-                            <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)}">
+
+                            <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)} span-3">
                                 <span>رصيد آخر السنة</span>
                                 <b>${formatCurrency(summary.final_balance)}</b>
+                            </div>
+
+                            <div class="summary-box summary-smart span-6">
+                                <div class="smart-head">
+                                    <div class="smart-title">نسبة السداد</div>
+                                    <div class="smart-rate ${status.chip}">${paymentRate}%</div>
+                                </div>
+
+                                <div class="smart-progress">
+                                    <div
+                                        class="smart-progress-fill ${status.chip}"
+                                        data-width="${paymentRate}%"
+                                        style="--print-width:${paymentRate}%"
+                                    ></div>
+                                </div>
+
+                                <div class="smart-meta">
+                                    <div class="smart-pill">
+                                        <span>حالة السنة</span>
+                                        <b>${status.text}</b>
+                                    </div>
+                                    <div class="smart-pill">
+                                        <span>المتبقي</span>
+                                        <b>${formatCurrency(Math.max(0, finalBalance))}</b>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="summary-box summary-smart span-6">
+                                <div class="smart-head">
+                                    <div class="smart-title">ملخص ذكي</div>
+                                    <div class="smart-rate ${status.chip}">${summary.year}</div>
+                                </div>
+
+                                <div class="smart-meta">
+                                    <div class="smart-pill">
+                                        <span>الدفع المحقق</span>
+                                        <b>${formatCurrency(totalCredit)}</b>
+                                    </div>
+                                    <div class="smart-pill">
+                                        <span>المطلوب الكلي</span>
+                                        <b>${formatCurrency(totalDebit)}</b>
+                                    </div>
+                                    <div class="smart-pill">
+                                        <span>الرصيد الافتتاحي</span>
+                                        <b>${formatCurrency(summary.opening_balance)}</b>
+                                    </div>
+                                    <div class="smart-pill">
+                                        <span>الرصيد النهائي</span>
+                                        <b>${formatCurrency(summary.final_balance)}</b>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function animateProgressBars() {
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.smart-progress-fill').forEach(el => {
+                    el.style.width = el.dataset.width || '0%';
+                });
+            });
         }
 
         function renderView() {
@@ -1106,8 +1329,10 @@
 
             container.innerHTML = [...ALL_SUMMARIES]
                 .sort((a, b) => Number(a.year) - Number(b.year))
-                .map(summary => buildYearCard(summary))
+                .map((summary, index) => buildYearCard(summary, index))
                 .join('');
+
+            animateProgressBars();
         }
 
         function setSearchStatus(type, text) {
@@ -1247,17 +1472,17 @@
 
             if (isYearSearch) {
                 title.textContent = `سندات سنة ${cleanedQuery}`;
-                const receipts = results.filter(isRealReceipt);
+                const validReceipts = results.filter(isRealReceipt);
 
-                if (!receipts.length) {
+                if (!validReceipts.length) {
                     setSearchStatus('not-found', 'لا يوجد سندات');
                     body.innerHTML = `<div class="search-empty">لا يوجد سندات لهذه السنة</div>`;
                     card.classList.add('active');
                     return;
                 }
 
-                body.innerHTML = buildYearSearchTable(receipts, cleanedQuery);
-                setSearchStatus('multi', `${receipts.length} سند`);
+                body.innerHTML = buildYearSearchTable(validReceipts, cleanedQuery);
+                setSearchStatus('multi', `${validReceipts.length} سند`);
             } else {
                 const item = results.find(isRealReceipt);
 
