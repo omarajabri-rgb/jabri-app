@@ -1,3 +1,16 @@
+تمام — فهمت التعديل بدقة.
+بدك:
+	•	إزالة الملخص الذكي
+	•	إزالة نسبة السداد
+	•	السنة بالنصف
+	•	الحالة على الشمال مثل: جزئي
+	•	تحتهم 4 أعمدة فقط
+	•	إزالة كود المستأجر من أعلى الصفحة
+	•	تغيير تاريخ الإصدار إلى آخر تحديث
+	•	تحسين الألوان
+
+وهذا هو الكود كامل محدث على هذا الأساس:
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -19,7 +32,9 @@
             --danger: #c95a52;
             --warning: #c38a2e;
             --info: #5e7fd8;
-            --highlight: rgba(201,164,107,0.22);
+            --surface: rgba(255,255,255,0.82);
+            --surface-soft: rgba(255,255,255,0.68);
+            --border: rgba(201,164,107,0.16);
         }
 
         * {
@@ -55,7 +70,7 @@
             padding: 24px;
             margin-bottom: 16px;
             text-align: center;
-            background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
+            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.84));
             border: 1px solid rgba(201,164,107,0.18);
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
             backdrop-filter: blur(16px);
@@ -88,7 +103,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 900;
@@ -102,8 +117,8 @@
         .search-card,
         .year-card,
         .search-results-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(247,244,237,0.74));
-            border: 1px solid rgba(201,164,107,0.16);
+            background: linear-gradient(135deg, rgba(255,255,255,0.84), rgba(247,244,237,0.76));
+            border: 1px solid var(--border);
             border-radius: 22px;
             box-shadow: 0 10px 24px rgba(120,95,56,0.06);
             backdrop-filter: blur(12px);
@@ -141,7 +156,7 @@
             height: 46px;
             border-radius: 16px;
             border: 1px solid rgba(201,164,107,0.20);
-            background: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.78);
             color: var(--text);
             font-size: 15px;
             font-weight: 900;
@@ -173,7 +188,7 @@
 
         .clear-btn,
         .back-btn {
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.76);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: var(--text);
@@ -257,7 +272,7 @@
             border-radius: 18px;
             padding: 14px;
             border: 1px solid rgba(201,164,107,0.16);
-            background: linear-gradient(135deg, rgba(255,255,255,0.70), rgba(247,244,237,0.62));
+            background: linear-gradient(135deg, rgba(255,255,255,0.74), rgba(247,244,237,0.66));
             box-shadow: 0 8px 18px rgba(120,95,56,0.05);
         }
 
@@ -270,7 +285,7 @@
         .result-cell {
             border-radius: 14px;
             padding: 10px;
-            background: rgba(255,255,255,0.60);
+            background: rgba(255,255,255,0.62);
             border: 1px solid rgba(201,164,107,0.12);
             text-align: center;
         }
@@ -316,7 +331,7 @@
         }
 
         .search-table td {
-            background: rgba(255,255,255,0.68);
+            background: rgba(255,255,255,0.70);
             border: 1px solid rgba(201,164,107,0.14);
             text-align: center;
             padding: 14px 10px;
@@ -369,7 +384,7 @@
 
         .search-total-box {
             margin-top: 14px;
-            background: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.74);
             border: 1px solid rgba(201,164,107,0.18);
             border-radius: 18px;
             padding: 14px 16px;
@@ -397,7 +412,7 @@
             margin-top: 14px;
             padding: 16px;
             border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,252,249,0.74));
+            background: linear-gradient(135deg, rgba(255,255,255,0.80), rgba(248,252,249,0.76));
             border: 1px solid rgba(47,158,111,0.16);
             box-shadow: 0 10px 24px rgba(47,158,111,0.06);
         }
@@ -435,7 +450,7 @@
         }
 
         .search-ai-item {
-            background: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.74);
             border: 1px solid rgba(201,164,107,0.12);
             border-radius: 16px;
             padding: 12px;
@@ -487,7 +502,7 @@
             overflow: hidden;
             border: 1px solid rgba(201,164,107,0.18);
             box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
+            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.88));
             break-inside: avoid;
             page-break-inside: avoid;
             opacity: 0;
@@ -495,9 +510,9 @@
             animation: cardIn .55s ease forwards;
         }
 
-        .year-card.status-paid { border-color: rgba(47,158,111,0.18); }
-        .year-card.status-partial { border-color: rgba(195,138,46,0.18); }
-        .year-card.status-late { border-color: rgba(204,90,80,0.16); }
+        .year-card.status-paid { border-color: rgba(47,158,111,0.20); }
+        .year-card.status-partial { border-color: rgba(195,138,46,0.20); }
+        .year-card.status-late { border-color: rgba(204,90,80,0.18); }
 
         .year-head {
             position: relative;
@@ -525,21 +540,21 @@
         }
 
         .status-paid {
-            background: rgba(47,158,111,0.12);
+            background: rgba(47,158,111,0.13);
             color: var(--success);
-            border: 1px solid rgba(47,158,111,0.24);
+            border: 1px solid rgba(47,158,111,0.28);
         }
 
         .status-partial {
-            background: rgba(195,138,46,0.12);
-            color: var(--warning);
-            border: 1px solid rgba(195,138,46,0.24);
+            background: rgba(195,138,46,0.13);
+            color: #9b6b10;
+            border: 1px solid rgba(195,138,46,0.28);
         }
 
         .status-late {
-            background: rgba(204,90,80,0.12);
+            background: rgba(204,90,80,0.13);
             color: var(--danger);
-            border: 1px solid rgba(204,90,80,0.22);
+            border: 1px solid rgba(204,90,80,0.26);
         }
 
         .year-title {
@@ -552,40 +567,25 @@
 
         .year-chip {
             display: inline-block;
-            padding: 8px 18px;
+            padding: 8px 20px;
             border-radius: 999px;
             font-size: 20px;
             font-weight: 900;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             letter-spacing: 1px;
-        }
-
-        .year-chip.paid {
-            color: var(--success);
-            background: linear-gradient(135deg, rgba(47,158,111,0.15), rgba(255,255,255,0.25));
-            border: 1px solid rgba(47,158,111,0.35);
-        }
-
-        .year-chip.partial {
-            color: var(--warning);
-            background: linear-gradient(135deg, rgba(195,138,46,0.15), rgba(255,255,255,0.25));
-            border: 1px solid rgba(195,138,46,0.30);
-        }
-
-        .year-chip.late {
-            color: var(--danger);
-            background: linear-gradient(135deg, rgba(204,90,80,0.12), rgba(255,255,255,0.25));
-            border: 1px solid rgba(204,90,80,0.30);
+            color: var(--gold-deep);
+            background: linear-gradient(135deg, rgba(201,164,107,0.16), rgba(255,255,255,0.24));
+            border: 1px solid rgba(201,164,107,0.28);
         }
 
         .year-body {
             padding: 0 16px 16px;
         }
 
-        .year-summary-smart {
+        .year-summary-grid {
             display: grid;
-            grid-template-columns: repeat(12, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 12px;
             align-items: stretch;
         }
@@ -602,8 +602,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
             transition: transform .25s ease, box-shadow .25s ease;
         }
 
@@ -611,9 +609,6 @@
             transform: translateY(-2px);
             box-shadow: 0 14px 24px rgba(120,95,56,0.12);
         }
-
-        .summary-box.span-3 { grid-column: span 3; }
-        .summary-box.span-6 { grid-column: span 6; }
 
         .summary-box span {
             display: block;
@@ -631,127 +626,45 @@
         }
 
         .summary-opening {
-            background: linear-gradient(135deg, rgba(201,164,107,0.14), rgba(255,255,255,0.25));
+            background: linear-gradient(135deg, rgba(201,164,107,0.16), rgba(255,255,255,0.26));
+        }
+
+        .summary-opening b {
+            color: var(--gold-deep);
         }
 
         .summary-debit {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+            background: linear-gradient(135deg, rgba(204,90,80,0.15), rgba(255,255,255,0.26));
         }
 
-        .summary-debit b { color: var(--danger); }
+        .summary-debit b {
+            color: var(--danger);
+        }
 
         .summary-credit {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            background: linear-gradient(135deg, rgba(47,158,111,0.17), rgba(255,255,255,0.26));
         }
 
-        .summary-credit b { color: var(--success); }
+        .summary-credit b {
+            color: var(--success);
+        }
 
         .summary-balance.ok {
-            background: linear-gradient(135deg, rgba(47,158,111,0.16), rgba(255,255,255,0.25));
+            background: linear-gradient(135deg, rgba(47,158,111,0.17), rgba(255,255,255,0.26));
         }
 
         .summary-balance.due {
-            background: linear-gradient(135deg, rgba(204,90,80,0.14), rgba(255,255,255,0.25));
+            background: linear-gradient(135deg, rgba(204,90,80,0.15), rgba(255,255,255,0.26));
         }
 
         .summary-balance.ok b { color: var(--success); }
         .summary-balance.due b { color: var(--danger); }
 
-        .summary-smart {
-            background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(248,245,238,0.78));
-        }
-
-        .smart-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .smart-title {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .smart-rate {
-            font-size: 24px;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .smart-rate.paid { color: var(--success); }
-        .smart-rate.partial { color: var(--warning); }
-        .smart-rate.late { color: var(--danger); }
-
-        .smart-progress {
-            position: relative;
-            width: 100%;
-            height: 12px;
-            border-radius: 999px;
-            background: rgba(47,42,36,0.08);
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .smart-progress-fill {
-            height: 100%;
-            width: 0;
-            border-radius: 999px;
-            transition: width 1s ease;
-        }
-
-        .smart-progress-fill.paid {
-            background: linear-gradient(90deg, rgba(47,158,111,0.68), rgba(47,158,111,1));
-        }
-
-        .smart-progress-fill.partial {
-            background: linear-gradient(90deg, rgba(195,138,46,0.68), rgba(195,138,46,1));
-        }
-
-        .smart-progress-fill.late {
-            background: linear-gradient(90deg, rgba(201,90,82,0.68), rgba(201,90,82,1));
-        }
-
-        .smart-meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .smart-pill {
-            min-height: 58px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.72);
-            border: 1px solid rgba(201,164,107,0.14);
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .smart-pill span {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--muted);
-            margin-bottom: 5px;
-        }
-
-        .smart-pill b {
-            font-size: 16px;
-            font-weight: 900;
-            line-height: 1.1;
-            color: var(--text);
-        }
-
         .empty-state {
             border-radius: 24px;
             padding: 28px 18px;
             text-align: center;
-            background: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.74);
             border: 1px solid rgba(201,164,107,0.16);
             color: var(--muted);
             font-weight: 800;
@@ -810,13 +723,9 @@
 
         @media screen and (max-width: 980px) {
             .result-grid,
-            .search-ai-grid {
+            .search-ai-grid,
+            .year-summary-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-
-            .summary-box.span-3,
-            .summary-box.span-6 {
-                grid-column: span 6;
             }
         }
 
@@ -832,16 +741,13 @@
             .year-chip { font-size: 17px; }
             .bottom-actions { flex-wrap: nowrap; }
             .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; }
-
-            .summary-box b {
-                font-size: 21px;
-            }
+            .summary-box b { font-size: 21px; }
         }
 
         @media screen and (max-width: 560px) {
             .result-grid,
             .search-ai-grid,
-            .smart-meta {
+            .year-summary-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -859,11 +765,6 @@
 
             .search-table {
                 min-width: 100%;
-            }
-
-            .summary-box.span-3,
-            .summary-box.span-6 {
-                grid-column: span 12;
             }
 
             .year-status {
@@ -910,10 +811,6 @@
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
             }
-
-            .smart-progress-fill {
-                width: var(--print-width, 0%) !important;
-            }
         }
     </style>
 </head>
@@ -925,7 +822,6 @@
             <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">-</h2>
             <div class="header-meta">
-                <span class="chip" id="statement_tenant_code">-</span>
                 <span class="chip" id="statement_date">-</span>
             </div>
         </div>
@@ -1016,7 +912,7 @@
 
         function formatLastUpdate() {
             const now = new Date();
-            return `تاريخ الإصدار: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
+            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit'
             })}`;
@@ -1031,11 +927,11 @@
                 .replace(/'/g, '&#039;');
         }
 
-        function getStatus(totalCredit, finalBalance, paymentRate = 0) {
+        function getStatus(totalCredit, finalBalance) {
             if (toNumber(finalBalance) <= 0) {
                 return { text: 'مسدد', className: 'status-paid', chip: 'paid' };
             }
-            if (paymentRate >= 50 || toNumber(totalCredit) > 0) {
+            if (toNumber(totalCredit) > 0) {
                 return { text: 'جزئي', className: 'status-partial', chip: 'partial' };
             }
             return { text: 'متأخر', className: 'status-late', chip: 'late' };
@@ -1200,114 +1096,45 @@
             };
         }
 
-        function getPaymentRate(totalDebit, totalCredit) {
-            const debit = toNumber(totalDebit);
-            const credit = toNumber(totalCredit);
-            if (debit <= 0) return 0;
-            return Math.max(0, Math.min(100, Math.round((credit / debit) * 100)));
-        }
-
         function buildYearCard(summary, index) {
-            const totalDebit = toNumber(summary?.total_debit || 0);
             const totalCredit = toNumber(summary?.total_credit || 0);
             const finalBalance = toNumber(summary?.final_balance || 0);
-            const paymentRate = getPaymentRate(totalDebit, totalCredit);
-            const status = getStatus(totalCredit, finalBalance, paymentRate);
+            const status = getStatus(totalCredit, finalBalance);
 
             return `
                 <div class="year-card ${status.className}" style="animation-delay:${index * 0.06}s;">
                     <div class="year-head">
                         <div class="year-status ${status.className}">${status.text}</div>
                         <div class="year-title">
-                            <span class="year-chip ${status.chip}">${summary.year}</span>
+                            <span class="year-chip">${summary.year}</span>
                         </div>
                     </div>
 
                     <div class="year-body">
-                        <div class="year-summary-smart">
-                            <div class="summary-box summary-opening span-3">
+                        <div class="year-summary-grid">
+                            <div class="summary-box summary-opening">
                                 <span>الرصيد السابق</span>
                                 <b>${formatCurrency(summary.opening_balance)}</b>
                             </div>
 
-                            <div class="summary-box summary-debit span-3">
+                            <div class="summary-box summary-debit">
                                 <span>مدين السنة</span>
                                 <b>${formatCurrency(summary.total_debit)}</b>
                             </div>
 
-                            <div class="summary-box summary-credit span-3">
+                            <div class="summary-box summary-credit">
                                 <span>دائن السنة</span>
                                 <b>${formatCurrency(summary.total_credit)}</b>
                             </div>
 
-                            <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)} span-3">
+                            <div class="summary-box summary-balance ${getBalanceBoxClass(summary.final_balance)}">
                                 <span>رصيد آخر السنة</span>
                                 <b>${formatCurrency(summary.final_balance)}</b>
-                            </div>
-
-                            <div class="summary-box summary-smart span-6">
-                                <div class="smart-head">
-                                    <div class="smart-title">نسبة السداد</div>
-                                    <div class="smart-rate ${status.chip}">${paymentRate}%</div>
-                                </div>
-
-                                <div class="smart-progress">
-                                    <div
-                                        class="smart-progress-fill ${status.chip}"
-                                        data-width="${paymentRate}%"
-                                        style="--print-width:${paymentRate}%"
-                                    ></div>
-                                </div>
-
-                                <div class="smart-meta">
-                                    <div class="smart-pill">
-                                        <span>حالة السنة</span>
-                                        <b>${status.text}</b>
-                                    </div>
-                                    <div class="smart-pill">
-                                        <span>المتبقي</span>
-                                        <b>${formatCurrency(Math.max(0, finalBalance))}</b>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="summary-box summary-smart span-6">
-                                <div class="smart-head">
-                                    <div class="smart-title">ملخص ذكي</div>
-                                    <div class="smart-rate ${status.chip}">${summary.year}</div>
-                                </div>
-
-                                <div class="smart-meta">
-                                    <div class="smart-pill">
-                                        <span>الدفع المحقق</span>
-                                        <b>${formatCurrency(totalCredit)}</b>
-                                    </div>
-                                    <div class="smart-pill">
-                                        <span>المطلوب الكلي</span>
-                                        <b>${formatCurrency(totalDebit)}</b>
-                                    </div>
-                                    <div class="smart-pill">
-                                        <span>الرصيد الافتتاحي</span>
-                                        <b>${formatCurrency(summary.opening_balance)}</b>
-                                    </div>
-                                    <div class="smart-pill">
-                                        <span>الرصيد النهائي</span>
-                                        <b>${formatCurrency(summary.final_balance)}</b>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
-        }
-
-        function animateProgressBars() {
-            requestAnimationFrame(() => {
-                document.querySelectorAll('.smart-progress-fill').forEach(el => {
-                    el.style.width = el.dataset.width || '0%';
-                });
-            });
         }
 
         function renderView() {
@@ -1322,8 +1149,6 @@
                 .sort((a, b) => Number(a.year) - Number(b.year))
                 .map((summary, index) => buildYearCard(summary, index))
                 .join('');
-
-            animateProgressBars();
         }
 
         function setSearchStatus(type, text) {
@@ -1405,25 +1230,6 @@
                                 <div class="search-ai-item">
                                     <span>تاريخ آخر دفعة</span>
                                     <b>${ai.lastDate}</b>
-                                </div>
-                            </div>
-
-                            <div class="search-ai-grid" style="margin-top:10px;">
-                                <div class="search-ai-item">
-                                    <span>متوسط السند</span>
-                                    <b>${ai.averagePayment}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>مؤشر النشاط</span>
-                                    <b>${ai.frequency}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>دائن السنة</span>
-                                    <b>${formatCurrency(ai.total)}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>عدد الدفعات</span>
-                                    <b>${ai.count}</b>
                                 </div>
                             </div>
 
@@ -1604,7 +1410,6 @@
                 return;
             }
 
-            document.getElementById('statement_tenant_code').innerText = `كود المستأجر: ${tenantCode}`;
             document.getElementById('statement_date').innerText = formatLastUpdate();
             document.getElementById('statement_tenant_name').innerText = tenantCode;
 
@@ -1636,3 +1441,5 @@
     </script>
 </body>
 </html>
+
+هذا هو الكود الكامل المحدث على الطلب الجديد.
