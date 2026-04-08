@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>مجمع جبري | كشف الحساب التفصيلي</title>
 
-    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        window.createSupabaseClient = createClient;
+    </script>
 
     <style>
         :root {
@@ -19,7 +22,6 @@
             --danger: #c95a52;
             --warning: #c38a2e;
             --info: #5e7fd8;
-            --highlight: rgba(201,164,107,0.22);
         }
 
         * {
@@ -174,8 +176,6 @@
         .clear-btn,
         .back-btn {
             background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             color: var(--text);
             padding: 0 18px;
         }
@@ -402,7 +402,8 @@
             box-shadow: 0 10px 24px rgba(47,158,111,0.06);
         }
 
-        .search-ai-head {
+        .search-ai-head,
+        .year-ai-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -411,14 +412,16 @@
             flex-wrap: wrap;
         }
 
-        .search-ai-head h4 {
+        .search-ai-head h4,
+        .year-ai-head h4 {
             margin: 0;
             font-size: 15px;
             font-weight: 900;
             color: var(--text);
         }
 
-        .search-ai-badge {
+        .search-ai-badge,
+        .year-ai-badge {
             padding: 7px 12px;
             border-radius: 999px;
             background: rgba(47,158,111,0.10);
@@ -428,13 +431,15 @@
             font-weight: 900;
         }
 
-        .search-ai-grid {
+        .search-ai-grid,
+        .year-ai-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
 
-        .search-ai-item {
+        .search-ai-item,
+        .year-ai-item {
             background: rgba(255,255,255,0.72);
             border: 1px solid rgba(201,164,107,0.12);
             border-radius: 16px;
@@ -442,7 +447,8 @@
             text-align: center;
         }
 
-        .search-ai-item span {
+        .search-ai-item span,
+        .year-ai-item span {
             display: block;
             font-size: 11px;
             color: var(--muted);
@@ -450,14 +456,16 @@
             margin-bottom: 6px;
         }
 
-        .search-ai-item b {
+        .search-ai-item b,
+        .year-ai-item b {
             display: block;
             font-size: 16px;
             font-weight: 900;
             color: var(--text);
         }
 
-        .search-ai-note {
+        .search-ai-note,
+        .year-ai-note {
             margin-top: 12px;
             padding: 12px 14px;
             border-radius: 14px;
@@ -469,13 +477,15 @@
             color: var(--success);
         }
 
-        .search-ai-note.warning {
+        .search-ai-note.warning,
+        .year-ai-note.warning {
             background: rgba(195,138,46,0.10);
             border-color: rgba(195,138,46,0.18);
             color: var(--warning);
         }
 
-        .search-ai-note.danger {
+        .search-ai-note.danger,
+        .year-ai-note.danger {
             background: rgba(201,90,82,0.10);
             border-color: rgba(201,90,82,0.18);
             color: var(--danger);
@@ -626,9 +636,8 @@
             border-radius: 18px;
             text-align: center;
             border: 1px solid rgba(201,164,107,0.18);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 8px 18px rgba(120,95,56,0.08);
+            background: rgba(255,255,255,0.55);
         }
 
         .summary-box span {
@@ -679,88 +688,6 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(248,252,249,0.72));
             border: 1px solid rgba(47,158,111,0.14);
             box-shadow: 0 10px 24px rgba(47,158,111,0.06);
-        }
-
-        .year-ai-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .year-ai-head h4 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .year-ai-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 7px 12px;
-            border-radius: 999px;
-            background: rgba(47,158,111,0.10);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.18);
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .year-ai-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .year-ai-item {
-            background: rgba(255,255,255,0.72);
-            border: 1px solid rgba(201,164,107,0.12);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .year-ai-item span {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-
-        .year-ai-item b {
-            display: block;
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .year-ai-note {
-            margin-top: 12px;
-            padding: 12px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            text-align: center;
-            background: rgba(47,158,111,0.10);
-            border: 1px solid rgba(47,158,111,0.18);
-            color: var(--success);
-        }
-
-        .year-ai-note.warning {
-            background: rgba(195,138,46,0.10);
-            border-color: rgba(195,138,46,0.18);
-            color: var(--warning);
-        }
-
-        .year-ai-note.danger {
-            background: rgba(201,90,82,0.10);
-            border-color: rgba(201,90,82,0.18);
-            color: var(--danger);
         }
 
         .empty-state {
@@ -959,9 +886,7 @@
                 <button id="search_btn" class="search-btn" type="button">بحث</button>
                 <button id="clear_search_btn" class="clear-btn" type="button">مسح</button>
             </div>
-            <div class="search-hint">
-                مثال: 878 أو 2025
-            </div>
+            <div class="search-hint">مثال: 878 أو 2025</div>
         </div>
 
         <div id="search_results_card" class="search-results-card">
@@ -981,14 +906,12 @@
     </div>
 
     <script type="module">
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
         const urlParams = new URLSearchParams(window.location.search);
         const tenantFromURL = urlParams.get('tenant');
         const tenantFromStorage = localStorage.getItem('jabri_tenant_code');
         const tenantCode = (tenantFromURL || tenantFromStorage || '').trim();
 
-        const supabase = createClient(
+        const supabase = window.createSupabaseClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
@@ -1072,69 +995,25 @@
         function extractDateParts(rawDate) {
             const raw = String(rawDate || '').trim();
             if (!raw) {
-                return {
-                    raw: '',
-                    rawNormalized: '',
-                    year: '',
-                    month: '',
-                    month2: '',
-                    day: '',
-                    day2: ''
-                };
+                return { year: '' };
             }
 
             const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
             if (isoMatch) {
-                const year = isoMatch[1];
-                const month = String(Number(isoMatch[2]));
-                const day = String(Number(isoMatch[3]));
-                return {
-                    raw,
-                    rawNormalized: normalizeSearchText(raw),
-                    year,
-                    month,
-                    month2: month.padStart(2, '0'),
-                    day,
-                    day2: day.padStart(2, '0')
-                };
+                return { year: isoMatch[1] };
             }
 
             const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
             if (slashMatch) {
-                const day = String(Number(slashMatch[1]));
-                const month = String(Number(slashMatch[2]));
-                const year = slashMatch[3];
-                return {
-                    raw,
-                    rawNormalized: normalizeSearchText(raw),
-                    year,
-                    month,
-                    month2: month.padStart(2, '0'),
-                    day,
-                    day2: day.padStart(2, '0')
-                };
+                return { year: slashMatch[3] };
             }
 
             const parsed = new Date(raw);
-            let year = '';
-            let month = '';
-            let day = '';
-
             if (!isNaN(parsed)) {
-                year = String(parsed.getFullYear());
-                month = String(parsed.getMonth() + 1);
-                day = String(parsed.getDate());
+                return { year: String(parsed.getFullYear()) };
             }
 
-            return {
-                raw,
-                rawNormalized: normalizeSearchText(raw),
-                year,
-                month,
-                month2: month ? month.padStart(2, '0') : '',
-                day,
-                day2: day ? day.padStart(2, '0') : ''
-            };
+            return { year: '' };
         }
 
         function getRecordYear(item) {
@@ -1331,4 +1210,53 @@
             container.innerHTML = [...ALL_SUMMARIES]
                 .sort((a, b) => Number(a.year) - Number(b.year))
                 .map(summary => buildYearCard(summary))
-                .
+                .join('');
+        }
+
+        function setSearchStatus(type, text) {
+            const badge = document.getElementById('search_status_badge');
+            badge.className = `search-status-badge ${type}`;
+            badge.textContent = text;
+        }
+
+        function clearSearchResults() {
+            const card = document.getElementById('search_results_card');
+            const body = document.getElementById('search_results_body');
+            const title = document.getElementById('search_results_title');
+
+            title.textContent = 'نتائج البحث';
+            body.innerHTML = '';
+            card.classList.remove('active');
+        }
+
+        function buildYearSearchTable(receipts, year) {
+            const sorted = sortTransactionsAsc(receipts);
+            let total = 0;
+
+            const rows = sorted.map((item, index) => {
+                const amount = getAmount(item);
+                total += amount;
+
+                const isLastRow2026 = String(year) === '2026' && index === sorted.length - 1;
+
+                return `
+                    <tr class="${isLastRow2026 ? 'highlight-2026' : ''}">
+                        <td><span class="search-date-chip">${formatShortDate(item.date)}</span></td>
+                        <td><span class="search-amount">${formatCurrency(amount)}</span></td>
+                        <td><span class="search-receipt-chip">${escapeHtml(item.receipt_no)}</span></td>
+                    </tr>
+                `;
+            }).join('');
+
+            const ai = buildAIDataForReceipts(sorted);
+
+            return `
+                <div class="result-item">
+                    <div class="search-table-wrap">
+                        <table class="search-table">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>المبلغ</th>
+                                    <th>رقم السند</th>
+                               
