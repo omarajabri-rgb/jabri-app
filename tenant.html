@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>مجمع جبري | لوحة المستأجر المحدثة</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
@@ -100,6 +101,11 @@
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 10px 22px rgba(120,95,56,0.10);
             transition: all 0.25s ease;
+        }
+
+        .ghost-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(120,95,56,0.12);
         }
 
         .hero-card {
@@ -384,6 +390,11 @@
             box-shadow: 0 18px 35px rgba(201,164,107,0.25);
         }
 
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 20px 38px rgba(201,164,107,0.28);
+        }
+
         .footer {
             text-align: center;
             margin-top: 20px;
@@ -569,42 +580,12 @@
             return 6;
         }
 
-        function getSummaryCredit(row) {
-            return toNumber(
-                row?.total_credit ??
-                row?.credit ??
-                row?.total_paid ??
-                row?.paid ??
-                0
-            );
-        }
-
-        function getSummaryBalance(row) {
-            return Math.max(0, toNumber(
-                row?.closing_balance ??
-                row?.balance ??
-                row?.remaining_balance ??
-                row?.remaining ??
-                0
-            ));
-        }
-
-        function getSummaryYear(row) {
-            return Number(
-                row?.year ??
-                row?.summary_year ??
-                row?.fiscal_year ??
-                0
-            );
-        }
-
         function getCurrentAndPreviousSummaries(summaryRows) {
-            const validRows = (summaryRows || [])
-                .map(row => ({ ...row, __year: getSummaryYear(row) }))
-                .filter(row => row.__year > 0)
-                .sort((a, b) => a.__year - b.__year);
+            const rows = (summaryRows || [])
+                .filter(row => Number(row.year) > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
 
-            if (!validRows.length) {
+            if (!rows.length) {
                 return {
                     currentSummary: null,
                     previousSummary: null,
@@ -612,20 +593,16 @@
                 };
             }
 
-            const preferredCurrent = validRows.find(row => row.__year === 2026);
-            const currentSummary = preferredCurrent || validRows[validRows.length - 1];
-
+            const currentSummary = rows.find(row => Number(row.year) === 2026) || rows[rows.length - 1];
             const previousSummary =
-                validRows.find(row => row.__year === currentSummary.__year - 1) ||
-                validRows.filter(row => row.__year < currentSummary.__year).slice(-1)[0] ||
+                rows.find(row => Number(row.year) === Number(currentSummary.year) - 1) ||
+                rows.filter(row => Number(row.year) < Number(currentSummary.year)).slice(-1)[0] ||
                 null;
-
-            const chartRows = [previousSummary, currentSummary].filter(Boolean);
 
             return {
                 currentSummary,
                 previousSummary,
-                chartRows
+                chartRows: [previousSummary, currentSummary].filter(Boolean)
             };
         }
 
@@ -634,9 +611,9 @@
                 return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
             }
 
-            const currentYear = getSummaryYear(currentSummary);
-            const currentCredit = getSummaryCredit(currentSummary);
-            const currentBalance = getSummaryBalance(currentSummary);
+            const currentYear = Number(currentSummary.year || 0);
+            const currentCredit = toNumber(currentSummary.total_credit);
+            const currentBalance = Math.max(0, toNumber(currentSummary.final_balance));
 
             if (!previousSummary) {
                 if (currentBalance === 0) {
@@ -649,8 +626,8 @@
 والرصيد الحالي <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ`;
             }
 
-            const previousYear = getSummaryYear(previousSummary);
-            const previousBalance = getSummaryBalance(previousSummary);
+            const previousYear = Number(previousSummary.year || 0);
+            const previousBalance = Math.max(0, toNumber(previousSummary.final_balance));
             const balanceDiff = currentBalance - previousBalance;
 
             if (balanceDiff < 0) {
@@ -867,8 +844,8 @@
             if (timelineChartInstance) timelineChartInstance.destroy();
 
             const rows = (chartRows || []).filter(Boolean);
-            const labels = rows.map(row => String(getSummaryYear(row)));
-            const balances = rows.map(row => getSummaryBalance(row));
+            const labels = rows.map(row => String(row.year));
+            const balances = rows.map(row => Math.max(0, toNumber(row.final_balance)));
 
             let trendColor = '#c9a46b';
             let fillColor = 'rgba(201,164,107,0.10)';
@@ -973,7 +950,7 @@
 
                 const { data: summaryData, error: summaryError } = await supabaseClient
                     .from('tenant_yearly_summary')
-                    .select('*')
+                    .select('tenant_code, year, opening_balance, total_debit, total_credit, final_balance')
                     .eq('tenant_code', tenantCode)
                     .order('year', { ascending: true });
 
@@ -986,11 +963,11 @@
                     chartRows
                 } = getCurrentAndPreviousSummaries(summaryData || []);
 
-                const currentYear = currentSummary ? getSummaryYear(currentSummary) : 2026;
-                const currentCredit = currentSummary ? getSummaryCredit(currentSummary) : 0;
-                const currentBalance = currentSummary ? getSummaryBalance(currentSummary) : 0;
+                const currentYear = currentSummary ? Number(currentSummary.year) : 2026;
+                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
+                const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
 
-                document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
+                document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode || '-';
                 document.getElementById('last_update').innerText =
                     `آخر تحديث: ${new Date().toLocaleDateString('en-GB')} | سنة العرض: ${currentYear}`;
 
@@ -1017,10 +994,12 @@
                 document.querySelectorAll('.reveal').forEach((el, i) => {
                     setTimeout(() => el.classList.add('active'), i * 80);
                 });
-                lucide.createIcons();
+
+                if (window.lucide) lucide.createIcons();
             } catch (e) {
                 console.error(e);
                 document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
             }
         }
 
