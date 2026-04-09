@@ -22,6 +22,7 @@
             --success: #2f9e6f;
             --danger: #c95a52;
             --warning: #c38a2e;
+            --neutral: #8b7f70;
 
             --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
             --glass-card-bg: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
@@ -241,7 +242,7 @@
 
         .smart-body {
             font-size: 16px;
-            line-height: 2.2;
+            line-height: 2.1;
             font-weight: 800;
             color: var(--text);
             text-align: right;
@@ -300,6 +301,34 @@
 
         .timeline-wrap {
             min-height: 300px;
+        }
+
+        .line-insight {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .line-insight.good {
+            color: var(--success);
+            background: rgba(47,158,111,0.10);
+            border-color: rgba(47,158,111,0.18);
+        }
+
+        .line-insight.warning {
+            color: var(--danger);
+            background: rgba(201,90,82,0.10);
+            border-color: rgba(201,90,82,0.18);
+        }
+
+        .line-insight.neutral {
+            color: var(--neutral);
+            background: rgba(139,127,112,0.10);
+            border-color: rgba(139,127,112,0.18);
         }
 
         #notifications_box {
@@ -512,7 +541,7 @@
 
         <div class="panel reveal">
             <div class="chip-header">
-                <div class="chip">ملخص الحساب السنوي</div>
+                <div class="chip">وضع الحساب</div>
             </div>
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
@@ -530,6 +559,7 @@
             <div class="chart-wrap timeline-wrap">
                 <canvas id="timelineChart"></canvas>
             </div>
+            <div id="line_insight" class="line-insight neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
@@ -558,7 +588,7 @@
         }
 
         function formatNumber(v) {
-            return Math.round(toNumber(v)).toLocaleString('en-US');
+            return String(Math.round(toNumber(v)));
         }
 
         function formatNotificationDate(value) {
@@ -569,6 +599,17 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
+        }
+
+        function formatRealLastUpdate(value) {
+            if (!value) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+            const d = new Date(value);
+            if (isNaN(d)) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+
+            return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })}`;
         }
 
         function getPriorityByType(type) {
@@ -593,11 +634,8 @@
                 };
             }
 
-            const currentSummary = rows.find(row => Number(row.year) === 2026) || rows[rows.length - 1];
-            const previousSummary =
-                rows.find(row => Number(row.year) === Number(currentSummary.year) - 1) ||
-                rows.filter(row => Number(row.year) < Number(currentSummary.year)).slice(-1)[0] ||
-                null;
+            const currentSummary = rows[rows.length - 1];
+            const previousSummary = rows.length > 1 ? rows[rows.length - 2] : null;
 
             return {
                 currentSummary,
@@ -606,45 +644,118 @@
             };
         }
 
-        function buildAdviceMessageFromSummary(currentSummary, previousSummary) {
-            if (!currentSummary) {
-                return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
+        function getMonthlyPlan(finalBalance) {
+            const balance = Math.max(0, Number(finalBalance || 0));
+
+            if (balance <= 0) {
+                return {
+                    monthsToClose: 0,
+                    monthlySuggestion: 0
+                };
             }
 
-            const currentYear = Number(currentSummary.year || 0);
-            const currentCredit = toNumber(currentSummary.total_credit);
-            const currentBalance = Math.max(0, toNumber(currentSummary.final_balance));
+            let monthsToClose = 12;
 
-            if (!previousSummary) {
-                if (currentBalance === 0) {
-                    return `حساب سنة <span class="highlight-number" data-value="${currentYear}">0</span> مسدد بالكامل
-تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
-                }
-
-                return `في سنة <span class="highlight-number" data-value="${currentYear}">0</span>
-تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ
-والرصيد الحالي <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ`;
+            if (balance <= 300) {
+                monthsToClose = 3;
+            } else if (balance <= 1000) {
+                monthsToClose = 6;
+            } else if (balance <= 2000) {
+                monthsToClose = 12;
+            } else {
+                monthsToClose = 18;
             }
 
-            const previousYear = Number(previousSummary.year || 0);
-            const previousBalance = Math.max(0, toNumber(previousSummary.final_balance));
+            return {
+                monthsToClose,
+                monthlySuggestion: Math.ceil(balance / monthsToClose)
+            };
+        }
+
+        function getAccountingAdvice(current, previous) {
+            if (!current) {
+                return {
+                    status: 'neutral',
+                    message: 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.'
+                };
+            }
+
+            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
+            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
+            const currentCredit = Number(current?.total_credit || 0);
+            const currentDebit = Number(current?.total_debit || 0);
+
             const balanceDiff = currentBalance - previousBalance;
+            const paymentRate = currentDebit > 0 ? (currentCredit / currentDebit) * 100 : 0;
+            const plan = getMonthlyPlan(currentBalance);
 
-            if (balanceDiff < 0) {
-                return `مقارنة بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
-هناك تحسّن في الرصيد بمقدار <span class="highlight-number" data-value="${Math.round(Math.abs(balanceDiff))}">0</span> د.أ
-ودائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
+            if (currentBalance <= 0) {
+                return {
+                    status: 'excellent',
+                    message: `وضع حسابك ممتاز، ولا يوجد رصيد مستحق حالياً.
+تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`
+                };
             }
 
-            if (balanceDiff > 0) {
-                return `مقارنة بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
-هناك زيادة في الرصيد بمقدار <span class="highlight-number" data-value="${Math.round(balanceDiff)}">0</span> د.أ
-ودائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
+            if (balanceDiff > 0 && currentBalance > 500) {
+                return {
+                    status: 'warning',
+                    message: `هناك زيادة في الرصيد المستحق مقارنة بالسنة الماضية.
+الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
+المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
+لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
+                };
             }
 
-            return `الرصيد ثابت بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
-دائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ
-والرصيد الحالي <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ`;
+            if (paymentRate >= 85) {
+                return {
+                    status: 'good',
+                    message: `نسبة السداد جيدة، لكن ما زال هناك رصيد يحتاج متابعة.
+الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
+المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
+لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
+                };
+            }
+
+            return {
+                status: 'fair',
+                message: `يوجد رصيد مستحق، ويُفضل تنظيم دفعة قريبة لتجنب التراكم.
+الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
+المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
+لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
+            };
+        }
+
+        function getLineInsight(current, previous) {
+            if (!current || !previous) {
+                return {
+                    type: 'neutral',
+                    text: 'لا توجد بيانات كافية للمقارنة حالياً'
+                };
+            }
+
+            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
+            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
+            const diff = currentBalance - previousBalance;
+
+            if (diff < 0) {
+                return {
+                    type: 'good',
+                    text: `تحسّن في الرصيد بمقدار ${Math.abs(Math.round(diff))} د.أ مقارنة بالسنة الماضية`
+                };
+            }
+
+            if (diff > 0) {
+                return {
+                    type: 'warning',
+                    text: `زيادة في الرصيد المستحق بمقدار ${Math.round(diff)} د.أ مقارنة بالسنة الماضية`
+                };
+            }
+
+            return {
+                type: 'neutral',
+                text: 'لا يوجد تغيير في الرصيد مقارنة بالسنة الماضية'
+            };
         }
 
         function animateNumber(element, endValue) {
@@ -654,7 +765,7 @@
 
             function update(currentTime) {
                 const progress = Math.min((currentTime - startTime) / duration, 1);
-                element.innerText = Math.floor(progress * endValue).toLocaleString('en-US');
+                element.innerText = String(Math.floor(progress * endValue));
                 if (progress < 1) requestAnimationFrame(update);
             }
 
@@ -670,7 +781,7 @@
                 function update(currentTime) {
                     const progress = Math.min((currentTime - startTime) / duration, 1);
                     const eased = 1 - Math.pow(1 - progress, 3);
-                    el.innerText = Math.floor(eased * end).toLocaleString('en-US');
+                    el.innerText = String(Math.floor(eased * end));
                     if (progress < 1) requestAnimationFrame(update);
                 }
 
@@ -950,7 +1061,7 @@
 
                 const { data: summaryData, error: summaryError } = await supabaseClient
                     .from('tenant_yearly_summary')
-                    .select('tenant_code, year, opening_balance, total_debit, total_credit, final_balance')
+                    .select('*')
                     .eq('tenant_code', tenantCode)
                     .order('year', { ascending: true });
 
@@ -963,13 +1074,19 @@
                     chartRows
                 } = getCurrentAndPreviousSummaries(summaryData || []);
 
-                const currentYear = currentSummary ? Number(currentSummary.year) : 2026;
                 const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
                 const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode || '-';
-                document.getElementById('last_update').innerText =
-                    `آخر تحديث: ${new Date().toLocaleDateString('en-GB')} | سنة العرض: ${currentYear}`;
+
+                const realLastUpdate =
+                    currentSummary?.updated_at ||
+                    currentSummary?.created_at ||
+                    tenant?.updated_at ||
+                    tenant?.created_at ||
+                    null;
+
+                document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
 
                 const chip = document.getElementById('account_status_chip');
                 chip.innerText = currentBalance === 0 ? '✔ مسدد' : '⚠ جزئي';
@@ -980,8 +1097,13 @@
                 animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
 
-                document.getElementById('smart_message').innerHTML =
-                    buildAdviceMessageFromSummary(currentSummary, previousSummary);
+                const advice = getAccountingAdvice(currentSummary, previousSummary);
+                document.getElementById('smart_message').innerHTML = advice.message;
+
+                const lineInsight = getLineInsight(currentSummary, previousSummary);
+                const lineInsightEl = document.getElementById('line_insight');
+                lineInsightEl.className = `line-insight ${lineInsight.type}`;
+                lineInsightEl.innerText = lineInsight.text;
 
                 animateHighlights();
                 await loadNotifications();
