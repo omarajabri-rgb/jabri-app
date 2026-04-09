@@ -223,17 +223,6 @@
             margin-bottom:0;
         }
 
-        .commitment-box{
-            margin-top:10px;
-            padding:12px;
-            border-radius:14px;
-            font-weight:800;
-            font-size:14px;
-            text-align:center;
-            background:rgba(201,164,107,0.1);
-            color:#6b4f2b;
-        }
-
         .alert-box{
             margin-top:10px;
             padding:12px;
@@ -762,13 +751,11 @@
 
             <div class="tenant-select-grid">
                 <div class="field">
-                    <label>المستأجر</label>
                     <select id="tenant_select"><option value="">اختر المستأجر</option></select>
                 </div>
                 <div class="last-seen-chip" id="last_seen_chip">—</div>
             </div>
 
-            <div id="commitment_score" class="commitment-box">—</div>
             <div id="smart_alert" class="alert-box">—</div>
 
             <div class="smart-ai-box">
@@ -796,6 +783,11 @@
                         <div class="hero-mini" id="hero_default_card">
                             <span>احتمال التعثر</span>
                             <b id="ai_default_probability">0%</b>
+                        </div>
+
+                        <div class="hero-mini" id="hero_commitment_card">
+                            <span>نسبة الالتزام</span>
+                            <b id="ai_commitment_ratio">0%</b>
                         </div>
                     </div>
                 </div>
@@ -1087,24 +1079,6 @@
             el.classList.add(mood === 'good' ? 'dot-good' : mood === 'bad' ? 'dot-bad' : 'dot-warn');
         }
 
-        function updateCommitment(totalDebit, totalCredit) {
-            const el = document.getElementById('commitment_score');
-            if (!el) return;
-
-            if (!totalDebit) {
-                el.innerText = 'نسبة الالتزام: 0%';
-                el.style.color = '#6b4f2b';
-                return;
-            }
-
-            const ratio = Math.round((totalCredit / totalDebit) * 100);
-            el.innerText = `نسبة الالتزام: ${ratio}%`;
-
-            if (ratio >= 80) el.style.color = '#159a6f';
-            else if (ratio >= 55) el.style.color = '#d7921f';
-            else el.style.color = '#d14d4d';
-        }
-
         function buildTenantYearlyPattern(tenantCode) {
             return allSummaries
                 .filter(r => r.tenant_code === tenantCode)
@@ -1156,13 +1130,13 @@
             const raw = tenant.lastSeen || tenant.last_seen || tenant.last_login || tenant.updated_at || tenant.created_at || null;
 
             if (!raw) {
-                chip.innerText = 'No last seen';
+                chip.innerText = 'لا يوجد تسجيل دخول';
                 return;
             }
 
             const d = new Date(raw);
             if (isNaN(d.getTime())) {
-                chip.innerText = 'No last seen';
+                chip.innerText = 'لا يوجد تسجيل دخول';
                 return;
             }
 
@@ -1172,11 +1146,11 @@
             const diffHour = Math.floor(diffMin / 60);
             const diffDay = Math.floor(diffHour / 24);
 
-            if (diffMin < 1) chip.innerText = 'Last seen: now';
-            else if (diffMin < 60) chip.innerText = `Last seen: ${diffMin} min ago`;
-            else if (diffHour < 24) chip.innerText = `Last seen: ${diffHour} hr ago`;
-            else if (diffDay <= 7) chip.innerText = `Last seen: ${diffDay} day ago`;
-            else chip.innerText = `Last seen: ${formatEnglishDateTime(raw)}`;
+            if (diffMin < 1) chip.innerText = 'آخر ظهور: الآن';
+            else if (diffMin < 60) chip.innerText = `آخر ظهور: ${diffMin} دقيقة`;
+            else if (diffHour < 24) chip.innerText = `آخر ظهور: ${diffHour} ساعة`;
+            else if (diffDay <= 7) chip.innerText = `آخر ظهور: ${diffDay} يوم`;
+            else chip.innerText = `آخر ظهور: ${formatEnglishDateTime(raw)}`;
         }
 
         async function loadData() {
@@ -1233,7 +1207,6 @@
                 if (balanceTextEl) balanceTextEl.innerText = '—';
                 if (creditCard) setMoodClass(creditCard, 'ai-neutral');
                 if (balanceCard) setMoodClass(balanceCard, 'ai-neutral');
-                document.getElementById('commitment_score').innerText = 'نسبة الالتزام: 0%';
                 return;
             }
 
@@ -1256,8 +1229,6 @@
             [creditEl, balanceEl].forEach(el => {
                 if (el) applySmartNumberColorByRatio(el, ratio);
             });
-
-            updateCommitment(totalDebit, paid);
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
@@ -1309,11 +1280,11 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#4b3720';
 
-                        ctx.font = 'bold 24px Tajawal';
+                        ctx.font = 'bold 36px Tajawal';
                         ctx.fillText(`${ratio}%`, x, y - 10);
 
                         ctx.font = 'bold 16px Tajawal';
-                        ctx.fillText(`${formatNumber(paid)} / ${formatNumber(total)}`, x, y + 18);
+                        ctx.fillText(`${formatNumber(paid)} / ${formatNumber(total)}`, x, y + 22);
                         ctx.restore();
                     }
                 }]
@@ -1405,12 +1376,11 @@
             const recommendation = document.getElementById('ai_recommendation');
             const recommendationText = document.getElementById('ai_recommendation_text');
             const nextPayEl = document.getElementById('ai_next_payment_probability');
-            const nextPayText = document.getElementById('ai_next_payment_probability_text');
             const defaultEl = document.getElementById('ai_default_probability');
-            const defaultText = document.getElementById('ai_default_probability_text');
             const flagsBox = document.getElementById('ai_risk_flags');
             const probabilitySummary = document.getElementById('ai_probability_summary');
             const probabilitySummaryText = document.getElementById('ai_probability_summary_text');
+            const commitmentEl = document.getElementById('ai_commitment_ratio');
 
             if (!tenant) {
                 badge.innerText = '—';
@@ -1432,9 +1402,8 @@
                 recommendation.innerText = '—';
                 recommendationText.innerText = '—';
                 nextPayEl.innerText = '0%';
-                nextPayText.innerText = '—';
                 defaultEl.innerText = '0%';
-                defaultText.innerText = '—';
+                commitmentEl.innerText = '0%';
                 probabilitySummary.innerText = '—';
                 probabilitySummaryText.innerText = '—';
                 flagsBox.innerHTML = '';
@@ -1442,6 +1411,7 @@
                 ['ai_card_type','ai_card_last_payment','ai_card_months_without_payment','ai_card_last3_ratio','ai_card_total_credit','ai_card_total_balance'].forEach(id => setMoodClass(document.getElementById(id), 'ai-neutral'));
                 setMoodClass(document.getElementById('hero_next_payment_card'), 'warn');
                 setMoodClass(document.getElementById('hero_default_card'), 'warn');
+                setMoodClass(document.getElementById('hero_commitment_card'), 'warn');
                 ['dot_close_estimate','dot_behavior','dot_recommendation','dot_probability_summary'].forEach(id => setDotMood(id, 'warn'));
                 return;
             }
@@ -1455,6 +1425,14 @@
             const currentBalance = latestSummary ? Math.max(0, toNumber(latestSummary.final_balance)) : 0;
             const coverageScore = totalReq > 0 ? Math.min(100, Math.round((paid / totalReq) * 100)) : 0;
             const regularityScore = yearlyData.length ? Math.round(yearlyData.reduce((s, y) => s + y.ratio, 0) / yearlyData.length) : 0;
+
+            if (commitmentEl) {
+                commitmentEl.innerText = `${coverageScore}%`;
+                const card = document.getElementById('hero_commitment_card');
+                if (coverageScore >= 80) setMoodClass(card, 'good');
+                else if (coverageScore >= 55) setMoodClass(card, 'warn');
+                else setMoodClass(card, 'bad');
+            }
 
             const paymentRows = tenantTx.filter(x => toNumber(x.credit) > 0).sort((a, b) => new Date(a.date) - new Date(b.date));
             const lastPaymentRow = paymentRows[paymentRows.length - 1] || null;
@@ -1489,7 +1467,7 @@
             } else {
                 badgeText = 'خطر';
                 badgeClass = 'badge-risk';
-                badgeDesc = 'يحتاج متابعة مباشرة';
+                badgeDesc = 'يحتاج تدخل إداري فوري';
             }
 
             badge.innerText = badgeText;
@@ -1517,14 +1495,21 @@
             setMoodClass(document.getElementById('ai_card_type'), finalScore >= 70 ? 'ai-good' : finalScore >= 50 ? 'ai-warn' : 'ai-bad');
 
             if (lastPaymentRow?.date) {
-                lastPayment.innerText = `${formatEnglishDate(lastPaymentRow.date)} • ${formatNumber(lastPaymentRow.credit)}`;
+                lastPayment.innerText = `${formatEnglishDate(lastPaymentRow.date)} ${formatNumber(lastPaymentRow.credit)}`;
                 const monthsGap = monthsSince(lastPaymentRow.date);
-                lastPaymentText.innerText = monthsGap === 0 ? 'آخر دفعة هذا الشهر' : `آخر دفعة منذ ${monthsGap} شهر`;
+
+                let mood = 'warn';
+                if (monthsGap === 0) mood = 'good';
+                else if (monthsGap <= 2) mood = 'warn';
+                else mood = 'bad';
+
+                lastPaymentText.innerText = `${monthsGap} شهر`;
+                setMoodClass(document.getElementById('ai_card_last_payment'), mood);
             } else {
                 lastPayment.innerText = 'لا توجد دفعات';
-                lastPaymentText.innerText = 'لم يتم تسجيل أي دفعة حديثة';
+                lastPaymentText.innerText = '—';
+                setMoodClass(document.getElementById('ai_card_last_payment'), 'ai-bad');
             }
-            setMoodClass(document.getElementById('ai_card_last_payment'), lastPaymentRow ? 'ai-good' : 'ai-bad');
 
             const monthsWithoutPayment = lastPaymentRow?.date ? (monthsSince(lastPaymentRow.date) ?? 0) : 12;
             monthsNoPay.innerText = `${monthsWithoutPayment}`;
@@ -1611,10 +1596,9 @@
             );
 
             nextPayEl.innerText = `${nextPaymentProbability}%`;
-            if (nextPaymentProbability >= 75) nextPayText.innerText = 'احتمال جيد لحدوث دفعة الشهر القادم';
-            else if (nextPaymentProbability >= 50) nextPayText.innerText = 'احتمال متوسط ويحتاج متابعة';
-            else nextPayText.innerText = 'الاحتمال ضعيف حالياً';
-            setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
+            if (nextPaymentProbability >= 75) setMoodClass(document.getElementById('hero_next_payment_card'), 'good');
+            else if (nextPaymentProbability >= 50) setMoodClass(document.getElementById('hero_next_payment_card'), 'warn');
+            else setMoodClass(document.getElementById('hero_next_payment_card'), 'bad');
 
             const defaultProbability = Math.max(
                 5,
@@ -1625,9 +1609,6 @@
             );
 
             defaultEl.innerText = `${defaultProbability}%`;
-            if (defaultProbability >= 70) defaultText.innerText = 'خطر تعثر مرتفع';
-            else if (defaultProbability >= 45) defaultText.innerText = 'خطر تعثر متوسط';
-            else defaultText.innerText = 'خطر تعثر منخفض';
             setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
 
             probabilitySummary.innerText = `احتمال السداد ${nextPaymentProbability}% • احتمال التعثر ${defaultProbability}%`;
