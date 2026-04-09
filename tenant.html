@@ -474,11 +474,11 @@
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
-                <span>دائن (مدفوع)</span>
+                <span>دائن</span>
                 <b id="val_credit">0</b>
             </div>
             <div class="soft-card balance-card reveal">
-                <span>الرصيد المتبقي</span>
+                <span>الرصيد</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
@@ -501,20 +501,20 @@
 
         <div class="panel reveal">
             <div class="chip-header">
-                <div class="chip">ملخص الحساب</div>
+                <div class="chip">ملخص الحساب السنوي</div>
             </div>
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
             </div>
             <div class="pie-text-stats">
-                <span class="pie-text-item paid">مدفوع: <b id="pie_paid_value">0</b></span>
-                <span class="pie-text-item balance">متبقي: <b id="pie_balance_value">0</b></span>
+                <span class="pie-text-item paid">دائن: <b id="pie_paid_value">0</b></span>
+                <span class="pie-text-item balance">الرصيد: <b id="pie_balance_value">0</b></span>
             </div>
         </div>
 
         <div class="panel reveal">
             <div class="chip-header">
-                <div class="chip">الخط الزمني للدفع</div>
+                <div class="chip">اتجاه الرصيد خلال سنتين</div>
             </div>
             <div class="chart-wrap timeline-wrap">
                 <canvas id="timelineChart"></canvas>
@@ -540,7 +540,6 @@
 
         let pieChartInstance = null;
         let timelineChartInstance = null;
-        const CHART_YEARS = new Set([2025, 2026]);
 
         function toNumber(v) {
             const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
@@ -549,25 +548,6 @@
 
         function formatNumber(v) {
             return Math.round(toNumber(v)).toLocaleString('en-US');
-        }
-
-        function isRentRow(desc) {
-            const d = (desc || '').trim();
-            return d.startsWith('ايجار') || d.startsWith('الإيجار') || d.startsWith('الايجار');
-        }
-
-        function isFeesRow(desc) {
-            return (desc || '').trim().startsWith('معارف');
-        }
-
-        function isCarryRow(desc) {
-            const d = (desc || '').trim();
-            return d.includes('رصيد سابق') || d.includes('رصيد مدور') || d.startsWith('رصيد عام');
-        }
-
-        function formatDateOnly(value) {
-            const d = new Date(value);
-            return isNaN(d) ? '-' : d.toLocaleDateString('en-GB');
         }
 
         function formatNotificationDate(value) {
@@ -580,17 +560,6 @@
                 });
         }
 
-        function getChartTransactions(transactions) {
-            return (transactions || []).filter(t => {
-                const year = new Date(t.date).getFullYear();
-                return CHART_YEARS.has(year);
-            });
-        }
-
-        function getTransactionsByYear(transactions, year) {
-            return (transactions || []).filter(t => new Date(t.date).getFullYear() === year);
-        }
-
         function getPriorityByType(type) {
             if (type === 'lawyer') return 1;
             if (type === 'legal') return 2;
@@ -600,92 +569,105 @@
             return 6;
         }
 
-        function getStatementYearAdvice(transactions, balance) {
-            const chartRows = getChartTransactions(transactions);
-            const rows2026 = getTransactionsByYear(transactions, 2026);
+        function getSummaryCredit(row) {
+            return toNumber(
+                row?.total_credit ??
+                row?.credit ??
+                row?.total_paid ??
+                row?.paid ??
+                0
+            );
+        }
 
-            const rentRows = rows2026.filter(t => isRentRow(t.description || ''));
-            const feesRows = rows2026.filter(t => isFeesRow(t.description || ''));
-            const carryRows = rows2026.filter(t => isCarryRow(t.description || ''));
+        function getSummaryBalance(row) {
+            return Math.max(0, toNumber(
+                row?.closing_balance ??
+                row?.balance ??
+                row?.remaining_balance ??
+                row?.remaining ??
+                0
+            ));
+        }
 
-            const yearlyRent = rentRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
-            const yearlyFees = feesRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
-            const previousBalance = carryRows.reduce((sum, row) => sum + toNumber(row.debit), 0);
+        function getSummaryYear(row) {
+            return Number(
+                row?.year ??
+                row?.summary_year ??
+                row?.fiscal_year ??
+                0
+            );
+        }
 
-            const payments2025_2026 = chartRows.filter(t => toNumber(t.credit) > 0);
-            const months = new Set(
-                payments2025_2026.map(t => {
-                    const d = new Date(t.date);
-                    return `${d.getFullYear()}-${d.getMonth()}`;
-                })
-            ).size;
+        function getCurrentAndPreviousSummaries(summaryRows) {
+            const validRows = (summaryRows || [])
+                .map(row => ({ ...row, __year: getSummaryYear(row) }))
+                .filter(row => row.__year > 0)
+                .sort((a, b) => a.__year - b.__year);
 
-            const totalPaid = payments2025_2026.reduce((sum, row) => sum + toNumber(row.credit), 0);
-            const monthlyBase = months > 0 ? Math.round(totalPaid / months) : Math.round((yearlyRent + yearlyFees) / 12);
-
-            let suggestedMonthly = monthlyBase;
-
-            if (balance > 0) {
-                if (balance <= 600) suggestedMonthly += 25;
-                else if (balance <= 1200) suggestedMonthly += 50;
-                else if (balance <= 1800) suggestedMonthly += 100;
-                else suggestedMonthly += 150;
-            } else if (previousBalance > 0) {
-                if (previousBalance <= 600) suggestedMonthly += 25;
-                else if (previousBalance <= 1200) suggestedMonthly += 50;
-                else if (previousBalance <= 1800) suggestedMonthly += 100;
-                else suggestedMonthly += 150;
+            if (!validRows.length) {
+                return {
+                    currentSummary: null,
+                    previousSummary: null,
+                    chartRows: []
+                };
             }
 
-            return { yearlyRent, yearlyFees, previousBalance, monthlyBase, suggestedMonthly };
+            const preferredCurrent = validRows.find(row => row.__year === 2026);
+            const currentSummary = preferredCurrent || validRows[validRows.length - 1];
+
+            const previousSummary =
+                validRows.find(row => row.__year === currentSummary.__year - 1) ||
+                validRows.filter(row => row.__year < currentSummary.__year).slice(-1)[0] ||
+                null;
+
+            const chartRows = [previousSummary, currentSummary].filter(Boolean);
+
+            return {
+                currentSummary,
+                previousSummary,
+                chartRows
+            };
         }
 
-        function buildPredictionMeta(transactions, balance) {
-            const filtered = getChartTransactions(transactions);
-            const payments = filtered.filter(t => toNumber(t.credit) > 0);
-
-            if (payments.length === 0 || balance <= 0) return { level: 'unknown' };
-
-            const totalPaid = payments.reduce((sum, t) => sum + toNumber(t.credit), 0);
-            const months = new Set(
-                payments.map(t => {
-                    const d = new Date(t.date);
-                    return `${d.getFullYear()}-${d.getMonth()}`;
-                })
-            ).size;
-
-            const monthlyRate = totalPaid / (months || 1);
-            if (monthlyRate <= 0) return { level: 'unknown' };
-
-            const monthsToClose = Math.ceil(balance / monthlyRate);
-            if (monthsToClose <= 3) return { level: 'excellent', monthsToClose };
-            if (monthsToClose <= 6) return { level: 'good', monthsToClose };
-            if (monthsToClose <= 12) return { level: 'warning', monthsToClose };
-            return { level: 'weak', monthsToClose };
-        }
-
-        function buildAdviceMessageFromStatement(transactions, balance) {
-            const advice = getStatementYearAdvice(transactions, balance);
-            const prediction = buildPredictionMeta(transactions, balance);
-
-            if (!advice.yearlyRent && !advice.yearlyFees && !balance) {
+        function buildAdviceMessageFromSummary(currentSummary, previousSummary) {
+            if (!currentSummary) {
                 return 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.';
             }
 
-            let recommended = advice.suggestedMonthly;
-            const monthsToClose = prediction.monthsToClose || 0;
+            const currentYear = getSummaryYear(currentSummary);
+            const currentCredit = getSummaryCredit(currentSummary);
+            const currentBalance = getSummaryBalance(currentSummary);
 
-            if (prediction.level === 'excellent') recommended = advice.monthlyBase;
-            else if (prediction.level === 'good') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 25);
-            else if (prediction.level === 'warning') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 75);
-            else if (prediction.level === 'weak') recommended = Math.max(advice.suggestedMonthly, advice.monthlyBase + 150);
+            if (!previousSummary) {
+                if (currentBalance === 0) {
+                    return `حساب سنة <span class="highlight-number" data-value="${currentYear}">0</span> مسدد بالكامل
+تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
+                }
 
-            if (recommended <= 0 && balance <= 0) {
-                return 'الحساب ضمن وضع جيد حالياً، ولا يوجد رصيد متبقٍ يستدعي خطة سداد إضافية.';
+                return `في سنة <span class="highlight-number" data-value="${currentYear}">0</span>
+تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ
+والرصيد الحالي <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ`;
             }
 
-            return `يُنصح بدفع حوالي <span class="highlight-number" data-value="${recommended}">0</span> د.أ شهرياً
-سيتم إغلاق الرصيد خلال <span class="highlight-number" data-value="${monthsToClose}">0</span> شهراً بهذا المعدل`;
+            const previousYear = getSummaryYear(previousSummary);
+            const previousBalance = getSummaryBalance(previousSummary);
+            const balanceDiff = currentBalance - previousBalance;
+
+            if (balanceDiff < 0) {
+                return `مقارنة بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
+هناك تحسّن في الرصيد بمقدار <span class="highlight-number" data-value="${Math.round(Math.abs(balanceDiff))}">0</span> د.أ
+ودائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
+            }
+
+            if (balanceDiff > 0) {
+                return `مقارنة بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
+هناك زيادة في الرصيد بمقدار <span class="highlight-number" data-value="${Math.round(balanceDiff)}">0</span> د.أ
+ودائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`;
+            }
+
+            return `الرصيد ثابت بين <span class="highlight-number" data-value="${previousYear}">0</span> و<span class="highlight-number" data-value="${currentYear}">0</span>
+دائن سنة ${currentYear} هو <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ
+والرصيد الحالي <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ`;
         }
 
         function animateNumber(element, endValue) {
@@ -818,65 +800,22 @@
             `).join('');
         }
 
-        function buildTimelineAnalytics2025_2026(transactions) {
-            const filtered = [...getChartTransactions(transactions)]
-                .filter(t => t?.date)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            let runningBalance = 0;
-            const labels = [];
-            const paymentSeries = [];
-            const balanceSeries = [];
-            const points = [];
-
-            filtered.forEach(row => {
-                const dateObj = new Date(row.date);
-                if (isNaN(dateObj)) return;
-
-                const debit = toNumber(row.debit);
-                const credit = toNumber(row.credit);
-                const desc = (row.description || '').trim();
-
-                if (!isCarryRow(desc)) {
-                    runningBalance += debit - credit;
-                }
-
-                labels.push(dateObj.toLocaleDateString('en-GB'));
-                paymentSeries.push(credit > 0 ? credit : null);
-                balanceSeries.push(runningBalance);
-                points.push({
-                    date: row.date,
-                    description: desc || 'حركة مالية',
-                    debit,
-                    credit,
-                    balance: runningBalance
-                });
-            });
-
-            return {
-                labels,
-                paymentSeries,
-                balanceSeries,
-                points
-            };
-        }
-
-        function renderPieChart(paid, balance) {
+        function renderPieChart(credit, balance) {
             const canvas = document.getElementById('balancePieChart');
 
             if (pieChartInstance) pieChartInstance.destroy();
 
-            const paidValue = Math.max(0, toNumber(paid));
+            const creditValue = Math.max(0, toNumber(credit));
             const balanceValue = Math.max(0, toNumber(balance));
-            const total = paidValue + balanceValue;
-            const percentTarget = total > 0 ? Math.round((paidValue / total) * 100) : 0;
+            const total = creditValue + balanceValue;
+            const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0;
 
             pieChartInstance = new Chart(canvas, {
                 type: 'doughnut',
                 data: {
-                    labels: ['مدفوع', 'متبقي'],
+                    labels: ['دائن', 'الرصيد'],
                     datasets: [{
-                        data: [paidValue, balanceValue],
+                        data: [creditValue, balanceValue],
                         backgroundColor: ['#2f9e6f', '#c95a52'],
                         borderWidth: 0
                     }]
@@ -923,47 +862,46 @@
             });
         }
 
-        function renderTimelineChart(analytics) {
+        function renderTimelineChart(chartRows) {
             const canvas = document.getElementById('timelineChart');
             if (timelineChartInstance) timelineChartInstance.destroy();
+
+            const rows = (chartRows || []).filter(Boolean);
+            const labels = rows.map(row => String(getSummaryYear(row)));
+            const balances = rows.map(row => getSummaryBalance(row));
+
+            let trendColor = '#c9a46b';
+            let fillColor = 'rgba(201,164,107,0.10)';
+
+            if (balances.length >= 2) {
+                const prev = balances[0];
+                const current = balances[1];
+
+                if (current < prev) {
+                    trendColor = '#2f9e6f';
+                    fillColor = 'rgba(47,158,111,0.10)';
+                } else if (current > prev) {
+                    trendColor = '#c95a52';
+                    fillColor = 'rgba(201,90,82,0.10)';
+                }
+            }
 
             timelineChartInstance = new Chart(canvas, {
                 type: 'line',
                 data: {
-                    labels: analytics.labels.length ? analytics.labels : ['—'],
-                    datasets: analytics.labels.length ? [
-                        {
-                            label: 'الدفعات',
-                            data: analytics.paymentSeries,
-                            yAxisID: 'yPayments',
-                            borderColor: '#2f9e6f',
-                            backgroundColor: 'rgba(47,158,111,0.08)',
-                            borderWidth: 3,
-                            tension: 0.35,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            spanGaps: true,
-                            fill: false
-                        },
-                        {
-                            label: 'الرصيد',
-                            data: analytics.balanceSeries,
-                            yAxisID: 'yBalance',
-                            borderColor: '#c95a52',
-                            backgroundColor: 'rgba(201,90,82,0.10)',
-                            borderWidth: 3,
-                            tension: 0.35,
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                            fill: true
-                        }
-                    ] : [{
+                    labels: labels.length ? labels : ['—'],
+                    datasets: [{
                         label: 'الرصيد',
-                        data: [0],
-                        borderColor: '#c9a46b',
-                        backgroundColor: 'rgba(201,164,107,0.10)',
-                        borderWidth: 3,
+                        data: balances.length ? balances : [0],
+                        borderColor: trendColor,
+                        backgroundColor: fillColor,
+                        borderWidth: 4,
                         tension: 0.35,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: trendColor,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
                         fill: true
                     }]
                 },
@@ -994,19 +932,10 @@
                             bodyAlign: 'right',
                             callbacks: {
                                 title: function(items) {
-                                    if (!analytics.points.length) return '—';
-                                    const idx = items[0]?.dataIndex ?? 0;
-                                    const point = analytics.points[idx];
-                                    return `${formatDateOnly(point.date)} | ${point.description}`;
+                                    return `السنة ${items[0]?.label || ''}`;
                                 },
                                 label: function(context) {
-                                    if (!analytics.points.length) return `${context.dataset.label}: 0`;
-                                    const idx = context.dataIndex;
-                                    const point = analytics.points[idx];
-                                    if (context.dataset.label === 'الدفعات') {
-                                        return `الدفعة: ${formatNumber(point.credit)}`;
-                                    }
-                                    return `الرصيد: ${formatNumber(point.balance)}`;
+                                    return `الرصيد: ${formatNumber(context.raw)}`;
                                 }
                             }
                         }
@@ -1015,24 +944,11 @@
                         x: {
                             grid: { display: false },
                             ticks: {
-                                maxRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 10,
                                 color: '#7a6c59',
-                                font: { size: 11, weight: '700' }
+                                font: { size: 12, weight: '700' }
                             }
                         },
-                        yPayments: {
-                            position: 'left',
-                            beginAtZero: true,
-                            grid: { drawOnChartArea: false },
-                            ticks: {
-                                color: '#7a6c59',
-                                callback: v => formatNumber(v)
-                            }
-                        },
-                        yBalance: {
-                            position: 'right',
+                        y: {
                             beginAtZero: true,
                             grid: {
                                 color: 'rgba(201,164,107,0.12)'
@@ -1055,44 +971,46 @@
                     .eq('tenant_code', tenantCode)
                     .maybeSingle();
 
-                const { data: tx, error: txError } = await supabaseClient
-                    .from('tenant_transactions')
+                const { data: summaryData, error: summaryError } = await supabaseClient
+                    .from('tenant_yearly_summary')
                     .select('*')
                     .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
+                    .order('year', { ascending: true });
 
                 if (tenantError) console.error('tenant error:', tenantError);
-                if (txError) console.error('transactions error:', txError);
+                if (summaryError) console.error('summary error:', summaryError);
 
-                const allTransactions = tx || [];
-                const transactions2026 = getTransactionsByYear(allTransactions, 2026);
+                const {
+                    currentSummary,
+                    previousSummary,
+                    chartRows
+                } = getCurrentAndPreviousSummaries(summaryData || []);
 
-                const totalCredit = transactions2026.reduce((sum, t) => sum + toNumber(t.credit), 0);
-                const totalDebit = transactions2026.reduce((sum, t) => sum + toNumber(t.debit), 0);
-                const balance = Math.max(0, totalDebit - totalCredit);
+                const currentYear = currentSummary ? getSummaryYear(currentSummary) : 2026;
+                const currentCredit = currentSummary ? getSummaryCredit(currentSummary) : 0;
+                const currentBalance = currentSummary ? getSummaryBalance(currentSummary) : 0;
 
                 document.getElementById('t_name').innerText = tenant?.tenant_name || '-';
-                document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+                document.getElementById('last_update').innerText =
+                    `آخر تحديث: ${new Date().toLocaleDateString('en-GB')} | سنة العرض: ${currentYear}`;
 
                 const chip = document.getElementById('account_status_chip');
-                chip.innerText = balance === 0 ? '✔ مسدد' : '⚠ جزئي';
-                chip.className = balance === 0 ? 'hero-status paid' : 'hero-status partial';
+                chip.innerText = currentBalance === 0 ? '✔ مسدد' : '⚠ جزئي';
+                chip.className = currentBalance === 0 ? 'hero-status paid' : 'hero-status partial';
 
-                animateNumber(document.getElementById('val_credit'), Math.round(totalCredit));
-                animateNumber(document.getElementById('val_balance'), Math.round(balance));
-                animateNumber(document.getElementById('pie_paid_value'), Math.round(totalCredit));
-                animateNumber(document.getElementById('pie_balance_value'), Math.round(balance));
+                animateNumber(document.getElementById('val_credit'), Math.round(currentCredit));
+                animateNumber(document.getElementById('val_balance'), Math.round(currentBalance));
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
 
                 document.getElementById('smart_message').innerHTML =
-                    buildAdviceMessageFromStatement(allTransactions, balance);
+                    buildAdviceMessageFromSummary(currentSummary, previousSummary);
 
                 animateHighlights();
                 await loadNotifications();
 
-                renderPieChart(totalCredit, balance);
-
-                const timelineAnalytics = buildTimelineAnalytics2025_2026(allTransactions);
-                renderTimelineChart(timelineAnalytics);
+                renderPieChart(currentCredit, currentBalance);
+                renderTimelineChart(chartRows);
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
