@@ -701,7 +701,6 @@
                 return {
                     status: 'warning',
                     message: `هناك زيادة في الرصيد المستحق مقارنة بالسنة الماضية.
-الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
 المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
 لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
                 };
@@ -711,7 +710,6 @@
                 return {
                     status: 'good',
                     message: `نسبة السداد جيدة، لكن ما زال هناك رصيد يحتاج متابعة.
-الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
 المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
 لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
                 };
@@ -720,7 +718,6 @@
             return {
                 status: 'fair',
                 message: `يوجد رصيد مستحق، ويُفضل تنظيم دفعة قريبة لتجنب التراكم.
-الرصيد الحالي: <span class="highlight-number" data-value="${Math.round(currentBalance)}">0</span> د.أ
 المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
 لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
             };
