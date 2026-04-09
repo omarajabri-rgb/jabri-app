@@ -1,3 +1,9 @@
+تمام 🔥
+هذا هو الـ full updated admin code بعد آخر تعديلين بالضبط:
+	•	حذف مربع آخر الحركات بالكامل
+	•	نقل إجمالي الدائن و إجمالي الرصيد إلى داخل الصندوق الذكي بنفس حجم المربعات الأخرى
+	•	بدون تغيير منطق البيانات
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -124,12 +130,6 @@
             color:var(--text);
         }
 
-        .btn-success{
-            background:rgba(21,154,111,0.12);
-            color:var(--success);
-            border:1px solid rgba(21,154,111,0.18);
-        }
-
         .panel{
             background:var(--card);
             backdrop-filter:blur(14px);
@@ -229,75 +229,6 @@
             margin-bottom:0;
         }
 
-        .top-metrics-grid{
-            display:grid;
-            grid-template-columns:1.15fr .85fr;
-            gap:18px;
-            margin-top:16px;
-        }
-
-        .top-kpi-grid{
-            display:grid;
-            grid-template-columns:repeat(2, 1fr);
-            gap:14px;
-            align-content:start;
-        }
-
-        .kpi-card{
-            backdrop-filter:blur(14px);
-            border:1px solid rgba(255,255,255,0.75);
-            box-shadow:0 18px 45px rgba(87,68,37,0.10);
-            border-radius:24px;
-            padding:18px;
-            min-height:165px;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            text-align:center;
-            transition:.25s ease;
-            position:relative;
-            overflow:hidden;
-        }
-
-        .kpi-card:hover{
-            transform:translateY(-2px);
-        }
-
-        .kpi-head span{
-            font-size:11px;
-            color:var(--muted);
-            font-weight:800;
-        }
-
-        .kpi-value{
-            font-size:28px;
-            font-weight:900;
-            color:#4b3720;
-            margin-top:8px;
-            line-height:1.4;
-            transition:all .35s ease;
-        }
-
-        .number-good{ color:var(--success) !important; }
-        .number-warn{ color:var(--warning) !important; }
-        .number-bad{ color:var(--danger) !important; }
-
-        .kpi-card.good-card{
-            background:linear-gradient(135deg, rgba(21,154,111,0.16), rgba(255,255,255,0.90));
-            border-color:rgba(21,154,111,0.20);
-        }
-
-        .kpi-card.warn-card{
-            background:linear-gradient(135deg, rgba(215,146,31,0.16), rgba(255,255,255,0.90));
-            border-color:rgba(215,146,31,0.20);
-        }
-
-        .kpi-card.bad-card{
-            background:linear-gradient(135deg, rgba(209,77,77,0.15), rgba(255,255,255,0.90));
-            border-color:rgba(209,77,77,0.20);
-        }
-
         .commitment-box{
             margin-top:10px;
             padding:12px;
@@ -321,6 +252,7 @@
         }
 
         .smart-ai-box{
+            margin-top:14px;
             padding:16px;
             border-radius:22px;
             background:rgba(255,255,255,0.76);
@@ -454,7 +386,7 @@
 
         .quick-ai-grid{
             display:grid;
-            grid-template-columns:repeat(4,1fr);
+            grid-template-columns:repeat(6,1fr);
             gap:12px;
             margin-bottom:14px;
         }
@@ -722,50 +654,6 @@
             font-weight:800;
         }
 
-        .recent-list{
-            display:grid;
-            gap:12px;
-        }
-
-        .recent-card{
-            background:rgba(255,255,255,0.78);
-            border:1px solid var(--line);
-            border-radius:20px;
-            padding:14px;
-        }
-
-        .recent-card-head{
-            display:flex;
-            justify-content:space-between;
-            gap:10px;
-            flex-wrap:wrap;
-            margin-bottom:6px;
-        }
-
-        .recent-card-title{
-            font-weight:900;
-            color:#4e3c24;
-            font-size:14px;
-        }
-
-        .recent-card-meta{
-            font-size:12px;
-            font-weight:800;
-            color:var(--muted);
-        }
-
-        .recent-card-values{
-            font-size:13px;
-            font-weight:900;
-            margin-bottom:10px;
-        }
-
-        .recent-card-actions{
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-        }
-
         .footer-note{
             text-align:center;
             margin-top:20px;
@@ -798,13 +686,8 @@
         }
 
         @media (max-width: 1200px){
-            .top-metrics-grid,
             .quick-ai-grid{
-                grid-template-columns:1fr;
-            }
-
-            .top-kpi-grid{
-                grid-template-columns:repeat(2,1fr);
+                grid-template-columns:repeat(3,1fr);
             }
 
             .hero-ai-card{
@@ -819,6 +702,10 @@
 
             .chart-grid{
                 grid-template-columns:1fr;
+            }
+
+            .quick-ai-grid{
+                grid-template-columns:repeat(2,1fr);
             }
         }
 
@@ -838,10 +725,6 @@
             .form-grid{
                 grid-template-columns:1fr;
             }
-
-            .top-kpi-grid{
-                grid-template-columns:1fr;
-            }
         }
 
         @media (max-width: 560px){
@@ -859,10 +742,6 @@
 
             .quick-ai-card b{
                 font-size:20px;
-            }
-
-            .kpi-value{
-                font-size:22px;
             }
         }
     </style>
@@ -895,126 +774,122 @@
                 <div class="last-seen-chip" id="last_seen_chip">—</div>
             </div>
 
-            <div class="top-metrics-grid">
-                <div>
-                    <div class="top-kpi-grid">
-                        <div class="kpi-card warn-card" id="kpi_card_credit">
-                            <div class="kpi-head"><span>إجمالي الدائن</span></div>
-                            <div class="kpi-value" id="kpi_total_credit">0</div>
-                        </div>
+            <div id="commitment_score" class="commitment-box">—</div>
+            <div id="smart_alert" class="alert-box">—</div>
 
-                        <div class="kpi-card bad-card" id="kpi_card_balance">
-                            <div class="kpi-head"><span>إجمالي الرصيد</span></div>
-                            <div class="kpi-value" id="kpi_total_balance">0</div>
-                        </div>
+            <div class="smart-ai-box">
+                <div class="smart-ai-header">
+                    <div class="panel-title" style="margin:0">
+                        <h3 style="font-size:16px;">الصندوق الذكي للمستأجر</h3>
+                        <p>تحليل ذكي مباشر لحالة المستأجر المحدد</p>
                     </div>
-
-                    <div id="commitment_score" class="commitment-box">—</div>
-                    <div id="smart_alert" class="alert-box">—</div>
+                    <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
 
-                <div class="smart-ai-box">
-                    <div class="smart-ai-header">
-                        <div class="panel-title" style="margin:0">
-                            <h3 style="font-size:16px;">الصندوق الذكي للمستأجر</h3>
-                            <p>تحليل ذكي مباشر لحالة المستأجر المحدد</p>
-                        </div>
-                        <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
+                <div class="hero-ai-card" id="hero_ai_card">
+                    <div class="hero-ai-main">
+                        <div class="hero-ai-title">التقييم الذكي</div>
+                        <div class="hero-ai-score" id="ai_score_value">0/100</div>
+                        <div class="hero-ai-desc" id="ai_score_text">—</div>
                     </div>
 
-                    <div class="hero-ai-card" id="hero_ai_card">
-                        <div class="hero-ai-main">
-                            <div class="hero-ai-title">التقييم الذكي</div>
-                            <div class="hero-ai-score" id="ai_score_value">0/100</div>
-                            <div class="hero-ai-desc" id="ai_score_text">—</div>
+                    <div class="hero-ai-side">
+                        <div class="hero-mini" id="hero_next_payment_card">
+                            <span>احتمال السداد الشهر القادم</span>
+                            <b id="ai_next_payment_probability">0%</b>
                         </div>
 
-                        <div class="hero-ai-side">
-                            <div class="hero-mini" id="hero_next_payment_card">
-                                <span>احتمال السداد الشهر القادم</span>
-                                <b id="ai_next_payment_probability">0%</b>
-                            </div>
-
-                            <div class="hero-mini" id="hero_default_card">
-                                <span>احتمال التعثر</span>
-                                <b id="ai_default_probability">0%</b>
-                            </div>
+                        <div class="hero-mini" id="hero_default_card">
+                            <span>احتمال التعثر</span>
+                            <b id="ai_default_probability">0%</b>
                         </div>
                     </div>
+                </div>
 
-                    <div class="quick-ai-grid">
-                        <div class="quick-ai-card" id="ai_card_type">
-                            <span>نوع المستأجر</span>
-                            <b id="ai_tenant_type">—</b>
-                            <small id="ai_tenant_type_text">—</small>
-                        </div>
-
-                        <div class="quick-ai-card" id="ai_card_last_payment">
-                            <span>آخر دفعة</span>
-                            <b id="ai_last_payment">—</b>
-                            <small id="ai_last_payment_text">—</small>
-                        </div>
-
-                        <div class="quick-ai-card" id="ai_card_months_without_payment">
-                            <span>أشهر بدون دفعات</span>
-                            <b id="ai_months_without_payment">0</b>
-                            <small id="ai_months_without_payment_text">—</small>
-                        </div>
-
-                        <div class="quick-ai-card" id="ai_card_last3_ratio">
-                            <span>التزام آخر 3 سنوات</span>
-                            <b id="ai_last3_ratio">0%</b>
-                            <small id="ai_last3_ratio_text">—</small>
-                        </div>
+                <div class="quick-ai-grid">
+                    <div class="quick-ai-card" id="ai_card_type">
+                        <span>نوع المستأجر</span>
+                        <b id="ai_tenant_type">—</b>
+                        <small id="ai_tenant_type_text">—</small>
                     </div>
 
-                    <div class="insight-list">
-                        <div class="insight-row" id="ai_row_close_estimate">
-                            <div class="insight-row-content">
-                                <span>إغلاق الرصيد المتوقع</span>
-                                <b id="ai_close_estimate">—</b>
-                                <small id="ai_close_estimate_text">—</small>
-                            </div>
-                            <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
-                        </div>
-
-                        <div class="insight-row" id="ai_row_behavior">
-                            <div class="insight-row-content">
-                                <span>تنبيه سلوكي</span>
-                                <b id="ai_behavior_alert">—</b>
-                                <small id="ai_behavior_alert_text">—</small>
-                            </div>
-                            <div class="insight-dot dot-warn" id="dot_behavior"></div>
-                        </div>
-
-                        <div class="insight-row" id="ai_row_recommendation">
-                            <div class="insight-row-content">
-                                <span>التوصية</span>
-                                <b id="ai_recommendation">—</b>
-                                <small id="ai_recommendation_text">—</small>
-                            </div>
-                            <div class="insight-dot dot-good" id="dot_recommendation"></div>
-                        </div>
-
-                        <div class="insight-row" id="ai_row_probabilities">
-                            <div class="insight-row-content">
-                                <span>الاحتمالات</span>
-                                <b id="ai_probability_summary">—</b>
-                                <small id="ai_probability_summary_text">—</small>
-                            </div>
-                            <div class="insight-dot dot-warn" id="dot_probability_summary"></div>
-                        </div>
+                    <div class="quick-ai-card" id="ai_card_last_payment">
+                        <span>آخر دفعة</span>
+                        <b id="ai_last_payment">—</b>
+                        <small id="ai_last_payment_text">—</small>
                     </div>
 
-                    <div class="flags-strip">
-                        <div class="flags-strip-title">أعلام المخاطر</div>
-                        <div class="risk-flags" id="ai_risk_flags"></div>
+                    <div class="quick-ai-card" id="ai_card_months_without_payment">
+                        <span>أشهر بدون دفعات</span>
+                        <b id="ai_months_without_payment">0</b>
+                        <small id="ai_months_without_payment_text">—</small>
                     </div>
 
-                    <div style="display:none;">
-                        <small id="ai_next_payment_probability_text">—</small>
-                        <small id="ai_default_probability_text">—</small>
+                    <div class="quick-ai-card" id="ai_card_last3_ratio">
+                        <span>التزام آخر 3 سنوات</span>
+                        <b id="ai_last3_ratio">0%</b>
+                        <small id="ai_last3_ratio_text">—</small>
                     </div>
+
+                    <div class="quick-ai-card" id="ai_card_total_credit">
+                        <span>إجمالي الدائن</span>
+                        <b id="kpi_total_credit">0</b>
+                        <small id="kpi_total_credit_text">—</small>
+                    </div>
+
+                    <div class="quick-ai-card" id="ai_card_total_balance">
+                        <span>إجمالي الرصيد</span>
+                        <b id="kpi_total_balance">0</b>
+                        <small id="kpi_total_balance_text">—</small>
+                    </div>
+                </div>
+
+                <div class="insight-list">
+                    <div class="insight-row" id="ai_row_close_estimate">
+                        <div class="insight-row-content">
+                            <span>إغلاق الرصيد المتوقع</span>
+                            <b id="ai_close_estimate">—</b>
+                            <small id="ai_close_estimate_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
+                    </div>
+
+                    <div class="insight-row" id="ai_row_behavior">
+                        <div class="insight-row-content">
+                            <span>تنبيه سلوكي</span>
+                            <b id="ai_behavior_alert">—</b>
+                            <small id="ai_behavior_alert_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_behavior"></div>
+                    </div>
+
+                    <div class="insight-row" id="ai_row_recommendation">
+                        <div class="insight-row-content">
+                            <span>التوصية</span>
+                            <b id="ai_recommendation">—</b>
+                            <small id="ai_recommendation_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-good" id="dot_recommendation"></div>
+                    </div>
+
+                    <div class="insight-row" id="ai_row_probabilities">
+                        <div class="insight-row-content">
+                            <span>الاحتمالات</span>
+                            <b id="ai_probability_summary">—</b>
+                            <small id="ai_probability_summary_text">—</small>
+                        </div>
+                        <div class="insight-dot dot-warn" id="dot_probability_summary"></div>
+                    </div>
+                </div>
+
+                <div class="flags-strip">
+                    <div class="flags-strip-title">أعلام المخاطر</div>
+                    <div class="risk-flags" id="ai_risk_flags"></div>
+                </div>
+
+                <div style="display:none;">
+                    <small id="ai_next_payment_probability_text">—</small>
+                    <small id="ai_default_probability_text">—</small>
                 </div>
             </div>
         </section>
@@ -1108,13 +983,6 @@
             </div>
         </section>
 
-        <section class="panel">
-            <div class="chip-header"><div class="chip-title">آخر الحركات</div></div>
-            <div id="recent_tx" class="recent-list">
-                <div class="alert-box">اختر مستأجراً لعرض الحركات</div>
-            </div>
-        </section>
-
         <section style="margin-top:20px;">
             <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; font-size:16px;" onclick="openTenantStatement()" disabled>كشف حساب هذا المستأجر</button>
         </section>
@@ -1170,13 +1038,6 @@
                 .filter(r => r.tenant_code === tenantCode && Number(r.year) > 0)
                 .sort((a, b) => Number(a.year) - Number(b.year));
             return rows.length ? rows[rows.length - 1] : null;
-        }
-
-        function getLatestTwoSummaries(tenantCode) {
-            const rows = allSummaries
-                .filter(r => r.tenant_code === tenantCode && Number(r.year) > 0)
-                .sort((a, b) => Number(a.year) - Number(b.year));
-            return rows.slice(-2);
         }
 
         function getTenantTransactions(tenantCode) {
@@ -1364,12 +1225,20 @@
             const balanceEl = document.getElementById('kpi_total_balance');
             const piePaidEl = document.getElementById('pie_paid_value');
             const pieBalanceEl = document.getElementById('pie_balance_value');
+            const creditTextEl = document.getElementById('kpi_total_credit_text');
+            const balanceTextEl = document.getElementById('kpi_total_balance_text');
+            const creditCard = document.getElementById('ai_card_total_credit');
+            const balanceCard = document.getElementById('ai_card_total_balance');
 
             if (!tenant) {
                 if (creditEl) creditEl.innerText = '0';
                 if (balanceEl) balanceEl.innerText = '0';
                 if (piePaidEl) piePaidEl.innerText = '0';
                 if (pieBalanceEl) pieBalanceEl.innerText = '0';
+                if (creditTextEl) creditTextEl.innerText = '—';
+                if (balanceTextEl) balanceTextEl.innerText = '—';
+                if (creditCard) setMoodClass(creditCard, 'ai-neutral');
+                if (balanceCard) setMoodClass(balanceCard, 'ai-neutral');
                 document.getElementById('commitment_score').innerText = 'نسبة الالتزام: 0%';
                 return;
             }
@@ -1383,6 +1252,12 @@
             if (balanceEl) animateValue(balanceEl, 0, bal);
             if (piePaidEl) animateValue(piePaidEl, 0, paid);
             if (pieBalanceEl) animateValue(pieBalanceEl, 0, bal);
+
+            if (creditTextEl) creditTextEl.innerText = ratio >= 80 ? 'تحصيل جيد' : ratio >= 55 ? 'تحصيل متوسط' : 'تحصيل ضعيف';
+            if (balanceTextEl) balanceTextEl.innerText = bal === 0 ? 'لا يوجد رصيد' : bal <= 500 ? 'رصيد منخفض' : bal <= 1500 ? 'رصيد متوسط' : 'رصيد مرتفع';
+
+            if (creditCard) setMoodClass(creditCard, ratio >= 80 ? 'ai-good' : ratio >= 55 ? 'ai-warn' : 'ai-bad');
+            if (balanceCard) setMoodClass(balanceCard, bal === 0 ? 'ai-good' : bal <= 1500 ? 'ai-warn' : 'ai-bad');
 
             [creditEl, balanceEl].forEach(el => {
                 if (el) applySmartNumberColorByRatio(el, ratio);
@@ -1570,7 +1445,7 @@
                 probabilitySummaryText.innerText = '—';
                 flagsBox.innerHTML = '';
 
-                ['ai_card_type','ai_card_last_payment','ai_card_months_without_payment','ai_card_last3_ratio'].forEach(id => setMoodClass(document.getElementById(id), 'ai-neutral'));
+                ['ai_card_type','ai_card_last_payment','ai_card_months_without_payment','ai_card_last3_ratio','ai_card_total_credit','ai_card_total_balance'].forEach(id => setMoodClass(document.getElementById(id), 'ai-neutral'));
                 setMoodClass(document.getElementById('hero_next_payment_card'), 'warn');
                 setMoodClass(document.getElementById('hero_default_card'), 'warn');
                 ['dot_close_estimate','dot_behavior','dot_recommendation','dot_probability_summary'].forEach(id => setDotMood(id, 'warn'));
@@ -1900,63 +1775,6 @@
             document.getElementById('save_tx_btn').innerText = 'حفظ الحركة';
         }
 
-        function renderRecentTransactions(tenantCode) {
-            const box = document.getElementById('recent_tx');
-            if (!box) return;
-
-            const list = allTransactions
-                .filter(t => t.tenant_code === tenantCode)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 8);
-
-            if (!list.length) {
-                box.innerHTML = '<div class="alert-box">لا يوجد حركات</div>';
-                return;
-            }
-
-            box.innerHTML = list.map(tx => `
-                <div class="recent-card">
-                    <div class="recent-card-head">
-                        <div class="recent-card-title">${tx.description || '—'}</div>
-                        <div class="recent-card-meta">${formatEnglishDate(tx.date)} | سند: ${tx.receipt_no || '—'}</div>
-                    </div>
-                    <div class="recent-card-values">مدين: ${formatNumber(tx.debit)} | دائن: ${formatNumber(tx.credit)}</div>
-                    <div class="recent-card-actions">
-                        <button class="btn btn-soft" type="button" onclick="editTransaction('${tx.id}')">تعديل</button>
-                        <button class="btn btn-danger" type="button" onclick="deleteTransaction('${tx.id}')">حذف</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function editTransaction(id) {
-            const tx = allTransactions.find(t => String(t.id) === String(id));
-            if (!tx) return alert('لم يتم العثور على الحركة');
-
-            editingTransactionId = tx.id;
-
-            document.getElementById('tenant_select').value = tx.tenant_code || '';
-            document.getElementById('tx_date').value = tx.date || '';
-            document.getElementById('tx_receipt').value = tx.receipt_no || '';
-            document.getElementById('tx_desc').value = tx.description || '';
-            document.getElementById('tx_debit').value = toNumber(tx.debit) || '';
-            document.getElementById('tx_credit').value = toNumber(tx.credit) || '';
-            document.getElementById('save_tx_btn').innerText = 'حفظ التعديل';
-
-            showStatus('أنت الآن تعدّل حركة مالية موجودة', 'soft');
-
-            const tenant = tenantBalances.find(x => x.tenant_code === tx.tenant_code);
-            updateTenantKpis(tenant);
-            updateLastSeen(tenant);
-            renderAiTenantBox(tenant);
-            drawCollectionChart(tenant?.totalCredit || 0, tenant?.currentBalance || 0);
-            drawMonthlyChart(tenant);
-            renderRecentTransactions(tx.tenant_code);
-            document.getElementById('statementBtn').disabled = false;
-
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-
         async function rebuildYearSummary(tenantCode, year) {
             const { data: yearTransactions, error: txError } = await supabaseClient
                 .from('tenant_transactions')
@@ -2089,36 +1907,6 @@
             }
         }
 
-        async function deleteTransaction(id) {
-            const tx = allTransactions.find(t => String(t.id) === String(id));
-            if (!tx) return alert('لم يتم العثور على الحركة');
-            if (!confirm('هل أنت متأكد من حذف الحركة؟')) return;
-
-            const year = tx.date ? new Date(tx.date).getFullYear() : null;
-            const tenantCode = tx.tenant_code;
-
-            const { error } = await supabaseClient
-                .from('tenant_transactions')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                console.error(error);
-                return alert('حدث خطأ أثناء الحذف');
-            }
-
-            if (year && tenantCode) {
-                await rebuildYearSummary(tenantCode, year);
-            }
-
-            if (editingTransactionId && String(editingTransactionId) === String(id)) {
-                cancelEdit();
-            }
-
-            alert('تم حذف الحركة ✔️');
-            await refreshDashboard(tenantCode);
-        }
-
         async function refreshDashboard(preselectedCode = null) {
             document.getElementById('loader').style.display = 'flex';
 
@@ -2142,12 +1930,9 @@
                     drawCollectionChart(t?.totalCredit || 0, t?.currentBalance || 0);
                     drawMonthlyChart(t);
                     updateNotificationComposer();
-                    renderRecentTransactions(selectedCode);
                     document.getElementById('statementBtn').disabled = false;
                 } else {
                     document.getElementById('statementBtn').disabled = true;
-                    const recentBox = document.getElementById('recent_tx');
-                    if (recentBox) recentBox.innerHTML = '<div class="alert-box">اختر مستأجراً لعرض الحركات</div>';
                 }
             } finally {
                 document.getElementById('loader').style.display = 'none';
@@ -2226,11 +2011,8 @@
                 if (t) {
                     drawCollectionChart(t.totalCredit, t.currentBalance);
                     drawMonthlyChart(t);
-                    renderRecentTransactions(t.tenant_code);
                 } else {
                     drawCollectionChart(0, 0);
-                    const recentBox = document.getElementById('recent_tx');
-                    if (recentBox) recentBox.innerHTML = '<div class="alert-box">اختر مستأجراً لعرض الحركات</div>';
                 }
 
                 updateNotificationComposer();
