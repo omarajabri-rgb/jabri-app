@@ -600,12 +600,6 @@
             })}`;
         }
 
-        function formatEnglishDate(value) {
-            if (!value) return '—';
-            const d = new Date(value);
-            return isNaN(d) ? '—' : d.toLocaleDateString('en-GB');
-        }
-
         function getPriorityByType(type) {
             if (type === 'lawyer') return 1;
             if (type === 'legal') return 2;
@@ -677,8 +671,7 @@
             if (!base) {
                 return {
                     installmentAmount,
-                    dueUntilToday: safePreviousBalance,
-                    currentInstallmentDate: null
+                    dueUntilToday: safePreviousBalance
                 };
             }
 
@@ -686,33 +679,25 @@
             const secondDate = addMonthsSafe(base, 5);
             const thirdDate = addMonthsSafe(base, 8);
 
-            let dueUntilToday = safePreviousBalance;
-            let currentInstallmentDate = firstDate;
-
-            if (referenceDate >= firstDate) {
-                dueUntilToday = safePreviousBalance + installmentAmount;
-                currentInstallmentDate = firstDate;
-            }
+            let dueUntilToday = safePreviousBalance + installmentAmount;
 
             if (referenceDate >= secondDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 2);
-                currentInstallmentDate = secondDate;
             }
 
             if (referenceDate >= thirdDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 3);
-                currentInstallmentDate = thirdDate;
             }
 
             return {
                 installmentAmount,
-                dueUntilToday,
-                currentInstallmentDate
+                dueUntilToday
             };
         }
 
-        function getMonthlyPlan(balance) {
-            const safeBalance = Math.max(0, toNumber(balance));
+        function getDynamicMonthlyPlan(currentBalance, dueNow) {
+            const safeBalance = Math.max(0, toNumber(currentBalance));
+            const safeDueNow = Math.max(0, toNumber(dueNow));
 
             if (safeBalance <= 0) {
                 return {
@@ -728,7 +713,13 @@
             else if (safeBalance <= 3000) monthsToClose = 15;
             else monthsToClose = 18;
 
-            const recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
+            let recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
+
+            if (safeDueNow > 0) {
+                const minByDue = Math.ceil(safeDueNow / Math.min(monthsToClose, 6));
+                recommendedMonthly = Math.max(recommendedMonthly, minByDue);
+                monthsToClose = Math.ceil(safeBalance / recommendedMonthly);
+            }
 
             return {
                 monthsToClose,
@@ -745,21 +736,24 @@
         function getAccountingAdvice(current, previous, tenant) {
             if (!current) {
                 return {
-                    message: 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.'
+                    message: 'لا توجد بيانات كافية حالياً'
                 };
             }
 
             const currentBalance = Math.max(0, Number(current?.final_balance || 0));
             const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
-            const annualDebit = Number(current?.total_debit || 0);
-            const plan = getInstallmentPlan(tenant?.contract_date, annualDebit, previousBalance);
-            const monthlyPlan = getMonthlyPlan(currentBalance);
+            const currentCredit = Math.max(0, Number(current?.total_credit || 0));
+            const annualDebit = Math.max(0, Number(current?.total_debit || 0));
 
             if (currentBalance <= 0) {
                 return {
-                    message: 'حسابك منتظم حالياً، ولا يوجد رصيد مستحق في هذه المرحلة.'
+                    message: 'لا يوجد رصيد مستحق حالياً'
                 };
             }
+
+            const plan = getInstallmentPlan(tenant?.contract_date, annualDebit, previousBalance);
+            const dueNow = Math.max(0, plan.dueUntilToday - currentCredit);
+            const monthlyPlan = getDynamicMonthlyPlan(currentBalance, dueNow);
 
             if (monthlyPlan.recommendedMonthly <= 0) {
                 return {
@@ -768,8 +762,10 @@
             }
 
             return {
-                message: `للمحافظة على انتظام الحساب، يُنصح بدفع ${monthlyPlan.recommendedMonthly} شهريًا في هذه المرحلة،
-وسيتم إغلاق الرصيد خلال ${monthlyPlan.monthsToClose} شهر تقريبًا.`
+                message: `ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
+لتغطية القسط الحالي وتقليل الرصيد
+
+إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`
             };
         }
 
