@@ -242,12 +242,20 @@
 
         .smart-body {
             font-size: 16px;
-            line-height: 2.1;
+            line-height: 2.4;
             font-weight: 800;
             color: var(--text);
             text-align: right;
             margin-top: 10px;
             white-space: pre-line;
+        }
+
+        .smart-subnote {
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--muted);
+            font-weight: 700;
         }
 
         .pie-text-stats {
@@ -516,6 +524,7 @@
                 <div class="chip">نصيحة محاسبية</div>
             </div>
             <div id="smart_message" class="smart-body">تحليل البيانات...</div>
+            <div id="smart_subnote" class="smart-subnote"></div>
         </div>
 
         <div class="panel reveal">
@@ -742,7 +751,8 @@
         function getAccountingAdvice(current, previous, tenant) {
             if (!current) {
                 return {
-                    message: 'لا توجد بيانات كافية حالياً'
+                    message: 'لا توجد بيانات كافية حالياً',
+                    subnote: ''
                 };
             }
 
@@ -753,7 +763,8 @@
 
             if (currentBalance <= 0) {
                 return {
-                    message: 'لا يوجد رصيد مستحق حالياً'
+                    message: 'لا يوجد رصيد مستحق حالياً',
+                    subnote: 'الاستمرار على نفس وتيرة السداد يحافظ على انتظام الحساب'
                 };
             }
 
@@ -763,16 +774,20 @@
 
             if (monthlyPlan.recommendedMonthly <= 0) {
                 return {
-                    message: 'يوجد رصيد مستحق، ويُنصح بتنظيم دفعة قريبة للمحافظة على انتظام الحساب.'
+                    message: 'يوجد رصيد مستحق، ويُنصح بتنظيم دفعة قريبة للمحافظة على انتظام الحساب.',
+                    subnote: ''
                 };
             }
 
             return {
-                message: `القسط الحالي: ${formatNumber(plan.currentInstallment)}
-ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
-لتغطية القسط الحالي وتقليل الرصيد
+                message: `المطلوب حالياً: ${formatNumber(plan.currentInstallment)}
 
-إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`
+ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
+للمحافظة على انتظام الحساب
+وتقليل الرصيد تدريجياً
+
+إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`,
+                subnote: 'الالتزام بالدفع الشهري يساعد على تجنب تراكم المبالغ'
             };
         }
 
@@ -798,7 +813,7 @@
             if (diff > 0) {
                 return {
                     type: 'warning',
-                    text: `الرصيد زاد عن السنة الماضية، وينصح بالالتزام بالدفع لتجنب التراكم`
+                    text: `الرصيد الحالي أعلى من السنة الماضية بـ ${Math.round(diff)}، والانتظام في الدفع خلال الأشهر القادمة سيحسن وضع الحساب`
                 };
             }
 
@@ -838,7 +853,7 @@
 
             return {
                 type: 'warning',
-                text: 'نسبة السداد منخفضة حالياً، ويُنصح برفع وتيرة الدفع'
+                text: 'تم دفع جزء بسيط من المستحق، ويُنصح برفع وتيرة الدفع'
             };
         }
 
@@ -1026,7 +1041,7 @@
             const balances = rows.map(row => Math.max(0, toNumber(row.final_balance)));
 
             let trendColor = '#c9a46b';
-            let fillColor = 'rgba(201,164,107,0.10)';
+            let fillColor = 'rgba(201,90,82,0.05)';
 
             if (balances.length >= 2) {
                 const prev = balances[0];
@@ -1034,10 +1049,10 @@
 
                 if (current < prev) {
                     trendColor = '#2f9e6f';
-                    fillColor = 'rgba(47,158,111,0.10)';
+                    fillColor = 'rgba(47,158,111,0.08)';
                 } else if (current > prev) {
                     trendColor = '#c95a52';
-                    fillColor = 'rgba(201,90,82,0.10)';
+                    fillColor = 'rgba(201,90,82,0.05)';
                 }
             }
 
@@ -1167,6 +1182,7 @@
 
                 const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
                 document.getElementById('smart_message').innerText = advice.message;
+                document.getElementById('smart_subnote').innerText = advice.subnote || '';
 
                 const pieCaption = getPieCaption(currentCredit, currentBalance);
                 const pieCaptionEl = document.getElementById('pie_caption');
