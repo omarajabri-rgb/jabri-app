@@ -962,12 +962,6 @@
             return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-GB');
         }
 
-        function formatEnglishDateTime(dateStr) {
-            if (!dateStr) return '—';
-            const d = new Date(dateStr);
-            return Number.isNaN(d.getTime()) ? '—' : `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}`;
-        }
-
         function monthsSince(dateStr) {
             if (!dateStr) return null;
             const d = new Date(dateStr);
@@ -999,10 +993,7 @@
                 contract.getDate()
             );
 
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
+            if (referenceDate < candidate) candidate.setFullYear(candidate.getFullYear() - 1);
             return candidate;
         }
 
@@ -1026,7 +1017,7 @@
                     dueUntilToday:
                         referenceDate >= thirdDate ? installmentAmount * 3 :
                         referenceDate >= secondDate ? installmentAmount * 2 :
-                        referenceDate >= firstDate ? installmentAmount * 1 : 0,
+                        referenceDate >= firstDate ? installmentAmount : 0,
                     nextInstallment:
                         referenceDate < firstDate ? { label: 'القسط الأول', date: firstDate, amount: installmentAmount } :
                         referenceDate < secondDate ? { label: 'القسط الثاني', date: secondDate, amount: installmentAmount } :
@@ -1045,25 +1036,12 @@
             if (referenceDate >= thirdDate) dueUntilToday += installmentAmount;
 
             let nextInstallment;
-            if (referenceDate < firstDate) {
-                nextInstallment = { label: 'القسط الأول', date: firstDate, amount: installmentAmount };
-            } else if (referenceDate < secondDate) {
-                nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
-            } else if (referenceDate < thirdDate) {
-                nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
-            } else {
-                const nextCycleFirst = addMonthsSafe(firstDate, 12);
-                nextInstallment = { label: 'القسط الأول', date: nextCycleFirst, amount: installmentAmount };
-            }
+            if (referenceDate < firstDate) nextInstallment = { label: 'القسط الأول', date: firstDate, amount: installmentAmount };
+            else if (referenceDate < secondDate) nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
+            else if (referenceDate < thirdDate) nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
+            else nextInstallment = { label: 'القسط الأول', date: addMonthsSafe(firstDate, 12), amount: installmentAmount };
 
-            return {
-                installmentAmount,
-                firstDate,
-                secondDate,
-                thirdDate,
-                dueUntilToday,
-                nextInstallment
-            };
+            return { installmentAmount, firstDate, secondDate, thirdDate, dueUntilToday, nextInstallment };
         }
 
         function getSelectedTenant() {
@@ -1123,10 +1101,6 @@
                 supabaseClient.from('tenant_yearly_summary').select('*').order('year')
             ]);
 
-            if (t.error) console.error('tenants error:', t.error);
-            if (tx.error) console.error('transactions error:', tx.error);
-            if (sum.error) console.error('summary error:', sum.error);
-
             allTenants = t.data || [];
             allTransactions = tx.data || [];
             allSummaries = sum.data || [];
@@ -1157,18 +1131,12 @@
 
         function updateLastSeen(tenant) {
             const el = document.getElementById('last_seen_chip');
-            if (!tenant) {
+            if (!tenant || !tenant.lastSeen) {
                 el.innerText = '—';
                 return;
             }
 
-            const raw = tenant.lastSeen;
-            if (!raw) {
-                el.innerText = '—';
-                return;
-            }
-
-            const d = new Date(raw);
+            const d = new Date(tenant.lastSeen);
             if (Number.isNaN(d.getTime())) {
                 el.innerText = '—';
                 return;
@@ -1184,13 +1152,11 @@
             else if (diffMin < 60) el.innerText = `${diffMin} د`;
             else if (diffHour < 24) el.innerText = `${diffHour} س`;
             else if (diffDay <= 7) el.innerText = `${diffDay} ي`;
-            else el.innerText = formatEnglishDate(raw);
+            else el.innerText = formatEnglishDate(tenant.lastSeen);
         }
 
         function updateTenantStatusChip(tenant) {
             const chip = document.getElementById('tenant_status_chip');
-            if (!chip) return;
-
             chip.classList.remove('paid', 'partial');
 
             if (!tenant) {
@@ -1236,9 +1202,7 @@
                     cutout: '64%',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false } }
                 },
                 plugins: [{
                     id: 'centerText',
@@ -1247,15 +1211,12 @@
                         if (!point) return;
                         const { x, y } = point;
                         const c = chart.ctx;
-
                         c.save();
                         c.textAlign = 'center';
                         c.textBaseline = 'middle';
                         c.fillStyle = '#4b3720';
-
                         c.font = 'bold 36px Tajawal';
                         c.fillText(`${ratio}%`, x, y - 10);
-
                         c.font = 'bold 16px Tajawal';
                         c.fillText(`${Math.round(paid)} / ${Math.round(total)}`, x, y + 22);
                         c.restore();
@@ -1278,7 +1239,6 @@
             for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
-
                 labels.push(d.toLocaleDateString('en-GB', { month:'short' }));
 
                 const monthTx = allTransactions.filter(tx => {
@@ -1450,11 +1410,18 @@
             setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
             setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
-            const flags = [];
-            if (currentInstallmentGap > 0) flags.push({ text:'متأخر عن القسط الحالي', cls:'flag-danger' });
-            if (nextInstallment?.date) flags.push({ text:`القسط القادم ${formatEnglishDate(nextInstallment.date)}`, cls:'flag-warning' });
-            if (installmentCoverageScore >= 100) flags.push({ text:'ملتزم حتى اليوم', cls:'flag-success' });
-            if (!flags.length) flags.push({ text:'مخاطر منخفضة', cls:'flag-success' });
+            const oldBalance = Math.max(0, currentBalance - currentInstallmentGap);
+
+            const flags = [
+                {
+                    text: `القسط الحالي: ${Math.round(installmentAmount)}`,
+                    cls: 'flag-warning'
+                },
+                {
+                    text: oldBalance > 0 ? `الرصيد القديم: ${Math.round(oldBalance)}` : 'لا يوجد رصيد قديم',
+                    cls: oldBalance > 0 ? 'flag-danger' : 'flag-success'
+                }
+            ];
 
             document.getElementById('ai_risk_flags').innerHTML =
                 flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
