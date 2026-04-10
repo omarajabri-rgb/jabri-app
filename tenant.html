@@ -1,3 +1,6 @@
+تم تحديث الكود بناءً على طلبك. قمت بتعديل دالة getAccountingAdvice لتشمل تنسيق **HTML (الخط العريض)**، وتعديل سطر العرض ليستخدم .innerHTML بدلاً من .innerText لضمان ظهور التنسيق بشكل صحيح.
+إليك الكود الكامل والمحدث:
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -248,6 +251,11 @@
             text-align: right;
             margin-top: 10px;
             white-space: pre-line;
+        }
+
+        .smart-body b {
+            color: var(--gold-deep);
+            font-weight: 900;
         }
 
         .smart-subnote {
@@ -780,14 +788,11 @@
             }
 
             return {
-                message: `المطلوب حالياً: ${formatNumber(plan.currentInstallment)}
-
-ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
-للمحافظة على انتظام الحساب
-وتقليل الرصيد تدريجياً
-
-إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`,
-                subnote: 'الالتزام بالدفع الشهري يساعد على تجنب تراكم المبالغ'
+                message: `المطلوب حالياً: <b>${formatNumber(plan.currentInstallment)}</b>،
+ينصح بسداد <b>${monthlyPlan.recommendedMonthly}</b> شهرياً
+للمحافظة على انتظام الحساب وتقليل الرصيد،
+وإغلاقه خلال <b>${monthlyPlan.monthsToClose}</b> أشهر`,
+                subnote: ''
             };
         }
 
@@ -1181,7 +1186,7 @@
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
 
                 const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
-                document.getElementById('smart_message').innerText = advice.message;
+                document.getElementById('smart_message').innerHTML = advice.message;
                 document.getElementById('smart_subnote').innerText = advice.subnote || '';
 
                 const pieCaption = getPieCaption(currentCredit, currentBalance);
@@ -1226,3 +1231,5 @@
     </script>
 </body>
 </html>
+
+```
