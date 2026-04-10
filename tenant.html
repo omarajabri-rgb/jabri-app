@@ -291,8 +291,8 @@
             min-height: 300px;
         }
 
-        .line-insight {
-            margin-top: 16px;
+        .chart-caption {
+            margin-top: 14px;
             padding: 14px 16px;
             border-radius: 18px;
             font-size: 14px;
@@ -301,19 +301,19 @@
             border: 1px solid transparent;
         }
 
-        .line-insight.good {
+        .chart-caption.good {
             color: var(--success);
             background: rgba(47,158,111,0.10);
             border-color: rgba(47,158,111,0.18);
         }
 
-        .line-insight.warning {
+        .chart-caption.warning {
             color: var(--danger);
             background: rgba(201,90,82,0.10);
             border-color: rgba(201,90,82,0.18);
         }
 
-        .line-insight.neutral {
+        .chart-caption.neutral {
             color: var(--neutral);
             background: rgba(139,127,112,0.10);
             border-color: rgba(139,127,112,0.18);
@@ -523,7 +523,7 @@
                 <div class="chip">إشعار</div>
             </div>
             <div id="notifications_box">
-                <div class="notify-empty">لا توجد إشعارات حالياً</div>
+                <div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>
             </div>
         </div>
 
@@ -538,6 +538,7 @@
                 <span class="pie-text-item paid">المدفوع: <b id="pie_paid_value">0</b></span>
                 <span class="pie-text-item balance">المتبقي: <b id="pie_balance_value">0</b></span>
             </div>
+            <div id="pie_caption" class="chart-caption neutral">لا توجد بيانات كافية لحساب نسبة السداد حالياً</div>
         </div>
 
         <div class="panel reveal">
@@ -547,7 +548,7 @@
             <div class="chart-wrap timeline-wrap">
                 <canvas id="timelineChart"></canvas>
             </div>
-            <div id="line_insight" class="line-insight neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
+            <div id="line_insight" class="chart-caption neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()">
@@ -671,7 +672,8 @@
             if (!base) {
                 return {
                     installmentAmount,
-                    dueUntilToday: safePreviousBalance
+                    dueUntilToday: safePreviousBalance,
+                    currentInstallment: safePreviousBalance + installmentAmount
                 };
             }
 
@@ -680,18 +682,22 @@
             const thirdDate = addMonthsSafe(base, 8);
 
             let dueUntilToday = safePreviousBalance + installmentAmount;
+            let currentInstallment = safePreviousBalance + installmentAmount;
 
             if (referenceDate >= secondDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 2);
+                currentInstallment = installmentAmount;
             }
 
             if (referenceDate >= thirdDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 3);
+                currentInstallment = installmentAmount;
             }
 
             return {
                 installmentAmount,
-                dueUntilToday
+                dueUntilToday,
+                currentInstallment
             };
         }
 
@@ -762,7 +768,8 @@
             }
 
             return {
-                message: `ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
+                message: `القسط الحالي: ${formatNumber(plan.currentInstallment)}
+ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
 لتغطية القسط الحالي وتقليل الرصيد
 
 إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`
@@ -784,20 +791,54 @@
             if (diff < 0) {
                 return {
                     type: 'good',
-                    text: `تحسّن في الرصيد بمقدار ${Math.abs(Math.round(diff))} مقارنة بالسنة الماضية`
+                    text: `الرصيد انخفض عن السنة الماضية بمقدار ${Math.abs(Math.round(diff))}`
                 };
             }
 
             if (diff > 0) {
                 return {
                     type: 'warning',
-                    text: `زيادة في الرصيد المستحق بمقدار ${Math.round(diff)} مقارنة بالسنة الماضية`
+                    text: `الرصيد زاد عن السنة الماضية، وينصح بالالتزام بالدفع لتجنب التراكم`
                 };
             }
 
             return {
                 type: 'neutral',
-                text: 'لا يوجد تغيير في الرصيد مقارنة بالسنة الماضية'
+                text: 'الرصيد مستقر مقارنة بالسنة الماضية'
+            };
+        }
+
+        function getPieCaption(credit, balance) {
+            const paid = Math.max(0, toNumber(credit));
+            const remaining = Math.max(0, toNumber(balance));
+            const total = paid + remaining;
+
+            if (total <= 0) {
+                return {
+                    type: 'neutral',
+                    text: 'لا توجد بيانات كافية لحساب نسبة السداد حالياً'
+                };
+            }
+
+            const percent = Math.round((paid / total) * 100);
+
+            if (percent >= 80) {
+                return {
+                    type: 'good',
+                    text: 'نسبة السداد جيدة وحسابك يسير بشكل ممتاز'
+                };
+            }
+
+            if (percent >= 35) {
+                return {
+                    type: 'neutral',
+                    text: 'تم دفع جزء من المستحق، ويُنصح بالاستمرار على نفس الوتيرة'
+                };
+            }
+
+            return {
+                type: 'warning',
+                text: 'نسبة السداد منخفضة حالياً، ويُنصح برفع وتيرة الدفع'
             };
         }
 
@@ -880,7 +921,7 @@
             const visibleBeforeSeen = await fetchVisibleNotifications();
 
             if (!visibleBeforeSeen.length) {
-                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
+                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
                 return;
             }
 
@@ -901,7 +942,7 @@
             const visibleAfterSeen = await fetchVisibleNotifications();
 
             if (!visibleAfterSeen.length) {
-                box.innerHTML = `<div class="notify-empty">لا توجد إشعارات حالياً</div>`;
+                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
                 return;
             }
 
@@ -1127,9 +1168,14 @@
                 const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
                 document.getElementById('smart_message').innerText = advice.message;
 
+                const pieCaption = getPieCaption(currentCredit, currentBalance);
+                const pieCaptionEl = document.getElementById('pie_caption');
+                pieCaptionEl.className = `chart-caption ${pieCaption.type}`;
+                pieCaptionEl.innerText = pieCaption.text;
+
                 const lineInsight = getLineInsight(currentSummary, previousSummary);
                 const lineInsightEl = document.getElementById('line_insight');
-                lineInsightEl.className = `line-insight ${lineInsight.type}`;
+                lineInsightEl.className = `chart-caption ${lineInsight.type}`;
                 lineInsightEl.innerText = lineInsight.text;
 
                 await loadNotifications();
