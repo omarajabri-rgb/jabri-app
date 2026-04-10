@@ -79,11 +79,12 @@
 
         .brand small {
             display: block;
-            font-size: 11px;
-            letter-spacing: 1.8px;
+            font-size: 10px;
+            letter-spacing: 1.4px;
             color: var(--muted);
             font-weight: 800;
             margin-bottom: 4px;
+            opacity: 0.9;
         }
 
         .ghost-btn {
@@ -142,6 +143,12 @@
         }
 
         .hero-status.partial {
+            background: rgba(195,138,46,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(195,138,46,0.25);
+        }
+
+        .hero-status.late {
             background: rgba(201,90,82,0.10);
             color: var(--danger);
             border: 1px solid rgba(201,90,82,0.25);
@@ -160,6 +167,25 @@
             color: var(--text);
             font-size: 13px;
             font-weight: 800;
+        }
+
+        .hero-due {
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 16px;
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+            color: var(--gold-deep);
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .hero-due b {
+            color: var(--text);
+            font-size: 18px;
         }
 
         .chip-header {
@@ -188,7 +214,7 @@
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 22px;
+            gap: 18px;
             margin-bottom: 22px;
         }
 
@@ -200,7 +226,7 @@
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
             text-align: center;
-            padding: 24px;
+            padding: 22px;
         }
 
         .soft-card span {
@@ -242,7 +268,7 @@
 
         .smart-body {
             font-size: 16px;
-            line-height: 2.1;
+            line-height: 2.05;
             font-weight: 800;
             color: var(--text);
             text-align: right;
@@ -489,6 +515,12 @@
                 left: 14px;
                 top: 14px;
             }
+
+            .hero-due {
+                display: flex;
+                width: 100%;
+                justify-content: space-between;
+            }
         }
     </style>
 </head>
@@ -510,15 +542,19 @@
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
             <div id="last_update" class="hero-note">-</div>
+            <div class="hero-due">
+                المطلوب الآن
+                <b id="due_now_value">0 د.أ</b>
+            </div>
         </section>
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
-                <span>دائن</span>
+                <span>المدفوع</span>
                 <b id="val_credit">0</b>
             </div>
             <div class="soft-card balance-card reveal">
-                <span>الرصيد</span>
+                <span>المتبقي</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
@@ -547,14 +583,14 @@
                 <canvas id="balancePieChart"></canvas>
             </div>
             <div class="pie-text-stats">
-                <span class="pie-text-item paid">دائن: <b id="pie_paid_value">0</b></span>
-                <span class="pie-text-item balance">الرصيد: <b id="pie_balance_value">0</b></span>
+                <span class="pie-text-item paid">المدفوع: <b id="pie_paid_value">0</b></span>
+                <span class="pie-text-item balance">المتبقي: <b id="pie_balance_value">0</b></span>
             </div>
         </div>
 
         <div class="panel reveal">
             <div class="chip-header">
-                <div class="chip">اتجاه الرصيد خلال سنتين</div>
+                <div class="chip">اتجاه المتبقي خلال سنتين</div>
             </div>
             <div class="chart-wrap timeline-wrap">
                 <canvas id="timelineChart"></canvas>
@@ -591,6 +627,10 @@
             return String(Math.round(toNumber(v)));
         }
 
+        function formatMoney(v) {
+            return `${formatNumber(v)} د.أ`;
+        }
+
         function formatNotificationDate(value) {
             const d = new Date(value);
             return isNaN(d)
@@ -610,6 +650,12 @@
                 hour: '2-digit',
                 minute: '2-digit'
             })}`;
+        }
+
+        function formatEnglishDate(value) {
+            if (!value) return '—';
+            const d = new Date(value);
+            return isNaN(d) ? '—' : d.toLocaleDateString('en-GB');
         }
 
         function getPriorityByType(type) {
@@ -644,27 +690,132 @@
             };
         }
 
+        function addMonthsSafe(dateInput, months) {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return null;
+
+            const originalDay = d.getDate();
+            d.setDate(1);
+            d.setMonth(d.getMonth() + months);
+
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            d.setDate(Math.min(originalDay, lastDay));
+            return d;
+        }
+
+        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
+            const contract = new Date(contractDate);
+            if (isNaN(contract.getTime())) return null;
+
+            const candidate = new Date(
+                referenceDate.getFullYear(),
+                contract.getMonth(),
+                contract.getDate()
+            );
+
+            if (referenceDate < candidate) {
+                candidate.setFullYear(candidate.getFullYear() - 1);
+            }
+
+            return candidate;
+        }
+
+        function getInstallmentPlan(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
+            const safeAnnual = Math.max(0, toNumber(annualAmount));
+            const installmentAmount = safeAnnual / 3;
+            const safePreviousBalance = Math.max(0, toNumber(previousBalance));
+
+            const base = getCycleBaseDate(contractDate, referenceDate);
+
+            if (!base) {
+                const year = referenceDate.getFullYear();
+                const firstDate = new Date(year, 0, 1);
+                const secondDate = new Date(year, 5, 1);
+                const thirdDate = new Date(year, 8, 1);
+
+                let dueUntilToday = safePreviousBalance;
+                let currentInstallmentValue = safePreviousBalance + installmentAmount;
+                let currentInstallmentDate = firstDate;
+
+                if (referenceDate >= firstDate) {
+                    dueUntilToday = safePreviousBalance + installmentAmount;
+                    currentInstallmentValue = safePreviousBalance + installmentAmount;
+                    currentInstallmentDate = firstDate;
+                }
+
+                if (referenceDate >= secondDate) {
+                    dueUntilToday = safePreviousBalance + (installmentAmount * 2);
+                    currentInstallmentValue = installmentAmount;
+                    currentInstallmentDate = secondDate;
+                }
+
+                if (referenceDate >= thirdDate) {
+                    dueUntilToday = safePreviousBalance + (installmentAmount * 3);
+                    currentInstallmentValue = installmentAmount;
+                    currentInstallmentDate = thirdDate;
+                }
+
+                const nextInstallment =
+                    referenceDate < firstDate ? { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount } :
+                    referenceDate < secondDate ? { label: 'القسط الثاني', date: secondDate, amount: installmentAmount } :
+                    referenceDate < thirdDate ? { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount } :
+                    { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
+
+                return { installmentAmount, currentInstallmentValue, currentInstallmentDate, dueUntilToday, nextInstallment };
+            }
+
+            const firstDate = new Date(base);
+            const secondDate = addMonthsSafe(base, 5);
+            const thirdDate = addMonthsSafe(base, 8);
+
+            let dueUntilToday = safePreviousBalance;
+            let currentInstallmentValue = safePreviousBalance + installmentAmount;
+            let currentInstallmentDate = firstDate;
+
+            if (referenceDate >= firstDate) {
+                dueUntilToday = safePreviousBalance + installmentAmount;
+                currentInstallmentValue = safePreviousBalance + installmentAmount;
+                currentInstallmentDate = firstDate;
+            }
+
+            if (referenceDate >= secondDate) {
+                dueUntilToday = safePreviousBalance + (installmentAmount * 2);
+                currentInstallmentValue = installmentAmount;
+                currentInstallmentDate = secondDate;
+            }
+
+            if (referenceDate >= thirdDate) {
+                dueUntilToday = safePreviousBalance + (installmentAmount * 3);
+                currentInstallmentValue = installmentAmount;
+                currentInstallmentDate = thirdDate;
+            }
+
+            let nextInstallment;
+            if (referenceDate < firstDate) {
+                nextInstallment = { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount };
+            } else if (referenceDate < secondDate) {
+                nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
+            } else if (referenceDate < thirdDate) {
+                nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
+            } else {
+                nextInstallment = { label: 'القسط الأول', date: addMonthsSafe(firstDate, 12), amount: safePreviousBalance + installmentAmount };
+            }
+
+            return { installmentAmount, currentInstallmentValue, currentInstallmentDate, dueUntilToday, nextInstallment };
+        }
+
         function getMonthlyPlan(finalBalance) {
             const balance = Math.max(0, Number(finalBalance || 0));
 
             if (balance <= 0) {
-                return {
-                    monthsToClose: 0,
-                    monthlySuggestion: 0
-                };
+                return { monthsToClose: 0, monthlySuggestion: 0 };
             }
 
             let monthsToClose = 12;
-
-            if (balance <= 300) {
-                monthsToClose = 3;
-            } else if (balance <= 1000) {
-                monthsToClose = 6;
-            } else if (balance <= 2000) {
-                monthsToClose = 12;
-            } else {
-                monthsToClose = 18;
-            }
+            if (balance <= 300) monthsToClose = 3;
+            else if (balance <= 1000) monthsToClose = 6;
+            else if (balance <= 2000) monthsToClose = 12;
+            else monthsToClose = 18;
 
             return {
                 monthsToClose,
@@ -672,54 +823,44 @@
             };
         }
 
-        function getAccountingAdvice(current, previous) {
+        function getTenantStatus(dueNow, totalCredit) {
+            if (dueNow <= 0) return { text: '✔ منتظم', cls: 'paid' };
+            if (totalCredit > 0) return { text: '⚠ سداد جزئي', cls: 'partial' };
+            return { text: '⚠ متأخر', cls: 'late' };
+        }
+
+        function getAccountingAdvice(current, previous, tenant) {
             if (!current) {
                 return {
-                    status: 'neutral',
-                    message: 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.'
+                    message: 'لا توجد بيانات كافية لإظهار النصيحة المحاسبية حالياً.',
+                    dueNow: 0
                 };
             }
 
             const currentBalance = Math.max(0, Number(current?.final_balance || 0));
             const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
             const currentCredit = Number(current?.total_credit || 0);
-            const currentDebit = Number(current?.total_debit || 0);
+            const annualDebit = Number(current?.total_debit || 0);
 
-            const balanceDiff = currentBalance - previousBalance;
-            const paymentRate = currentDebit > 0 ? (currentCredit / currentDebit) * 100 : 0;
-            const plan = getMonthlyPlan(currentBalance);
+            const plan = getInstallmentPlan(tenant?.contract_date, annualDebit, previousBalance);
+            const dueNow = Math.max(0, plan.dueUntilToday - currentCredit);
+            const monthlyPlan = getMonthlyPlan(currentBalance);
 
             if (currentBalance <= 0) {
                 return {
-                    status: 'excellent',
-                    message: `وضع حسابك ممتاز، ولا يوجد رصيد مستحق حالياً.
-تم تسجيل دائن بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`
-                };
-            }
-
-            if (balanceDiff > 0 && currentBalance > 500) {
-                return {
-                    status: 'warning',
-                    message: `هناك زيادة في الرصيد المستحق مقارنة بالسنة الماضية.
-المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
-لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
-                };
-            }
-
-            if (paymentRate >= 85) {
-                return {
-                    status: 'good',
-                    message: `نسبة السداد جيدة، لكن ما زال هناك رصيد يحتاج متابعة.
-المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
-لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
+                    dueNow: 0,
+                    message: `حسابك منتظم حالياً، ولا يوجد مبلغ مستحق الآن.
+تم تسجيل مدفوعات بقيمة <span class="highlight-number" data-value="${Math.round(currentCredit)}">0</span> د.أ`
                 };
             }
 
             return {
-                status: 'fair',
-                message: `يوجد رصيد مستحق، ويُفضل تنظيم دفعة قريبة لتجنب التراكم.
-المبلغ المقترح شهرياً: <span class="highlight-number" data-value="${plan.monthlySuggestion}">0</span> د.أ
-لإغلاق الرصيد خلال <span class="highlight-number" data-value="${plan.monthsToClose}">0</span> شهر`
+                dueNow,
+                message: `للمحافظة على انتظام الحساب، يُنصح بتسديد المبلغ المستحق حالياً وقدره <span class="highlight-number" data-value="${Math.round(dueNow)}">0</span> د.أ.
+القسط الحالي: <span class="highlight-number" data-value="${Math.round(plan.currentInstallmentValue)}">0</span> د.أ
+${previousBalance > 0 ? `الرصيد السابق: <span class="highlight-number" data-value="${Math.round(previousBalance)}">0</span> د.أ` : 'لا يوجد رصيد سابق'}
+تاريخ القسط الحالي: <span class="highlight-number">${formatEnglishDate(plan.currentInstallmentDate)}</span>
+${monthlyPlan.monthlySuggestion > 0 ? `الدفعة المقترحة شهرياً: <span class="highlight-number" data-value="${monthlyPlan.monthlySuggestion}">0</span> د.أ` : ''}`
             };
         }
 
@@ -738,20 +879,20 @@
             if (diff < 0) {
                 return {
                     type: 'good',
-                    text: `تحسّن في الرصيد بمقدار ${Math.abs(Math.round(diff))} د.أ مقارنة بالسنة الماضية`
+                    text: `تحسّن في المتبقي بمقدار ${Math.abs(Math.round(diff))} د.أ مقارنة بالسنة الماضية`
                 };
             }
 
             if (diff > 0) {
                 return {
                     type: 'warning',
-                    text: `زيادة في الرصيد المستحق بمقدار ${Math.round(diff)} د.أ مقارنة بالسنة الماضية`
+                    text: `زيادة في المبلغ المتبقي بمقدار ${Math.round(diff)} د.أ مقارنة بالسنة الماضية`
                 };
             }
 
             return {
                 type: 'neutral',
-                text: 'لا يوجد تغيير في الرصيد مقارنة بالسنة الماضية'
+                text: 'لا يوجد تغيير في المتبقي مقارنة بالسنة الماضية'
             };
         }
 
@@ -771,7 +912,10 @@
 
         function animateHighlights() {
             document.querySelectorAll('.highlight-number').forEach(el => {
-                const end = parseInt(el.getAttribute('data-value')) || 0;
+                const raw = el.getAttribute('data-value');
+                if (raw === null) return;
+
+                const end = parseInt(raw) || 0;
                 const duration = 900;
                 const startTime = performance.now();
 
@@ -898,7 +1042,7 @@
             pieChartInstance = new Chart(canvas, {
                 type: 'doughnut',
                 data: {
-                    labels: ['دائن', 'الرصيد'],
+                    labels: ['المدفوع', 'المتبقي'],
                     datasets: [{
                         data: [creditValue, balanceValue],
                         backgroundColor: ['#2f9e6f', '#c95a52'],
@@ -976,7 +1120,7 @@
                 data: {
                     labels: labels.length ? labels : ['—'],
                     datasets: [{
-                        label: 'الرصيد',
+                        label: 'المتبقي',
                         data: balances.length ? balances : [0],
                         borderColor: trendColor,
                         backgroundColor: fillColor,
@@ -1020,7 +1164,7 @@
                                     return `السنة ${items[0]?.label || ''}`;
                                 },
                                 label: function(context) {
-                                    return `الرصيد: ${formatNumber(context.raw)}`;
+                                    return `المتبقي: ${formatNumber(context.raw)}`;
                                 }
                             }
                         }
@@ -1085,17 +1229,19 @@
 
                 document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
 
+                const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
+                document.getElementById('smart_message').innerHTML = advice.message;
+                document.getElementById('due_now_value').innerText = formatMoney(advice.dueNow);
+
+                const tenantStatus = getTenantStatus(advice.dueNow, currentCredit);
                 const chip = document.getElementById('account_status_chip');
-                chip.innerText = currentBalance === 0 ? '✔ مسدد' : '⚠ جزئي';
-                chip.className = currentBalance === 0 ? 'hero-status paid' : 'hero-status partial';
+                chip.innerText = tenantStatus.text;
+                chip.className = `hero-status ${tenantStatus.cls}`;
 
                 animateNumber(document.getElementById('val_credit'), Math.round(currentCredit));
                 animateNumber(document.getElementById('val_balance'), Math.round(currentBalance));
                 animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
-
-                const advice = getAccountingAdvice(currentSummary, previousSummary);
-                document.getElementById('smart_message').innerHTML = advice.message;
 
                 const lineInsight = getLineInsight(currentSummary, previousSummary);
                 const lineInsightEl = document.getElementById('line_insight');
