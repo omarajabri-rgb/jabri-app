@@ -233,6 +233,12 @@
             border:1px solid rgba(21,154,111,0.18);
         }
 
+        .status-chip.partial{
+            background:rgba(215,146,31,0.12);
+            color:var(--warning);
+            border:1px solid rgba(215,146,31,0.18);
+        }
+
         .last-seen-chip{
             background:rgba(201,164,107,0.12);
             color:#6b4f2b;
@@ -953,21 +959,111 @@
         function formatEnglishDate(dateStr) {
             if (!dateStr) return '—';
             const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-GB');
+            return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-GB');
         }
 
         function formatEnglishDateTime(dateStr) {
             if (!dateStr) return '—';
             const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? '—' : `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}`;
+            return Number.isNaN(d.getTime()) ? '—' : `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}`;
         }
 
         function monthsSince(dateStr) {
             if (!dateStr) return null;
             const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return null;
+            if (Number.isNaN(d.getTime())) return null;
             const now = new Date();
             return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+        }
+
+        function addMonthsSafe(dateInput, months) {
+            const d = new Date(dateInput);
+            if (Number.isNaN(d.getTime())) return null;
+
+            const originalDay = d.getDate();
+            d.setDate(1);
+            d.setMonth(d.getMonth() + months);
+
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            d.setDate(Math.min(originalDay, lastDay));
+            return d;
+        }
+
+        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
+            const contract = new Date(contractDate);
+            if (Number.isNaN(contract.getTime())) return null;
+
+            const candidate = new Date(
+                referenceDate.getFullYear(),
+                contract.getMonth(),
+                contract.getDate()
+            );
+
+            if (referenceDate < candidate) {
+                candidate.setFullYear(candidate.getFullYear() - 1);
+            }
+
+            return candidate;
+        }
+
+        function getInstallmentPlanFromContract(contractDate, annualAmount, referenceDate = new Date()) {
+            const safeAnnual = Math.max(0, toNumber(annualAmount));
+            const installmentAmount = safeAnnual / 3;
+
+            const base = getCycleBaseDate(contractDate, referenceDate);
+
+            if (!base) {
+                const year = referenceDate.getFullYear();
+                const firstDate = new Date(year, 0, 1);
+                const secondDate = new Date(year, 5, 1);
+                const thirdDate = new Date(year, 8, 1);
+
+                return {
+                    installmentAmount,
+                    firstDate,
+                    secondDate,
+                    thirdDate,
+                    dueUntilToday:
+                        referenceDate >= thirdDate ? installmentAmount * 3 :
+                        referenceDate >= secondDate ? installmentAmount * 2 :
+                        referenceDate >= firstDate ? installmentAmount * 1 : 0,
+                    nextInstallment:
+                        referenceDate < firstDate ? { label: 'القسط الأول', date: firstDate, amount: installmentAmount } :
+                        referenceDate < secondDate ? { label: 'القسط الثاني', date: secondDate, amount: installmentAmount } :
+                        referenceDate < thirdDate ? { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount } :
+                        { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: installmentAmount }
+                };
+            }
+
+            const firstDate = new Date(base);
+            const secondDate = addMonthsSafe(base, 5);
+            const thirdDate = addMonthsSafe(base, 8);
+
+            let dueUntilToday = 0;
+            if (referenceDate >= firstDate) dueUntilToday += installmentAmount;
+            if (referenceDate >= secondDate) dueUntilToday += installmentAmount;
+            if (referenceDate >= thirdDate) dueUntilToday += installmentAmount;
+
+            let nextInstallment;
+            if (referenceDate < firstDate) {
+                nextInstallment = { label: 'القسط الأول', date: firstDate, amount: installmentAmount };
+            } else if (referenceDate < secondDate) {
+                nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
+            } else if (referenceDate < thirdDate) {
+                nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
+            } else {
+                const nextCycleFirst = addMonthsSafe(firstDate, 12);
+                nextInstallment = { label: 'القسط الأول', date: nextCycleFirst, amount: installmentAmount };
+            }
+
+            return {
+                installmentAmount,
+                firstDate,
+                secondDate,
+                thirdDate,
+                dueUntilToday,
+                nextInstallment
+            };
         }
 
         function getSelectedTenant() {
@@ -1037,11 +1133,22 @@
 
             tenantBalances = allTenants.map(tn => {
                 const s = getLatestSummary(tn.tenant_code);
+                const totalDebit = toNumber(s?.total_debit);
+                const totalCredit = toNumber(s?.total_credit);
+                const currentBalance = Math.max(0, toNumber(s?.final_balance));
+                const contractDate = tn.contract_date || null;
+                const installmentPlan = getInstallmentPlanFromContract(contractDate, totalDebit);
+
                 return {
                     ...tn,
-                    totalDebit: toNumber(s?.total_debit),
-                    totalCredit: toNumber(s?.total_credit),
-                    currentBalance: Math.max(0, toNumber(s?.final_balance)),
+                    contractDate,
+                    totalDebit,
+                    totalCredit,
+                    currentBalance,
+                    dueUntilToday: installmentPlan.dueUntilToday,
+                    currentInstallmentGap: Math.max(0, installmentPlan.dueUntilToday - totalCredit),
+                    installmentAmount: installmentPlan.installmentAmount,
+                    nextInstallment: installmentPlan.nextInstallment,
                     latestSummary: s,
                     lastSeen: tn.last_seen || tn.last_login || tn.updated_at || tn.created_at || null
                 };
@@ -1062,7 +1169,7 @@
             }
 
             const d = new Date(raw);
-            if (isNaN(d.getTime())) {
+            if (Number.isNaN(d.getTime())) {
                 el.innerText = '—';
                 return;
             }
@@ -1080,16 +1187,29 @@
             else el.innerText = formatEnglishDate(raw);
         }
 
-        function updateTenantStatusChip(balance) {
+        function updateTenantStatusChip(tenant) {
             const chip = document.getElementById('tenant_status_chip');
             if (!chip) return;
 
-            if (Math.max(0, toNumber(balance)) === 0) {
-                chip.innerText = 'مسدد';
-                chip.classList.add('paid');
-            } else {
+            chip.classList.remove('paid', 'partial');
+
+            if (!tenant) {
                 chip.innerText = 'جزئي';
-                chip.classList.remove('paid');
+                return;
+            }
+
+            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
+            const paid = Math.max(0, toNumber(tenant.totalCredit));
+            const gap = Math.max(0, dueUntilToday - paid);
+
+            if (dueUntilToday === 0 || gap === 0) {
+                chip.innerText = 'ملتزم';
+                chip.classList.add('paid');
+            } else if (paid > 0) {
+                chip.innerText = 'جزئي';
+                chip.classList.add('partial');
+            } else {
+                chip.innerText = 'متأخر';
             }
         }
 
@@ -1196,10 +1316,19 @@
             if (!tenant) return;
 
             const latestSummary = tenant.latestSummary;
-            const totalDebit = toNumber(latestSummary?.total_debit);
+            const annualDebit = toNumber(latestSummary?.total_debit);
             const totalCredit = toNumber(latestSummary?.total_credit);
             const currentBalance = Math.max(0, toNumber(latestSummary?.final_balance));
-            const coverageScore = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 0;
+
+            const installmentPlan = getInstallmentPlanFromContract(tenant.contractDate, annualDebit);
+            const dueUntilToday = Math.max(0, installmentPlan.dueUntilToday);
+            const currentInstallmentGap = Math.max(0, dueUntilToday - totalCredit);
+            const installmentAmount = installmentPlan.installmentAmount;
+            const nextInstallment = installmentPlan.nextInstallment;
+
+            const installmentCoverageScore = dueUntilToday > 0
+                ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
+                : 100;
 
             const txs = allTransactions
                 .filter(x => x.tenant_code === tenant.tenant_code)
@@ -1225,7 +1354,7 @@
                 5,
                 Math.min(
                     95,
-                    Math.round((coverageScore * 0.55) + ((monthsWithoutPayment <= 1 ? 90 : monthsWithoutPayment <= 3 ? 55 : 20) * 0.45))
+                    Math.round((installmentCoverageScore * 0.55) + ((monthsWithoutPayment <= 1 ? 90 : monthsWithoutPayment <= 3 ? 55 : 20) * 0.45))
                 )
             );
 
@@ -1233,39 +1362,46 @@
                 5,
                 Math.min(
                     95,
-                    100 - nextPaymentProbability + (currentBalance > 1000 ? 10 : 0)
+                    100 - nextPaymentProbability + (currentInstallmentGap > installmentAmount * 0.5 ? 10 : 0)
                 )
             );
 
-            document.getElementById('ai_score_value').innerText = `${coverageScore}/100`;
-            document.getElementById('ai_commitment_ratio').innerText = `${coverageScore}%`;
+            document.getElementById('ai_score_value').innerText = `${installmentCoverageScore}/100`;
+            document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
             document.getElementById('kpi_total_credit').innerText = Math.round(totalCredit);
             document.getElementById('kpi_total_balance').innerText = Math.round(currentBalance);
 
             const badge = document.getElementById('ai_badge');
-            if (coverageScore >= 80) {
+            if (installmentCoverageScore >= 100) {
                 badge.className = 'smart-ai-badge badge-excellent';
-                badge.innerText = 'ممتاز';
-                document.getElementById('ai_score_text').innerText = 'مستأجر موثوق وسلوكه جيد';
-            } else if (coverageScore >= 50) {
+                badge.innerText = 'ملتزم';
+                document.getElementById('ai_score_text').innerText = 'مسدد الأقساط المطلوبة حتى تاريخ اليوم';
+            } else if (installmentCoverageScore >= 60) {
                 badge.className = 'smart-ai-badge badge-good';
-                badge.innerText = 'جيد';
-                document.getElementById('ai_score_text').innerText = 'الحالة جيدة وتحتاج متابعة خفيفة';
+                badge.innerText = 'جزئي';
+                document.getElementById('ai_score_text').innerText = 'يوجد سداد لكنه أقل من المطلوب حتى اليوم';
             } else {
                 badge.className = 'smart-ai-badge badge-risk';
-                badge.innerText = 'خطر';
-                document.getElementById('ai_score_text').innerText = 'يحتاج تدخل إداري فوري';
+                badge.innerText = 'متأخر';
+                document.getElementById('ai_score_text').innerText = 'متأخر عن الأقساط المستحقة حتى اليوم';
             }
 
-            setMoodClass(document.getElementById('hero_commitment_card'), coverageScore >= 80 ? 'good' : coverageScore >= 55 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('hero_commitment_card'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
 
-            document.getElementById('ai_tenant_type').innerText = coverageScore >= 80 ? 'ملتزم' : coverageScore >= 50 ? 'متوسط' : 'متأخر';
-            document.getElementById('ai_tenant_type_text').innerText = coverageScore >= 80 ? 'سلوكه المالي مستقر' : coverageScore >= 50 ? 'يحتاج متابعة' : 'يتطلب متابعة قوية';
-            setMoodClass(document.getElementById('ai_card_type'), coverageScore >= 80 ? 'good' : coverageScore >= 50 ? 'warn' : 'bad');
+            document.getElementById('ai_tenant_type').innerText =
+                installmentCoverageScore >= 100 ? 'ملتزم' :
+                installmentCoverageScore >= 60 ? 'جزئي' : 'متأخر';
+
+            document.getElementById('ai_tenant_type_text').innerText =
+                installmentCoverageScore >= 100 ? 'يغطي المستحقات المرحلية' :
+                installmentCoverageScore >= 60 ? 'يدفع لكن دون اكتمال القسط المطلوب' :
+                'لم يغطي القسط المستحق حتى اليوم';
+
+            setMoodClass(document.getElementById('ai_card_type'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
 
             document.getElementById('ai_last_payment').innerText = monthlyAverage ? Math.round(monthlyAverage) : 0;
             setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAverage >= 600 ? 'good' : monthlyAverage >= 300 ? 'warn' : 'bad');
@@ -1291,35 +1427,33 @@
             document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
 
-            document.getElementById('kpi_total_credit_text').innerText = coverageScore >= 80 ? 'تحصيل جيد' : coverageScore >= 55 ? 'تحصيل متوسط' : 'تحصيل ضعيف';
-            document.getElementById('kpi_total_balance_text').innerText = currentBalance === 0 ? 'لا يوجد رصيد' : currentBalance <= 500 ? 'رصيد منخفض' : currentBalance <= 1500 ? 'رصيد متوسط' : 'رصيد مرتفع';
-            setMoodClass(document.getElementById('ai_card_total_credit'), coverageScore >= 80 ? 'good' : coverageScore >= 55 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentBalance <= 1500 ? 'warn' : 'bad');
+            document.getElementById('kpi_total_credit_text').innerText =
+                dueUntilToday > 0 ? `المطلوب حتى اليوم: ${Math.round(dueUntilToday)}` : 'لا يوجد استحقاق مرحلي بعد';
 
-            const monthsToClose = (currentBalance > 0 && monthlyAverage > 0) ? Math.ceil(currentBalance / monthlyAverage) : null;
-            document.getElementById('ai_close_estimate').innerText =
-                currentBalance <= 0 ? 'مغلق' :
-                monthsToClose ? `${monthsToClose} شهر` : 'غير واضح';
+            document.getElementById('kpi_total_balance_text').innerText =
+                currentInstallmentGap === 0 ? 'لا يوجد تأخر مرحلي' : `متأخر مرحلي: ${Math.round(currentInstallmentGap)}`;
+
+            setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_total_balance'), currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
+
+            if (nextInstallment?.date) {
+                document.getElementById('ai_close_estimate').innerText = `${nextInstallment.label} ${formatEnglishDate(nextInstallment.date)}`;
+            } else {
+                document.getElementById('ai_close_estimate').innerText = '—';
+            }
 
             document.getElementById('ai_recommendation').innerText =
-                coverageScore < 50 ? 'متابعة مباشرة' :
-                currentBalance > 0 ? 'متابعة مالية' : 'حالة جيدة';
+                currentInstallmentGap === 0
+                    ? 'لا حاجة لمتابعة حالياً'
+                    : `متابعة القسط الحالي (${Math.round(currentInstallmentGap)})`;
 
-            setDotMood('dot_close_estimate',
-                currentBalance <= 0 ? 'good' :
-                (monthsToClose && monthsToClose <= 6) ? 'good' :
-                (monthsToClose && monthsToClose <= 12) ? 'warn' : 'bad'
-            );
-
-            setDotMood('dot_recommendation',
-                coverageScore < 50 ? 'bad' :
-                currentBalance > 0 ? 'warn' : 'good'
-            );
+            setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
+            setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             const flags = [];
-            if (monthsWithoutPayment >= 3) flags.push({ text:'لا توجد دفعات حديثة', cls:'flag-danger' });
-            if (currentBalance > 1000) flags.push({ text:'رصيد مرتفع', cls:'flag-warning' });
-            if (last3Ratio >= 80) flags.push({ text:'التزام جيد', cls:'flag-success' });
+            if (currentInstallmentGap > 0) flags.push({ text:'متأخر عن القسط الحالي', cls:'flag-danger' });
+            if (nextInstallment?.date) flags.push({ text:`القسط القادم ${formatEnglishDate(nextInstallment.date)}`, cls:'flag-warning' });
+            if (installmentCoverageScore >= 100) flags.push({ text:'ملتزم حتى اليوم', cls:'flag-success' });
             if (!flags.length) flags.push({ text:'مخاطر منخفضة', cls:'flag-success' });
 
             document.getElementById('ai_risk_flags').innerHTML =
@@ -1483,25 +1617,25 @@
 
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
-            const amount = Math.round(tenant.currentBalance);
+            const amount = Math.round(tenant.currentInstallmentGap ?? tenant.currentBalance);
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
 
             if (type === 'first') {
-                return `نود إعلامكم بوجود رصيد مستحق عليكم بقيمة ${amount}، نرجو التكرم بتسديده في أقرب وقت ممكن.`;
+                return `نود إعلامكم بوجود مبلغ مستحق عليكم حتى تاريخه بقيمة ${amount}، نرجو التكرم بتسديده في أقرب وقت ممكن.`;
             }
             if (type === 'second') {
-                return `إشارة إلى التذكير السابق، نرجو التكرم بتسديد الرصيد المستحق عليكم والبالغ ${amount} خلال 48 ساعة.`;
+                return `إشارة إلى التذكير السابق، نرجو التكرم بتسديد المبلغ المستحق حتى اليوم والبالغ ${amount} خلال 48 ساعة.`;
             }
             if (type === 'third') {
-                return `إنذار نهائي: نرجو التكرم بتسديد الرصيد المستحق وقدره ${amount} قبل ${dueDateText} لتجنب الإجراءات القانونية.`;
+                return `إنذار نهائي: نرجو التكرم بتسديد المبلغ المستحق وقدره ${amount} قبل ${dueDateText} لتجنب الإجراءات القانونية.`;
             }
             if (type === 'legal') {
-                return `إنذار عدلي: نرجو تسديد الرصيد المستحق وقدره ${amount} خلال 48 ساعة من تاريخ هذا الإشعار، خلافاً لذلك سيتم اتخاذ الإجراءات القانونية.`;
+                return `إنذار عدلي: نرجو تسديد المبلغ المستحق وقدره ${amount} خلال 48 ساعة من تاريخ هذا الإشعار، خلافاً لذلك سيتم اتخاذ الإجراءات القانونية.`;
             }
             if (type === 'lawyer') {
-                return `إشعار قانوني: تم تحويل ملفكم إلى المحامي المختص بخصوص الرصيد المستحق وقدره ${amount}، وسيتم استكمال الإجراءات القانونية حسب الأصول.`;
+                return `إشعار قانوني: تم تحويل ملفكم إلى المحامي المختص بخصوص المبلغ المستحق وقدره ${amount}، وسيتم استكمال الإجراءات القانونية حسب الأصول.`;
             }
             return '';
         }
@@ -1565,7 +1699,7 @@
             updateLastSeen(tenant);
 
             if (tenant) {
-                updateTenantStatusChip(tenant.currentBalance);
+                updateTenantStatusChip(tenant);
                 renderAi(tenant);
                 drawCollectionChart(tenant.totalCredit, tenant.currentBalance);
                 drawMonthlyChart(tenant);
@@ -1594,7 +1728,7 @@
             } else {
                 document.getElementById('last_seen_chip').innerText = '—';
                 document.getElementById('tenant_status_chip').innerText = 'جزئي';
-                document.getElementById('tenant_status_chip').classList.remove('paid');
+                document.getElementById('tenant_status_chip').classList.remove('paid', 'partial');
                 document.getElementById('statementBtn').disabled = true;
             }
 
