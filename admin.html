@@ -192,24 +192,51 @@
         .select-with-chip{
             display:flex;
             gap:8px;
-            align-items:center;
+            align-items:flex-start;
         }
 
         .select-with-chip select{
             flex:1;
             min-width:0;
+            min-height:44px;
+            padding:10px 14px;
+            font-size:13px;
+        }
+
+        .tenant-mini-chips{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            align-items:flex-start;
+            flex-shrink:0;
+        }
+
+        .mini-chip{
+            padding:4px 10px;
+            border-radius:999px;
+            font-size:10px;
+            font-weight:900;
+            line-height:1.2;
+            white-space:nowrap;
+            flex-shrink:0;
+        }
+
+        .status-chip{
+            background:rgba(209,77,77,0.12);
+            color:var(--danger);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .status-chip.paid{
+            background:rgba(21,154,111,0.12);
+            color:var(--success);
+            border:1px solid rgba(21,154,111,0.18);
         }
 
         .last-seen-chip{
-            padding:8px 12px;
-            border-radius:999px;
-            font-size:11px;
-            font-weight:800;
             background:rgba(201,164,107,0.12);
             color:#6b4f2b;
             border:1px solid rgba(201,164,107,0.25);
-            white-space:nowrap;
-            flex-shrink:0;
         }
 
         .smart-ai-box{
@@ -644,12 +671,11 @@
             }
 
             .select-with-chip{
-                flex-direction:column;
                 align-items:stretch;
             }
 
-            .last-seen-chip{
-                text-align:center;
+            .tenant-mini-chips{
+                align-items:flex-start;
             }
         }
     </style>
@@ -678,7 +704,11 @@
                         <select id="tenant_select">
                             <option value="">اختر المستأجر</option>
                         </select>
-                        <div class="last-seen-chip" id="last_seen_chip">—</div>
+
+                        <div class="tenant-mini-chips">
+                            <div class="mini-chip status-chip" id="tenant_status_chip">جزئي</div>
+                            <div class="mini-chip last-seen-chip" id="last_seen_chip">—</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1048,6 +1078,19 @@
             else if (diffHour < 24) el.innerText = `${diffHour} س`;
             else if (diffDay <= 7) el.innerText = `${diffDay} ي`;
             else el.innerText = formatEnglishDate(raw);
+        }
+
+        function updateTenantStatusChip(balance) {
+            const chip = document.getElementById('tenant_status_chip');
+            if (!chip) return;
+
+            if (Math.max(0, toNumber(balance)) === 0) {
+                chip.innerText = 'مسدد';
+                chip.classList.add('paid');
+            } else {
+                chip.innerText = 'جزئي';
+                chip.classList.remove('paid');
+            }
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
@@ -1522,6 +1565,7 @@
             updateLastSeen(tenant);
 
             if (tenant) {
+                updateTenantStatusChip(tenant.currentBalance);
                 renderAi(tenant);
                 drawCollectionChart(tenant.totalCredit, tenant.currentBalance);
                 drawMonthlyChart(tenant);
@@ -1549,6 +1593,8 @@
                 await renderSelectedTenant(selectedCode);
             } else {
                 document.getElementById('last_seen_chip').innerText = '—';
+                document.getElementById('tenant_status_chip').innerText = 'جزئي';
+                document.getElementById('tenant_status_chip').classList.remove('paid');
                 document.getElementById('statementBtn').disabled = true;
             }
 
