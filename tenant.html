@@ -884,30 +884,36 @@
         }
 
         async function fetchVisibleNotifications() {
-            const nowIso = new Date().toISOString();
-            const { data, error } = await supabaseClient
-                .from('tenant_notifications')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .eq('is_active', true);
+    const { data, error } = await supabaseClient
+        .from('tenant_notifications')
+        .select('*')
+        .eq('tenant_code', tenantCode)
+        .eq('is_active', true);
 
-            if (error) {
-                console.error('fetchVisibleNotifications error:', error);
-                return [];
-            }
+    if (error) {
+        console.error('fetchVisibleNotifications error:', error);
+        return [];
+    }
 
-            return (data || [])
-                .filter(item => {
-                    const notExpired = !item.expires_at || item.expires_at > nowIso;
-                    const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
-                    return notExpired && notHiddenAfterSeen;
-                })
-                .sort((a, b) => {
-                    const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
-                    if (priorityDiff !== 0) return priorityDiff;
-                    return new Date(b.created_at) - new Date(a.created_at);
-                });
-        }
+    const now = new Date();
+
+    return (data || [])
+        .filter(item => {
+            // تحويل تاريخ الانتهاء لمقارنة صحيحة
+            const expiryDate = item.expires_at ? new Date(item.expires_at) : null;
+            const notExpired = !expiryDate || expiryDate > now;
+            
+            // منطق الإخفاء بعد الرؤية
+            const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
+            
+            return notExpired && notHiddenAfterSeen;
+        })
+        .sort((a, b) => {
+            const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
+            if (priorityDiff !== 0) return priorityDiff;
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+}
 
         async function markNotificationsSeen(ids) {
             if (!ids || !ids.length) return;
@@ -923,29 +929,40 @@
         }
 
         async function loadNotifications() {
-            const box = document.getElementById('notifications_box');
-            await deactivateExpiredNotifications();
-            const visibleBeforeSeen = await fetchVisibleNotifications();
+    const box = document.getElementById('notifications_box');
+    
+    // 1. تنظيف الإشعارات المنتهية
+    await deactivateExpiredNotifications();
+    
+    // 2. جلب الإشعارات النشطة
+    const visibleNotifications = await fetchVisibleNotifications();
 
-            if (!visibleBeforeSeen.length) {
-                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
-                return;
-            }
+    if (!visibleNotifications || visibleNotifications.length === 0) {
+        box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
+        return;
+    }
 
-            box.innerHTML = visibleBeforeSeen.map(item => `
-                <div class="notify-card ${item.type || 'normal'}">
-                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
-                    <div class="notify-message">${item.message || ''}</div>
-                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
-                </div>
-            `).join('');
+    // 3. عرض الإشعارات في الواجهة
+    box.innerHTML = visibleNotifications.map(item => `
+        <div class="notify-card ${item.type || 'normal'}">
+            ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
+            <div class="notify-message">${item.message || ''}</div>
+            <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
+        </div>
+    `).join('');
 
-            const unseenVisibleIds = visibleBeforeSeen
-                .filter(item => !item.seen_at || !item.is_read)
-                .map(item => item.id);
+    // 4. تحديد الإشعارات التي لم يتم وسمها كـ "مرئية" سابقاً
+    const unseenIds = visibleNotifications
+        .filter(item => !item.seen_at) 
+        .map(item => item.id);
 
-            await markNotificationsSeen(unseenVisibleIds);
-        }
+    if (unseenIds.length > 0) {
+        // تأخير بسيط لضمان العرض قبل التحديث
+        setTimeout(async () => {
+            await markNotificationsSeen(unseenIds);
+        }, 1000);
+    }
+}
 
         function renderPieChart(credit, balance) {
             const canvas = document.getElementById('balancePieChart');
