@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.1</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.3</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -826,13 +826,13 @@
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_total_credit">
-                        <span>إجمالي الدائن</span>
+                        <span>المطلوب حتى اليوم</span>
                         <b id="kpi_total_credit">0</b>
                         <small id="kpi_total_credit_text">—</small>
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_total_balance">
-                        <span>إجمالي الرصيد</span>
+                        <span>إغلاق الرصيد آخر السنة</span>
                         <b id="kpi_total_balance">0</b>
                         <small id="kpi_total_balance_text">—</small>
                     </div>
@@ -841,7 +841,7 @@
                 <div class="insight-list">
                     <div class="insight-row">
                         <div>
-                            <span>إغلاق الرصيد المتوقع</span>
+                            <span>القسط الحالي</span>
                             <b id="ai_close_estimate">—</b>
                         </div>
                         <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
@@ -905,7 +905,7 @@
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
-                    <div class="sub-section-note">هذه المنطقة مخصصة لإدخال دفعة جديدة فقط، وسيتم تحديث الحساب بعد الحفظ مباشرة</div>
+                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث tenant_yearly_summary مباشرة</div>
 
                     <div class="form-grid">
                         <div class="field">
@@ -942,9 +942,11 @@
             </div>
         </section>
 
-        <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
+        <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>
+            كشف حساب المستأجر
+        </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.1</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.3</div>
     </div>
 
     <script>
@@ -1057,7 +1059,10 @@
                 contract.getDate()
             );
 
-            if (referenceDate < candidate) candidate.setFullYear(candidate.getFullYear() - 1);
+            if (referenceDate < candidate) {
+                candidate.setFullYear(candidate.getFullYear() - 1);
+            }
+
             return candidate;
         }
 
@@ -1088,46 +1093,57 @@
                 const secondDate = new Date(year, 5, 1);
                 const thirdDate = new Date(year, 8, 1);
 
-                const dueUntilToday =
-                    referenceDate >= thirdDate ? safePreviousBalance + (installmentAmount * 3) :
-                    referenceDate >= secondDate ? safePreviousBalance + (installmentAmount * 2) :
-                    referenceDate >= firstDate ? safePreviousBalance + installmentAmount :
-                    safePreviousBalance;
+                let dueInstallmentsCount = 0;
+                if (referenceDate >= firstDate) dueInstallmentsCount = 1;
+                if (referenceDate >= secondDate) dueInstallmentsCount = 2;
+                if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
 
-                let currentInstallmentValue = safePreviousBalance + installmentAmount;
-                if (referenceDate >= secondDate && referenceDate < thirdDate) currentInstallmentValue = installmentAmount;
-                if (referenceDate >= thirdDate) currentInstallmentValue = installmentAmount;
+                const dueInstallmentsValue = installmentAmount * dueInstallmentsCount;
+                const dueUntilTodayRaw = safePreviousBalance + dueInstallmentsValue;
+                const annualTotalWithCarry = safePreviousBalance + safeAnnual;
+                const dueUntilToday = Math.min(dueUntilTodayRaw, annualTotalWithCarry);
 
-                const nextInstallment =
-                    referenceDate < firstDate ? { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount } :
-                    referenceDate < secondDate ? { label: 'القسط الثاني', date: secondDate, amount: installmentAmount } :
-                    referenceDate < thirdDate ? { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount } :
-                    { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
+                let currentInstallmentValue = installmentAmount;
+                if (dueInstallmentsCount === 0) currentInstallmentValue = safePreviousBalance + installmentAmount;
+                if (dueInstallmentsCount === 1) currentInstallmentValue = safePreviousBalance + installmentAmount;
 
-                return { installmentAmount, currentInstallmentValue, dueUntilToday, nextInstallment };
+                let nextInstallment;
+                if (referenceDate < firstDate) {
+                    nextInstallment = { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount };
+                } else if (referenceDate < secondDate) {
+                    nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
+                } else if (referenceDate < thirdDate) {
+                    nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
+                } else {
+                    nextInstallment = { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
+                }
+
+                return {
+                    installmentAmount,
+                    currentInstallmentValue,
+                    dueUntilToday,
+                    nextInstallment,
+                    dueInstallmentsCount
+                };
             }
 
             const firstDate = new Date(base);
             const secondDate = addMonthsSafe(base, 5);
             const thirdDate = addMonthsSafe(base, 8);
 
-            let dueUntilToday = safePreviousBalance;
-            let currentInstallmentValue = safePreviousBalance + installmentAmount;
+            let dueInstallmentsCount = 0;
+            if (referenceDate >= firstDate) dueInstallmentsCount = 1;
+            if (referenceDate >= secondDate) dueInstallmentsCount = 2;
+            if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
 
-            if (referenceDate >= firstDate) {
-                dueUntilToday = safePreviousBalance + installmentAmount;
-                currentInstallmentValue = safePreviousBalance + installmentAmount;
-            }
+            const dueInstallmentsValue = installmentAmount * dueInstallmentsCount;
+            const dueUntilTodayRaw = safePreviousBalance + dueInstallmentsValue;
+            const annualTotalWithCarry = safePreviousBalance + safeAnnual;
+            const dueUntilToday = Math.min(dueUntilTodayRaw, annualTotalWithCarry);
 
-            if (referenceDate >= secondDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 2);
-                currentInstallmentValue = installmentAmount;
-            }
-
-            if (referenceDate >= thirdDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 3);
-                currentInstallmentValue = installmentAmount;
-            }
+            let currentInstallmentValue = installmentAmount;
+            if (dueInstallmentsCount === 0) currentInstallmentValue = safePreviousBalance + installmentAmount;
+            if (dueInstallmentsCount === 1) currentInstallmentValue = safePreviousBalance + installmentAmount;
 
             let nextInstallment;
             if (referenceDate < firstDate) {
@@ -1144,12 +1160,13 @@
                 };
             }
 
-            return { installmentAmount, currentInstallmentValue, dueUntilToday, nextInstallment };
-        }
-
-        function getCappedInstallmentGap({ dueUntilToday, totalCredit, currentBalance }) {
-            const rawGap = Math.max(0, toNumber(dueUntilToday) - toNumber(totalCredit));
-            return Math.min(Math.max(0, toNumber(currentBalance)), rawGap);
+            return {
+                installmentAmount,
+                currentInstallmentValue,
+                dueUntilToday,
+                nextInstallment,
+                dueInstallmentsCount
+            };
         }
 
         function getSelectedTenant() {
@@ -1223,11 +1240,13 @@
                 const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
 
                 const plan = getInstallmentPlanFromContract(contractDate, annualDebit, previousBalance);
-                const currentInstallmentGap = getCappedInstallmentGap({
-                    dueUntilToday: plan.dueUntilToday,
-                    totalCredit,
-                    currentBalance
-                });
+
+                const annualTotalWithCarry = previousBalance + annualDebit;
+                const safeDueUntilToday = Math.min(
+                    Math.max(0, plan.dueUntilToday),
+                    annualTotalWithCarry,
+                    totalCredit + currentBalance
+                );
 
                 return {
                     ...tn,
@@ -1238,13 +1257,14 @@
                     totalDebit: annualDebit,
                     totalCredit,
                     currentBalance,
-                    dueUntilToday: plan.dueUntilToday,
+                    dueUntilToday: safeDueUntilToday,
                     currentInstallmentValue: plan.currentInstallmentValue,
-                    currentInstallmentGap,
+                    currentInstallmentGap: Math.max(0, safeDueUntilToday - totalCredit),
                     installmentAmount: plan.installmentAmount,
                     nextInstallment: plan.nextInstallment,
                     latestSummary: currentSummary,
-                    lastSeen: tn.last_seen || null
+                    lastSeen: tn.last_seen || null,
+                    dueInstallmentsCount: plan.dueInstallmentsCount
                 };
             });
         }
@@ -1261,16 +1281,11 @@
                 return;
             }
 
-            const gap = getCappedInstallmentGap({
-                dueUntilToday: tenant.dueUntilToday,
-                totalCredit: tenant.totalCredit,
-                currentBalance: tenant.currentBalance
-            });
-
+            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
             const paid = Math.max(0, toNumber(tenant.totalCredit));
-            const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
+            const gap = Math.max(0, dueUntilToday - paid);
 
-            if (currentBalance === 0 || gap === 0) {
+            if (dueUntilToday === 0 || gap === 0) {
                 chip.innerText = 'ملتزم';
                 chip.classList.add('paid');
             } else if (paid > 0) {
@@ -1383,21 +1398,14 @@
             const totalCredit = toNumber(tenant.totalCredit);
             const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
             const previousBalance = Math.max(0, toNumber(tenant.previousBalance));
+            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
+            const currentInstallmentGap = Math.max(0, toNumber(tenant.currentInstallmentGap));
+            const currentInstallmentValue = Math.max(0, toNumber(tenant.currentInstallmentValue));
+            const installmentAmount = Math.max(0, toNumber(tenant.installmentAmount));
+            const nextInstallment = tenant.nextInstallment;
 
-            const plan = getInstallmentPlanFromContract(tenant.contractDate, annualDebit, previousBalance);
-            const dueUntilToday = Math.max(0, plan.dueUntilToday);
-            const currentInstallmentGap = getCappedInstallmentGap({
-                dueUntilToday,
-                totalCredit,
-                currentBalance
-            });
-            const currentInstallmentValue = Math.max(0, plan.currentInstallmentValue);
-            const installmentAmount = Math.max(0, plan.installmentAmount);
-            const nextInstallment = plan.nextInstallment;
-
-            const installmentCoverageBase = Math.min(currentBalance, Math.max(0, dueUntilToday));
-            const installmentCoverageScore = installmentCoverageBase > 0
-                ? Math.min(100, Math.round(((installmentCoverageBase - currentInstallmentGap) / installmentCoverageBase) * 100))
+            const installmentCoverageScore = dueUntilToday > 0
+                ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
                 : 100;
 
             const txs = allTransactions
@@ -1440,22 +1448,22 @@
             document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
-            document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
+            document.getElementById('kpi_total_credit').innerText = roundMoney(dueUntilToday);
             document.getElementById('kpi_total_balance').innerText = roundMoney(currentBalance);
 
             const badge = document.getElementById('ai_badge');
-            if (currentBalance === 0 || currentInstallmentGap === 0) {
+            if (installmentCoverageScore >= 100) {
                 badge.className = 'smart-ai-badge badge-excellent';
                 badge.innerText = 'ملتزم';
-                document.getElementById('ai_score_text').innerText = 'لا يوجد مستحق مرحلي غير مسدد';
+                document.getElementById('ai_score_text').innerText = 'مسدد المستحقات التراكمية حتى اليوم';
             } else if (installmentCoverageScore >= 60) {
                 badge.className = 'smart-ai-badge badge-good';
                 badge.innerText = 'جزئي';
-                document.getElementById('ai_score_text').innerText = 'يوجد سداد لكن ما زال هناك جزء مستحق حالياً';
+                document.getElementById('ai_score_text').innerText = 'يوجد سداد لكنه أقل من المطلوب حتى اليوم';
             } else {
                 badge.className = 'smart-ai-badge badge-risk';
                 badge.innerText = 'متأخر';
-                document.getElementById('ai_score_text').innerText = 'المستحق الحالي غير مغطى بالشكل الكافي';
+                document.getElementById('ai_score_text').innerText = 'متأخر عن المستحق التراكمي حتى اليوم';
             }
 
             setMoodClass(document.getElementById('hero_commitment_card'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
@@ -1463,15 +1471,15 @@
             setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
 
             document.getElementById('ai_tenant_type').innerText =
-                currentBalance === 0 || currentInstallmentGap === 0 ? 'ملتزم' :
+                installmentCoverageScore >= 100 ? 'ملتزم' :
                 installmentCoverageScore >= 60 ? 'جزئي' : 'متأخر';
 
             document.getElementById('ai_tenant_type_text').innerText =
-                currentBalance === 0 || currentInstallmentGap === 0 ? 'لا يوجد مستحق مرحلي غير مدفوع' :
-                installmentCoverageScore >= 60 ? 'يدفع لكن ما زال عليه جزء من المستحق الحالي' :
-                'المستحق الحالي أعلى من الدفعات المنزلة';
+                installmentCoverageScore >= 100 ? 'يغطي المستحقات التراكمية' :
+                installmentCoverageScore >= 60 ? 'يدفع لكن دون اكتمال المستحق' :
+                'لم يغطي المستحق التراكمي حتى اليوم';
 
-            setMoodClass(document.getElementById('ai_card_type'), currentBalance === 0 || currentInstallmentGap === 0 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_type'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
 
             document.getElementById('ai_last_payment').innerText = monthlyAverage ? roundMoney(monthlyAverage) : 0;
             setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAverage >= 600 ? 'good' : monthlyAverage >= 300 ? 'warn' : 'bad');
@@ -1501,37 +1509,43 @@
 
             document.getElementById('kpi_total_credit_text').innerText =
                 dueUntilToday > 0
-                    ? `المطلوب حتى اليوم: ${roundMoney(currentInstallmentGap)}`
+                    ? `الرصيد السابق + الأقساط المستحقة حتى اليوم = ${roundMoney(dueUntilToday)}`
                     : 'لا يوجد استحقاق مرحلي بعد';
 
             document.getElementById('kpi_total_balance_text').innerText =
-                currentBalance === 0
-                    ? 'الرصيد مغلق'
-                    : `إغلاق الرصيد آخر السنة: ${roundMoney(currentBalance)}`;
+                currentInstallmentGap === 0
+                    ? 'لا يوجد تأخر مرحلي'
+                    : `المتبقي مرحلياً: ${roundMoney(currentInstallmentGap)}`;
 
-            setMoodClass(document.getElementById('ai_card_total_credit'), currentInstallmentGap === 0 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
 
-            if (nextInstallment?.date) {
-                document.getElementById('ai_close_estimate').innerText =
-                    `${nextInstallment.label} ${formatEnglishDate(nextInstallment.date)}`;
-            } else {
-                document.getElementById('ai_close_estimate').innerText = '—';
-            }
+            document.getElementById('ai_close_estimate').innerText = `القسط الحالي: ${roundMoney(currentInstallmentValue)}`;
 
             document.getElementById('ai_recommendation').innerText =
                 currentInstallmentGap === 0
                     ? 'لا حاجة لمتابعة حالياً'
                     : `متابعة المستحق الحالي (${roundMoney(currentInstallmentGap)})`;
 
-            setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
+            setDotMood('dot_close_estimate', currentInstallmentGap === 0 ? 'good' : 'warn');
             setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             const flags = [
-                { text: `القسط الحالي: ${roundMoney(currentInstallmentValue)}`, cls: 'flag-warning' },
                 {
-                    text: previousBalance > 0 ? `الرصيد القديم: ${roundMoney(previousBalance)}` : 'لا يوجد رصيد قديم',
+                    text: `الرصيد السابق: ${roundMoney(previousBalance)}`,
                     cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
+                },
+                {
+                    text: `القسط الواحد: ${roundMoney(installmentAmount)}`,
+                    cls: 'flag-warning'
+                },
+                {
+                    text: `الأقساط المستحقة: ${tenant.dueInstallmentsCount || 0}`,
+                    cls: 'flag-warning'
+                },
+                {
+                    text: `إغلاق السنة: ${roundMoney(currentBalance)}`,
+                    cls: currentBalance > 0 ? 'flag-danger' : 'flag-success'
                 }
             ];
 
@@ -1586,7 +1600,7 @@
                 const openingBalance = toNumber(summaryRow.opening_balance);
 
                 const newTotalCredit = currentTotalCredit + amount;
-                const newFinalBalance = openingBalance + currentTotalDebit - newTotalCredit;
+                const newFinalBalance = Math.max(0, openingBalance + currentTotalDebit - newTotalCredit);
 
                 const { error: insertTxError } = await supabaseClient
                     .from('tenant_transactions')
@@ -1650,11 +1664,7 @@
 
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
-            const amount = roundMoney(
-                tenant.currentInstallmentGap > 0
-                    ? tenant.currentInstallmentGap
-                    : tenant.currentBalance
-            );
+            const amount = roundMoney(tenant.currentInstallmentGap ?? tenant.currentBalance);
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
