@@ -1,9 +1,16 @@
+هذا هو الكود الكامل النهائي لـ admin.html بعد:
+	•	تثبيت معادلة الأقساط الصحيحة
+	•	الاعتماد على annual_rent
+	•	إبقاء الإشعارات شغالة
+	•	إبقاء الرسم الشهري شغال
+	•	إبقاء الشيبس و AI box شغالين
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.3</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.32</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -946,7 +953,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.3</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.32</div>
     </div>
 
     <script>
@@ -1002,12 +1009,6 @@
                 .filter(r => r.tenant_code === tenantCode)
                 .sort((a, b) => Number(b.year) - Number(a.year));
             return rows[0] || null;
-        }
-
-        function formatEnglishDate(dateStr) {
-            if (!dateStr) return '—';
-            const d = new Date(dateStr);
-            return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-GB');
         }
 
         function formatLastSeen(dateStr) {
@@ -1105,8 +1106,6 @@
             if (referenceDate >= secondDate) dueInstallmentsCount = 2;
             if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
 
-            // المعادلة الصحيحة:
-            // المطلوب حتى اليوم = الرصيد السابق + الأقساط التي حل موعدها فقط
             const dueUntilToday = safePreviousBalance + (installmentAmount * dueInstallmentsCount);
             const currentDueValue = dueUntilToday;
 
@@ -1211,12 +1210,12 @@
 
                 const previousSummary = getSummaryByYear(tn.tenant_code, previousCycleYear);
 
-                const annualDebit = toNumber(currentSummary?.total_debit);
+                const annualRent = toNumber(tn.annual_rent);
                 const totalCredit = toNumber(currentSummary?.total_credit);
                 const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
                 const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
 
-                const plan = getInstallmentPlanFromContract(contractDate, annualDebit, previousBalance);
+                const plan = getInstallmentPlanFromContract(contractDate, annualRent, previousBalance);
 
                 return {
                     ...tn,
@@ -1224,7 +1223,7 @@
                     currentCycleYear,
                     previousCycleYear,
                     previousBalance,
-                    totalDebit: annualDebit,
+                    totalDebit: annualRent,
                     totalCredit,
                     currentBalance,
                     dueUntilToday: Math.max(0, plan.dueUntilToday),
@@ -1364,7 +1363,6 @@
         function renderAi(tenant) {
             if (!tenant) return;
 
-            const annualDebit = toNumber(tenant.totalDebit);
             const totalCredit = toNumber(tenant.totalCredit);
             const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
             const previousBalance = Math.max(0, toNumber(tenant.previousBalance));
@@ -1405,13 +1403,7 @@
                 )
             );
 
-            const defaultProbability = Math.max(
-                5,
-                Math.min(
-                    95,
-                    100 - nextPaymentProbability + (currentInstallmentGap > installmentAmount * 0.5 ? 10 : 0)
-                )
-            );
+            const defaultProbability = 100 - nextPaymentProbability;
 
             document.getElementById('ai_score_value').innerText = `${installmentCoverageScore}/100`;
             document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
@@ -1437,7 +1429,7 @@
 
             setMoodClass(document.getElementById('hero_commitment_card'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('hero_default_card'), defaultProbability <= 30 ? 'good' : defaultProbability <= 50 ? 'warn' : 'bad');
 
             document.getElementById('ai_tenant_type').innerText =
                 installmentCoverageScore >= 100 ? 'ملتزم' :
@@ -1778,3 +1770,5 @@
     </script>
 </body>
 </html>
+
+هذا هو الملف الكامل.
