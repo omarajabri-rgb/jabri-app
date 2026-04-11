@@ -408,7 +408,6 @@
             flex-direction:column;
             justify-content:center;
             align-items:center;
-            text-align:center;
             aspect-ratio:1 / 1;
             box-shadow:var(--soft-shadow);
         }
@@ -1350,7 +1349,15 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
         }
@@ -1509,52 +1516,6 @@
                 flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
 
-        async function rebuildYearSummary(tenantCode, year) {
-            const yearNum = Number(year);
-
-            const { data: yearTransactions, error: txError } = await supabaseClient
-                .from('tenant_transactions')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .gte('date', `${yearNum}-01-01`)
-                .lte('date', `${yearNum}-12-31`);
-
-            if (txError) throw txError;
-
-            const totalDebit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.debit), 0);
-            const totalCredit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.credit), 0);
-
-            let openingBalance = 0;
-
-            const existingSummary = allSummaries.find(
-                r => r.tenant_code === tenantCode && Number(r.year) === yearNum
-            );
-
-            if (existingSummary) {
-                openingBalance = toNumber(existingSummary.opening_balance);
-            } else {
-                const prevSummary = allSummaries.find(
-                    r => r.tenant_code === tenantCode && Number(r.year) === (yearNum - 1)
-                );
-                openingBalance = toNumber(prevSummary?.final_balance);
-            }
-
-            const finalBalance = openingBalance + totalDebit - totalCredit;
-
-            const { error: summaryError } = await supabaseClient
-                .from('tenant_yearly_summary')
-                .upsert([{
-                    tenant_code: tenantCode,
-                    year: yearNum,
-                    opening_balance: openingBalance,
-                    total_debit: totalDebit,
-                    total_credit: totalCredit,
-                    final_balance: finalBalance
-                }], { onConflict: 'tenant_code,year' });
-
-            if (summaryError) throw summaryError;
-        }
-
         async function submitTransaction() {
             if (isSavingTransaction) return;
 
@@ -1587,9 +1548,24 @@
                     throw new Error('رقم السند مستخدم مسبقاً');
                 }
 
-                const newYear = new Date(date).getFullYear();
+                const yearNum = new Date(date).getFullYear();
 
-                const { error } = await supabaseClient
+                const summaryRow = allSummaries.find(
+                    r => r.tenant_code === code && Number(r.year) === Number(yearNum)
+                );
+
+                if (!summaryRow) {
+                    throw new Error(`لا يوجد tenant_yearly_summary للمستأجر ${code} لسنة ${yearNum}`);
+                }
+
+                const currentTotalCredit = toNumber(summaryRow.total_credit);
+                const currentTotalDebit = toNumber(summaryRow.total_debit);
+                const openingBalance = toNumber(summaryRow.opening_balance);
+
+                const newTotalCredit = currentTotalCredit + amount;
+                const newFinalBalance = openingBalance + currentTotalDebit - newTotalCredit;
+
+                const { error: insertTxError } = await supabaseClient
                     .from('tenant_transactions')
                     .insert([{
                         tenant_code: code,
@@ -1601,9 +1577,19 @@
                         notes: null
                     }]);
 
-                if (error) throw error;
+                if (insertTxError) throw insertTxError;
 
-                await rebuildYearSummary(code, newYear);
+                const { error: updateSummaryError } = await supabaseClient
+                    .from('tenant_yearly_summary')
+                    .update({
+                        total_credit: newTotalCredit,
+                        final_balance: newFinalBalance
+                    })
+                    .eq('tenant_code', code)
+                    .eq('year', yearNum);
+
+                if (updateSummaryError) throw updateSummaryError;
+
                 await refresh(code);
                 clearTransactionForm();
                 showStatus('تم حفظ الدفعة وتحديث الملخص السنوي بنجاح', 'success');
