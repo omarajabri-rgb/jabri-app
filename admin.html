@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.34</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.35</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -391,7 +391,6 @@
             border-color:rgba(209,77,77,0.18);
         }
 
-        /* [تحديث] - قسم التحليل السريع */
         .quick-ai-grid{
             display:grid;
             grid-template-columns:repeat(2, 1fr);
@@ -433,6 +432,14 @@
             color:#6b4f2b;
             font-weight:700;
             line-height:1.6;
+        }
+
+        #ai_card_total_credit b{
+            color:var(--success);
+        }
+
+        #ai_card_total_debit b{
+            color:var(--danger);
         }
 
         .ai-good{
@@ -710,7 +717,6 @@
             }
         }
 
-        /* [تحديث] - استعلامات الموبايل */
         @media (max-width: 768px){
             .tenant-select-grid,
             .form-grid{
@@ -832,10 +838,14 @@
                         <small id="ai_last3_ratio_text">—</small>
                     </div>
 
-                    <div class="quick-ai-card" id="ai_card_total_balance">
-                        <span>رصيد إغلاق الرصيد آخر السنة</span>
-                        <b id="kpi_total_balance">0</b>
-                        <small id="kpi_total_balance_text"></small>
+                    <div class="quick-ai-card" id="ai_card_total_credit">
+                        <span>دائن</span>
+                        <b id="kpi_total_credit">0</b>
+                    </div>
+
+                    <div class="quick-ai-card" id="ai_card_total_debit">
+                        <span>مدين</span>
+                        <b id="kpi_total_debit">0</b>
                     </div>
                 </div>
 
@@ -947,7 +957,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.34</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.35</div>
     </div>
 
     <script>
@@ -1354,6 +1364,7 @@
             const currentInstallmentGap = Math.max(0, toNumber(tenant.currentInstallmentGap));
             const currentInstallmentValue = Math.max(0, toNumber(tenant.currentInstallmentValue));
             const installmentAmount = Math.max(0, toNumber(tenant.installmentAmount));
+            const totalDebit = Math.max(0, toNumber(tenant.totalDebit));
 
             const installmentCoverageScore = dueUntilToday > 0
                 ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
@@ -1393,7 +1404,9 @@
             document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
-            document.getElementById('kpi_total_balance').innerText = roundMoney(currentBalance);
+
+            document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
+            document.getElementById('kpi_total_debit').innerText = roundMoney(totalDebit);
 
             const badge = document.getElementById('ai_badge');
             if (installmentCoverageScore >= 100) {
@@ -1451,9 +1464,15 @@
                 last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
 
-            document.getElementById('kpi_total_balance_text').innerText = '';
+            setMoodClass(
+                document.getElementById('ai_card_total_credit'),
+                totalCredit >= totalDebit ? 'good' : totalCredit > 0 ? 'warn' : 'bad'
+            );
 
-            setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
+            setMoodClass(
+                document.getElementById('ai_card_total_debit'),
+                totalDebit === 0 ? 'good' : 'warn'
+            );
 
             document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentValue)}`;
 
@@ -1744,5 +1763,3 @@
     </script>
 </body>
 </html>
-
-```
