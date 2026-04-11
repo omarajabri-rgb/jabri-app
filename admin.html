@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v2.7</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v2.8</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -105,6 +105,12 @@
             transform:translateY(-1px);
         }
 
+        .btn:disabled{
+            opacity:.55;
+            cursor:not-allowed;
+            transform:none;
+        }
+
         .btn-gold{
             background:linear-gradient(135deg, var(--gold), var(--gold-deep));
             color:#fff;
@@ -163,6 +169,7 @@
             display:flex;
             flex-direction:column;
             gap:8px;
+            min-width:0;
         }
 
         .field label{
@@ -174,6 +181,8 @@
 
         input, select, textarea{
             width:100%;
+            max-width:100%;
+            min-width:0;
             border-radius:16px;
             border:1px solid var(--line);
             background:rgba(255,255,255,0.84);
@@ -181,6 +190,12 @@
             font-size:14px;
             font-weight:700;
             outline:none;
+        }
+
+        input[type="date"]{
+            min-width:0;
+            width:100%;
+            display:block;
         }
 
         textarea{
@@ -193,6 +208,7 @@
             display:flex;
             gap:8px;
             align-items:flex-start;
+            min-width:0;
         }
 
         .select-with-chip select{
@@ -449,6 +465,7 @@
             display:flex;
             align-items:center;
             justify-content:space-between;
+            gap:12px;
             padding:14px;
             border-radius:18px;
             background:#fff;
@@ -475,6 +492,7 @@
             width:12px;
             height:12px;
             border-radius:50%;
+            flex-shrink:0;
         }
 
         .dot-good{ background:var(--success); }
@@ -581,6 +599,7 @@
             border:1px solid rgba(201,164,107,0.14);
             border-radius:22px;
             padding:16px;
+            overflow:hidden;
         }
 
         .sub-section-title{
@@ -608,6 +627,11 @@
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:12px;
+            align-items:start;
+        }
+
+        .form-grid > *{
+            min-width:0;
         }
 
         .quick-descs{
@@ -702,6 +726,10 @@
 
             .tenant-mini-chips{
                 align-items:flex-start;
+            }
+
+            .tx-actions .btn{
+                width:100%;
             }
         }
     </style>
@@ -917,7 +945,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.7</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.8</div>
     </div>
 
     <script>
@@ -933,6 +961,7 @@
         let tenantBalances = [];
         let collectionChart = null;
         let monthlyChart = null;
+        let isSavingTransaction = false;
 
         const toNumber = v => parseFloat(String(v ?? 0).replace(/,/g, '')) || 0;
 
@@ -1153,7 +1182,8 @@
         }
 
         function clearTransactionForm() {
-            document.getElementById('tx_date').valueAsDate = new Date();
+            const dateEl = document.getElementById('tx_date');
+            if (dateEl) dateEl.valueAsDate = new Date();
             document.getElementById('tx_receipt').value = '';
             document.getElementById('tx_desc').value = 'دفعة من الايجار';
             document.getElementById('tx_amount').value = '';
@@ -1480,30 +1510,42 @@
         }
 
         async function rebuildYearSummary(tenantCode, year) {
+            const yearNum = Number(year);
+
             const { data: yearTransactions, error: txError } = await supabaseClient
                 .from('tenant_transactions')
                 .select('*')
                 .eq('tenant_code', tenantCode)
-                .gte('date', `${year}-01-01`)
-                .lte('date', `${year}-12-31`);
+                .gte('date', `${yearNum}-01-01`)
+                .lte('date', `${yearNum}-12-31`);
 
             if (txError) throw txError;
 
             const totalDebit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.debit), 0);
             const totalCredit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.credit), 0);
 
+            let openingBalance = 0;
+
             const existingSummary = allSummaries.find(
-                r => r.tenant_code === tenantCode && Number(r.year) === Number(year)
+                r => r.tenant_code === tenantCode && Number(r.year) === yearNum
             );
 
-            const openingBalance = toNumber(existingSummary?.opening_balance);
+            if (existingSummary) {
+                openingBalance = toNumber(existingSummary.opening_balance);
+            } else {
+                const prevSummary = allSummaries.find(
+                    r => r.tenant_code === tenantCode && Number(r.year) === (yearNum - 1)
+                );
+                openingBalance = toNumber(prevSummary?.final_balance);
+            }
+
             const finalBalance = openingBalance + totalDebit - totalCredit;
 
             const { error: summaryError } = await supabaseClient
                 .from('tenant_yearly_summary')
                 .upsert([{
                     tenant_code: tenantCode,
-                    year,
+                    year: yearNum,
                     opening_balance: openingBalance,
                     total_debit: totalDebit,
                     total_credit: totalCredit,
@@ -1514,11 +1556,14 @@
         }
 
         async function submitTransaction() {
+            if (isSavingTransaction) return;
+
             const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
             const desc = document.getElementById('tx_desc').value.trim();
             const amount = toNumber(document.getElementById('tx_amount').value);
             const receiptNo = document.getElementById('tx_receipt').value.trim();
+            const saveBtn = document.getElementById('save_tx_btn');
 
             if (!code) return alert('اختر المستأجر');
             if (!date) return alert('أدخل التاريخ');
@@ -1527,6 +1572,11 @@
             if (amount <= 0) return alert('أدخل قيمة دفعة صحيحة');
 
             try {
+                isSavingTransaction = true;
+                saveBtn.disabled = true;
+                saveBtn.innerText = 'جاري الحفظ...';
+                hideStatus();
+
                 const { data: existingReceipt, error: receiptError } = await supabaseClient
                     .from('tenant_transactions')
                     .select('id')
@@ -1534,7 +1584,7 @@
 
                 if (receiptError) throw receiptError;
                 if (existingReceipt && existingReceipt.length > 0) {
-                    return alert('رقم السند مستخدم مسبقاً');
+                    throw new Error('رقم السند مستخدم مسبقاً');
                 }
 
                 const newYear = new Date(date).getFullYear();
@@ -1560,6 +1610,10 @@
             } catch (err) {
                 console.error(err);
                 showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
+            } finally {
+                isSavingTransaction = false;
+                saveBtn.disabled = false;
+                saveBtn.innerText = 'حفظ الدفعة';
             }
         }
 
