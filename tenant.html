@@ -241,13 +241,13 @@
         }
 
         .smart-body {
-            font-size: 16px;
-            line-height: 2.4;
+            font-size: 15px;
+            line-height: 1.8;
             font-weight: 800;
             color: var(--text);
             text-align: right;
             margin-top: 10px;
-            white-space: pre-line;
+            white-space: normal;
         }
 
         .smart-body b {
@@ -784,11 +784,10 @@
                 };
             }
 
+            // تعديل الرسالة لتظهر في سطرين فقط
             return {
-                message: `المطلوب حالياً: <b>${formatNumber(plan.currentInstallment)}</b>،
-ينصح بسداد <b>${monthlyPlan.recommendedMonthly}</b> شهرياً
-للمحافظة على انتظام الحساب وتقليل الرصيد،
-وإغلاقه خلال <b>${monthlyPlan.monthsToClose}</b> أشهر`,
+                message: `المطلوب حالياً: <b>${formatNumber(plan.currentInstallment)}</b>. ينصح بسداد <b>${monthlyPlan.recommendedMonthly}</b> شهرياً،
+لإغلاق الحساب خلال <b>${monthlyPlan.monthsToClose}</b> أشهر.`,
                 subnote: ''
             };
         }
@@ -1228,5 +1227,3 @@
     </script>
 </body>
 </html>
-
-```
