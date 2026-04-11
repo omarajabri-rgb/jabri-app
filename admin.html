@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v2.8</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v2.9</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -193,8 +193,8 @@
         }
 
         input[type="date"]{
-            min-width:0;
             width:100%;
+            min-width:0;
             display:block;
         }
 
@@ -944,7 +944,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.8</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.9</div>
     </div>
 
     <script>
@@ -1047,10 +1047,7 @@
 
             const candidate = new Date(referenceDate.getFullYear(), contract.getMonth(), contract.getDate());
 
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
+            if (referenceDate < candidate) candidate.setFullYear(candidate.getFullYear() - 1);
             return candidate;
         }
 
@@ -1071,7 +1068,6 @@
             const safeAnnual = Math.max(0, toNumber(annualAmount));
             const installmentAmount = safeAnnual / 3;
             const safePreviousBalance = Math.max(0, toNumber(previousBalance));
-
             const base = getCurrentCycleStart(contractDate, referenceDate);
 
             if (!base) {
@@ -1096,12 +1092,7 @@
                     referenceDate < thirdDate ? { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount } :
                     { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
 
-                return {
-                    installmentAmount,
-                    currentInstallmentValue,
-                    dueUntilToday,
-                    nextInstallment
-                };
+                return { installmentAmount, currentInstallmentValue, dueUntilToday, nextInstallment };
             }
 
             const firstDate = new Date(base);
@@ -1115,12 +1106,10 @@
                 dueUntilToday = safePreviousBalance + installmentAmount;
                 currentInstallmentValue = safePreviousBalance + installmentAmount;
             }
-
             if (referenceDate >= secondDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 2);
                 currentInstallmentValue = installmentAmount;
             }
-
             if (referenceDate >= thirdDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 3);
                 currentInstallmentValue = installmentAmount;
@@ -1137,12 +1126,7 @@
                 nextInstallment = { label: 'القسط الأول', date: addMonthsSafe(firstDate, 12), amount: safePreviousBalance + installmentAmount };
             }
 
-            return {
-                installmentAmount,
-                currentInstallmentValue,
-                dueUntilToday,
-                nextInstallment
-            };
+            return { installmentAmount, currentInstallmentValue, dueUntilToday, nextInstallment };
         }
 
         function getSelectedTenant() {
@@ -1350,14 +1334,8 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
@@ -1494,22 +1472,14 @@
             }
 
             document.getElementById('ai_recommendation').innerText =
-                currentInstallmentGap === 0
-                    ? 'لا حاجة لمتابعة حالياً'
-                    : `متابعة المستحق الحالي (${Math.round(currentInstallmentGap)})`;
+                currentInstallmentGap === 0 ? 'لا حاجة لمتابعة حالياً' : `متابعة المستحق الحالي (${Math.round(currentInstallmentGap)})`;
 
             setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
             setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             const flags = [
-                {
-                    text: `القسط الحالي: ${Math.round(currentInstallmentValue)}`,
-                    cls: 'flag-warning'
-                },
-                {
-                    text: previousBalance > 0 ? `الرصيد القديم: ${Math.round(previousBalance)}` : 'لا يوجد رصيد قديم',
-                    cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
-                }
+                { text: `القسط الحالي: ${Math.round(currentInstallmentValue)}`, cls: 'flag-warning' },
+                { text: previousBalance > 0 ? `الرصيد القديم: ${Math.round(previousBalance)}` : 'لا يوجد رصيد قديم', cls: previousBalance > 0 ? 'flag-danger' : 'flag-success' }
             ];
 
             document.getElementById('ai_risk_flags').innerHTML =
