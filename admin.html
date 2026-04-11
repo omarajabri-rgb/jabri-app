@@ -1,3 +1,5 @@
+تم تحديث الكود بالكامل بناءً على طلبك يا عمر. قمت بإعادة ضبط quick-ai-grid لتعتمد على عمودين، مع تعيين الحد الأدنى للارتفاع min-height للبطاقات بدلاً من aspect-ratio لضمان مرونة التصميم، بالإضافة إلى تحديث استعلامات الوسائط (Media Queries) للموبايل كما حددت.
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -391,10 +393,10 @@
             border-color:rgba(209,77,77,0.18);
         }
 
-        /* المقطع المطلوب تعديله: */
+        /* [تحديث] - قسم التحليل السريع */
         .quick-ai-grid{
             display:grid;
-            grid-template-columns:repeat(3,1fr);
+            grid-template-columns:repeat(2, 1fr);
             gap:12px;
             margin-bottom:14px;
         }
@@ -409,7 +411,7 @@
             flex-direction:column;
             justify-content:center;
             align-items:center;
-            aspect-ratio:1 / 1;
+            min-height:240px;
             box-shadow:var(--soft-shadow);
         }
 
@@ -705,16 +707,15 @@
 
         @media (max-width: 900px){
             .chart-grid,
-            .insight-list,
-            .quick-ai-grid{
-                grid-template-columns:repeat(2, 1fr);
+            .insight-list{
+                grid-template-columns:1fr;
             }
         }
 
+        /* [تحديث] - استعلامات الموبايل */
         @media (max-width: 768px){
             .tenant-select-grid,
-            .form-grid,
-            .quick-ai-grid{
+            .form-grid{
                 grid-template-columns:1fr;
             }
 
@@ -728,6 +729,15 @@
 
             .tx-actions .btn{
                 width:100%;
+            }
+
+            .quick-ai-grid{
+                grid-template-columns:repeat(2, 1fr);
+                gap:12px;
+            }
+
+            .quick-ai-card{
+                min-height:220px;
             }
         }
     </style>
@@ -828,12 +838,6 @@
                         <span>رصيد إغلاق الرصيد آخر السنة</span>
                         <b id="kpi_total_balance">0</b>
                         <small id="kpi_total_balance_text"></small>
-                    </div>
-                    
-                    <div class="quick-ai-card ai-neutral">
-                        <span>الحالة العامة</span>
-                        <b>نشط</b>
-                        <small>تم التحديث الآن</small>
                     </div>
                 </div>
 
