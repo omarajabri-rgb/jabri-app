@@ -1,16 +1,9 @@
-هذا هو الكود الكامل النهائي لـ admin.html بعد:
-	•	تثبيت معادلة الأقساط الصحيحة
-	•	الاعتماد على annual_rent
-	•	إبقاء الإشعارات شغالة
-	•	إبقاء الرسم الشهري شغال
-	•	إبقاء الشيبس و AI box شغالين
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.32</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.33</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -953,7 +946,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.32</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.33</div>
     </div>
 
     <script>
@@ -1067,15 +1060,6 @@
             return candidate;
         }
 
-        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
-            const start = getCurrentCycleStart(contractDate, referenceDate);
-            return start ? start.getFullYear() : referenceDate.getFullYear();
-        }
-
-        function getPreviousCycleYear(contractDate, referenceDate = new Date()) {
-            return getCurrentCycleYear(contractDate, referenceDate) - 1;
-        }
-
         function getSummaryByYear(tenantCode, year) {
             return allSummaries.find(
                 r => r.tenant_code === tenantCode && Number(r.year) === Number(year)
@@ -1107,7 +1091,6 @@
             if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
 
             const dueUntilToday = safePreviousBalance + (installmentAmount * dueInstallmentsCount);
-            const currentDueValue = dueUntilToday;
 
             let nextInstallment;
             if (referenceDate < firstDate) {
@@ -1139,7 +1122,7 @@
             return {
                 installmentAmount,
                 dueUntilToday,
-                currentDueValue,
+                currentDueValue: dueUntilToday,
                 nextInstallment,
                 dueInstallmentsCount
             };
@@ -1201,27 +1184,30 @@
 
             tenantBalances = allTenants.map(tn => {
                 const contractDate = tn.contract_date || null;
-                const currentCycleYear = getCurrentCycleYear(contractDate);
-                const previousCycleYear = getPreviousCycleYear(contractDate);
+
+                // نأخذ ملخص السنة الحالية والسنة السابقة بشكل ثابت
+                const currentYear = new Date().getFullYear();
+                const previousYear = currentYear - 1;
 
                 const currentSummary =
-                    getSummaryByYear(tn.tenant_code, currentCycleYear) ||
+                    getSummaryByYear(tn.tenant_code, currentYear) ||
                     getLatestSummary(tn.tenant_code);
 
-                const previousSummary = getSummaryByYear(tn.tenant_code, previousCycleYear);
+                const previousSummary = getSummaryByYear(tn.tenant_code, previousYear);
 
                 const annualRent = toNumber(tn.annual_rent);
                 const totalCredit = toNumber(currentSummary?.total_credit);
                 const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
                 const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
 
+                // لكن مواعيد الأقساط تبقى حسب contract_date
                 const plan = getInstallmentPlanFromContract(contractDate, annualRent, previousBalance);
 
                 return {
                     ...tn,
                     contractDate,
-                    currentCycleYear,
-                    previousCycleYear,
+                    currentCycleYear: currentYear,
+                    previousCycleYear: previousYear,
                     previousBalance,
                     totalDebit: annualRent,
                     totalCredit,
@@ -1457,9 +1443,9 @@
 
             const last3Ratio = last3.length
                 ? Math.round(last3.reduce((sum, row) => {
-                    const d = toNumber(row.total_debit);
+                    const rent = toNumber(tenant.totalDebit);
                     const c = toNumber(row.total_credit);
-                    return sum + (d > 0 ? Math.round((c / d) * 100) : 0);
+                    return sum + (rent > 0 ? Math.round((c / rent) * 100) : 0);
                 }, 0) / last3.length)
                 : 0;
 
@@ -1770,5 +1756,3 @@
     </script>
 </body>
 </html>
-
-هذا هو الملف الكامل.
