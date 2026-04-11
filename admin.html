@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v2.6</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v2.7</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -576,20 +576,11 @@
             padding:16px;
         }
 
-        .sub-box{
-            background:rgba(255,255,255,0.46);
+        .entry-box{
+            background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58));
             border:1px solid rgba(201,164,107,0.14);
             border-radius:22px;
             padding:16px;
-            margin-bottom:16px;
-        }
-
-        .search-box{
-            background:linear-gradient(135deg, rgba(255,255,255,0.56), rgba(248,244,236,0.50));
-        }
-
-        .entry-box{
-            background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58));
         }
 
         .sub-section-title{
@@ -653,13 +644,6 @@
             font-weight:800;
         }
 
-        .search-grid{
-            display:grid;
-            grid-template-columns:minmax(0, 1fr) auto;
-            gap:10px;
-            align-items:end;
-        }
-
         .footer-note{
             text-align:center;
             margin-top:20px;
@@ -708,8 +692,7 @@
 
         @media (max-width: 768px){
             .tenant-select-grid,
-            .form-grid,
-            .search-grid{
+            .form-grid{
                 grid-template-columns:1fr;
             }
 
@@ -890,25 +873,12 @@
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">تعديل أو إدخال حركة مالية</div></div>
+            <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
 
             <div class="form-shell">
-                <div class="sub-box search-box">
-                    <div class="sub-section-title">تحميل حركة موجودة</div>
-                    <div class="sub-section-note">ابحث برقم السند لتحميل حركة سابقة وتعديلها</div>
-
-                    <div class="search-grid">
-                        <div class="field">
-                            <label>بحث برقم السند</label>
-                            <input type="text" id="search_receipt" placeholder="أدخل رقم السند لتحميل الحركة" />
-                        </div>
-                        <button class="btn btn-soft" type="button" onclick="loadTransactionByReceipt()">تحميل الحركة</button>
-                    </div>
-                </div>
-
-                <div class="sub-box entry-box">
-                    <div class="sub-section-title">إدخال أو تعديل الحركة</div>
-                    <div class="sub-section-note">هذه المنطقة مخصصة للحفظ الفعلي: التاريخ + رقم السند + البيان + قيمة الدفعة</div>
+                <div class="entry-box">
+                    <div class="sub-section-title">بيانات الدفعة</div>
+                    <div class="sub-section-note">هذه المنطقة مخصصة لإدخال دفعة جديدة فقط، وسيتم تحديث الحساب بعد الحفظ مباشرة</div>
 
                     <div class="form-grid">
                         <div class="field">
@@ -923,14 +893,11 @@
 
                     <div class="field" style="margin-top:10px;">
                         <label>البيان</label>
-                        <input type="text" id="tx_desc" placeholder="البيان">
+                        <input type="text" id="tx_desc" placeholder="البيان" value="دفعة من الايجار">
                     </div>
 
                     <div class="quick-descs">
                         <button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الايجار')">دفعة من الايجار</button>
-                        <button class="quick-pill" type="button" onclick="quickFillDesc('معارف')">معارف</button>
-                        <button class="quick-pill" type="button" onclick="quickFillDesc('تعديل رصيد')">تعديل رصيد</button>
-                        <button class="quick-pill" type="button" onclick="quickFillDesc('تسوية')">تسوية</button>
                     </div>
 
                     <div class="field" style="margin-top:10px;">
@@ -939,9 +906,8 @@
                     </div>
 
                     <div class="tx-actions">
-                        <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الحركة</button>
+                        <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الدفعة</button>
                         <button class="btn btn-soft" type="button" onclick="clearTransactionForm()">تفريغ الحقول</button>
-                        <button class="btn btn-soft" type="button" onclick="cancelEditTransaction()">إلغاء التعديل</button>
                     </div>
 
                     <div id="status_msg" class="status-msg"></div>
@@ -951,7 +917,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.6</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.7</div>
     </div>
 
     <script>
@@ -967,7 +933,6 @@
         let tenantBalances = [];
         let collectionChart = null;
         let monthlyChart = null;
-        let editingTransactionId = null;
 
         const toNumber = v => parseFloat(String(v ?? 0).replace(/,/g, '')) || 0;
 
@@ -1107,10 +1072,7 @@
                     installmentAmount,
                     currentInstallmentValue,
                     dueUntilToday,
-                    nextInstallment,
-                    firstDate,
-                    secondDate,
-                    thirdDate
+                    nextInstallment
                 };
             }
 
@@ -1151,10 +1113,7 @@
                 installmentAmount,
                 currentInstallmentValue,
                 dueUntilToday,
-                nextInstallment,
-                firstDate,
-                secondDate,
-                thirdDate
+                nextInstallment
             };
         }
 
@@ -1194,18 +1153,10 @@
         }
 
         function clearTransactionForm() {
-            document.getElementById('search_receipt').value = '';
             document.getElementById('tx_date').valueAsDate = new Date();
             document.getElementById('tx_receipt').value = '';
-            document.getElementById('tx_desc').value = '';
+            document.getElementById('tx_desc').value = 'دفعة من الايجار';
             document.getElementById('tx_amount').value = '';
-        }
-
-        function cancelEditTransaction() {
-            editingTransactionId = null;
-            document.getElementById('save_tx_btn').innerText = 'حفظ الحركة';
-            clearTransactionForm();
-            hideStatus();
         }
 
         async function loadData() {
@@ -1257,7 +1208,7 @@
         function updateTenantStatusChip(tenant) {
             const chip = document.getElementById('tenant_status_chip');
             const seenEl = document.getElementById('last_seen_chip');
-            
+
             chip.classList.remove('paid', 'partial');
             seenEl.innerText = formatLastSeen(tenant?.lastSeen);
 
@@ -1562,31 +1513,6 @@
             if (summaryError) throw summaryError;
         }
 
-        async function loadTransactionByReceipt() {
-            const receipt = document.getElementById('search_receipt').value.trim();
-            if (!receipt) {
-                alert('أدخل رقم السند أولاً');
-                return;
-            }
-
-            const tx = allTransactions.find(row => String(row.receipt_no || '').trim() === receipt);
-            if (!tx) {
-                alert('لم يتم العثور على حركة بهذا السند');
-                return;
-            }
-
-            editingTransactionId = tx.id;
-            document.getElementById('tenant_select').value = tx.tenant_code || '';
-            document.getElementById('tx_date').value = tx.date || '';
-            document.getElementById('tx_receipt').value = tx.receipt_no || '';
-            document.getElementById('tx_desc').value = tx.description || '';
-            document.getElementById('tx_amount').value = Math.round(toNumber(tx.credit || tx.debit));
-            document.getElementById('save_tx_btn').innerText = 'حفظ التعديل';
-
-            showStatus('تم تحميل الحركة للتعديل', 'soft');
-            await renderSelectedTenant(tx.tenant_code);
-        }
-
         async function submitTransaction() {
             const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
@@ -1601,14 +1527,10 @@
             if (amount <= 0) return alert('أدخل قيمة دفعة صحيحة');
 
             try {
-                const receiptQuery = supabaseClient
+                const { data: existingReceipt, error: receiptError } = await supabaseClient
                     .from('tenant_transactions')
                     .select('id')
                     .eq('receipt_no', receiptNo);
-
-                const { data: existingReceipt, error: receiptError } = editingTransactionId
-                    ? await receiptQuery.neq('id', editingTransactionId)
-                    : await receiptQuery;
 
                 if (receiptError) throw receiptError;
                 if (existingReceipt && existingReceipt.length > 0) {
@@ -1616,53 +1538,25 @@
                 }
 
                 const newYear = new Date(date).getFullYear();
-                let oldYear = null;
-                let oldTenantCode = null;
-                const wasEditing = !!editingTransactionId;
 
-                if (editingTransactionId) {
-                    const oldTx = allTransactions.find(t => String(t.id) === String(editingTransactionId));
-                    oldYear = oldTx?.date ? new Date(oldTx.date).getFullYear() : null;
-                    oldTenantCode = oldTx?.tenant_code || code;
+                const { error } = await supabaseClient
+                    .from('tenant_transactions')
+                    .insert([{
+                        tenant_code: code,
+                        date,
+                        description: desc,
+                        debit: 0,
+                        credit: amount,
+                        receipt_no: receiptNo,
+                        notes: null
+                    }]);
 
-                    const { error } = await supabaseClient
-                        .from('tenant_transactions')
-                        .update({
-                            tenant_code: code,
-                            date,
-                            description: desc,
-                            debit: null,
-                            credit: amount,
-                            receipt_no: receiptNo
-                        })
-                        .eq('id', editingTransactionId);
-
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabaseClient
-                        .from('tenant_transactions')
-                        .insert([{
-                            tenant_code: code,
-                            date,
-                            description: desc,
-                            debit: null,
-                            credit: amount,
-                            receipt_no: receiptNo,
-                            notes: null
-                        }]);
-
-                    if (error) throw error;
-                }
+                if (error) throw error;
 
                 await rebuildYearSummary(code, newYear);
-
-                if (wasEditing && oldYear && (oldYear !== newYear || oldTenantCode !== code)) {
-                    await rebuildYearSummary(oldTenantCode, oldYear);
-                }
-
-                cancelEditTransaction();
                 await refresh(code);
-                showStatus(wasEditing ? 'تم حفظ التعديل بنجاح' : 'تم حفظ الدفعة بنجاح', 'success');
+                clearTransactionForm();
+                showStatus('تم حفظ الدفعة وتحديث الملخص السنوي بنجاح', 'success');
             } catch (err) {
                 console.error(err);
                 showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
