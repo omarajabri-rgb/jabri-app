@@ -1,12 +1,9 @@
-هذا هو الكود الكامل والنهائي لصفحة **الإدارة (Admin)**. لقد قمت بدمج كافة التحسينات التقنية اللازمة (نظام الإشعارات الجديد، وتحديثات "آخر ظهور" اللحظية) مع **الالتزام التام بالتنسيق الأصلي (Original Theme)** والـ CSS الخاص بك دون تغيير أي لون أو حجم أو توزيع.
-
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v2.5</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v2.6</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -579,6 +576,43 @@
             padding:16px;
         }
 
+        .sub-box{
+            background:rgba(255,255,255,0.46);
+            border:1px solid rgba(201,164,107,0.14);
+            border-radius:22px;
+            padding:16px;
+            margin-bottom:16px;
+        }
+
+        .search-box{
+            background:linear-gradient(135deg, rgba(255,255,255,0.56), rgba(248,244,236,0.50));
+        }
+
+        .entry-box{
+            background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58));
+        }
+
+        .sub-section-title{
+            display:inline-flex;
+            align-items:center;
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+            color:#6b4f2b;
+            background:rgba(201,164,107,0.12);
+            border:1px solid rgba(201,164,107,0.18);
+            margin-bottom:14px;
+        }
+
+        .sub-section-note{
+            margin-top:-4px;
+            margin-bottom:12px;
+            font-size:11px;
+            font-weight:800;
+            color:var(--muted);
+        }
+
         .form-grid{
             display:grid;
             grid-template-columns:1fr 1fr;
@@ -859,55 +893,65 @@
             <div class="chip-header"><div class="chip-title">تعديل أو إدخال حركة مالية</div></div>
 
             <div class="form-shell">
-                <div class="search-grid">
-                    <div class="field">
-                        <label>بحث برقم السند</label>
-                        <input type="text" id="search_receipt" placeholder="أدخل رقم السند لتحميل الحركة" />
-                    </div>
-                    <button class="btn btn-soft" type="button" onclick="loadTransactionByReceipt()">تحميل الحركة</button>
-                </div>
+                <div class="sub-box search-box">
+                    <div class="sub-section-title">تحميل حركة موجودة</div>
+                    <div class="sub-section-note">ابحث برقم السند لتحميل حركة سابقة وتعديلها</div>
 
-                <div class="form-grid" style="margin-top:12px;">
-                    <div class="field">
-                        <label>التاريخ</label>
-                        <input type="date" id="tx_date">
-                    </div>
-                    <div class="field">
-                        <label>رقم السند</label>
-                        <input type="text" id="tx_receipt" placeholder="رقم السند">
+                    <div class="search-grid">
+                        <div class="field">
+                            <label>بحث برقم السند</label>
+                            <input type="text" id="search_receipt" placeholder="أدخل رقم السند لتحميل الحركة" />
+                        </div>
+                        <button class="btn btn-soft" type="button" onclick="loadTransactionByReceipt()">تحميل الحركة</button>
                     </div>
                 </div>
 
-                <div class="field" style="margin-top:10px;">
-                    <label>البيان</label>
-                    <input type="text" id="tx_desc" placeholder="البيان">
-                </div>
+                <div class="sub-box entry-box">
+                    <div class="sub-section-title">إدخال أو تعديل الحركة</div>
+                    <div class="sub-section-note">هذه المنطقة مخصصة للحفظ الفعلي: التاريخ + رقم السند + البيان + قيمة الدفعة</div>
 
-                <div class="quick-descs">
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الإيجار')">دفعة من الإيجار</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('معارف')">معارف</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('تعديل رصيد')">تعديل رصيد</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('تسوية')">تسوية</button>
-                </div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>التاريخ</label>
+                            <input type="date" id="tx_date">
+                        </div>
+                        <div class="field">
+                            <label>رقم السند</label>
+                            <input type="text" id="tx_receipt" placeholder="رقم السند">
+                        </div>
+                    </div>
 
-                <div class="field" style="margin-top:10px;">
-                    <label>قيمة الدفعة</label>
-                    <input type="number" id="tx_amount" placeholder="0">
-                </div>
+                    <div class="field" style="margin-top:10px;">
+                        <label>البيان</label>
+                        <input type="text" id="tx_desc" placeholder="البيان">
+                    </div>
 
-                <div class="tx-actions">
-                    <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الحركة</button>
-                    <button class="btn btn-soft" type="button" onclick="clearTransactionForm()">تفريغ الحقول</button>
-                    <button class="btn btn-soft" type="button" onclick="cancelEditTransaction()">إلغاء التعديل</button>
-                </div>
+                    <div class="quick-descs">
+                        <button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الايجار')">دفعة من الايجار</button>
+                        <button class="quick-pill" type="button" onclick="quickFillDesc('معارف')">معارف</button>
+                        <button class="quick-pill" type="button" onclick="quickFillDesc('تعديل رصيد')">تعديل رصيد</button>
+                        <button class="quick-pill" type="button" onclick="quickFillDesc('تسوية')">تسوية</button>
+                    </div>
 
-                <div id="status_msg" class="status-msg"></div>
+                    <div class="field" style="margin-top:10px;">
+                        <label>قيمة الدفعة</label>
+                        <input type="number" id="tx_amount" placeholder="0">
+                    </div>
+
+                    <div class="tx-actions">
+                        <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الحركة</button>
+                        <button class="btn btn-soft" type="button" onclick="clearTransactionForm()">تفريغ الحقول</button>
+                        <button class="btn btn-soft" type="button" onclick="cancelEditTransaction()">إلغاء التعديل</button>
+                    </div>
+
+                    <div id="status_msg" class="status-msg"></div>
+                </div>
             </div>
         </section>
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.5</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.6</div>
     </div>
 
     <script>
@@ -1496,13 +1540,20 @@
 
             const totalDebit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.debit), 0);
             const totalCredit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.credit), 0);
-            const finalBalance = totalDebit - totalCredit;
+
+            const existingSummary = allSummaries.find(
+                r => r.tenant_code === tenantCode && Number(r.year) === Number(year)
+            );
+
+            const openingBalance = toNumber(existingSummary?.opening_balance);
+            const finalBalance = openingBalance + totalDebit - totalCredit;
 
             const { error: summaryError } = await supabaseClient
                 .from('tenant_yearly_summary')
                 .upsert([{
                     tenant_code: tenantCode,
                     year,
+                    opening_balance: openingBalance,
                     total_debit: totalDebit,
                     total_credit: totalCredit,
                     final_balance: finalBalance
@@ -1529,7 +1580,7 @@
             document.getElementById('tx_date').value = tx.date || '';
             document.getElementById('tx_receipt').value = tx.receipt_no || '';
             document.getElementById('tx_desc').value = tx.description || '';
-            document.getElementById('tx_amount').value = Math.round(toNumber(tx.credit));
+            document.getElementById('tx_amount').value = Math.round(toNumber(tx.credit || tx.debit));
             document.getElementById('save_tx_btn').innerText = 'حفظ التعديل';
 
             showStatus('تم تحميل الحركة للتعديل', 'soft');
@@ -1596,7 +1647,8 @@
                             description: desc,
                             debit: null,
                             credit: amount,
-                            receipt_no: receiptNo
+                            receipt_no: receiptNo,
+                            notes: null
                         }]);
 
                     if (error) throw error;
@@ -1786,4 +1838,3 @@
     </script>
 </body>
 </html>
-```
