@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.33</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.34</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -393,7 +393,7 @@
 
         .quick-ai-grid{
             display:grid;
-            grid-template-columns:repeat(3,1fr);
+            grid-template-columns:repeat(2,1fr);
             gap:12px;
             margin-bottom:14px;
         }
@@ -707,10 +707,6 @@
             .insight-list{
                 grid-template-columns:1fr;
             }
-
-            .quick-ai-grid{
-                grid-template-columns:repeat(2,1fr);
-            }
         }
 
         @media (max-width: 768px){
@@ -729,6 +725,10 @@
 
             .tx-actions .btn{
                 width:100%;
+            }
+
+            .quick-ai-grid{
+                grid-template-columns:1fr;
             }
         }
     </style>
@@ -825,16 +825,10 @@
                         <small id="ai_last3_ratio_text">—</small>
                     </div>
 
-                    <div class="quick-ai-card" id="ai_card_total_credit">
-                        <span>المطلوب حتى اليوم</span>
-                        <b id="kpi_total_credit">0</b>
-                        <small id="kpi_total_credit_text">—</small>
-                    </div>
-
                     <div class="quick-ai-card" id="ai_card_total_balance">
-                        <span>إغلاق الرصيد آخر السنة</span>
+                        <span>رصيد إغلاق الرصيد آخر السنة</span>
                         <b id="kpi_total_balance">0</b>
-                        <small id="kpi_total_balance_text">—</small>
+                        <small id="kpi_total_balance_text"></small>
                     </div>
                 </div>
 
@@ -946,7 +940,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.33</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.34</div>
     </div>
 
     <script>
@@ -1184,8 +1178,6 @@
 
             tenantBalances = allTenants.map(tn => {
                 const contractDate = tn.contract_date || null;
-
-                // نأخذ ملخص السنة الحالية والسنة السابقة بشكل ثابت
                 const currentYear = new Date().getFullYear();
                 const previousYear = currentYear - 1;
 
@@ -1200,7 +1192,6 @@
                 const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
                 const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
 
-                // لكن مواعيد الأقساط تبقى حسب contract_date
                 const plan = getInstallmentPlanFromContract(contractDate, annualRent, previousBalance);
 
                 return {
@@ -1395,7 +1386,6 @@
             document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
-            document.getElementById('kpi_total_credit').innerText = roundMoney(dueUntilToday);
             document.getElementById('kpi_total_balance').innerText = roundMoney(currentBalance);
 
             const badge = document.getElementById('ai_badge');
@@ -1445,7 +1435,7 @@
                 ? Math.round(last3.reduce((sum, row) => {
                     const rent = toNumber(tenant.totalDebit);
                     const c = toNumber(row.total_credit);
-                    return sum + (rent > 0 ? Math.round((c / rent) * 100) : 0);
+                    return sum + (rent > 0 ? Math.min(100, Math.round((c / rent) * 100)) : 0);
                 }, 0) / last3.length)
                 : 0;
 
@@ -1454,17 +1444,8 @@
                 last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
 
-            document.getElementById('kpi_total_credit_text').innerText =
-                dueUntilToday > 0
-                    ? `الرصيد السابق + الأقساط المستحقة حتى اليوم = ${roundMoney(dueUntilToday)}`
-                    : 'لا يوجد استحقاق مرحلي بعد';
+            document.getElementById('kpi_total_balance_text').innerText = '';
 
-            document.getElementById('kpi_total_balance_text').innerText =
-                currentInstallmentGap === 0
-                    ? 'لا يوجد تأخر مرحلي'
-                    : `المتبقي مرحلياً: ${roundMoney(currentInstallmentGap)}`;
-
-            setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
 
             document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentValue)}`;
