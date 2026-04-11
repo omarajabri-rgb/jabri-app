@@ -11,7 +11,7 @@
 
     <style>
         :root{
-            --bg:#f7f4ec;
+            --bg:#f7f4ed;
             --card:rgba(255,255,255,0.72);
             --text:#1f2937;
             --muted:#7a7469;
@@ -101,9 +101,7 @@
             text-decoration:none;
         }
 
-        .btn:hover{
-            transform:translateY(-1px);
-        }
+        .btn:hover{ transform:translateY(-1px); }
 
         .btn-gold{
             background:linear-gradient(135deg, var(--gold), var(--gold-deep));
@@ -152,18 +150,7 @@
             border:1px solid rgba(201,164,107,0.22);
         }
 
-        .tenant-select-grid{
-            display:grid;
-            grid-template-columns:1fr;
-            gap:10px;
-            align-items:end;
-        }
-
-        .field{
-            display:flex;
-            flex-direction:column;
-            gap:8px;
-        }
+        .field{ display:flex; flex-direction:column; gap:8px; }
 
         .field label{
             font-size:11px;
@@ -183,67 +170,24 @@
             outline:none;
         }
 
-        textarea{
-            min-height:150px;
-            resize:vertical;
-            line-height:1.9;
-        }
+        textarea{ min-height:120px; line-height:1.6; }
 
-        .select-with-chip{
-            display:flex;
-            gap:8px;
-            align-items:flex-start;
-        }
+        .select-with-chip{ display:flex; gap:8px; align-items:flex-start; }
+        .select-with-chip select{ flex:1; }
 
-        .select-with-chip select{
-            flex:1;
-            min-width:0;
-            min-height:44px;
-            padding:10px 14px;
-            font-size:13px;
-        }
-
-        .tenant-mini-chips{
-            display:flex;
-            flex-direction:column;
-            gap:6px;
-            align-items:flex-start;
-            flex-shrink:0;
-        }
+        .tenant-mini-chips{ display:flex; flex-direction:column; gap:6px; }
 
         .mini-chip{
             padding:4px 10px;
             border-radius:999px;
             font-size:10px;
             font-weight:900;
-            line-height:1.2;
-            white-space:nowrap;
-            flex-shrink:0;
+            text-align:center;
         }
 
-        .status-chip{
-            background:rgba(209,77,77,0.12);
-            color:var(--danger);
-            border:1px solid rgba(209,77,77,0.18);
-        }
-
-        .status-chip.paid{
-            background:rgba(21,154,111,0.12);
-            color:var(--success);
-            border:1px solid rgba(21,154,111,0.18);
-        }
-
-        .status-chip.partial{
-            background:rgba(215,146,31,0.12);
-            color:var(--warning);
-            border:1px solid rgba(215,146,31,0.18);
-        }
-
-        .last-seen-chip{
-            background:rgba(201,164,107,0.12);
-            color:#6b4f2b;
-            border:1px solid rgba(201,164,107,0.25);
-        }
+        .status-chip{ background:rgba(209,77,77,0.12); color:var(--danger); border:1px solid rgba(209,77,77,0.18); }
+        .status-chip.paid{ background:rgba(21,154,111,0.12); color:var(--success); border:1px solid rgba(21,154,111,0.18); }
+        .last-seen-chip{ background:rgba(201,164,107,0.12); color:#6b4f2b; border:1px solid rgba(201,164,107,0.25); }
 
         .smart-ai-box{
             margin-top:14px;
@@ -251,54 +195,6 @@
             border-radius:22px;
             background:rgba(255,255,255,0.76);
             border:1px solid var(--line);
-        }
-
-        .smart-ai-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:12px;
-            margin-bottom:14px;
-            flex-wrap:wrap;
-        }
-
-        .panel-title h3{
-            margin:0;
-            font-size:18px;
-            color:#4e3c24;
-            font-weight:900;
-        }
-
-        .panel-title p{
-            margin:3px 0 0;
-            font-size:11px;
-            color:var(--muted);
-            font-weight:700;
-        }
-
-        .smart-ai-badge{
-            padding:8px 14px;
-            border-radius:999px;
-            font-size:12px;
-            font-weight:900;
-        }
-
-        .badge-excellent{
-            color:var(--success);
-            background:rgba(21,154,111,0.12);
-            border:1px solid rgba(21,154,111,0.18);
-        }
-
-        .badge-good{
-            color:#8b6a3a;
-            background:rgba(201,164,107,0.14);
-            border:1px solid rgba(201,164,107,0.22);
-        }
-
-        .badge-risk{
-            color:var(--danger);
-            background:rgba(209,77,77,0.12);
-            border:1px solid rgba(209,77,77,0.18);
         }
 
         .hero-ai-card{
@@ -310,70 +206,9 @@
             display:grid;
             grid-template-columns:1.2fr .8fr;
             gap:14px;
-            align-items:center;
         }
 
-        .hero-ai-title{
-            font-size:14px;
-            font-weight:800;
-            color:var(--muted);
-        }
-
-        .hero-ai-score{
-            font-size:36px;
-            font-weight:900;
-            color:#4e3c24;
-            margin:8px 0;
-        }
-
-        .hero-ai-desc{
-            font-size:14px;
-            font-weight:800;
-            color:#6b4f2b;
-        }
-
-        .hero-ai-side{
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-        }
-
-        .hero-mini{
-            border-radius:18px;
-            padding:12px;
-            text-align:center;
-            background:#fff;
-            border:1px solid var(--line);
-        }
-
-        .hero-mini span{
-            display:block;
-            font-size:10px;
-            color:var(--muted);
-            font-weight:800;
-            margin-bottom:4px;
-        }
-
-        .hero-mini b{
-            font-size:18px;
-            color:#4e3c24;
-            font-weight:900;
-        }
-
-        .hero-mini.good{
-            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(21,154,111,0.18);
-        }
-
-        .hero-mini.warn{
-            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .hero-mini.bad{
-            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(209,77,77,0.18);
-        }
+        .hero-ai-score{ font-size:36px; font-weight:900; color:#4e3c24; margin:8px 0; }
 
         .quick-ai-grid{
             display:grid;
@@ -388,302 +223,24 @@
             text-align:center;
             background:#fff;
             border:1px solid var(--line);
+            aspect-ratio:1/1;
             display:flex;
             flex-direction:column;
             justify-content:center;
-            align-items:center;
-            text-align:center;
-            aspect-ratio:1 / 1;
-            box-shadow:var(--soft-shadow);
         }
 
-        .quick-ai-card span{
-            display:block;
-            font-size:11px;
-            color:var(--muted);
-            font-weight:800;
-            margin-bottom:6px;
-        }
+        .quick-ai-card b{ font-size:20px; display:block; margin:4px 0; color:#4e3c24; }
 
-        .quick-ai-card b{
-            font-size:22px;
-            color:#4e3c24;
-            font-weight:900;
-            margin-bottom:6px;
-        }
+        .chart-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+        .chart-wrap{ background:#fff; border-radius:22px; padding:16px; height:280px; border:1px solid var(--line); }
 
-        .quick-ai-card small{
-            font-size:12px;
-            color:#6b4f2b;
-            font-weight:700;
-            line-height:1.6;
-        }
+        .tx-actions{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 
-        .ai-good{
-            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(21,154,111,0.18);
-        }
+        #loader{ position:fixed; inset:0; background:#f8f4ec; display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .spinner{ width:40px; height:40px; border:3px solid rgba(201,164,107,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin{ to{ transform:rotate(360deg); } }
 
-        .ai-warn{
-            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .ai-bad{
-            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
-            border-color:rgba(209,77,77,0.18);
-        }
-
-        .ai-neutral{
-            background:#fff;
-        }
-
-        .insight-list{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:10px;
-            margin-bottom:12px;
-        }
-
-        .insight-row{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:14px;
-            border-radius:18px;
-            background:#fff;
-            border:1px solid var(--line);
-            box-shadow:var(--soft-shadow);
-        }
-
-        .insight-row span{
-            display:block;
-            font-size:11px;
-            color:var(--muted);
-            font-weight:800;
-            margin-bottom:4px;
-        }
-
-        .insight-row b{
-            display:block;
-            font-size:18px;
-            color:#4e3c24;
-            font-weight:900;
-        }
-
-        .insight-dot{
-            width:12px;
-            height:12px;
-            border-radius:50%;
-        }
-
-        .dot-good{ background:var(--success); }
-        .dot-warn{ background:var(--warning); }
-        .dot-bad{ background:var(--danger); }
-
-        .flags-strip{
-            padding:14px;
-            border-radius:18px;
-            background:rgba(255,255,255,0.74);
-            border:1px solid var(--line);
-        }
-
-        .flags-strip-title{
-            font-size:12px;
-            font-weight:900;
-            color:#6b4f2b;
-            margin-bottom:10px;
-            text-align:center;
-        }
-
-        .risk-flags{
-            display:flex;
-            flex-wrap:wrap;
-            gap:8px;
-            justify-content:center;
-        }
-
-        .risk-flag{
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            padding:7px 12px;
-            border-radius:999px;
-            font-size:11px;
-            font-weight:900;
-            color:#6b4f2b;
-            background:rgba(201,164,107,0.10);
-            border:1px solid rgba(201,164,107,0.18);
-        }
-
-        .flag-danger{
-            color:var(--danger);
-            background:rgba(209,77,77,0.10);
-            border-color:rgba(209,77,77,0.18);
-        }
-
-        .flag-warning{
-            color:var(--warning);
-            background:rgba(215,146,31,0.10);
-            border-color:rgba(215,146,31,0.18);
-        }
-
-        .flag-success{
-            color:var(--success);
-            background:rgba(21,154,111,0.10);
-            border-color:rgba(21,154,111,0.18);
-        }
-
-        .chart-grid{
-            display:grid;
-            grid-template-columns:1.08fr .92fr;
-            gap:18px;
-            margin-bottom:18px;
-        }
-
-        .chart-wrap{
-            background:rgba(255,255,255,0.76);
-            border:1px solid var(--line);
-            border-radius:22px;
-            padding:16px;
-            height:300px;
-        }
-
-        .chart-meta{
-            display:flex;
-            justify-content:center;
-            gap:14px;
-            flex-wrap:wrap;
-            margin-top:12px;
-            font-weight:900;
-            font-size:14px;
-            color:#6b4f2b;
-        }
-
-        .chart-meta .good{ color:var(--success); }
-        .chart-meta .bad{ color:var(--danger); }
-
-        .notify-builder{
-            display:grid;
-            grid-template-columns:1fr;
-            gap:14px;
-        }
-
-        .form-shell{
-            background:rgba(255,255,255,0.58);
-            border:1px solid rgba(201,164,107,0.16);
-            border-radius:24px;
-            padding:16px;
-        }
-
-        .form-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-        }
-
-        .quick-descs{
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-            margin-top:12px;
-        }
-
-        .quick-pill{
-            padding:9px 14px;
-            border-radius:999px;
-            border:1px solid rgba(201,164,107,0.16);
-            background:#fff;
-            font-size:12px;
-            font-weight:900;
-            color:#6b4f2b;
-            cursor:pointer;
-        }
-
-        .tx-actions{
-            display:flex;
-            gap:10px;
-            margin-top:16px;
-            flex-wrap:wrap;
-        }
-
-        .status-msg{
-            display:none;
-            margin-top:14px;
-            border-radius:16px;
-            padding:14px;
-            font-size:13px;
-            font-weight:800;
-        }
-
-        .search-grid{
-            display:grid;
-            grid-template-columns:minmax(0, 1fr) auto;
-            gap:10px;
-            align-items:end;
-        }
-
-        .footer-note{
-            text-align:center;
-            margin-top:20px;
-            color:var(--muted);
-            font-size:11px;
-            font-weight:800;
-        }
-
-        #loader{
-            position:fixed;
-            inset:0;
-            background:#f8f4ec;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            z-index:9999;
-        }
-
-        .spinner{
-            width:40px;
-            height:40px;
-            border:3px solid rgba(201,164,107,0.2);
-            border-top-color:var(--gold);
-            border-radius:50%;
-            animation:spin 1s linear infinite;
-        }
-
-        @keyframes spin{
-            to{ transform:rotate(360deg); }
-        }
-
-        @media (max-width: 1200px){
-            .hero-ai-card{ grid-template-columns:1fr; }
-        }
-
-        @media (max-width: 900px){
-            .chart-grid,
-            .insight-list{
-                grid-template-columns:1fr;
-            }
-
-            .quick-ai-grid{
-                grid-template-columns:repeat(2,1fr);
-            }
-        }
-
-        @media (max-width: 768px){
-            .tenant-select-grid,
-            .form-grid,
-            .search-grid{
-                grid-template-columns:1fr;
-            }
-
-            .select-with-chip{
-                align-items:stretch;
-            }
-
-            .tenant-mini-chips{
-                align-items:flex-start;
-            }
-        }
+        @media (max-width: 900px){ .chart-grid, .hero-ai-card{ grid-template-columns:1fr; } .quick-ai-grid{ grid-template-columns:repeat(2,1fr); } }
     </style>
 </head>
 <body>
@@ -695,7 +252,7 @@
                 <div class="brand-badge"></div>
                 <div>
                     <h1>مجمع جبري الصناعي التجاري</h1>
-                    <p>لوحة الإدارة الذكية لإدارة المستأجرين والحسابات</p>
+                    <p>لوحة الإدارة الذكية v2.5</p>
                 </div>
             </div>
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
@@ -703,208 +260,82 @@
 
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
-
-            <div class="tenant-select-grid">
-                <div class="field">
-                    <div class="select-with-chip">
-                        <select id="tenant_select">
-                            <option value="">اختر المستأجر</option>
-                        </select>
-
-                        <div class="tenant-mini-chips">
-                            <div class="mini-chip status-chip" id="tenant_status_chip">جزئي</div>
-                            <div class="mini-chip last-seen-chip" id="last_seen_chip">—</div>
-                        </div>
-                    </div>
+            <div class="select-with-chip">
+                <select id="tenant_select">
+                    <option value="">اختر المستأجر</option>
+                </select>
+                <div class="tenant-mini-chips">
+                    <div class="mini-chip status-chip" id="tenant_status_chip">تحميل...</div>
+                    <div class="mini-chip last-seen-chip" id="last_seen_chip">—</div>
                 </div>
             </div>
 
             <div class="smart-ai-box">
-                <div class="smart-ai-header">
-                    <div class="panel-title">
-                        <h3>تحليل المستأجر</h3>
-                        <p>تحليل ذكي مباشر لحالة المستأجر المحدد</p>
-                    </div>
-                    <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
-                </div>
-
                 <div class="hero-ai-card">
-                    <div class="hero-ai-main">
-                        <div class="hero-ai-title">التقييم الذكي</div>
+                    <div>
+                        <div style="font-size:12px; font-weight:800; color:var(--muted)">التقييم العام للسلوك المالي</div>
                         <div class="hero-ai-score" id="ai_score_value">0/100</div>
-                        <div class="hero-ai-desc" id="ai_score_text">—</div>
+                        <div id="ai_badge" class="mini-chip" style="display:inline-block; padding:6px 12px">جاري التحليل...</div>
                     </div>
-
-                    <div class="hero-ai-side">
-                        <div class="hero-mini" id="hero_next_payment_card">
-                            <span>احتمال السداد</span>
-                            <b id="ai_next_payment_probability">0%</b>
-                        </div>
-
-                        <div class="hero-mini" id="hero_default_card">
-                            <span>احتمال التعثر</span>
-                            <b id="ai_default_probability">0%</b>
-                        </div>
-
-                        <div class="hero-mini" id="hero_commitment_card">
-                            <span>نسبة الالتزام</span>
-                            <b id="ai_commitment_ratio">0%</b>
-                        </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="mini-chip last-seen-chip" style="background:#fff">احتمال سداد: <b id="ai_next_payment_probability">0%</b></div>
+                        <div class="mini-chip last-seen-chip" style="background:#fff">احتمال تعثر: <b id="ai_default_probability">0%</b></div>
                     </div>
                 </div>
 
                 <div class="quick-ai-grid">
-                    <div class="quick-ai-card" id="ai_card_type">
-                        <span>نوع المستأجر</span>
-                        <b id="ai_tenant_type">—</b>
-                        <small id="ai_tenant_type_text">—</small>
-                    </div>
-
-                    <div class="quick-ai-card" id="ai_card_last_payment">
-                        <span>زخم الدفع</span>
-                        <b id="ai_last_payment">—</b>
-                        <small>نشاط الدفع خلال الفترة الأخيرة</small>
-                    </div>
-
-                    <div class="quick-ai-card" id="ai_card_months_without_payment">
-                        <span>أشهر بلا دفع</span>
-                        <b id="ai_months_without_payment">0</b>
-                        <small id="ai_months_without_payment_text">—</small>
-                    </div>
-
-                    <div class="quick-ai-card" id="ai_card_last3_ratio">
-                        <span>التزام 3 سنوات</span>
-                        <b id="ai_last3_ratio">0%</b>
-                        <small id="ai_last3_ratio_text">—</small>
-                    </div>
-
-                    <div class="quick-ai-card" id="ai_card_total_credit">
-                        <span>إجمالي الدائن</span>
-                        <b id="kpi_total_credit">0</b>
-                        <small id="kpi_total_credit_text">—</small>
-                    </div>
-
-                    <div class="quick-ai-card" id="ai_card_total_balance">
-                        <span>إجمالي الرصيد</span>
-                        <b id="kpi_total_balance">0</b>
-                        <small id="kpi_total_balance_text">—</small>
-                    </div>
-                </div>
-
-                <div class="insight-list">
-                    <div class="insight-row">
-                        <div>
-                            <span>إغلاق الرصيد المتوقع</span>
-                            <b id="ai_close_estimate">—</b>
-                        </div>
-                        <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
-                    </div>
-
-                    <div class="insight-row">
-                        <div>
-                            <span>التوصية الإدارية</span>
-                            <b id="ai_recommendation">—</b>
-                        </div>
-                        <div class="insight-dot dot-good" id="dot_recommendation"></div>
-                    </div>
-                </div>
-
-                <div class="flags-strip">
-                    <div class="flags-strip-title">أعلام المخاطر</div>
-                    <div class="risk-flags" id="ai_risk_flags"></div>
+                    <div class="quick-ai-card"><span>أشهر بلا دفع</span><b id="ai_months_without_payment">0</b></div>
+                    <div class="quick-ai-card"><span>إجمالي التحصيل</span><b id="kpi_total_credit">0</b></div>
+                    <div class="quick-ai-card"><span>الرصيد المتبقي</span><b id="kpi_total_balance">0</b></div>
                 </div>
             </div>
         </section>
 
         <section class="chart-grid">
-            <div class="panel">
-                <div class="chip-header"><div class="chip-title">وضع الحساب</div></div>
-                <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
-                <div class="chart-meta">
-                    <span class="good">دائن: <b id="pie_paid_value">0</b></span>
-                    <span class="bad">الرصيد: <b id="pie_balance_value">0</b></span>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
-                <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
-            </div>
+            <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
+            <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
-            <div class="notify-builder">
-                <div class="field">
-                    <select id="notification_type">
-                        <option value="">اختر موضوع الإشعار</option>
-                        <option value="first">المطالبة الأولى</option>
-                        <option value="second">المطالبة الثانية</option>
-                        <option value="third">المطالبة الثالثة</option>
-                        <option value="legal">إنذار عدلي</option>
-                        <option value="lawyer">تحويل للمحامي</option>
-                        <option value="general">رسالة عامة</option>
-                    </select>
-                </div>
-
-                <textarea id="notification_message" placeholder="نص الإشعار..."></textarea>
-                <button class="btn btn-gold" style="width:100%;" onclick="sendNotification()">إرسال الإشعار</button>
+            <div class="chip-header"><div class="chip-title">إرسال إشعار للمستأجر</div></div>
+            <div class="field" style="margin-bottom:10px;">
+                <select id="notification_type">
+                    <option value="">اختر موضوع الإشعار</option>
+                    <option value="first">المطالبة الأولى (تذكير)</option>
+                    <option value="second">المطالبة الثانية (تحذير)</option>
+                    <option value="third">المطالبة الثالثة (إنذار نهائي)</option>
+                    <option value="legal">إنذار عدلي</option>
+                    <option value="lawyer">تحويل للمحامي</option>
+                    <option value="general">رسالة عامة</option>
+                </select>
             </div>
+            <textarea id="notification_message" placeholder="سيتم توليد النص تلقائياً عند الاختيار..."></textarea>
+            <button class="btn btn-gold" style="width:100%; margin-top:10px;" onclick="sendNotification()">إرسال الإشعار فوراً</button>
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">تعديل أو إدخال حركة مالية</div></div>
-
-            <div class="form-shell">
-                <div class="search-grid">
-                    <div class="field">
-                        <label>بحث برقم السند</label>
-                        <input type="text" id="search_receipt" placeholder="أدخل رقم السند لتحميل الحركة" />
-                    </div>
-                    <button class="btn btn-soft" type="button" onclick="loadTransactionByReceipt()">تحميل الحركة</button>
+            <div class="chip-header"><div class="chip-title">تعديل أو إدخال دفعة</div></div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>بحث برقم السند للتعديل</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="search_receipt" placeholder="أدخل رقم السند">
+                    <button class="btn btn-soft" onclick="loadTransactionByReceipt()">تحميل</button>
                 </div>
-
-                <div class="form-grid" style="margin-top:12px;">
-                    <div class="field">
-                        <label>التاريخ</label>
-                        <input type="date" id="tx_date">
-                    </div>
-                    <div class="field">
-                        <label>رقم السند</label>
-                        <input type="text" id="tx_receipt" placeholder="رقم السند">
-                    </div>
-                </div>
-
-                <div class="field" style="margin-top:10px;">
-                    <label>البيان</label>
-                    <input type="text" id="tx_desc" placeholder="البيان">
-                </div>
-
-                <div class="quick-descs">
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الإيجار')">دفعة من الإيجار</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('معارف')">معارف</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('تعديل رصيد')">تعديل رصيد</button>
-                    <button class="quick-pill" type="button" onclick="quickFillDesc('تسوية')">تسوية</button>
-                </div>
-
-                <div class="field" style="margin-top:10px;">
-                    <label>قيمة الدفعة</label>
-                    <input type="number" id="tx_amount" placeholder="0">
-                </div>
-
-                <div class="tx-actions">
-                    <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الحركة</button>
-                    <button class="btn btn-soft" type="button" onclick="clearTransactionForm()">تفريغ الحقول</button>
-                    <button class="btn btn-soft" type="button" onclick="cancelEditTransaction()">إلغاء التعديل</button>
-                </div>
-
-                <div id="status_msg" class="status-msg"></div>
             </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div class="field"><label>التاريخ</label><input type="date" id="tx_date"></div>
+                <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt"></div>
+            </div>
+            <div class="field" style="margin-bottom:10px;"><label>البيان</label><input type="text" id="tx_desc"></div>
+            <div class="field"><label>المبلغ (دينار)</label><input type="number" id="tx_amount"></div>
+            <div class="tx-actions">
+                <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الحركة</button>
+                <button class="btn btn-soft" onclick="cancelEditTransaction()">إلغاء / تفريغ</button>
+            </div>
+            <div id="status_msg" style="display:none; margin-top:10px; padding:10px; border-radius:10px; font-weight:800;"></div>
         </section>
 
-        <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
-
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.5</div>
+        <button id="statementBtn" class="btn btn-gold" style="width:100%; height:50px;" onclick="openTenantStatement()" disabled>عرض كشف الحساب التفصيلي</button>
     </div>
 
     <script>
@@ -914,877 +345,179 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        let allTenants = [];
-        let allTransactions = [];
-        let allSummaries = [];
-        let tenantBalances = [];
-        let collectionChart = null;
-        let monthlyChart = null;
-        let editingTransactionId = null;
+        let allTenants = [], allTransactions = [], allSummaries = [], tenantBalances = [];
+        let collectionChart = null, monthlyChart = null, editingTransactionId = null;
 
         const toNumber = v => parseFloat(String(v ?? 0).replace(/,/g, '')) || 0;
-
-        function setMoodClass(el, mood) {
-            if (!el) return;
-            el.classList.remove('good', 'warn', 'bad', 'ai-good', 'ai-warn', 'ai-bad', 'ai-neutral');
-
-            if (el.classList.contains('hero-mini')) {
-                if (mood === 'good') el.classList.add('good');
-                else if (mood === 'warn') el.classList.add('warn');
-                else if (mood === 'bad') el.classList.add('bad');
-            } else {
-                if (mood === 'good') el.classList.add('ai-good');
-                else if (mood === 'warn') el.classList.add('ai-warn');
-                else if (mood === 'bad') el.classList.add('ai-bad');
-                else el.classList.add('ai-neutral');
-            }
-        }
-
-        function setDotMood(id, mood) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.classList.remove('dot-good', 'dot-warn', 'dot-bad');
-            if (mood === 'good') el.classList.add('dot-good');
-            else if (mood === 'bad') el.classList.add('dot-bad');
-            else el.classList.add('dot-warn');
-        }
-
-        function getLatestSummary(tenantCode) {
-            const rows = allSummaries
-                .filter(r => r.tenant_code === tenantCode)
-                .sort((a, b) => Number(b.year) - Number(a.year));
-            return rows[0] || null;
-        }
-
-        function formatEnglishDate(dateStr) {
-            if (!dateStr) return '—';
-            const d = new Date(dateStr);
-            return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-GB');
-        }
-
-        function monthsSince(dateStr) {
-            if (!dateStr) return null;
-            const d = new Date(dateStr);
-            if (Number.isNaN(d.getTime())) return null;
-            const now = new Date();
-            return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (Number.isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
-        }
-
-        function getCurrentCycleStart(contractDate, referenceDate = new Date()) {
-            const contract = new Date(contractDate);
-            if (Number.isNaN(contract.getTime())) return null;
-
-            const candidate = new Date(referenceDate.getFullYear(), contract.getMonth(), contract.getDate());
-
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
-            return candidate;
-        }
-
-        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
-            const start = getCurrentCycleStart(contractDate, referenceDate);
-            return start ? start.getFullYear() : referenceDate.getFullYear();
-        }
-
-        function getPreviousCycleYear(contractDate, referenceDate = new Date()) {
-            return getCurrentCycleYear(contractDate, referenceDate) - 1;
-        }
-
-        function getSummaryByYear(tenantCode, year) {
-            return allSummaries.find(r => r.tenant_code === tenantCode && Number(r.year) === Number(year)) || null;
-        }
-
-        function getInstallmentPlanFromContract(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
-            const safeAnnual = Math.max(0, toNumber(annualAmount));
-            const installmentAmount = safeAnnual / 3;
-            const safePreviousBalance = Math.max(0, toNumber(previousBalance));
-
-            const base = getCurrentCycleStart(contractDate, referenceDate);
-
-            if (!base) {
-                const year = referenceDate.getFullYear();
-                const firstDate = new Date(year, 0, 1);
-                const secondDate = new Date(year, 5, 1);
-                const thirdDate = new Date(year, 8, 1);
-
-                const dueUntilToday =
-                    referenceDate >= thirdDate ? safePreviousBalance + (installmentAmount * 3) :
-                    referenceDate >= secondDate ? safePreviousBalance + (installmentAmount * 2) :
-                    referenceDate >= firstDate ? safePreviousBalance + installmentAmount :
-                    safePreviousBalance;
-
-                let currentInstallmentValue = safePreviousBalance + installmentAmount;
-                if (referenceDate >= secondDate && referenceDate < thirdDate) currentInstallmentValue = installmentAmount;
-                if (referenceDate >= thirdDate) currentInstallmentValue = installmentAmount;
-
-                const nextInstallment =
-                    referenceDate < firstDate ? { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount } :
-                    referenceDate < secondDate ? { label: 'القسط الثاني', date: secondDate, amount: installmentAmount } :
-                    referenceDate < thirdDate ? { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount } :
-                    { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
-
-                return {
-                    installmentAmount,
-                    currentInstallmentValue,
-                    dueUntilToday,
-                    nextInstallment,
-                    firstDate,
-                    secondDate,
-                    thirdDate
-                };
-            }
-
-            const firstDate = new Date(base);
-            const secondDate = addMonthsSafe(base, 5);
-            const thirdDate = addMonthsSafe(base, 8);
-
-            let dueUntilToday = safePreviousBalance;
-            let currentInstallmentValue = safePreviousBalance + installmentAmount;
-
-            if (referenceDate >= firstDate) {
-                dueUntilToday = safePreviousBalance + installmentAmount;
-                currentInstallmentValue = safePreviousBalance + installmentAmount;
-            }
-
-            if (referenceDate >= secondDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 2);
-                currentInstallmentValue = installmentAmount;
-            }
-
-            if (referenceDate >= thirdDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 3);
-                currentInstallmentValue = installmentAmount;
-            }
-
-            let nextInstallment;
-            if (referenceDate < firstDate) {
-                nextInstallment = { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount };
-            } else if (referenceDate < secondDate) {
-                nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
-            } else if (referenceDate < thirdDate) {
-                nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
-            } else {
-                nextInstallment = { label: 'القسط الأول', date: addMonthsSafe(firstDate, 12), amount: safePreviousBalance + installmentAmount };
-            }
-
-            return {
-                installmentAmount,
-                currentInstallmentValue,
-                dueUntilToday,
-                nextInstallment,
-                firstDate,
-                secondDate,
-                thirdDate
-            };
-        }
-
-        function getSelectedTenant() {
-            const code = document.getElementById('tenant_select').value;
-            return tenantBalances.find(x => x.tenant_code === code) || null;
-        }
-
-        function showStatus(message, type = 'soft') {
-            const el = document.getElementById('status_msg');
-            el.style.display = 'block';
-            el.innerText = message;
-
-            if (type === 'danger') {
-                el.style.background = 'rgba(209,77,77,0.12)';
-                el.style.color = '#d14d4d';
-                el.style.border = '1px solid rgba(209,77,77,0.18)';
-            } else if (type === 'success') {
-                el.style.background = 'rgba(21,154,111,0.12)';
-                el.style.color = '#159a6f';
-                el.style.border = '1px solid rgba(21,154,111,0.18)';
-            } else {
-                el.style.background = 'rgba(201,164,107,0.12)';
-                el.style.color = '#6b4f2b';
-                el.style.border = '1px solid rgba(201,164,107,0.18)';
-            }
-        }
-
-        function hideStatus() {
-            const el = document.getElementById('status_msg');
-            el.style.display = 'none';
-            el.innerText = '';
-        }
-
-        function quickFillDesc(text) {
-            document.getElementById('tx_desc').value = text;
-        }
-
-        function clearTransactionForm() {
-            document.getElementById('search_receipt').value = '';
-            document.getElementById('tx_date').valueAsDate = new Date();
-            document.getElementById('tx_receipt').value = '';
-            document.getElementById('tx_desc').value = '';
-            document.getElementById('tx_amount').value = '';
-        }
-
-        function cancelEditTransaction() {
-            editingTransactionId = null;
-            document.getElementById('save_tx_btn').innerText = 'حفظ الحركة';
-            clearTransactionForm();
-            hideStatus();
-        }
 
         async function loadData() {
             const [t, tx, sum] = await Promise.all([
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
-                supabaseClient.from('tenant_transactions').select('*').order('date'),
+                supabaseClient.from('tenant_transactions').select('*').order('date', {ascending: false}),
                 supabaseClient.from('tenant_yearly_summary').select('*').order('year')
             ]);
-
             allTenants = t.data || [];
             allTransactions = tx.data || [];
             allSummaries = sum.data || [];
-
+            
+            // ربط البيانات وحساب الأرصدة والذكاء الاصطناعي
             tenantBalances = allTenants.map(tn => {
-                const contractDate = tn.contract_date || null;
-                const currentCycleYear = getCurrentCycleYear(contractDate);
-                const previousCycleYear = getPreviousCycleYear(contractDate);
-
-                const currentSummary = getSummaryByYear(tn.tenant_code, currentCycleYear) || getLatestSummary(tn.tenant_code);
-                const previousSummary = getSummaryByYear(tn.tenant_code, previousCycleYear);
-
-                const annualDebit = toNumber(currentSummary?.total_debit);
-                const totalCredit = toNumber(currentSummary?.total_credit);
-                const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
-                const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
-
-                const plan = getInstallmentPlanFromContract(contractDate, annualDebit, previousBalance);
+                const summary = allSummaries.filter(s => s.tenant_code === tn.tenant_code).sort((a,b) => b.year - a.year)[0];
+                const txs = allTransactions.filter(x => x.tenant_code === tn.tenant_code);
+                const lastPay = txs.find(x => toNumber(x.credit) > 0);
+                
+                let monthsDiff = 12;
+                if(lastPay) {
+                    const d = new Date(lastPay.date);
+                    monthsDiff = Math.max(0, (new Date().getFullYear() - d.getFullYear()) * 12 + (new Date().getMonth() - d.getMonth()));
+                }
 
                 return {
                     ...tn,
-                    contractDate,
-                    currentCycleYear,
-                    previousCycleYear,
-                    previousBalance,
-                    totalDebit: annualDebit,
-                    totalCredit,
-                    currentBalance,
-                    dueUntilToday: plan.dueUntilToday,
-                    currentInstallmentValue: plan.currentInstallmentValue,
-                    currentInstallmentGap: Math.max(0, plan.dueUntilToday - totalCredit),
-                    installmentAmount: plan.installmentAmount,
-                    nextInstallment: plan.nextInstallment,
-                    latestSummary: currentSummary,
-                    lastSeen: tn.last_seen || tn.last_login || tn.updated_at || tn.created_at || null
+                    currentBalance: Math.max(0, toNumber(summary?.final_balance)),
+                    totalCredit: toNumber(summary?.total_credit),
+                    monthsWithoutPayment: monthsDiff,
+                    lastSeen: tn.last_seen
                 };
             });
         }
 
-        function updateLastSeen(tenant) {
-            const el = document.getElementById('last_seen_chip');
-            if (!tenant || !tenant.lastSeen) {
-                el.innerText = '—';
-                return;
-            }
-
-            const d = new Date(tenant.lastSeen);
-            if (Number.isNaN(d.getTime())) {
-                el.innerText = '—';
-                return;
-            }
-
+        function formatLastSeen(dateStr) {
+            if(!dateStr) return 'لم يظهر أبداً';
+            const d = new Date(dateStr);
             const now = new Date();
-            const diffMs = now - d;
-            const diffMin = Math.floor(diffMs / 60000);
+            const diffMin = Math.floor((now - d) / 60000);
+            if(diffMin < 1) return 'الآن';
+            if(diffMin < 60) return `${diffMin} د`;
             const diffHour = Math.floor(diffMin / 60);
-            const diffDay = Math.floor(diffHour / 24);
-
-            if (diffMin < 1) el.innerText = 'الآن';
-            else if (diffMin < 60) el.innerText = `${diffMin} د`;
-            else if (diffHour < 24) el.innerText = `${diffHour} س`;
-            else if (diffDay <= 7) el.innerText = `${diffDay} ي`;
-            else el.innerText = formatEnglishDate(tenant.lastSeen);
+            if(diffHour < 24) return `${diffHour} س`;
+            return d.toLocaleDateString('en-GB');
         }
 
-        function updateTenantStatusChip(tenant) {
-            const chip = document.getElementById('tenant_status_chip');
-            chip.classList.remove('paid', 'partial');
+        async function renderSelectedTenant(code) {
+            const tenant = tenantBalances.find(x => x.tenant_code === code);
+            if(!tenant) return;
 
-            if (!tenant) {
-                chip.innerText = 'جزئي';
-                return;
-            }
+            document.getElementById('last_seen_chip').innerText = formatLastSeen(tenant.lastSeen);
+            document.getElementById('tenant_status_chip').innerText = tenant.currentBalance <= 0 ? 'ملتزم' : 'متبقي ذمم';
+            document.getElementById('tenant_status_chip').className = `mini-chip status-chip ${tenant.currentBalance <= 0 ? 'paid' : ''}`;
+            
+            // تحديث أرقام الـ AI
+            document.getElementById('ai_score_value').innerText = `${Math.min(100, Math.round((tenant.totalCredit / (tenant.totalCredit + tenant.currentBalance || 1)) * 100))}/100`;
+            document.getElementById('ai_months_without_payment').innerText = tenant.monthsWithoutPayment;
+            document.getElementById('kpi_total_credit').innerText = Math.round(tenant.totalCredit);
+            document.getElementById('kpi_total_balance').innerText = Math.round(tenant.currentBalance);
+            
+            const prob = tenant.monthsWithoutPayment <= 1 ? 95 : tenant.monthsWithoutPayment <= 3 ? 60 : 20;
+            document.getElementById('ai_next_payment_probability').innerText = `${prob}%`;
+            document.getElementById('ai_default_probability').innerText = `${100 - prob}%`;
 
-            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
-            const paid = Math.max(0, toNumber(tenant.totalCredit));
-            const gap = Math.max(0, dueUntilToday - paid);
-
-            if (dueUntilToday === 0 || gap === 0) {
-                chip.innerText = 'ملتزم';
-                chip.classList.add('paid');
-            } else if (paid > 0) {
-                chip.innerText = 'جزئي';
-                chip.classList.add('partial');
-            } else {
-                chip.innerText = 'متأخر';
-            }
+            drawCharts(tenant);
+            document.getElementById('statementBtn').disabled = false;
         }
 
-        function drawCollectionChart(totalCredit, totalBalance) {
-            const ctx = document.getElementById('collectionChart').getContext('2d');
-            if (collectionChart) collectionChart.destroy();
-
-            const paid = toNumber(totalCredit);
-            const remaining = Math.max(0, toNumber(totalBalance));
-            const total = paid + remaining;
-            const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
-
-            collectionChart = new Chart(ctx, {
+        function drawCharts(tenant) {
+            const ctx1 = document.getElementById('collectionChart').getContext('2d');
+            if(collectionChart) collectionChart.destroy();
+            collectionChart = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['الدائن', 'الرصيد'],
-                    datasets: [{
-                        data: [paid, remaining],
-                        backgroundColor: ['#159a6f', '#d14d4d'],
-                        borderWidth: 0
-                    }]
+                    labels: ['مسدد', 'متبقي'],
+                    datasets: [{ data: [tenant.totalCredit, tenant.currentBalance], backgroundColor: ['#159a6f', '#d14d4d'] }]
                 },
-                options: {
-                    cutout: '64%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                },
-                plugins: [{
-                    id: 'centerText',
-                    afterDraw(chart) {
-                        const point = chart.getDatasetMeta(0).data[0];
-                        if (!point) return;
-                        const { x, y } = point;
-                        const c = chart.ctx;
-                        c.save();
-                        c.textAlign = 'center';
-                        c.textBaseline = 'middle';
-                        c.fillStyle = '#4b3720';
-                        c.font = 'bold 36px Tajawal';
-                        c.fillText(`${ratio}%`, x, y - 10);
-                        c.font = 'bold 16px Tajawal';
-                        c.fillText(`${Math.round(paid)} / ${Math.round(total)}`, x, y + 22);
-                        c.restore();
-                    }
-                }]
-            });
-
-            document.getElementById('pie_paid_value').innerText = Math.round(paid);
-            document.getElementById('pie_balance_value').innerText = Math.round(remaining);
-        }
-
-        function drawMonthlyChart(tenant) {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            if (monthlyChart) monthlyChart.destroy();
-            if (!tenant) return;
-
-            const labels = [];
-            const credits = [];
-
-            for (let i = 11; i >= 0; i--) {
-                const d = new Date();
-                d.setMonth(d.getMonth() - i);
-                labels.push(d.toLocaleDateString('en-GB', { month:'short' }));
-
-                const monthTx = allTransactions.filter(tx => {
-                    const txDate = new Date(tx.date);
-                    return tx.tenant_code === tenant.tenant_code &&
-                        txDate.getMonth() === d.getMonth() &&
-                        txDate.getFullYear() === d.getFullYear();
-                });
-
-                credits.push(monthTx.reduce((s, row) => s + toNumber(row.credit), 0));
-            }
-
-            monthlyChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'الدائن',
-                        data: credits,
-                        borderColor: '#159a6f',
-                        backgroundColor: 'rgba(21,154,111,0.08)',
-                        tension: 0.35,
-                        borderWidth: 3,
-                        pointRadius: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        function renderAi(tenant) {
-            if (!tenant) return;
+        async function sendNotification() {
+            const code = document.getElementById('tenant_select').value;
+            const type = document.getElementById('notification_type').value;
+            const msg = document.getElementById('notification_message').value;
 
-            const annualDebit = toNumber(tenant.totalDebit);
-            const totalCredit = toNumber(tenant.totalCredit);
-            const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
-            const previousBalance = Math.max(0, toNumber(tenant.previousBalance));
+            if(!code || !msg) return alert('اختر المستأجر واكتب الرسالة');
 
-            const plan = getInstallmentPlanFromContract(tenant.contractDate, annualDebit, previousBalance);
-            const dueUntilToday = Math.max(0, plan.dueUntilToday);
-            const currentInstallmentGap = Math.max(0, dueUntilToday - totalCredit);
-            const currentInstallmentValue = Math.max(0, plan.currentInstallmentValue);
-            const installmentAmount = Math.max(0, plan.installmentAmount);
-            const nextInstallment = plan.nextInstallment;
+            const { error } = await supabaseClient.from('tenant_notifications').insert([{
+                tenant_code: code,
+                title: document.getElementById('notification_type').options[document.getElementById('notification_type').selectedIndex].text,
+                message: msg,
+                type: type,
+                is_active: true,
+                is_read: false,
+                expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+            }]);
 
-            const installmentCoverageScore = dueUntilToday > 0
-                ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
-                : 100;
-
-            const txs = allTransactions
-                .filter(x => x.tenant_code === tenant.tenant_code)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            const pays = txs.filter(x => toNumber(x.credit) > 0);
-            const lastPay = pays[pays.length - 1] || null;
-            const monthsWithoutPayment = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
-
-            const monthlyAverage = (() => {
-                if (!pays.length) return 0;
-                const monthsSet = new Set(
-                    pays.map(row => {
-                        const d = new Date(row.date);
-                        return `${d.getFullYear()}-${d.getMonth()}`;
-                    })
-                );
-                const total = pays.reduce((s, row) => s + toNumber(row.credit), 0);
-                return monthsSet.size ? Math.round(total / monthsSet.size) : 0;
-            })();
-
-            const nextPaymentProbability = Math.max(
-                5,
-                Math.min(
-                    95,
-                    Math.round((installmentCoverageScore * 0.55) + ((monthsWithoutPayment <= 1 ? 90 : monthsWithoutPayment <= 3 ? 55 : 20) * 0.45))
-                )
-            );
-
-            const defaultProbability = Math.max(
-                5,
-                Math.min(
-                    95,
-                    100 - nextPaymentProbability + (currentInstallmentGap > installmentAmount * 0.5 ? 10 : 0)
-                )
-            );
-
-            document.getElementById('ai_score_value').innerText = `${installmentCoverageScore}/100`;
-            document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
-            document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
-            document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
-            document.getElementById('kpi_total_credit').innerText = Math.round(totalCredit);
-            document.getElementById('kpi_total_balance').innerText = Math.round(currentBalance);
-
-            const badge = document.getElementById('ai_badge');
-            if (installmentCoverageScore >= 100) {
-                badge.className = 'smart-ai-badge badge-excellent';
-                badge.innerText = 'ملتزم';
-                document.getElementById('ai_score_text').innerText = 'مسدد المستحقات التراكمية حتى اليوم';
-            } else if (installmentCoverageScore >= 60) {
-                badge.className = 'smart-ai-badge badge-good';
-                badge.innerText = 'جزئي';
-                document.getElementById('ai_score_text').innerText = 'يوجد سداد لكنه أقل من المطلوب حتى اليوم';
-            } else {
-                badge.className = 'smart-ai-badge badge-risk';
-                badge.innerText = 'متأخر';
-                document.getElementById('ai_score_text').innerText = 'متأخر عن المستحق التراكمي حتى اليوم';
-            }
-
-            setMoodClass(document.getElementById('hero_commitment_card'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_default_card'), defaultProbability < 45 ? 'good' : defaultProbability < 70 ? 'warn' : 'bad');
-
-            document.getElementById('ai_tenant_type').innerText =
-                installmentCoverageScore >= 100 ? 'ملتزم' :
-                installmentCoverageScore >= 60 ? 'جزئي' : 'متأخر';
-
-            document.getElementById('ai_tenant_type_text').innerText =
-                installmentCoverageScore >= 100 ? 'يغطي المستحقات التراكمية' :
-                installmentCoverageScore >= 60 ? 'يدفع لكن دون اكتمال المستحق' :
-                'لم يغطي المستحق التراكمي حتى اليوم';
-
-            setMoodClass(document.getElementById('ai_card_type'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
-
-            document.getElementById('ai_last_payment').innerText = monthlyAverage ? Math.round(monthlyAverage) : 0;
-            setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAverage >= 600 ? 'good' : monthlyAverage >= 300 ? 'warn' : 'bad');
-
-            document.getElementById('ai_months_without_payment').innerText = monthsWithoutPayment;
-            document.getElementById('ai_months_without_payment_text').innerText = monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `منذ ${monthsWithoutPayment} شهر`;
-            setMoodClass(document.getElementById('ai_card_months_without_payment'), monthsWithoutPayment <= 1 ? 'good' : monthsWithoutPayment <= 3 ? 'warn' : 'bad');
-
-            const last3 = allSummaries
-                .filter(r => r.tenant_code === tenant.tenant_code)
-                .sort((a, b) => Number(b.year) - Number(a.year))
-                .slice(0, 3);
-
-            const last3Ratio = last3.length
-                ? Math.round(last3.reduce((sum, row) => {
-                    const d = toNumber(row.total_debit);
-                    const c = toNumber(row.total_credit);
-                    return sum + (d > 0 ? Math.round((c / d) * 100) : 0);
-                }, 0) / last3.length)
-                : 0;
-
-            document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
-            setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
-
-            document.getElementById('kpi_total_credit_text').innerText =
-                dueUntilToday > 0 ? `المطلوب حتى اليوم: ${Math.round(dueUntilToday)}` : 'لا يوجد استحقاق مرحلي بعد';
-
-            document.getElementById('kpi_total_balance_text').innerText =
-                currentInstallmentGap === 0 ? 'لا يوجد تأخر مرحلي' : `متأخر مرحلي: ${Math.round(currentInstallmentGap)}`;
-
-            setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_balance'), currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
-
-            if (nextInstallment?.date) {
-                document.getElementById('ai_close_estimate').innerText = `${nextInstallment.label} ${formatEnglishDate(nextInstallment.date)}`;
-            } else {
-                document.getElementById('ai_close_estimate').innerText = '—';
-            }
-
-            document.getElementById('ai_recommendation').innerText =
-                currentInstallmentGap === 0
-                    ? 'لا حاجة لمتابعة حالياً'
-                    : `متابعة المستحق الحالي (${Math.round(currentInstallmentGap)})`;
-
-            setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
-            setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
-
-            const flags = [
-                {
-                    text: `القسط الحالي: ${Math.round(currentInstallmentValue)}`,
-                    cls: 'flag-warning'
-                },
-                {
-                    text: previousBalance > 0 ? `الرصيد القديم: ${Math.round(previousBalance)}` : 'لا يوجد رصيد قديم',
-                    cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
-                }
-            ];
-
-            document.getElementById('ai_risk_flags').innerHTML =
-                flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
-        }
-
-        async function rebuildYearSummary(tenantCode, year) {
-            const { data: yearTransactions, error: txError } = await supabaseClient
-                .from('tenant_transactions')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .gte('date', `${year}-01-01`)
-                .lte('date', `${year}-12-31`);
-
-            if (txError) throw txError;
-
-            const totalDebit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.debit), 0);
-            const totalCredit = (yearTransactions || []).reduce((sum, row) => sum + toNumber(row.credit), 0);
-            const finalBalance = totalDebit - totalCredit;
-
-            const { error: summaryError } = await supabaseClient
-                .from('tenant_yearly_summary')
-                .upsert([{
-                    tenant_code: tenantCode,
-                    year,
-                    total_debit: totalDebit,
-                    total_credit: totalCredit,
-                    final_balance: finalBalance
-                }], { onConflict: 'tenant_code,year' });
-
-            if (summaryError) throw summaryError;
-        }
-
-        async function loadTransactionByReceipt() {
-            const receipt = document.getElementById('search_receipt').value.trim();
-            if (!receipt) {
-                alert('أدخل رقم السند أولاً');
-                return;
-            }
-
-            const tx = allTransactions.find(row => String(row.receipt_no || '').trim() === receipt);
-            if (!tx) {
-                alert('لم يتم العثور على حركة بهذا السند');
-                return;
-            }
-
-            editingTransactionId = tx.id;
-            document.getElementById('tenant_select').value = tx.tenant_code || '';
-            document.getElementById('tx_date').value = tx.date || '';
-            document.getElementById('tx_receipt').value = tx.receipt_no || '';
-            document.getElementById('tx_desc').value = tx.description || '';
-            document.getElementById('tx_amount').value = Math.round(toNumber(tx.credit));
-            document.getElementById('save_tx_btn').innerText = 'حفظ التعديل';
-
-            showStatus('تم تحميل الحركة للتعديل', 'soft');
-            await renderSelectedTenant(tx.tenant_code);
+            if(error) alert('خطأ: ' + error.message);
+            else alert('تم إرسال الإشعار بنجاح');
         }
 
         async function submitTransaction() {
             const code = document.getElementById('tenant_select').value;
-            const date = document.getElementById('tx_date').value;
-            const desc = document.getElementById('tx_desc').value.trim();
             const amount = toNumber(document.getElementById('tx_amount').value);
-            const receiptNo = document.getElementById('tx_receipt').value.trim();
+            const receipt = document.getElementById('tx_receipt').value;
+            const date = document.getElementById('tx_date').value;
 
-            if (!code) return alert('اختر المستأجر');
-            if (!date) return alert('أدخل التاريخ');
-            if (!desc) return alert('أدخل البيان');
-            if (!receiptNo) return alert('أدخل رقم السند');
-            if (amount <= 0) return alert('أدخل قيمة دفعة صحيحة');
-
-            try {
-                const receiptQuery = supabaseClient
-                    .from('tenant_transactions')
-                    .select('id')
-                    .eq('receipt_no', receiptNo);
-
-                const { data: existingReceipt, error: receiptError } = editingTransactionId
-                    ? await receiptQuery.neq('id', editingTransactionId)
-                    : await receiptQuery;
-
-                if (receiptError) throw receiptError;
-                if (existingReceipt && existingReceipt.length > 0) {
-                    return alert('رقم السند مستخدم مسبقاً');
-                }
-
-                const newYear = new Date(date).getFullYear();
-                let oldYear = null;
-                let oldTenantCode = null;
-                const wasEditing = !!editingTransactionId;
-
-                if (editingTransactionId) {
-                    const oldTx = allTransactions.find(t => String(t.id) === String(editingTransactionId));
-                    oldYear = oldTx?.date ? new Date(oldTx.date).getFullYear() : null;
-                    oldTenantCode = oldTx?.tenant_code || code;
-
-                    const { error } = await supabaseClient
-                        .from('tenant_transactions')
-                        .update({
-                            tenant_code: code,
-                            date,
-                            description: desc,
-                            debit: null,
-                            credit: amount,
-                            receipt_no: receiptNo
-                        })
-                        .eq('id', editingTransactionId);
-
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabaseClient
-                        .from('tenant_transactions')
-                        .insert([{
-                            tenant_code: code,
-                            date,
-                            description: desc,
-                            debit: null,
-                            credit: amount,
-                            receipt_no: receiptNo
-                        }]);
-
-                    if (error) throw error;
-                }
-
-                await rebuildYearSummary(code, newYear);
-
-                if (wasEditing && oldYear && (oldYear !== newYear || oldTenantCode !== code)) {
-                    await rebuildYearSummary(oldTenantCode, oldYear);
-                }
-
-                cancelEditTransaction();
-                await refresh(code);
-                showStatus(wasEditing ? 'تم حفظ التعديل بنجاح' : 'تم حفظ الدفعة بنجاح', 'success');
-            } catch (err) {
-                console.error(err);
-                showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
-            }
-        }
-
-        function getNotificationTitle(type) {
-            if (type === 'first') return 'المطالبة الأولى';
-            if (type === 'second') return 'المطالبة الثانية';
-            if (type === 'third') return 'المطالبة الثالثة';
-            if (type === 'legal') return 'إنذار عدلي';
-            if (type === 'lawyer') return 'تحويل للمحامي';
-            return 'رسالة عامة';
-        }
-
-        function getNotificationLifetimeDays(type) {
-            if (type === 'first') return 5;
-            if (type === 'second') return 5;
-            if (type === 'third') return 10;
-            if (type === 'legal') return 15;
-            if (type === 'lawyer') return 30;
-            return 7;
-        }
-
-        function shouldHideAfterSeen(type) {
-            return !(type === 'legal' || type === 'lawyer');
-        }
-
-        function buildNotificationText(type, tenant) {
-            if (!tenant) return '';
-            const amount = Math.round(tenant.currentInstallmentGap ?? tenant.currentBalance);
-            const dueDate = new Date();
-            dueDate.setDate(dueDate.getDate() + 7);
-            const dueDateText = dueDate.toLocaleDateString('en-GB');
-
-            if (type === 'first') {
-                return `نود إعلامكم بوجود مبلغ مستحق عليكم حتى تاريخه بقيمة ${amount}، نرجو التكرم بتسديده في أقرب وقت ممكن.`;
-            }
-            if (type === 'second') {
-                return `إشارة إلى التذكير السابق، نرجو التكرم بتسديد المبلغ المستحق حتى اليوم والبالغ ${amount} خلال 48 ساعة.`;
-            }
-            if (type === 'third') {
-                return `إنذار نهائي: نرجو التكرم بتسديد المبلغ المستحق وقدره ${amount} قبل ${dueDateText} لتجنب الإجراءات القانونية.`;
-            }
-            if (type === 'legal') {
-                return `إنذار عدلي: نرجو تسديد المبلغ المستحق وقدره ${amount} خلال 48 ساعة من تاريخ هذا الإشعار، خلافاً لذلك سيتم اتخاذ الإجراءات القانونية.`;
-            }
-            if (type === 'lawyer') {
-                return `إشعار قانوني: تم تحويل ملفكم إلى المحامي المختص بخصوص المبلغ المستحق وقدره ${amount}، وسيتم استكمال الإجراءات القانونية حسب الأصول.`;
-            }
-            return '';
-        }
-
-        function updateNotificationComposer() {
-            const tenant = getSelectedTenant();
-            const type = document.getElementById('notification_type').value;
-            const messageInput = document.getElementById('notification_message');
-
-            if (!type) {
-                messageInput.value = '';
-                return;
-            }
-
-            if (type === 'general') return;
-            if (!tenant) return;
-
-            messageInput.value = buildNotificationText(type, tenant);
-        }
-
-        async function sendNotification() {
-            const tenant = getSelectedTenant();
-            const type = document.getElementById('notification_type').value;
-            const message = document.getElementById('notification_message').value.trim();
-
-            if (!tenant) return alert('اختر المستأجر أولاً');
-            if (!type) return alert('اختر موضوع الإشعار');
-            if (!message) return alert('أدخل نص الإشعار');
-
-            const now = new Date();
-            const expiresAt = new Date(now);
-            expiresAt.setDate(expiresAt.getDate() + getNotificationLifetimeDays(type));
+            if(!code || amount <= 0 || !receipt) return alert('أكمل بيانات الحركة');
 
             const payload = {
-                tenant_code: tenant.tenant_code,
-                title: getNotificationTitle(type),
-                message,
-                type,
-                is_read: false,
-                is_active: true,
-                hide_after_seen: shouldHideAfterSeen(type),
-                seen_at: null,
-                created_at: now.toISOString(),
-                expires_at: expiresAt.toISOString()
+                tenant_code: code,
+                date: date,
+                receipt_no: receipt,
+                description: document.getElementById('tx_desc').value,
+                credit: amount,
+                debit: 0
             };
 
-            const { error } = await supabaseClient.from('tenant_notifications').insert([payload]);
-            if (error) {
-                console.error(error);
-                alert('حدث خطأ أثناء إرسال الإشعار');
-                return;
-            }
-
-            alert('تم إرسال الإشعار بنجاح');
-            document.getElementById('notification_type').value = '';
-            document.getElementById('notification_message').value = '';
-        }
-
-        async function renderSelectedTenant(code) {
-            const tenant = tenantBalances.find(x => x.tenant_code === code) || null;
-            updateLastSeen(tenant);
-
-            if (tenant) {
-                updateTenantStatusChip(tenant);
-                renderAi(tenant);
-                drawCollectionChart(tenant.totalCredit, tenant.currentBalance);
-                drawMonthlyChart(tenant);
-                document.getElementById('statementBtn').disabled = false;
+            let res;
+            if(editingTransactionId) {
+                res = await supabaseClient.from('tenant_transactions').update(payload).eq('id', editingTransactionId);
             } else {
-                document.getElementById('statementBtn').disabled = true;
+                res = await supabaseClient.from('tenant_transactions').insert([payload]);
             }
 
-            updateNotificationComposer();
-        }
-
-        async function refresh(code = null) {
-            document.getElementById('loader').style.display = 'flex';
-            await loadData();
-
-            const select = document.getElementById('tenant_select');
-            const selectedCode = code || select.value || allTenants[0]?.tenant_code || '';
-
-            select.innerHTML =
-                '<option value="">اختر المستأجر</option>' +
-                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
-
-            if (selectedCode) {
-                select.value = selectedCode;
-                await renderSelectedTenant(selectedCode);
-            } else {
-                document.getElementById('last_seen_chip').innerText = '—';
-                document.getElementById('tenant_status_chip').innerText = 'جزئي';
-                document.getElementById('tenant_status_chip').classList.remove('paid', 'partial');
-                document.getElementById('statementBtn').disabled = true;
+            if(res.error) alert('خطأ في الحفظ');
+            else {
+                alert('تم الحفظ وتحديث الأرصدة');
+                location.reload(); // لإعادة حساب الملخص السنوي تلقائياً عبر السيرفر أو الـ Triggers
             }
-
-            document.getElementById('loader').style.display = 'none';
         }
 
         function openTenantStatement() {
             const code = document.getElementById('tenant_select').value;
-            if (!code) return alert('اختر المستأجر أولاً');
-
-            localStorage.setItem('jabri_tenant_code', code);
-            localStorage.setItem('jabri_admin_session', 'active');
-            window.open(`statement.html?tenant=${encodeURIComponent(code)}`, '_blank');
+            window.open(`statement.html?tenant=${code}`, '_blank');
         }
 
         function logoutAdmin() {
             localStorage.removeItem('jabri_admin_session');
-            location.reload();
+            location.href = 'index.html';
         }
 
         window.onload = async () => {
-            document.body.style.opacity = '1';
-            clearTransactionForm();
-            await refresh();
-
-            document.getElementById('tenant_select').addEventListener('change', async (e) => {
-                await renderSelectedTenant(e.target.value);
+            await loadData();
+            const sel = document.getElementById('tenant_select');
+            allTenants.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.tenant_code;
+                opt.text = t.tenant_name || t.tenant_code;
+                sel.add(opt);
+            });
+            sel.addEventListener('change', e => renderSelectedTenant(e.target.value));
+            
+            document.getElementById('notification_type').addEventListener('change', function() {
+                const t = tenantBalances.find(x => x.tenant_code === sel.value);
+                if(!t) return;
+                const amt = Math.round(t.currentBalance);
+                const texts = {
+                    first: `نرجو التكرم بالعلم بأن رصيدكم المستحق هو ${amt} دينار. يرجى السداد لتجنب التراكم.`,
+                    second: `تذكير ثاني: يرجى سداد المبلغ المستحق ${amt} دينار في أقرب وقت ممكن.`,
+                    third: `إنذار نهائي: نرجو سداد مبلغ ${amt} دينار خلال 48 ساعة لتجنب الإجراءات القانونية.`,
+                    legal: `إنذار عدلي رسمي: بخصوص ذمتكم البالغة ${amt} دينار، يرجى مراجعة الإدارة فوراً.`,
+                    lawyer: `تم تحويل ملفكم للمحامي لتحصيل مبلغ ${amt} دينار قانونياً.`
+                };
+                document.getElementById('notification_message').value = texts[this.value] || "";
             });
 
-            document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
+            document.getElementById('loader').style.display = 'none';
+            document.body.style.opacity = '1';
         };
     </script>
 </body>
