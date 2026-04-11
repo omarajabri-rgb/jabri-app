@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v2.9</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.0</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -944,7 +944,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v2.9</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.0</div>
     </div>
 
     <script>
@@ -962,7 +962,13 @@
         let monthlyChart = null;
         let isSavingTransaction = false;
 
-        const toNumber = v => parseFloat(String(v ?? 0).replace(/,/g, '')) || 0;
+        const toNumber = v => {
+            const cleaned = String(v ?? 0).replace(/,/g, '').trim();
+            const n = parseFloat(cleaned);
+            return Number.isFinite(n) ? n : 0;
+        };
+
+        const roundMoney = v => Math.round(toNumber(v));
 
         function setMoodClass(el, mood) {
             if (!el) return;
@@ -1045,7 +1051,11 @@
             const contract = new Date(contractDate);
             if (Number.isNaN(contract.getTime())) return null;
 
-            const candidate = new Date(referenceDate.getFullYear(), contract.getMonth(), contract.getDate());
+            const candidate = new Date(
+                referenceDate.getFullYear(),
+                contract.getMonth(),
+                contract.getDate()
+            );
 
             if (referenceDate < candidate) candidate.setFullYear(candidate.getFullYear() - 1);
             return candidate;
@@ -1061,7 +1071,9 @@
         }
 
         function getSummaryByYear(tenantCode, year) {
-            return allSummaries.find(r => r.tenant_code === tenantCode && Number(r.year) === Number(year)) || null;
+            return allSummaries.find(
+                r => r.tenant_code === tenantCode && Number(r.year) === Number(year)
+            ) || null;
         }
 
         function getInstallmentPlanFromContract(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
@@ -1106,10 +1118,12 @@
                 dueUntilToday = safePreviousBalance + installmentAmount;
                 currentInstallmentValue = safePreviousBalance + installmentAmount;
             }
+
             if (referenceDate >= secondDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 2);
                 currentInstallmentValue = installmentAmount;
             }
+
             if (referenceDate >= thirdDate) {
                 dueUntilToday = safePreviousBalance + (installmentAmount * 3);
                 currentInstallmentValue = installmentAmount;
@@ -1123,7 +1137,11 @@
             } else if (referenceDate < thirdDate) {
                 nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
             } else {
-                nextInstallment = { label: 'القسط الأول', date: addMonthsSafe(firstDate, 12), amount: safePreviousBalance + installmentAmount };
+                nextInstallment = {
+                    label: 'القسط الأول',
+                    date: addMonthsSafe(firstDate, 12),
+                    amount: safePreviousBalance + installmentAmount
+                };
             }
 
             return { installmentAmount, currentInstallmentValue, dueUntilToday, nextInstallment };
@@ -1188,7 +1206,10 @@
                 const currentCycleYear = getCurrentCycleYear(contractDate);
                 const previousCycleYear = getPreviousCycleYear(contractDate);
 
-                const currentSummary = getSummaryByYear(tn.tenant_code, currentCycleYear) || getLatestSummary(tn.tenant_code);
+                const currentSummary =
+                    getSummaryByYear(tn.tenant_code, currentCycleYear) ||
+                    getLatestSummary(tn.tenant_code);
+
                 const previousSummary = getSummaryByYear(tn.tenant_code, previousCycleYear);
 
                 const annualDebit = toNumber(currentSummary?.total_debit);
@@ -1290,8 +1311,8 @@
                 }]
             });
 
-            document.getElementById('pie_paid_value').innerText = Math.round(paid);
-            document.getElementById('pie_balance_value').innerText = Math.round(remaining);
+            document.getElementById('pie_paid_value').innerText = roundMoney(paid);
+            document.getElementById('pie_balance_value').innerText = roundMoney(remaining);
         }
 
         function drawMonthlyChart(tenant) {
@@ -1399,8 +1420,8 @@
             document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
-            document.getElementById('kpi_total_credit').innerText = Math.round(totalCredit);
-            document.getElementById('kpi_total_balance').innerText = Math.round(currentBalance);
+            document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
+            document.getElementById('kpi_total_balance').innerText = roundMoney(currentBalance);
 
             const badge = document.getElementById('ai_badge');
             if (installmentCoverageScore >= 100) {
@@ -1432,11 +1453,12 @@
 
             setMoodClass(document.getElementById('ai_card_type'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
 
-            document.getElementById('ai_last_payment').innerText = monthlyAverage ? Math.round(monthlyAverage) : 0;
+            document.getElementById('ai_last_payment').innerText = monthlyAverage ? roundMoney(monthlyAverage) : 0;
             setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAverage >= 600 ? 'good' : monthlyAverage >= 300 ? 'warn' : 'bad');
 
             document.getElementById('ai_months_without_payment').innerText = monthsWithoutPayment;
-            document.getElementById('ai_months_without_payment_text').innerText = monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `منذ ${monthsWithoutPayment} شهر`;
+            document.getElementById('ai_months_without_payment_text').innerText =
+                monthsWithoutPayment === 0 ? 'يوجد دفع حديث' : `منذ ${monthsWithoutPayment} شهر`;
             setMoodClass(document.getElementById('ai_card_months_without_payment'), monthsWithoutPayment <= 1 ? 'good' : monthsWithoutPayment <= 3 ? 'warn' : 'bad');
 
             const last3 = allSummaries
@@ -1453,33 +1475,40 @@
                 : 0;
 
             document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+            document.getElementById('ai_last3_ratio_text').innerText =
+                last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
 
             document.getElementById('kpi_total_credit_text').innerText =
-                dueUntilToday > 0 ? `المطلوب حتى اليوم: ${Math.round(dueUntilToday)}` : 'لا يوجد استحقاق مرحلي بعد';
+                dueUntilToday > 0 ? `المطلوب حتى اليوم: ${roundMoney(dueUntilToday)}` : 'لا يوجد استحقاق مرحلي بعد';
 
             document.getElementById('kpi_total_balance_text').innerText =
-                currentInstallmentGap === 0 ? 'لا يوجد تأخر مرحلي' : `متأخر مرحلي: ${Math.round(currentInstallmentGap)}`;
+                currentInstallmentGap === 0 ? 'لا يوجد تأخر مرحلي' : `متأخر مرحلي: ${roundMoney(currentInstallmentGap)}`;
 
             setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_balance'), currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             if (nextInstallment?.date) {
-                document.getElementById('ai_close_estimate').innerText = `${nextInstallment.label} ${formatEnglishDate(nextInstallment.date)}`;
+                document.getElementById('ai_close_estimate').innerText =
+                    `${nextInstallment.label} ${formatEnglishDate(nextInstallment.date)}`;
             } else {
                 document.getElementById('ai_close_estimate').innerText = '—';
             }
 
             document.getElementById('ai_recommendation').innerText =
-                currentInstallmentGap === 0 ? 'لا حاجة لمتابعة حالياً' : `متابعة المستحق الحالي (${Math.round(currentInstallmentGap)})`;
+                currentInstallmentGap === 0
+                    ? 'لا حاجة لمتابعة حالياً'
+                    : `متابعة المستحق الحالي (${roundMoney(currentInstallmentGap)})`;
 
             setDotMood('dot_close_estimate', nextInstallment?.date ? 'warn' : 'good');
             setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             const flags = [
-                { text: `القسط الحالي: ${Math.round(currentInstallmentValue)}`, cls: 'flag-warning' },
-                { text: previousBalance > 0 ? `الرصيد القديم: ${Math.round(previousBalance)}` : 'لا يوجد رصيد قديم', cls: previousBalance > 0 ? 'flag-danger' : 'flag-success' }
+                { text: `القسط الحالي: ${roundMoney(currentInstallmentValue)}`, cls: 'flag-warning' },
+                {
+                    text: previousBalance > 0 ? `الرصيد القديم: ${roundMoney(previousBalance)}` : 'لا يوجد رصيد قديم',
+                    cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
+                }
             ];
 
             document.getElementById('ai_risk_flags').innerHTML =
@@ -1597,7 +1626,7 @@
 
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
-            const amount = Math.round(tenant.currentInstallmentGap ?? tenant.currentBalance);
+            const amount = roundMoney(tenant.currentInstallmentGap ?? tenant.currentBalance);
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
