@@ -784,7 +784,6 @@
                 };
             }
 
-            // تعديل الرسالة لتظهر في سطرين فقط
             return {
                 message: `المطلوب حالياً: <b>${formatNumber(plan.currentInstallment)}</b>. ينصح بسداد <b>${monthlyPlan.recommendedMonthly}</b> شهرياً،
 لإغلاق الحساب خلال <b>${monthlyPlan.monthsToClose}</b> أشهر.`,
@@ -887,8 +886,7 @@
         }
 
         async function fetchVisibleNotifications() {
-            const nowIso = new Date().toISOString();
-
+            // جلب الإشعارات النشطة فقط للمستأجر الحالي
             const { data, error } = await supabaseClient
                 .from('tenant_notifications')
                 .select('*')
@@ -900,13 +898,19 @@
                 return [];
             }
 
+            const now = new Date();
+
             return (data || [])
                 .filter(item => {
-                    const notExpired = !item.expires_at || item.expires_at > nowIso;
+                    // الفلتر 1: التحقق من تاريخ الانتهاء (إن وجد)
+                    const notExpired = !item.expires_at || new Date(item.expires_at) > now;
+                    // الفلتر 2: التحقق من منطق الإخفاء بعد الرؤية (إن وجد)
                     const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
+                    
                     return notExpired && notHiddenAfterSeen;
                 })
                 .sort((a, b) => {
+                    // الترتيب حسب الأولوية أولاً ثم التاريخ الأحدث
                     const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
                     if (priorityDiff !== 0) return priorityDiff;
                     return new Date(b.created_at) - new Date(a.created_at);
@@ -918,6 +922,7 @@
 
             const nowIso = new Date().toISOString();
 
+            // تحديث حالة القراءة ووقت القراءة الفعلي
             const { error } = await supabaseClient
                 .from('tenant_notifications')
                 .update({
@@ -932,16 +937,19 @@
         async function loadNotifications() {
             const box = document.getElementById('notifications_box');
 
+            // 1. تنظيف الإشعارات القديمة تلقائياً
             await deactivateExpiredNotifications();
 
-            const visibleBeforeSeen = await fetchVisibleNotifications();
+            // 2. جلب ما يجب عرضه
+            const visibleNotifications = await fetchVisibleNotifications();
 
-            if (!visibleBeforeSeen.length) {
+            if (!visibleNotifications.length) {
                 box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
                 return;
             }
 
-            box.innerHTML = visibleBeforeSeen.map(item => `
+            // 3. عرض الإشعارات في الواجهة
+            box.innerHTML = visibleNotifications.map(item => `
                 <div class="notify-card ${item.type || 'normal'}">
                     ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
                     <div class="notify-message">${item.message || ''}</div>
@@ -949,26 +957,14 @@
                 </div>
             `).join('');
 
-            const unseenVisibleIds = visibleBeforeSeen
-                .filter(item => !item.seen_at || !item.is_read)
+            // 4. تحديد الإشعارات التي لم تُقرأ بعد ووسمها بـ "تمت الرؤية"
+            const unseenIds = visibleNotifications
+                .filter(item => !item.seen_at)
                 .map(item => item.id);
 
-            await markNotificationsSeen(unseenVisibleIds);
-
-            const visibleAfterSeen = await fetchVisibleNotifications();
-
-            if (!visibleAfterSeen.length) {
-                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
-                return;
+            if (unseenIds.length > 0) {
+                await markNotificationsSeen(unseenIds);
             }
-
-            box.innerHTML = visibleAfterSeen.map(item => `
-                <div class="notify-card ${item.type || 'normal'}">
-                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
-                    <div class="notify-message">${item.message || ''}</div>
-                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
-                </div>
-            `).join('');
         }
 
         function renderPieChart(credit, balance) {
@@ -1195,6 +1191,7 @@
                 lineInsightEl.className = `chart-caption ${lineInsight.type}`;
                 lineInsightEl.innerText = lineInsight.text;
 
+                // تحميل الإشعارات بعد تحديث البيانات
                 await loadNotifications();
 
                 renderPieChart(currentCredit, currentBalance);
