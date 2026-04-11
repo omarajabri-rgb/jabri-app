@@ -23,7 +23,6 @@
             --danger: #c95a52;
             --warning: #c38a2e;
             --neutral: #8b7f70;
-
             --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
             --glass-card-bg: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
             --glass-border: 1px solid rgba(201,164,107,0.18);
@@ -32,472 +31,100 @@
             --glass-blur: blur(14px);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
 
         body {
-            margin: 0;
-            color: var(--text);
-            padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
+            margin: 0; color: var(--text); padding: 16px; opacity: 0;
+            transform: translateY(8px); transition: all 0.45s ease;
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
-            direction: rtl;
-            text-align: right;
+            direction: rtl; text-align: right;
         }
 
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body.loaded { opacity: 1; transform: translateY(0); }
 
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-            width: 100%;
-        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
 
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
 
-        .brand strong {
-            color: var(--gold-deep);
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        .brand small {
-            display: block;
-            font-size: 11px;
-            letter-spacing: 1.8px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
+        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
+        .brand small { display: block; font-size: 11px; letter-spacing: 1.8px; color: var(--muted); font-weight: 800; margin-bottom: 4px; }
 
         .ghost-btn {
-            padding: 12px 16px;
-            border-radius: 16px;
-            border: var(--glass-border);
-            background: rgba(255,255,255,0.70);
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 900;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
-            transition: all 0.25s ease;
-        }
-
-        .ghost-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 26px rgba(120,95,56,0.12);
+            padding: 12px 16px; border-radius: 16px; border: var(--glass-border);
+            background: rgba(255,255,255,0.70); color: var(--text); font-size: 12px;
+            font-weight: 900; cursor: pointer; display: inline-flex; align-items: center;
+            gap: 8px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10); transition: all 0.25s ease;
         }
 
         .hero-card {
-            border-radius: 26px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: right;
-            background: var(--glass-bg);
-            border: var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            position: relative;
+            border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: right;
+            background: var(--glass-bg); border: var(--glass-border); box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative;
         }
 
         .hero-status {
-            position: absolute;
-            left: 18px;
-            top: 18px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            letter-spacing: 0.4px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            position: absolute; left: 18px; top: 18px; padding: 6px 12px; border-radius: 999px;
+            font-size: 11px; font-weight: 900; backdrop-filter: blur(8px);
         }
 
-        .hero-status.paid {
-            background: rgba(47,158,111,0.12);
-            color: var(--success);
-            border: 1px solid rgba(47,158,111,0.25);
+        .hero-status.paid { background: rgba(47,158,111,0.12); color: var(--success); border: 1px solid rgba(47,158,111,0.25); }
+        .hero-status.partial { background: rgba(201,90,82,0.10); color: var(--danger); border: 1px solid rgba(201,90,82,0.25); }
+
+        .hero-card h1 { margin: 0; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+
+        .soft-card {
+            border-radius: 26px; border: var(--glass-border); background: var(--glass-card-bg);
+            box-shadow: var(--glass-soft-shadow); text-align: center; padding: 24px;
         }
 
-        .hero-status.partial {
-            background: rgba(201,90,82,0.10);
-            color: var(--danger);
-            border: 1px solid rgba(201,90,82,0.25);
-        }
+        .soft-card b { display: block; font-size: 30px; font-weight: 900; }
 
-        .hero-card h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            padding-left: 110px;
-        }
-
-        .hero-note {
-            margin-top: 8px;
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .chip-header {
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 12px;
-            width: 100%;
-            padding-right: 10px;
+        .panel {
+            padding: 24px; margin-bottom: 22px; border-radius: 26px; border: var(--glass-border);
+            background: var(--glass-card-bg); box-shadow: var(--glass-soft-shadow);
         }
 
         .chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 16px;
-            border-radius: 999px;
-            min-width: 100px;
-            font-size: 12px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            background: rgba(201,164,107,0.12);
-            border: 1px solid rgba(201,164,107,0.22);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
+            display: inline-flex; padding: 8px 16px; border-radius: 999px; font-size: 12px;
+            font-weight: 900; color: var(--gold-deep); background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22); margin-bottom: 12px;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-            margin-bottom: 22px;
-        }
-
-        .soft-card {
-            border-radius: 26px;
-            border: var(--glass-border);
-            background: var(--glass-card-bg);
-            box-shadow: var(--glass-soft-shadow);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            text-align: center;
-            padding: 24px;
-        }
-
-        .soft-card span {
-            display: block;
-            font-size: 15px;
-            font-weight: 900;
-            margin-bottom: 8px;
-            color: var(--muted);
-        }
-
-        .soft-card b {
-            display: block;
-            font-size: 30px;
-            font-weight: 900;
-        }
-
-        .credit-card {
-            background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
-            border-color: rgba(47,158,111,0.24);
-            color: var(--success);
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, rgba(201,90,82,0.10), rgba(255,255,255,0.25));
-            border-color: rgba(201,90,82,0.22);
-            color: var(--danger);
-        }
-
-        .panel {
-            padding: 24px;
-            margin-bottom: 22px;
-            border-radius: 26px;
-            border: var(--glass-border);
-            background: var(--glass-card-bg);
-            box-shadow: var(--glass-soft-shadow);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-        }
-
-        .smart-body {
-            font-size: 15px;
-            line-height: 1.8;
-            font-weight: 800;
-            color: var(--text);
-            text-align: right;
-            margin-top: 10px;
-            white-space: normal;
-        }
-
-        .smart-body b {
-            color: var(--gold-deep);
-            font-weight: 900;
-        }
-
-        .smart-subnote {
-            margin-top: 12px;
-            font-size: 13px;
-            line-height: 1.9;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .pie-text-stats {
-            margin-top: 16px;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            font-size: 15px;
-            font-weight: 900;
-        }
-
-        .pie-text-item {
-            color: var(--muted);
-        }
-
-        .pie-text-item b {
-            font-weight: 900;
-            margin-right: 4px;
-        }
-
-        .pie-text-item.paid b {
-            color: var(--success);
-        }
-
-        .pie-text-item.balance b {
-            color: var(--danger);
-        }
-
-        .chart-wrap {
-            min-height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        .timeline-wrap {
-            min-height: 300px;
-        }
-
-        .chart-caption {
-            margin-top: 14px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            font-weight: 900;
-            text-align: center;
-            border: 1px solid transparent;
-        }
-
-        .chart-caption.good {
-            color: var(--success);
-            background: rgba(47,158,111,0.10);
-            border-color: rgba(47,158,111,0.18);
-        }
-
-        .chart-caption.warning {
-            color: var(--danger);
-            background: rgba(201,90,82,0.10);
-            border-color: rgba(201,90,82,0.18);
-        }
-
-        .chart-caption.neutral {
-            color: var(--neutral);
-            background: rgba(139,127,112,0.10);
-            border-color: rgba(139,127,112,0.18);
-        }
-
-        #notifications_box {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .notify-empty {
-            padding: 16px;
-            border-radius: 18px;
-            text-align: center;
-            color: var(--muted);
-            font-weight: 800;
-            background: rgba(255,255,255,0.45);
-            border: 1px dashed rgba(201,164,107,0.24);
-        }
+        .smart-body { font-size: 15px; line-height: 1.8; font-weight: 800; white-space: normal; }
+        .smart-body b { color: var(--gold-deep); }
 
         .notify-card {
-            padding: 16px 18px;
-            border-radius: 20px;
+            padding: 16px 18px; border-radius: 20px; margin-bottom: 10px;
             background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(247,244,237,0.75));
-            border: 1px solid rgba(201,164,107,0.18);
-            box-shadow: 0 6px 18px rgba(120,95,56,0.08);
-            position: relative;
-            overflow: hidden;
+            border: 1px solid rgba(201,164,107,0.18); position: relative;
         }
 
-        .notify-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
+        .notify-card.legal::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--danger); }
 
-        .notify-card.legal::before {
-            background: linear-gradient(90deg, transparent, #c95a52, transparent);
-        }
-
-        .notify-card.lawyer::before {
-            background: linear-gradient(90deg, transparent, #7a1f1f, transparent);
-        }
-
-        .notify-title {
-            font-size: 14px;
-            font-weight: 900;
-            margin-bottom: 6px;
-            color: var(--gold-deep);
-        }
-
-        .notify-card.legal .notify-title,
-        .notify-card.lawyer .notify-title {
-            color: var(--danger);
-        }
-
-        .notify-message {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .notify-date {
-            margin-top: 6px;
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--muted);
-        }
+        .chart-wrap { min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative; }
 
         .action-btn {
-            width: 100%;
-            max-width: 300px;
-            margin: 24px auto 0;
-            padding: 16px;
-            border-radius: 24px;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: none;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            color: #fff;
-            box-shadow: 0 18px 35px rgba(201,164,107,0.25);
+            width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px; border-radius: 24px;
+            font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            gap: 10px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff; box-shadow: 0 18px 35px rgba(201,164,107,0.25);
         }
 
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 20px 38px rgba(201,164,107,0.28);
-        }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #eee;
-            border-top-color: var(--gold-deep);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(14px);
-            transition: all 0.55s ease;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-wrap {
-                min-height: 240px;
-            }
-
-            .timeline-wrap {
-                min-height: 280px;
-            }
-
-            .hero-card h1 {
-                padding-left: 0;
-                padding-top: 34px;
-                font-size: 24px;
-            }
-
-            .hero-status {
-                left: 14px;
-                top: 14px;
-            }
-        }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
 
     <div class="wrap">
-        <div class="topbar reveal">
+        <div class="topbar">
             <div class="brand">
                 <small>MANAGED BUSINESS SPACES</small>
                 <strong>JABRI COMPLEX</strong>
@@ -507,69 +134,47 @@
             </button>
         </div>
 
-        <section class="hero-card reveal">
+        <section class="hero-card">
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
             <div id="last_update" class="hero-note">-</div>
         </section>
 
         <div class="stats-grid">
-            <div class="soft-card credit-card reveal">
-                <span>المدفوع</span>
+            <div class="soft-card" style="color:var(--success)">
+                <span style="font-size:14px; font-weight:800;">المدفوع</span>
                 <b id="val_credit">0</b>
             </div>
-            <div class="soft-card balance-card reveal">
-                <span>المتبقي</span>
+            <div class="soft-card" style="color:var(--danger)">
+                <span style="font-size:14px; font-weight:800;">المتبقي</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
 
-        <div class="panel reveal">
-            <div class="chip-header">
-                <div class="chip">نصيحة محاسبية</div>
-            </div>
+        <div class="panel">
+            <div class="chip">نصيحة محاسبية</div>
             <div id="smart_message" class="smart-body">تحليل البيانات...</div>
-            <div id="smart_subnote" class="smart-subnote"></div>
         </div>
 
-        <div class="panel reveal">
-            <div class="chip-header">
-                <div class="chip">إشعار</div>
-            </div>
+        <div class="panel">
+            <div class="chip">إشعار الإدارة</div>
             <div id="notifications_box">
-                <div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>
+                <div style="text-align:center; color:var(--muted); padding:20px;">لا يوجد تنبيهات حالياً</div>
             </div>
         </div>
 
-        <div class="panel reveal">
-            <div class="chip-header">
-                <div class="chip">وضع الحساب</div>
-            </div>
+        <div class="panel">
+            <div class="chip">وضع الحساب</div>
             <div class="chart-wrap">
                 <canvas id="balancePieChart"></canvas>
             </div>
-            <div class="pie-text-stats">
-                <span class="pie-text-item paid">المدفوع: <b id="pie_paid_value">0</b></span>
-                <span class="pie-text-item balance">المتبقي: <b id="pie_balance_value">0</b></span>
-            </div>
-            <div id="pie_caption" class="chart-caption neutral">لا توجد بيانات كافية لحساب نسبة السداد حالياً</div>
         </div>
 
-        <div class="panel reveal">
-            <div class="chip-header">
-                <div class="chip">اتجاه الرصيد خلال سنتين</div>
-            </div>
-            <div class="chart-wrap timeline-wrap">
-                <canvas id="timelineChart"></canvas>
-            </div>
-            <div id="line_insight" class="chart-caption neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
-        </div>
-
-        <button class="action-btn reveal" onclick="goToStatement()">
+        <button class="action-btn" onclick="goToStatement()">
             <i data-lucide="file-text"></i> كشف الحساب بالتفصيل
         </button>
 
-        <div class="footer reveal">© 2026 مجمع الجبري الصناعي التجاري</div>
+        <div class="footer" style="text-align:center; margin-top:30px; font-size:12px; color:var(--muted);">© 2026 مجمع الجبري الصناعي التجاري</div>
     </div>
 
     <script>
@@ -583,642 +188,109 @@
         );
 
         let pieChartInstance = null;
-        let timelineChartInstance = null;
 
-        function toNumber(v) {
-            const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
-            return isNaN(num) ? 0 : num;
-        }
+        function toNumber(v) { return parseFloat(String(v ?? 0).replace(/,/g, '')) || 0; }
 
-        function formatNumber(v) {
-            return String(Math.round(toNumber(v)));
-        }
+        async function init() {
+            try {
+                // 1. جلب البيانات الأساسية
+                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                const { data: summaryData } = await supabaseClient.from('tenant_yearly_summary').select('*').eq('tenant_code', tenantCode).order('year', { ascending: false });
 
-        function formatNotificationDate(value) {
-            const d = new Date(value);
-            return isNaN(d)
-                ? ''
-                : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-        }
+                if (tenant) {
+                    // 2. تحديث "آخر ظهور" فورياً (مهم لصفحة الإدارة)
+                    await supabaseClient.from('tenants').update({ last_seen: new Date().toISOString() }).eq('tenant_code', tenantCode);
+                    document.getElementById('t_name').innerText = tenant.tenant_name || tenantCode;
+                }
 
-        function formatRealLastUpdate(value) {
-            if (!value) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
-            const d = new Date(value);
-            if (isNaN(d)) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+                const currentSummary = summaryData?.[0] || null;
+                const credit = toNumber(currentSummary?.total_credit);
+                const balance = Math.max(0, toNumber(currentSummary?.final_balance));
 
-            return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            })}`;
-        }
+                // تحديث الواجهة
+                document.getElementById('val_credit').innerText = Math.round(credit);
+                document.getElementById('val_balance').innerText = Math.round(balance);
+                document.getElementById('account_status_chip').innerText = balance <= 0 ? "ملتزم" : "جزئي";
+                document.getElementById('account_status_chip').className = `hero-status ${balance <= 0 ? 'paid' : 'partial'}`;
+                document.getElementById('last_update').innerText = `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
 
-        function getPriorityByType(type) {
-            if (type === 'lawyer') return 1;
-            if (type === 'legal') return 2;
-            if (type === 'third') return 3;
-            if (type === 'second') return 4;
-            if (type === 'first') return 5;
-            return 6;
-        }
+                // النصيحة المحاسبية (تنسيق سطرين)
+                if (balance > 0) {
+                    const monthly = Math.ceil(balance / 12);
+                    document.getElementById('smart_message').innerHTML = `المطلوب حالياً: <b>${Math.round(balance)}</b>. ينصح بسداد <b>${monthly}</b> شهرياً،<br>لإغلاق الحساب خلال 12 شهر.`;
+                } else {
+                    document.getElementById('smart_message').innerText = "حسابكم منتظم تماماً، شكراً لالتزامكم.";
+                }
 
-        function getCurrentAndPreviousSummaries(summaryRows) {
-            const rows = (summaryRows || [])
-                .filter(row => Number(row.year) > 0)
-                .sort((a, b) => Number(a.year) - Number(b.year));
+                // تحميل الإشعارات
+                await loadNotifications();
+                
+                // رسم المخطط
+                renderPie(credit, balance);
 
-            if (!rows.length) {
-                return {
-                    currentSummary: null,
-                    previousSummary: null,
-                    chartRows: []
-                };
-            }
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+                if (window.lucide) lucide.createIcons();
 
-            const currentSummary = rows[rows.length - 1];
-            const previousSummary = rows.length > 1 ? rows[rows.length - 2] : null;
-
-            return {
-                currentSummary,
-                previousSummary,
-                chartRows: [previousSummary, currentSummary].filter(Boolean)
-            };
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
-        }
-
-        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
-            const contract = new Date(contractDate);
-            if (isNaN(contract.getTime())) return null;
-
-            const candidate = new Date(
-                referenceDate.getFullYear(),
-                contract.getMonth(),
-                contract.getDate()
-            );
-
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
-            return candidate;
-        }
-
-        function getInstallmentPlan(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
-            const safeAnnual = Math.max(0, toNumber(annualAmount));
-            const installmentAmount = safeAnnual / 3;
-            const safePreviousBalance = Math.max(0, toNumber(previousBalance));
-            const base = getCycleBaseDate(contractDate, referenceDate);
-
-            if (!base) {
-                return {
-                    installmentAmount,
-                    dueUntilToday: safePreviousBalance,
-                    currentInstallment: safePreviousBalance + installmentAmount
-                };
-            }
-
-            const firstDate = new Date(base);
-            const secondDate = addMonthsSafe(base, 5);
-            const thirdDate = addMonthsSafe(base, 8);
-
-            let dueUntilToday = safePreviousBalance + installmentAmount;
-            let currentInstallment = safePreviousBalance + installmentAmount;
-
-            if (referenceDate >= secondDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 2);
-                currentInstallment = installmentAmount;
-            }
-
-            if (referenceDate >= thirdDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 3);
-                currentInstallment = installmentAmount;
-            }
-
-            return {
-                installmentAmount,
-                dueUntilToday,
-                currentInstallment
-            };
-        }
-
-        function getDynamicMonthlyPlan(currentBalance, dueNow) {
-            const safeBalance = Math.max(0, toNumber(currentBalance));
-            const safeDueNow = Math.max(0, toNumber(dueNow));
-
-            if (safeBalance <= 0) {
-                return {
-                    monthsToClose: 0,
-                    recommendedMonthly: 0
-                };
-            }
-
-            let monthsToClose = 18;
-
-            if (safeBalance <= 500) monthsToClose = 6;
-            else if (safeBalance <= 1500) monthsToClose = 10;
-            else if (safeBalance <= 3000) monthsToClose = 15;
-            else monthsToClose = 18;
-
-            let recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
-
-            if (safeDueNow > 0) {
-                const minByDue = Math.ceil(safeDueNow / Math.min(monthsToClose, 6));
-                recommendedMonthly = Math.max(recommendedMonthly, minByDue);
-                monthsToClose = Math.ceil(safeBalance / recommendedMonthly);
-            }
-
-            return {
-                monthsToClose,
-                recommendedMonthly
-            };
-        }
-
-        function getTenantStatus(currentBalance, currentCredit) {
-            if (currentBalance <= 0) return { text: '✔ مسدد', cls: 'paid' };
-            if (currentCredit > 0) return { text: '⚠ جزئي', cls: 'partial' };
-            return { text: '⚠ جزئي', cls: 'partial' };
-        }
-
-        function getAccountingAdvice(current, previous, tenant) {
-            if (!current) {
-                return {
-                    message: 'لا توجد بيانات كافية حالياً',
-                    subnote: ''
-                };
-            }
-
-            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
-            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
-            const currentCredit = Math.max(0, Number(current?.total_credit || 0));
-            const annualDebit = Math.max(0, Number(current?.total_debit || 0));
-
-            if (currentBalance <= 0) {
-                return {
-                    message: 'لا يوجد رصيد مستحق حالياً',
-                    subnote: 'الاستمرار على نفس وتيرة السداد يحافظ على انتظام الحساب'
-                };
-            }
-
-            const plan = getInstallmentPlan(tenant?.contract_date, annualDebit, previousBalance);
-            const dueNow = Math.max(0, plan.dueUntilToday - currentCredit);
-            const monthlyPlan = getDynamicMonthlyPlan(currentBalance, dueNow);
-
-            if (monthlyPlan.recommendedMonthly <= 0) {
-                return {
-                    message: 'يوجد رصيد مستحق، ويُنصح بتنظيم دفعة قريبة للمحافظة على انتظام الحساب.',
-                    subnote: ''
-                };
-            }
-
-            return {
-                message: `المطلوب حالياً: <b>${formatNumber(plan.currentInstallment)}</b>. ينصح بسداد <b>${monthlyPlan.recommendedMonthly}</b> شهرياً،
-لإغلاق الحساب خلال <b>${monthlyPlan.monthsToClose}</b> أشهر.`,
-                subnote: ''
-            };
-        }
-
-        function getLineInsight(current, previous) {
-            if (!current || !previous) {
-                return {
-                    type: 'neutral',
-                    text: 'لا توجد بيانات كافية للمقارنة حالياً'
-                };
-            }
-
-            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
-            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
-            const diff = currentBalance - previousBalance;
-
-            if (diff < 0) {
-                return {
-                    type: 'good',
-                    text: `الرصيد انخفض عن السنة الماضية بمقدار ${Math.abs(Math.round(diff))}`
-                };
-            }
-
-            if (diff > 0) {
-                return {
-                    type: 'warning',
-                    text: `الرصيد الحالي أعلى من السنة الماضية بـ ${Math.round(diff)}، والانتظام في الدفع خلال الأشهر القادمة سيحسن وضع الحساب`
-                };
-            }
-
-            return {
-                type: 'neutral',
-                text: 'الرصيد مستقر مقارنة بالسنة الماضية'
-            };
-        }
-
-        function getPieCaption(credit, balance) {
-            const paid = Math.max(0, toNumber(credit));
-            const remaining = Math.max(0, toNumber(balance));
-            const total = paid + remaining;
-
-            if (total <= 0) {
-                return {
-                    type: 'neutral',
-                    text: 'لا توجد بيانات كافية لحساب نسبة السداد حالياً'
-                };
-            }
-
-            const percent = Math.round((paid / total) * 100);
-
-            if (percent >= 80) {
-                return {
-                    type: 'good',
-                    text: 'نسبة السداد جيدة وحسابك يسير بشكل ممتاز'
-                };
-            }
-
-            if (percent >= 35) {
-                return {
-                    type: 'neutral',
-                    text: 'تم دفع جزء من المستحق، ويُنصح بالاستمرار على نفس الوتيرة'
-                };
-            }
-
-            return {
-                type: 'warning',
-                text: 'تم دفع جزء بسيط من المستحق، ويُنصح برفع وتيرة الدفع'
-            };
-        }
-
-        function animateNumber(element, endValue) {
-            if (!element) return;
-            const duration = 800;
-            const startTime = performance.now();
-
-            function update(currentTime) {
-                const progress = Math.min((currentTime - startTime) / duration, 1);
-                element.innerText = String(Math.floor(progress * endValue));
-                if (progress < 1) requestAnimationFrame(update);
-            }
-
-            requestAnimationFrame(update);
-        }
-
-        async function deactivateExpiredNotifications() {
-            const nowIso = new Date().toISOString();
-
-            const { error } = await supabaseClient
-                .from('tenant_notifications')
-                .update({ is_active: false })
-                .eq('tenant_code', tenantCode)
-                .eq('is_active', true)
-                .not('expires_at', 'is', null)
-                .lt('expires_at', nowIso);
-
-            if (error) console.error('deactivateExpiredNotifications error:', error);
-        }
-
-        async function fetchVisibleNotifications() {
-            // جلب الإشعارات النشطة فقط للمستأجر الحالي
-            const { data, error } = await supabaseClient
-                .from('tenant_notifications')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .eq('is_active', true);
-
-            if (error) {
-                console.error('fetchVisibleNotifications error:', error);
-                return [];
-            }
-
-            const now = new Date();
-
-            return (data || [])
-                .filter(item => {
-                    // الفلتر 1: التحقق من تاريخ الانتهاء (إن وجد)
-                    const notExpired = !item.expires_at || new Date(item.expires_at) > now;
-                    // الفلتر 2: التحقق من منطق الإخفاء بعد الرؤية (إن وجد)
-                    const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
-                    
-                    return notExpired && notHiddenAfterSeen;
-                })
-                .sort((a, b) => {
-                    // الترتيب حسب الأولوية أولاً ثم التاريخ الأحدث
-                    const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
-                    if (priorityDiff !== 0) return priorityDiff;
-                    return new Date(b.created_at) - new Date(a.created_at);
-                });
-        }
-
-        async function markNotificationsSeen(ids) {
-            if (!ids || !ids.length) return;
-
-            const nowIso = new Date().toISOString();
-
-            // تحديث حالة القراءة ووقت القراءة الفعلي
-            const { error } = await supabaseClient
-                .from('tenant_notifications')
-                .update({
-                    is_read: true,
-                    seen_at: nowIso
-                })
-                .in('id', ids);
-
-            if (error) console.error('markNotificationsSeen error:', error);
+            } catch (e) { console.error(e); }
         }
 
         async function loadNotifications() {
+            const { data } = await supabaseClient.from('tenant_notifications').select('*').eq('tenant_code', tenantCode).eq('is_active', true).order('created_at', { ascending: false });
             const box = document.getElementById('notifications_box');
 
-            // 1. تنظيف الإشعارات القديمة تلقائياً
-            await deactivateExpiredNotifications();
-
-            // 2. جلب ما يجب عرضه
-            const visibleNotifications = await fetchVisibleNotifications();
-
-            if (!visibleNotifications.length) {
-                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
-                return;
-            }
-
-            // 3. عرض الإشعارات في الواجهة
-            box.innerHTML = visibleNotifications.map(item => `
-                <div class="notify-card ${item.type || 'normal'}">
-                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
-                    <div class="notify-message">${item.message || ''}</div>
-                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
-                </div>
-            `).join('');
-
-            // 4. تحديد الإشعارات التي لم تُقرأ بعد ووسمها بـ "تمت الرؤية"
-            const unseenIds = visibleNotifications
-                .filter(item => !item.seen_at)
-                .map(item => item.id);
-
-            if (unseenIds.length > 0) {
-                await markNotificationsSeen(unseenIds);
+            if (data && data.length > 0) {
+                box.innerHTML = data.map(n => `
+                    <div class="notify-card ${n.type === 'legal' || n.type === 'lawyer' ? 'legal' : ''}">
+                        <div style="font-weight:900; color:var(--gold-deep); margin-bottom:5px;">${n.title || 'تنبيه من الإدارة'}</div>
+                        <div style="font-size:14px; font-weight:700;">${n.message}</div>
+                        <div style="font-size:10px; color:var(--muted); margin-top:8px;">${new Date(n.created_at).toLocaleDateString('en-GB')}</div>
+                    </div>
+                `).join('');
+                
+                // تحديث الإشعارات كـ "مقروءة"
+                const unseenIds = data.filter(n => !n.is_read).map(n => n.id);
+                if (unseenIds.length > 0) {
+                    await supabaseClient.from('tenant_notifications').update({ is_read: true, seen_at: new Date().toISOString() }).in('id', unseenIds);
+                }
             }
         }
 
-        function renderPieChart(credit, balance) {
-            const canvas = document.getElementById('balancePieChart');
-
+        function renderPie(paid, remaining) {
+            const ctx = document.getElementById('balancePieChart').getContext('2d');
             if (pieChartInstance) pieChartInstance.destroy();
+            
+            const total = paid + remaining;
+            const percent = total > 0 ? Math.round((paid / total) * 100) : 0;
 
-            const creditValue = Math.max(0, toNumber(credit));
-            const balanceValue = Math.max(0, toNumber(balance));
-            const total = creditValue + balanceValue;
-            const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0;
-
-            pieChartInstance = new Chart(canvas, {
+            pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['المدفوع', 'المتبقي'],
-                    datasets: [{
-                        data: [creditValue, balanceValue],
-                        backgroundColor: ['#2f9e6f', '#c95a52'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: [paid, remaining], backgroundColor: ['#2f9e6f', '#c95a52'], borderWidth: 0 }]
                 },
                 options: {
-                    cutout: '75%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    cutout: '80%',
+                    plugins: { legend: { display: false } },
+                    animation: { duration: 2000 }
                 },
                 plugins: [{
-                    id: 'centerText',
-                    beforeDraw(chart) {
+                    beforeDraw: (chart) => {
                         const { width, height, ctx } = chart;
-
-                        if (typeof chart._animatedValue !== 'number') {
-                            chart._animatedValue = 0;
-                        }
-
-                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
-                        const currentValue = Math.round(chart._animatedValue);
-
                         ctx.save();
-                        ctx.font = 'bold 52px Tajawal';
-                        ctx.fillStyle = '#2f2a24';
-                        ctx.textBaseline = 'middle';
                         ctx.textAlign = 'center';
-                        ctx.fillText(`${currentValue}%`, width / 2, height / 2 - 8);
+                        ctx.textBaseline = 'middle';
+                        ctx.font = 'bold 40px Tajawal';
+                        ctx.fillStyle = '#2f2a24';
+                        ctx.fillText(percent + '%', width / 2, height / 2);
                         ctx.restore();
-
-                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
-                            requestAnimationFrame(() => chart.draw());
-                        }
                     }
                 }]
             });
         }
 
-        function renderTimelineChart(chartRows) {
-            const canvas = document.getElementById('timelineChart');
-            if (timelineChartInstance) timelineChartInstance.destroy();
-
-            const rows = (chartRows || []).filter(Boolean);
-            const labels = rows.map(row => String(row.year));
-            const balances = rows.map(row => Math.max(0, toNumber(row.final_balance)));
-
-            let trendColor = '#c9a46b';
-            let fillColor = 'rgba(201,90,82,0.05)';
-
-            if (balances.length >= 2) {
-                const prev = balances[0];
-                const current = balances[1];
-
-                if (current < prev) {
-                    trendColor = '#2f9e6f';
-                    fillColor = 'rgba(47,158,111,0.08)';
-                } else if (current > prev) {
-                    trendColor = '#c95a52';
-                    fillColor = 'rgba(201,90,82,0.05)';
-                }
-            }
-
-            timelineChartInstance = new Chart(canvas, {
-                type: 'line',
-                data: {
-                    labels: labels.length ? labels : ['—'],
-                    datasets: [{
-                        label: 'الرصيد',
-                        data: balances.length ? balances : [0],
-                        borderColor: trendColor,
-                        backgroundColor: fillColor,
-                        borderWidth: 4,
-                        tension: 0.35,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: trendColor,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            rtl: true,
-                            labels: {
-                                usePointStyle: true,
-                                boxWidth: 10,
-                                font: {
-                                    family: 'Tajawal',
-                                    size: 12,
-                                    weight: '700'
-                                }
-                            }
-                        },
-                        tooltip: {
-                            rtl: true,
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            callbacks: {
-                                title: function(items) {
-                                    return `السنة ${items[0]?.label || ''}`;
-                                },
-                                label: function(context) {
-                                    return `الرصيد: ${formatNumber(context.raw)}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#7a6c59',
-                                font: { size: 12, weight: '700' }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(201,164,107,0.12)'
-                            },
-                            ticks: {
-                                color: '#7a6c59',
-                                callback: v => formatNumber(v)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        async function init() {
-            try {
-                const { data: tenant, error: tenantError } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                const { data: summaryData, error: summaryError } = await supabaseClient
-                    .from('tenant_yearly_summary')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('year', { ascending: true });
-
-                if (tenantError) console.error('tenant error:', tenantError);
-                if (summaryError) console.error('summary error:', summaryError);
-
-                const {
-                    currentSummary,
-                    previousSummary,
-                    chartRows
-                } = getCurrentAndPreviousSummaries(summaryData || []);
-
-                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
-                const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
-
-                document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode || '-';
-
-                const realLastUpdate =
-                    currentSummary?.updated_at ||
-                    currentSummary?.created_at ||
-                    tenant?.updated_at ||
-                    tenant?.created_at ||
-                    null;
-
-                document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
-
-                const chip = document.getElementById('account_status_chip');
-                const status = getTenantStatus(currentBalance, currentCredit);
-                chip.innerText = status.text;
-                chip.className = `hero-status ${status.cls}`;
-
-                animateNumber(document.getElementById('val_credit'), Math.round(currentCredit));
-                animateNumber(document.getElementById('val_balance'), Math.round(currentBalance));
-                animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
-                animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
-
-                const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
-                document.getElementById('smart_message').innerHTML = advice.message;
-                document.getElementById('smart_subnote').innerText = advice.subnote || '';
-
-                const pieCaption = getPieCaption(currentCredit, currentBalance);
-                const pieCaptionEl = document.getElementById('pie_caption');
-                pieCaptionEl.className = `chart-caption ${pieCaption.type}`;
-                pieCaptionEl.innerText = pieCaption.text;
-
-                const lineInsight = getLineInsight(currentSummary, previousSummary);
-                const lineInsightEl = document.getElementById('line_insight');
-                lineInsightEl.className = `chart-caption ${lineInsight.type}`;
-                lineInsightEl.innerText = lineInsight.text;
-
-                // تحميل الإشعارات بعد تحديث البيانات
-                await loadNotifications();
-
-                renderPieChart(currentCredit, currentBalance);
-                renderTimelineChart(chartRows);
-
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-                document.querySelectorAll('.reveal').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('active'), i * 80);
-                });
-
-                if (window.lucide) lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-            }
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        function goToStatement() {
-            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
-        }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function goToStatement() { window.location.href = `statement.html?tenant=${tenantCode}`; }
 
         window.onload = init;
     </script>
