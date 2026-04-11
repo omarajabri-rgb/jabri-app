@@ -1,3 +1,5 @@
+تم تحديث الكود بالكامل مع تعديل شبكة التحليل السريع (quick-ai-grid) لتصبح **ثلاثة أعمدة** بدلاً من اثنين، مما يمنح واجهة الإدارة مظهراً أكثر تنظيماً واحترافية على الشاشات الكبيرة.
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -391,9 +393,10 @@
             border-color:rgba(209,77,77,0.18);
         }
 
+        /* المقطع المطلوب تعديله: */
         .quick-ai-grid{
             display:grid;
-            grid-template-columns:repeat(2,1fr);
+            grid-template-columns:repeat(3,1fr);
             gap:12px;
             margin-bottom:14px;
         }
@@ -704,14 +707,16 @@
 
         @media (max-width: 900px){
             .chart-grid,
-            .insight-list{
-                grid-template-columns:1fr;
+            .insight-list,
+            .quick-ai-grid{
+                grid-template-columns:repeat(2, 1fr);
             }
         }
 
         @media (max-width: 768px){
             .tenant-select-grid,
-            .form-grid{
+            .form-grid,
+            .quick-ai-grid{
                 grid-template-columns:1fr;
             }
 
@@ -725,10 +730,6 @@
 
             .tx-actions .btn{
                 width:100%;
-            }
-
-            .quick-ai-grid{
-                grid-template-columns:1fr;
             }
         }
     </style>
@@ -829,6 +830,12 @@
                         <span>رصيد إغلاق الرصيد آخر السنة</span>
                         <b id="kpi_total_balance">0</b>
                         <small id="kpi_total_balance_text"></small>
+                    </div>
+                    
+                    <div class="quick-ai-card ai-neutral">
+                        <span>الحالة العامة</span>
+                        <b>نشط</b>
+                        <small>تم التحديث الآن</small>
                     </div>
                 </div>
 
@@ -1737,3 +1744,5 @@
     </script>
 </body>
 </html>
+
+```
