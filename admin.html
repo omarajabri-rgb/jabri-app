@@ -841,7 +841,7 @@
                 <div class="insight-list">
                     <div class="insight-row">
                         <div>
-                            <span>القسط الحالي</span>
+                            <span>المستحق الحالي</span>
                             <b id="ai_close_estimate">—</b>
                         </div>
                         <div class="insight-dot dot-warn" id="dot_close_estimate"></div>
@@ -1085,85 +1085,62 @@
             const safeAnnual = Math.max(0, toNumber(annualAmount));
             const installmentAmount = safeAnnual / 3;
             const safePreviousBalance = Math.max(0, toNumber(previousBalance));
+
+            let firstDate, secondDate, thirdDate;
             const base = getCurrentCycleStart(contractDate, referenceDate);
 
             if (!base) {
                 const year = referenceDate.getFullYear();
-                const firstDate = new Date(year, 0, 1);
-                const secondDate = new Date(year, 5, 1);
-                const thirdDate = new Date(year, 8, 1);
-
-                let dueInstallmentsCount = 0;
-                if (referenceDate >= firstDate) dueInstallmentsCount = 1;
-                if (referenceDate >= secondDate) dueInstallmentsCount = 2;
-                if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
-
-                const dueInstallmentsValue = installmentAmount * dueInstallmentsCount;
-                const dueUntilTodayRaw = safePreviousBalance + dueInstallmentsValue;
-                const annualTotalWithCarry = safePreviousBalance + safeAnnual;
-                const dueUntilToday = Math.min(dueUntilTodayRaw, annualTotalWithCarry);
-
-                let currentInstallmentValue = installmentAmount;
-                if (dueInstallmentsCount === 0) currentInstallmentValue = safePreviousBalance + installmentAmount;
-                if (dueInstallmentsCount === 1) currentInstallmentValue = safePreviousBalance + installmentAmount;
-
-                let nextInstallment;
-                if (referenceDate < firstDate) {
-                    nextInstallment = { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount };
-                } else if (referenceDate < secondDate) {
-                    nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
-                } else if (referenceDate < thirdDate) {
-                    nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
-                } else {
-                    nextInstallment = { label: 'القسط الأول', date: new Date(year + 1, 0, 1), amount: safePreviousBalance + installmentAmount };
-                }
-
-                return {
-                    installmentAmount,
-                    currentInstallmentValue,
-                    dueUntilToday,
-                    nextInstallment,
-                    dueInstallmentsCount
-                };
+                firstDate = new Date(year, 0, 1);
+                secondDate = new Date(year, 5, 1);
+                thirdDate = new Date(year, 8, 1);
+            } else {
+                firstDate = new Date(base);
+                secondDate = addMonthsSafe(base, 5);
+                thirdDate = addMonthsSafe(base, 8);
             }
-
-            const firstDate = new Date(base);
-            const secondDate = addMonthsSafe(base, 5);
-            const thirdDate = addMonthsSafe(base, 8);
 
             let dueInstallmentsCount = 0;
             if (referenceDate >= firstDate) dueInstallmentsCount = 1;
             if (referenceDate >= secondDate) dueInstallmentsCount = 2;
             if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
 
-            const dueInstallmentsValue = installmentAmount * dueInstallmentsCount;
-            const dueUntilTodayRaw = safePreviousBalance + dueInstallmentsValue;
-            const annualTotalWithCarry = safePreviousBalance + safeAnnual;
-            const dueUntilToday = Math.min(dueUntilTodayRaw, annualTotalWithCarry);
-
-            let currentInstallmentValue = installmentAmount;
-            if (dueInstallmentsCount === 0) currentInstallmentValue = safePreviousBalance + installmentAmount;
-            if (dueInstallmentsCount === 1) currentInstallmentValue = safePreviousBalance + installmentAmount;
+            // المعادلة الصحيحة:
+            // المطلوب حتى اليوم = الرصيد السابق + الأقساط التي حل موعدها فقط
+            const dueUntilToday = safePreviousBalance + (installmentAmount * dueInstallmentsCount);
+            const currentDueValue = dueUntilToday;
 
             let nextInstallment;
             if (referenceDate < firstDate) {
-                nextInstallment = { label: 'القسط الأول', date: firstDate, amount: safePreviousBalance + installmentAmount };
+                nextInstallment = {
+                    label: 'القسط الأول',
+                    date: firstDate,
+                    amount: safePreviousBalance + installmentAmount
+                };
             } else if (referenceDate < secondDate) {
-                nextInstallment = { label: 'القسط الثاني', date: secondDate, amount: installmentAmount };
+                nextInstallment = {
+                    label: 'القسط الثاني',
+                    date: secondDate,
+                    amount: installmentAmount
+                };
             } else if (referenceDate < thirdDate) {
-                nextInstallment = { label: 'القسط الثالث', date: thirdDate, amount: installmentAmount };
+                nextInstallment = {
+                    label: 'القسط الثالث',
+                    date: thirdDate,
+                    amount: installmentAmount
+                };
             } else {
                 nextInstallment = {
                     label: 'القسط الأول',
                     date: addMonthsSafe(firstDate, 12),
-                    amount: safePreviousBalance + installmentAmount
+                    amount: installmentAmount
                 };
             }
 
             return {
                 installmentAmount,
-                currentInstallmentValue,
                 dueUntilToday,
+                currentDueValue,
                 nextInstallment,
                 dueInstallmentsCount
             };
@@ -1241,13 +1218,6 @@
 
                 const plan = getInstallmentPlanFromContract(contractDate, annualDebit, previousBalance);
 
-                const annualTotalWithCarry = previousBalance + annualDebit;
-                const safeDueUntilToday = Math.min(
-                    Math.max(0, plan.dueUntilToday),
-                    annualTotalWithCarry,
-                    totalCredit + currentBalance
-                );
-
                 return {
                     ...tn,
                     contractDate,
@@ -1257,10 +1227,10 @@
                     totalDebit: annualDebit,
                     totalCredit,
                     currentBalance,
-                    dueUntilToday: safeDueUntilToday,
-                    currentInstallmentValue: plan.currentInstallmentValue,
-                    currentInstallmentGap: Math.max(0, safeDueUntilToday - totalCredit),
-                    installmentAmount: plan.installmentAmount,
+                    dueUntilToday: Math.max(0, plan.dueUntilToday),
+                    currentInstallmentValue: Math.max(0, plan.currentDueValue),
+                    currentInstallmentGap: Math.max(0, plan.dueUntilToday - totalCredit),
+                    installmentAmount: Math.max(0, plan.installmentAmount),
                     nextInstallment: plan.nextInstallment,
                     latestSummary: currentSummary,
                     lastSeen: tn.last_seen || null,
@@ -1402,7 +1372,6 @@
             const currentInstallmentGap = Math.max(0, toNumber(tenant.currentInstallmentGap));
             const currentInstallmentValue = Math.max(0, toNumber(tenant.currentInstallmentValue));
             const installmentAmount = Math.max(0, toNumber(tenant.installmentAmount));
-            const nextInstallment = tenant.nextInstallment;
 
             const installmentCoverageScore = dueUntilToday > 0
                 ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
@@ -1520,7 +1489,7 @@
             setMoodClass(document.getElementById('ai_card_total_credit'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
 
-            document.getElementById('ai_close_estimate').innerText = `القسط الحالي: ${roundMoney(currentInstallmentValue)}`;
+            document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentValue)}`;
 
             document.getElementById('ai_recommendation').innerText =
                 currentInstallmentGap === 0
