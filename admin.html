@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.35</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.36</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -434,13 +434,8 @@
             line-height:1.6;
         }
 
-        #ai_card_total_credit b{
-            color:var(--success);
-        }
-
-        #ai_card_total_debit b{
-            color:var(--danger);
-        }
+        #ai_card_total_credit b{ color:var(--success); }
+        #ai_card_balance b{ color:var(--danger); }
 
         .ai-good{
             background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
@@ -457,9 +452,7 @@
             border-color:rgba(209,77,77,0.18);
         }
 
-        .ai-neutral{
-            background:#fff;
-        }
+        .ai-neutral{ background:#fff; }
 
         .insight-list{
             display:grid;
@@ -637,9 +630,7 @@
             align-items:start;
         }
 
-        .form-grid > *{
-            min-width:0;
-        }
+        .form-grid > *{ min-width:0; }
 
         .quick-descs{
             display:flex;
@@ -702,9 +693,7 @@
             animation:spin 1s linear infinite;
         }
 
-        @keyframes spin{
-            to{ transform:rotate(360deg); }
-        }
+        @keyframes spin{ to{ transform:rotate(360deg); } }
 
         @media (max-width: 1200px){
             .hero-ai-card{ grid-template-columns:1fr; }
@@ -712,37 +701,18 @@
 
         @media (max-width: 900px){
             .chart-grid,
-            .insight-list{
-                grid-template-columns:1fr;
-            }
+            .insight-list{ grid-template-columns:1fr; }
         }
 
         @media (max-width: 768px){
             .tenant-select-grid,
-            .form-grid{
-                grid-template-columns:1fr;
-            }
+            .form-grid{ grid-template-columns:1fr; }
 
-            .select-with-chip{
-                align-items:stretch;
-            }
-
-            .tenant-mini-chips{
-                align-items:flex-start;
-            }
-
-            .tx-actions .btn{
-                width:100%;
-            }
-
-            .quick-ai-grid{
-                grid-template-columns:repeat(2, 1fr);
-                gap:12px;
-            }
-
-            .quick-ai-card{
-                min-height:220px;
-            }
+            .select-with-chip{ align-items:stretch; }
+            .tenant-mini-chips{ align-items:flex-start; }
+            .tx-actions .btn{ width:100%; }
+            .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; }
+            .quick-ai-card{ min-height:220px; }
         }
     </style>
 </head>
@@ -841,12 +811,15 @@
                     <div class="quick-ai-card" id="ai_card_total_credit">
                         <span>دائن</span>
                         <b id="kpi_total_credit">0</b>
+                        <small>إجمالي الدفعات المسجلة</small>
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_balance">
-    <span>الرصيد الحالي</span>
-    <b id="kpi_balance">0</b>
-</div>
+                        <span>الرصيد الحالي</span>
+                        <b id="kpi_balance">0</b>
+                        <small>الرصيد المطلوب بآخر السنة</small>
+                    </div>
+                </div>
 
                 <div class="insight-list">
                     <div class="insight-row">
@@ -956,7 +929,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.35</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.36</div>
     </div>
 
     <script>
@@ -1207,6 +1180,8 @@
                 const totalCredit = toNumber(currentSummary?.total_credit);
                 const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
                 const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
+                const yearlyDebit = Math.max(0, toNumber(currentSummary?.total_debit || annualRent));
+                const openingBalance = Math.max(0, toNumber(currentSummary?.opening_balance));
 
                 const plan = getInstallmentPlanFromContract(contractDate, annualRent, previousBalance);
 
@@ -1216,7 +1191,9 @@
                     currentCycleYear: currentYear,
                     previousCycleYear: previousYear,
                     previousBalance,
-                    totalDebit: annualRent,
+                    openingBalance,
+                    totalDebit: yearlyDebit,
+                    annualRent,
                     totalCredit,
                     currentBalance,
                     dueUntilToday: Math.max(0, plan.dueUntilToday),
@@ -1259,7 +1236,9 @@
         }
 
         function drawCollectionChart(totalCredit, totalBalance) {
-            const ctx = document.getElementById('collectionChart').getContext('2d');
+            const canvas = document.getElementById('collectionChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (collectionChart) collectionChart.destroy();
 
             const paid = toNumber(totalCredit);
@@ -1308,7 +1287,9 @@
         }
 
         function drawMonthlyChart(tenant) {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            const canvas = document.getElementById('monthlyChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             if (monthlyChart) monthlyChart.destroy();
             if (!tenant) return;
 
@@ -1356,7 +1337,7 @@
         function renderAi(tenant) {
             if (!tenant) return;
 
-            const totalCredit = toNumber(tenant.totalCredit);
+            const totalCredit = Math.max(0, toNumber(tenant.totalCredit));
             const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
             const previousBalance = Math.max(0, toNumber(tenant.previousBalance));
             const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
@@ -1364,6 +1345,7 @@
             const currentInstallmentValue = Math.max(0, toNumber(tenant.currentInstallmentValue));
             const installmentAmount = Math.max(0, toNumber(tenant.installmentAmount));
             const totalDebit = Math.max(0, toNumber(tenant.totalDebit));
+            const openingBalance = Math.max(0, toNumber(tenant.openingBalance));
 
             const installmentCoverageScore = dueUntilToday > 0
                 ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
@@ -1406,8 +1388,15 @@
 
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
 
-const balance = totalDebit - totalCredit;
-document.getElementById('kpi_balance').innerText = roundMoney(balance);
+            const balanceEl = document.getElementById('kpi_balance');
+            if (balanceEl) {
+                balanceEl.innerText = roundMoney(currentBalance);
+                if (currentBalance > 0) {
+                    balanceEl.style.color = '#d14d4d';
+                } else {
+                    balanceEl.style.color = '#159a6f';
+                }
+            }
 
             const badge = document.getElementById('ai_badge');
             if (installmentCoverageScore >= 100) {
@@ -1454,9 +1443,9 @@ document.getElementById('kpi_balance').innerText = roundMoney(balance);
 
             const last3Ratio = last3.length
                 ? Math.round(last3.reduce((sum, row) => {
-                    const rent = toNumber(tenant.totalDebit);
+                    const debitBase = Math.max(0, toNumber(row.total_debit || tenant.annualRent || tenant.totalDebit));
                     const c = toNumber(row.total_credit);
-                    return sum + (rent > 0 ? Math.min(100, Math.round((c / rent) * 100)) : 0);
+                    return sum + (debitBase > 0 ? Math.min(100, Math.round((c / debitBase) * 100)) : 0);
                 }, 0) / last3.length)
                 : 0;
 
@@ -1467,28 +1456,32 @@ document.getElementById('kpi_balance').innerText = roundMoney(balance);
 
             setMoodClass(
                 document.getElementById('ai_card_total_credit'),
-                totalCredit >= totalDebit ? 'good' : totalCredit > 0 ? 'warn' : 'bad'
+                totalCredit >= dueUntilToday ? 'good' : totalCredit > 0 ? 'warn' : 'bad'
             );
 
             setMoodClass(
-                document.getElementById('ai_card_total_debit'),
-                totalDebit === 0 ? 'good' : 'warn'
+                document.getElementById('ai_card_balance'),
+                currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad'
             );
 
-            document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentValue)}`;
+            document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentGap)}`;
 
             document.getElementById('ai_recommendation').innerText =
                 currentInstallmentGap === 0
                     ? 'لا حاجة لمتابعة حالياً'
                     : `متابعة المستحق الحالي (${roundMoney(currentInstallmentGap)})`;
 
-            setDotMood('dot_close_estimate', currentInstallmentGap === 0 ? 'good' : 'warn');
+            setDotMood('dot_close_estimate', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount ? 'warn' : 'bad');
             setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
 
             const flags = [
                 {
                     text: `الرصيد السابق: ${roundMoney(previousBalance)}`,
                     cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
+                },
+                {
+                    text: `رصيد أول السنة: ${roundMoney(openingBalance)}`,
+                    cls: openingBalance > 0 ? 'flag-warning' : 'flag-success'
                 },
                 {
                     text: `القسط الواحد: ${roundMoney(installmentAmount)}`,
