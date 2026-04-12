@@ -846,8 +846,7 @@
                     <div class="quick-ai-card" id="ai_card_balance">
     <span>الرصيد الحالي</span>
     <b id="kpi_balance">0</b>
-
-                </div>
+</div>
 
                 <div class="insight-list">
                     <div class="insight-row">
@@ -1406,7 +1405,9 @@
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
 
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
-            document.getElementById('kpi_total_debit').innerText = roundMoney(totalDebit);
+
+const balance = totalDebit - totalCredit;
+document.getElementById('kpi_balance').innerText = roundMoney(balance);
 
             const badge = document.getElementById('ai_badge');
             if (installmentCoverageScore >= 100) {
