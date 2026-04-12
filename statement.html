@@ -1,3 +1,14 @@
+هذا هو ملف statement.html الكامل والمحدث — بحيث:
+	•	العرض المحاسبي يعتمد فقط على tenant_yearly_summary
+	•	البحث عن السندات فقط من tenant_transactions
+	•	لا يوجد أي حساب جديد من tenant_transactions
+	•	كل سنة تعرض:
+	•	opening_balance
+	•	total_debit
+	•	total_credit
+	•	final_balance
+كما هي من tenant_yearly_summary
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -350,7 +361,7 @@
             border-bottom-left-radius: 16px;
         }
 
-        .search-table tbody tr.highlight-2026 td {
+        .search-table tbody tr.highlight-latest td {
             background: rgba(63,162,111,0.08);
             border-color: rgba(63,162,111,0.16);
         }
@@ -895,12 +906,14 @@
         </div>
     </div>
 
-            <script type="module">
-    const session = localStorage.getItem('jabri_tenant_session');
+    <script type="module">
+        const tenantSession = localStorage.getItem('jabri_tenant_session');
+        const adminSession = localStorage.getItem('jabri_admin_session');
 
-    if (session !== 'active') {
-        window.location.href = 'index.html';
-    }
+        if (tenantSession !== 'active' && adminSession !== 'active') {
+            window.location.href = 'index.html';
+        }
+
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -915,6 +928,7 @@
 
         let ALL_TRANSACTIONS = [];
         let ALL_SUMMARIES = [];
+        let TENANT_DATA = null;
 
         function toNumber(v) {
             return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
@@ -939,7 +953,7 @@
             }
 
             const d = new Date(raw);
-            if (!isNaN(d)) {
+            if (!Number.isNaN(d.getTime())) {
                 const day = String(d.getDate()).padStart(2, '0');
                 const month = String(d.getMonth() + 1).padStart(2, '0');
                 const year = d.getFullYear();
@@ -949,7 +963,17 @@
             return raw;
         }
 
-        function formatLastUpdate() {
+        function formatLastUpdate(value) {
+            if (value) {
+                const d = new Date(value);
+                if (!Number.isNaN(d.getTime())) {
+                    return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}`;
+                }
+            }
+
             const now = new Date();
             return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
                 hour: '2-digit',
@@ -1039,7 +1063,7 @@
             let month = '';
             let day = '';
 
-            if (!isNaN(parsed)) {
+            if (!Number.isNaN(parsed.getTime())) {
                 year = String(parsed.getFullYear());
                 month = String(parsed.getMonth() + 1);
                 day = String(parsed.getDate());
@@ -1072,7 +1096,7 @@
             }
 
             const parsed = new Date(text);
-            return isNaN(parsed) ? 0 : parsed.getTime();
+            return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
         }
 
         function sortTransactionsAsc(list) {
@@ -1204,17 +1228,23 @@
             card.classList.remove('active');
         }
 
+        function getLatestSummaryYear() {
+            if (!ALL_SUMMARIES.length) return null;
+            return Math.max(...ALL_SUMMARIES.map(row => Number(row.year)));
+        }
+
         function buildYearSearchTable(receipts, year) {
             const sorted = sortTransactionsAsc(receipts);
             let total = 0;
+            const latestSummaryYear = getLatestSummaryYear();
 
             const rows = sorted.map((item, index) => {
                 const amount = getAmount(item);
                 total += amount;
-                const isLast2026 = String(year) === '2026' && index === sorted.length - 1;
+                const isLatestYear = Number(year) === Number(latestSummaryYear) && index === sorted.length - 1;
 
                 return `
-                    <tr class="${isLast2026 ? 'highlight-2026' : ''}">
+                    <tr class="${isLatestYear ? 'highlight-latest' : ''}">
                         <td><span class="search-date-chip">${formatShortDate(item.date)}</span></td>
                         <td><span class="search-amount">${formatCurrency(amount)}</span></td>
                         <td><span class="search-receipt-chip">${escapeHtml(item.receipt_no)}</span></td>
@@ -1244,11 +1274,11 @@
                         <strong>${formatCurrency(total)}</strong>
                     </div>
 
-                    ${String(year) === '2026' ? `
+                    ${Number(year) === Number(latestSummaryYear) ? `
                         <div class="search-ai-box">
                             <div class="search-ai-head">
-                                <h4>التحليل الذكي لسنة 2026</h4>
-                                <span class="search-ai-badge">AI 2026</span>
+                                <h4>التحليل الذكي لسنة ${year}</h4>
+                                <span class="search-ai-badge">AI ${year}</span>
                             </div>
 
                             <div class="search-ai-grid">
@@ -1398,6 +1428,8 @@
                     return;
                 }
 
+                TENANT_DATA = data || null;
+
                 document.getElementById('statement_tenant_name').innerText =
                     data?.tenant_name ||
                     data?.name ||
@@ -1439,6 +1471,19 @@
             ALL_SUMMARIES = Array.isArray(data) ? data : [];
         }
 
+        function updateHeaderDate() {
+            const latestSummary = [...ALL_SUMMARIES]
+                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
+
+            const dateValue =
+                latestSummary?.updated_at ||
+                latestSummary?.created_at ||
+                TENANT_DATA?.updated_at ||
+                null;
+
+            document.getElementById('statement_date').innerText = formatLastUpdate(dateValue);
+        }
+
         async function init() {
             if (!tenantCode) {
                 document.getElementById('loader').style.display = 'none';
@@ -1447,8 +1492,8 @@
                 return;
             }
 
-            document.getElementById('statement_date').innerText = formatLastUpdate();
             document.getElementById('statement_tenant_name').innerText = tenantCode;
+            document.getElementById('statement_date').innerText = formatLastUpdate();
 
             try {
                 await Promise.all([
@@ -1457,11 +1502,14 @@
                     loadSummaries()
                 ]);
 
+                updateHeaderDate();
                 bindSearchEvents();
                 renderView();
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
+
+                if (window.lucide) lucide.createIcons();
             } catch (e) {
                 console.error('STATEMENT ERROR:', e);
                 document.getElementById('loader').style.display = 'none';
