@@ -569,13 +569,14 @@
 
     <script>
         const session = localStorage.getItem('jabri_tenant_session');
+        if (session !== 'active') {
+            window.location.href = 'index.html';
+        }
 
-if (session !== 'active') {
-    window.location.href = 'index.html';
-}
-
-const tenantCode = localStorage.getItem('jabri_tenant_code');
-        if (!tenantCode) window.location.href = "index.html";
+        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        if (!tenantCode) {
+            window.location.href = 'index.html';
+        }
 
         const { createClient } = supabase;
         const supabaseClient = createClient(
@@ -588,7 +589,7 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
 
         function toNumber(v) {
             const num = parseFloat(String(v ?? 0).replace(/,/g, ''));
-            return isNaN(num) ? 0 : num;
+            return Number.isNaN(num) ? 0 : num;
         }
 
         function formatNumber(v) {
@@ -597,7 +598,7 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
 
         function formatNotificationDate(value) {
             const d = new Date(value);
-            return isNaN(d)
+            return Number.isNaN(d.getTime())
                 ? ''
                 : d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -608,7 +609,7 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
         function formatRealLastUpdate(value) {
             if (!value) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
             const d = new Date(value);
-            if (isNaN(d)) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+            if (Number.isNaN(d.getTime())) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
 
             return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', {
                 hour: '2-digit',
@@ -625,45 +626,9 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
             return 6;
         }
 
-        function getCurrentAndPreviousSummaries(summaryRows) {
-            const rows = (summaryRows || [])
-                .filter(row => Number(row.year) > 0)
-                .sort((a, b) => Number(a.year) - Number(b.year));
-
-            if (!rows.length) {
-                return {
-                    currentSummary: null,
-                    previousSummary: null,
-                    chartRows: []
-                };
-            }
-
-            const currentSummary = rows[rows.length - 1];
-            const previousSummary = rows.length > 1 ? rows[rows.length - 2] : null;
-
-            return {
-                currentSummary,
-                previousSummary,
-                chartRows: [previousSummary, currentSummary].filter(Boolean)
-            };
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
-        }
-
         function getCycleBaseDate(contractDate, referenceDate = new Date()) {
             const contract = new Date(contractDate);
-            if (isNaN(contract.getTime())) return null;
+            if (Number.isNaN(contract.getTime())) return null;
 
             const candidate = new Date(
                 referenceDate.getFullYear(),
@@ -676,6 +641,50 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
             }
 
             return candidate;
+        }
+
+        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
+            const base = getCycleBaseDate(contractDate, referenceDate);
+            return base ? base.getFullYear() : referenceDate.getFullYear();
+        }
+
+        function getCurrentAndPreviousSummaries(summaryRows, contractDate) {
+            const rows = (summaryRows || [])
+                .filter(row => Number(row.year) > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
+
+            if (!rows.length) {
+                return {
+                    currentSummary: null,
+                    previousSummary: null,
+                    chartRows: []
+                };
+            }
+
+            const cycleYear = getCurrentCycleYear(contractDate);
+            const currentSummary = rows.find(row => Number(row.year) === Number(cycleYear)) || null;
+            const previousSummary = rows.find(row => Number(row.year) === Number(cycleYear - 1)) || null;
+
+            const chartRows = [previousSummary, currentSummary].filter(Boolean);
+
+            return {
+                currentSummary,
+                previousSummary,
+                chartRows
+            };
+        }
+
+        function addMonthsSafe(dateInput, months) {
+            const d = new Date(dateInput);
+            if (Number.isNaN(d.getTime())) return null;
+
+            const originalDay = d.getDate();
+            d.setDate(1);
+            d.setMonth(d.getMonth() + months);
+
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            d.setDate(Math.min(originalDay, lastDay));
+            return d;
         }
 
         function getInstallmentPlan(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
@@ -886,40 +895,37 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
                 .eq('is_active', true)
                 .not('expires_at', 'is', null)
                 .lt('expires_at', nowIso);
+
             if (error) console.error('deactivateExpiredNotifications error:', error);
         }
 
         async function fetchVisibleNotifications() {
-    const { data, error } = await supabaseClient
-        .from('tenant_notifications')
-        .select('*')
-        .eq('tenant_code', tenantCode)
-        .eq('is_active', true);
+            const { data, error } = await supabaseClient
+                .from('tenant_notifications')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .eq('is_active', true);
 
-    if (error) {
-        console.error('fetchVisibleNotifications error:', error);
-        return [];
-    }
+            if (error) {
+                console.error('fetchVisibleNotifications error:', error);
+                return [];
+            }
 
-    const now = new Date();
+            const now = new Date();
 
-    return (data || [])
-        .filter(item => {
-            // تحويل تاريخ الانتهاء لمقارنة صحيحة
-            const expiryDate = item.expires_at ? new Date(item.expires_at) : null;
-            const notExpired = !expiryDate || expiryDate > now;
-            
-            // منطق الإخفاء بعد الرؤية
-            const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
-            
-            return notExpired && notHiddenAfterSeen;
-        })
-        .sort((a, b) => {
-            const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
-            if (priorityDiff !== 0) return priorityDiff;
-            return new Date(b.created_at) - new Date(a.created_at);
-        });
-}
+            return (data || [])
+                .filter(item => {
+                    const expiryDate = item.expires_at ? new Date(item.expires_at) : null;
+                    const notExpired = !expiryDate || expiryDate > now;
+                    const notHiddenAfterSeen = !(item.hide_after_seen === true && item.seen_at);
+                    return notExpired && notHiddenAfterSeen;
+                })
+                .sort((a, b) => {
+                    const priorityDiff = getPriorityByType(a.type) - getPriorityByType(b.type);
+                    if (priorityDiff !== 0) return priorityDiff;
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+        }
 
         async function markNotificationsSeen(ids) {
             if (!ids || !ids.length) return;
@@ -931,44 +937,39 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
                     seen_at: nowIso
                 })
                 .in('id', ids);
+
             if (error) console.error('markNotificationsSeen error:', error);
         }
 
         async function loadNotifications() {
-    const box = document.getElementById('notifications_box');
-    
-    // 1. تنظيف الإشعارات المنتهية
-    await deactivateExpiredNotifications();
-    
-    // 2. جلب الإشعارات النشطة
-    const visibleNotifications = await fetchVisibleNotifications();
+            const box = document.getElementById('notifications_box');
 
-    if (!visibleNotifications || visibleNotifications.length === 0) {
-        box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
-        return;
-    }
+            await deactivateExpiredNotifications();
+            const visibleNotifications = await fetchVisibleNotifications();
 
-    // 3. عرض الإشعارات في الواجهة
-    box.innerHTML = visibleNotifications.map(item => `
-        <div class="notify-card ${item.type || 'normal'}">
-            ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
-            <div class="notify-message">${item.message || ''}</div>
-            <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
-        </div>
-    `).join('');
+            if (!visibleNotifications || !visibleNotifications.length) {
+                box.innerHTML = `<div class="notify-empty">لا يوجد تنبيهات حالياً، حسابك تحت المتابعة</div>`;
+                return;
+            }
 
-    // 4. تحديد الإشعارات التي لم يتم وسمها كـ "مرئية" سابقاً
-    const unseenIds = visibleNotifications
-        .filter(item => !item.seen_at) 
-        .map(item => item.id);
+            box.innerHTML = visibleNotifications.map(item => `
+                <div class="notify-card ${item.type || 'normal'}">
+                    ${item.title ? `<div class="notify-title">${item.title}</div>` : ''}
+                    <div class="notify-message">${item.message || ''}</div>
+                    <div class="notify-date">${formatNotificationDate(item.created_at)}</div>
+                </div>
+            `).join('');
 
-    if (unseenIds.length > 0) {
-        // تأخير بسيط لضمان العرض قبل التحديث
-        setTimeout(async () => {
-            await markNotificationsSeen(unseenIds);
-        }, 1000);
-    }
-}
+            const unseenIds = visibleNotifications
+                .filter(item => !item.seen_at)
+                .map(item => item.id);
+
+            if (unseenIds.length > 0) {
+                setTimeout(async () => {
+                    await markNotificationsSeen(unseenIds);
+                }, 1000);
+            }
+        }
 
         function renderPieChart(credit, balance) {
             const canvas = document.getElementById('balancePieChart');
@@ -1018,17 +1019,24 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
         function renderTimelineChart(chartRows) {
             const canvas = document.getElementById('timelineChart');
             if (timelineChartInstance) timelineChartInstance.destroy();
+
             const rows = (chartRows || []).filter(Boolean);
             const labels = rows.map(row => String(row.year));
             const balances = rows.map(row => Math.max(0, toNumber(row.final_balance)));
+
             let trendColor = '#c9a46b';
             let fillColor = 'rgba(201,90,82,0.05)';
 
             if (balances.length >= 2) {
                 const prev = balances[0];
                 const current = balances[1];
-                if (current < prev) { trendColor = '#2f9e6f'; fillColor = 'rgba(47,158,111,0.08)'; }
-                else if (current > prev) { trendColor = '#c95a52'; fillColor = 'rgba(201,90,82,0.05)'; }
+                if (current < prev) {
+                    trendColor = '#2f9e6f';
+                    fillColor = 'rgba(47,158,111,0.08)';
+                } else if (current > prev) {
+                    trendColor = '#c95a52';
+                    fillColor = 'rgba(201,90,82,0.05)';
+                }
             }
 
             timelineChartInstance = new Chart(canvas, {
@@ -1050,10 +1058,22 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: true, rtl: true, labels: { usePointStyle: true, font: { family: 'Tajawal', size: 12, weight: '700' } } }
+                        legend: {
+                            display: true,
+                            rtl: true,
+                            labels: {
+                                usePointStyle: true,
+                                font: { family: 'Tajawal', size: 12, weight: '700' }
+                            }
+                        }
                     },
                     scales: {
-                        y: { beginAtZero: true, ticks: { callback: v => formatNumber(v) } }
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: v => formatNumber(v)
+                            }
+                        }
                     }
                 }
             });
@@ -1061,18 +1081,33 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
 
         async function init() {
             try {
-                // 1. جلب البيانات
-                const { data: tenant } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
-                const { data: summaryData } = await supabaseClient.from('tenant_yearly_summary').select('*').eq('tenant_code', tenantCode).order('year', { ascending: true });
+                const { data: tenant, error: tenantError } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                if (tenantError) throw tenantError;
+
+                const { data: summaryData, error: summaryError } = await supabaseClient
+                    .from('tenant_yearly_summary')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('year', { ascending: true });
+
+                if (summaryError) throw summaryError;
 
                 if (tenant) {
-                    // 2. ميزة "آخر ظهور": تحديث فوري عند الدخول
-                    await supabaseClient.from('tenants').update({ last_seen: new Date().toISOString() }).eq('tenant_code', tenantCode);
+                    await supabaseClient
+                        .from('tenants')
+                        .update({ last_seen: new Date().toISOString() })
+                        .eq('tenant_code', tenantCode);
+
                     document.getElementById('t_name').innerText = tenant.tenant_name || tenantCode;
                 }
 
-                const { currentSummary, previousSummary, chartRows } = getCurrentAndPreviousSummaries(summaryData || []);
-                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
+                const { currentSummary, previousSummary, chartRows } = getCurrentAndPreviousSummaries(summaryData || [], tenant?.contract_date);
+                const currentCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
                 const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
 
                 const realLastUpdate = currentSummary?.updated_at || currentSummary?.created_at || tenant?.updated_at || null;
@@ -1108,7 +1143,10 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
-                document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 80));
+                document.querySelectorAll('.reveal').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('active'), i * 80);
+                });
+
                 if (window.lucide) lucide.createIcons();
             } catch (e) {
                 console.error(e);
@@ -1117,8 +1155,14 @@ const tenantCode = localStorage.getItem('jabri_tenant_code');
             }
         }
 
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
-        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function goToStatement() {
+            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
+        }
 
         window.onload = init;
     </script>
