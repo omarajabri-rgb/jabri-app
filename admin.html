@@ -1,9 +1,23 @@
+تمام — هذا admin.html كامل ومحدّث على المنطق الصحيح الذي اتفقنا عليه:
+
+ما الذي تم إصلاحه
+	•	الدفعة الجديدة تعدّل سنة الدفعة فقط
+	•	لا نعيد ترحيل كل السنوات بعد كل دفعة
+	•	إذا دخلت دفعة لسنة جديدة مثل 2027 ولم يكن هناك صف لها:
+	•	ينشئ النظام سنة جديدة تلقائيًا
+	•	opening_balance = final_balance للسنة السابقة
+	•	total_debit = annual_rent
+	•	total_credit = 0
+	•	ثم يضيف الدفعة عليها
+	•	التحليل في الأدمن صار يعتمد على آخر سنة موجودة للمستأجر
+	•	فتح كشف الحساب من الأدمن يبقى كما هو
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.37</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.38</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -810,13 +824,13 @@
                     <div class="quick-ai-card" id="ai_card_total_credit">
                         <span>دائن</span>
                         <b id="kpi_total_credit">0</b>
-                        <small>إجمالي الدفعات المسجلة</small>
+                        <small>إجمالي الدفعات المسجلة للسنة الحالية</small>
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_balance">
                         <span>الرصيد الحالي</span>
                         <b id="kpi_balance">0</b>
-                        <small>الرصيد المطلوب بآخر السنة</small>
+                        <small>رصيد آخر سنة موجودة</small>
                     </div>
                 </div>
 
@@ -887,7 +901,7 @@
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
-                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث tenant_yearly_summary مع إعادة ترحيل السنوات التالية لنفس المستأجر</div>
+                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث سنة الدفعة فقط داخل tenant_yearly_summary. وإذا كانت سنة جديدة غير موجودة سيتم إنشاؤها تلقائياً.</div>
 
                     <div class="form-grid">
                         <div class="field">
@@ -928,7 +942,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.37</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.38</div>
     </div>
 
     <script>
@@ -959,107 +973,22 @@
 
         const roundMoney = (v) => Math.round(toNumber(v));
 
-        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
-            const contract = new Date(contractDate);
-            if (Number.isNaN(contract.getTime())) return null;
-
-            const candidate = new Date(
-                referenceDate.getFullYear(),
-                contract.getMonth(),
-                contract.getDate()
-            );
-
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
-            return candidate;
+        function getLatestSummary(tenantCode) {
+            return allSummaries
+                .filter((r) => r.tenant_code === tenantCode)
+                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
         }
 
-        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
-            const base = getCycleBaseDate(contractDate, referenceDate);
-            return base ? base.getFullYear() : referenceDate.getFullYear();
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (Number.isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
+        function getPreviousSummary(tenantCode, year) {
+            return allSummaries
+                .filter((r) => r.tenant_code === tenantCode && Number(r.year) < Number(year))
+                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
         }
 
         function getSummaryByYear(tenantCode, year) {
             return allSummaries.find(
                 (r) => r.tenant_code === tenantCode && Number(r.year) === Number(year)
             ) || null;
-        }
-
-        function getInstallmentPlanFromContract(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
-            const safeAnnual = Math.max(0, toNumber(annualAmount));
-            const installmentAmount = safeAnnual / 3;
-            const safePreviousBalance = Math.max(0, toNumber(previousBalance));
-
-            let firstDate, secondDate, thirdDate;
-            const base = getCycleBaseDate(contractDate, referenceDate);
-
-            if (!base) {
-                const year = referenceDate.getFullYear();
-                firstDate = new Date(year, 0, 1);
-                secondDate = new Date(year, 5, 1);
-                thirdDate = new Date(year, 8, 1);
-            } else {
-                firstDate = new Date(base);
-                secondDate = addMonthsSafe(base, 5);
-                thirdDate = addMonthsSafe(base, 8);
-            }
-
-            let dueInstallmentsCount = 0;
-            if (referenceDate >= firstDate) dueInstallmentsCount = 1;
-            if (referenceDate >= secondDate) dueInstallmentsCount = 2;
-            if (referenceDate >= thirdDate) dueInstallmentsCount = 3;
-
-            const dueUntilToday = safePreviousBalance + (installmentAmount * dueInstallmentsCount);
-
-            let nextInstallment;
-            if (referenceDate < firstDate) {
-                nextInstallment = {
-                    label: 'القسط الأول',
-                    date: firstDate,
-                    amount: safePreviousBalance + installmentAmount
-                };
-            } else if (referenceDate < secondDate) {
-                nextInstallment = {
-                    label: 'القسط الثاني',
-                    date: secondDate,
-                    amount: installmentAmount
-                };
-            } else if (referenceDate < thirdDate) {
-                nextInstallment = {
-                    label: 'القسط الثالث',
-                    date: thirdDate,
-                    amount: installmentAmount
-                };
-            } else {
-                nextInstallment = {
-                    label: 'القسط الأول',
-                    date: addMonthsSafe(firstDate, 12),
-                    amount: installmentAmount
-                };
-            }
-
-            return {
-                installmentAmount,
-                dueUntilToday,
-                currentDueValue: dueUntilToday,
-                nextInstallment,
-                dueInstallmentsCount
-            };
         }
 
         function setMoodClass(el, mood) {
@@ -1168,40 +1097,26 @@
             allSummaries = sum.data || [];
 
             tenantBalances = allTenants.map((tn) => {
-                const contractDate = tn.contract_date || null;
-                const currentYear = getCurrentCycleYear(contractDate);
-                const previousYear = currentYear - 1;
+                const latestSummary = getLatestSummary(tn.tenant_code);
+                const previousSummary = latestSummary ? getPreviousSummary(tn.tenant_code, latestSummary.year) : null;
 
-                const currentSummary = getSummaryByYear(tn.tenant_code, currentYear);
-                const previousSummary = getSummaryByYear(tn.tenant_code, previousYear);
-
-                const annualRent = Math.max(0, toNumber(tn.annual_rent));
-                const openingBalance = currentSummary ? Math.max(0, toNumber(currentSummary.opening_balance)) : Math.max(0, toNumber(previousSummary?.final_balance));
-                const totalDebit = currentSummary ? Math.max(0, toNumber(currentSummary.total_debit)) : 0;
-                const totalCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
-                const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : Math.max(0, openingBalance + totalDebit - totalCredit);
+                const totalCredit = latestSummary ? Math.max(0, toNumber(latestSummary.total_credit)) : 0;
+                const currentBalance = latestSummary ? Math.max(0, toNumber(latestSummary.final_balance)) : 0;
                 const previousBalance = previousSummary ? Math.max(0, toNumber(previousSummary.final_balance)) : 0;
-
-                const plan = getInstallmentPlanFromContract(contractDate, annualRent || totalDebit, previousBalance);
+                const openingBalance = latestSummary ? Math.max(0, toNumber(latestSummary.opening_balance)) : 0;
+                const totalDebit = latestSummary ? Math.max(0, toNumber(latestSummary.total_debit)) : Math.max(0, toNumber(tn.annual_rent));
+                const annualRent = Math.max(0, toNumber(tn.annual_rent));
 
                 return {
                     ...tn,
-                    contractDate,
-                    currentCycleYear: currentYear,
-                    previousCycleYear: previousYear,
-                    openingBalance,
+                    latestSummary,
+                    latestYear: latestSummary ? Number(latestSummary.year) : null,
                     previousBalance,
-                    annualRent,
+                    openingBalance,
                     totalDebit,
+                    annualRent,
                     totalCredit,
                     currentBalance,
-                    dueUntilToday: Math.max(0, plan.dueUntilToday),
-                    currentInstallmentGap: Math.max(0, plan.dueUntilToday - totalCredit),
-                    currentInstallmentValue: Math.max(0, plan.currentDueValue),
-                    installmentAmount: Math.max(0, plan.installmentAmount),
-                    nextInstallment: plan.nextInstallment,
-                    dueInstallmentsCount: plan.dueInstallmentsCount,
-                    latestSummary: currentSummary,
                     lastSeen: tn.last_seen || null
                 };
             });
@@ -1219,11 +1134,10 @@
                 return;
             }
 
-            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
             const paid = Math.max(0, toNumber(tenant.totalCredit));
-            const gap = Math.max(0, dueUntilToday - paid);
+            const balance = Math.max(0, toNumber(tenant.currentBalance));
 
-            if (dueUntilToday === 0 || gap === 0) {
+            if (balance === 0) {
                 chip.innerText = 'ملتزم';
                 chip.classList.add('paid');
             } else if (paid > 0) {
@@ -1339,14 +1253,13 @@
             const totalCredit = Math.max(0, toNumber(tenant.totalCredit));
             const currentBalance = Math.max(0, toNumber(tenant.currentBalance));
             const previousBalance = Math.max(0, toNumber(tenant.previousBalance));
-            const dueUntilToday = Math.max(0, toNumber(tenant.dueUntilToday));
-            const currentInstallmentGap = Math.max(0, toNumber(tenant.currentInstallmentGap));
-            const installmentAmount = Math.max(0, toNumber(tenant.installmentAmount));
             const totalDebit = Math.max(0, toNumber(tenant.totalDebit));
             const openingBalance = Math.max(0, toNumber(tenant.openingBalance));
 
-            const installmentCoverageScore = dueUntilToday > 0
-                ? Math.min(100, Math.round((totalCredit / dueUntilToday) * 100))
+            const latestYear = tenant.latestYear || '—';
+            const coverageBase = openingBalance + totalDebit;
+            const coverageScore = coverageBase > 0
+                ? Math.min(100, Math.round((totalCredit / coverageBase) * 100))
                 : 100;
 
             const txs = allTransactions
@@ -1373,14 +1286,14 @@
                 5,
                 Math.min(
                     95,
-                    Math.round((installmentCoverageScore * 0.55) + ((monthsWithoutPayment <= 1 ? 90 : monthsWithoutPayment <= 3 ? 55 : 20) * 0.45))
+                    Math.round((coverageScore * 0.55) + ((monthsWithoutPayment <= 1 ? 90 : monthsWithoutPayment <= 3 ? 55 : 20) * 0.45))
                 )
             );
 
             const defaultProbability = 100 - nextPaymentProbability;
 
-            document.getElementById('ai_score_value').innerText = `${installmentCoverageScore}/100`;
-            document.getElementById('ai_commitment_ratio').innerText = `${installmentCoverageScore}%`;
+            document.getElementById('ai_score_value').innerText = `${coverageScore}/100`;
+            document.getElementById('ai_commitment_ratio').innerText = `${coverageScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextPaymentProbability}%`;
             document.getElementById('ai_default_probability').innerText = `${defaultProbability}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalCredit);
@@ -1392,34 +1305,34 @@
             }
 
             const badge = document.getElementById('ai_badge');
-            if (installmentCoverageScore >= 100) {
+            if (currentBalance === 0) {
                 badge.className = 'smart-ai-badge badge-excellent';
                 badge.innerText = 'ملتزم';
-                document.getElementById('ai_score_text').innerText = 'مسدد المستحقات التراكمية حتى اليوم';
-            } else if (installmentCoverageScore >= 60) {
+                document.getElementById('ai_score_text').innerText = 'لا يوجد رصيد مستحق حالياً';
+            } else if (totalCredit > 0) {
                 badge.className = 'smart-ai-badge badge-good';
                 badge.innerText = 'جزئي';
-                document.getElementById('ai_score_text').innerText = 'يوجد سداد لكنه أقل من المطلوب حتى اليوم';
+                document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة في سنة ${latestYear}`;
             } else {
                 badge.className = 'smart-ai-badge badge-risk';
                 badge.innerText = 'متأخر';
-                document.getElementById('ai_score_text').innerText = 'متأخر عن المستحق التراكمي حتى اليوم';
+                document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل في سنة ${latestYear}`;
             }
 
-            setMoodClass(document.getElementById('hero_commitment_card'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('hero_commitment_card'), currentBalance === 0 ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextPaymentProbability >= 75 ? 'good' : nextPaymentProbability >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defaultProbability <= 30 ? 'good' : defaultProbability <= 50 ? 'warn' : 'bad');
 
             document.getElementById('ai_tenant_type').innerText =
-                installmentCoverageScore >= 100 ? 'ملتزم' :
-                installmentCoverageScore >= 60 ? 'جزئي' : 'متأخر';
+                currentBalance === 0 ? 'ملتزم' :
+                totalCredit > 0 ? 'جزئي' : 'متأخر';
 
             document.getElementById('ai_tenant_type_text').innerText =
-                installmentCoverageScore >= 100 ? 'يغطي المستحقات التراكمية' :
-                installmentCoverageScore >= 60 ? 'يدفع لكن دون اكتمال المستحق' :
-                'لم يغطي المستحق التراكمي حتى اليوم';
+                currentBalance === 0 ? 'رصيد السنة مغلق' :
+                totalCredit > 0 ? `يوجد دائن في سنة ${latestYear}` :
+                `الرصيد ما زال كاملاً تقريباً في سنة ${latestYear}`;
 
-            setMoodClass(document.getElementById('ai_card_type'), installmentCoverageScore >= 100 ? 'good' : installmentCoverageScore >= 60 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_type'), currentBalance === 0 ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
 
             document.getElementById('ai_last_payment').innerText = monthlyAverage ? roundMoney(monthlyAverage) : 0;
             setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAverage >= 600 ? 'good' : monthlyAverage >= 300 ? 'warn' : 'bad');
@@ -1447,19 +1360,23 @@
                 last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
 
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_credit'), totalCredit >= dueUntilToday ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_total_credit'), currentBalance === 0 ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_balance'), currentBalance === 0 ? 'good' : currentBalance <= Math.max(1, totalDebit * 0.25) ? 'warn' : 'bad');
 
-            document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentGap)}`;
+            document.getElementById('ai_close_estimate').innerText = `رصيد سنة ${latestYear}: ${roundMoney(currentBalance)}`;
             document.getElementById('ai_recommendation').innerText =
-                currentInstallmentGap === 0
+                currentBalance === 0
                     ? 'لا حاجة لمتابعة حالياً'
-                    : `متابعة المستحق الحالي (${roundMoney(currentInstallmentGap)})`;
+                    : `متابعة رصيد سنة ${latestYear}`;
 
-            setDotMood('dot_close_estimate', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount ? 'warn' : 'bad');
-            setDotMood('dot_recommendation', currentInstallmentGap === 0 ? 'good' : currentInstallmentGap <= installmentAmount * 0.5 ? 'warn' : 'bad');
+            setDotMood('dot_close_estimate', currentBalance === 0 ? 'good' : currentBalance <= Math.max(1, totalDebit * 0.25) ? 'warn' : 'bad');
+            setDotMood('dot_recommendation', currentBalance === 0 ? 'good' : 'warn');
 
             const flags = [
+                {
+                    text: `السنة الحالية: ${latestYear}`,
+                    cls: 'flag-warning'
+                },
                 {
                     text: `الرصيد السابق: ${roundMoney(previousBalance)}`,
                     cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
@@ -1473,10 +1390,6 @@
                     cls: totalDebit > 0 ? 'flag-warning' : 'flag-success'
                 },
                 {
-                    text: `القسط الواحد: ${roundMoney(installmentAmount)}`,
-                    cls: 'flag-warning'
-                },
-                {
                     text: `إغلاق السنة: ${roundMoney(currentBalance)}`,
                     cls: currentBalance > 0 ? 'flag-danger' : 'flag-success'
                 }
@@ -1486,43 +1399,33 @@
                 flags.map((f) => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
 
-        async function recalculateTenantSummaries(tenantCode, fromYear) {
-            const { data: rows, error } = await supabaseClient
+        async function ensureYearlySummaryExists(tenant, yearNum) {
+            let summaryRow = getSummaryByYear(tenant.tenant_code, yearNum);
+            if (summaryRow) return summaryRow;
+
+            const previousSummary = getPreviousSummary(tenant.tenant_code, yearNum);
+            const openingBalance = previousSummary ? Math.max(0, toNumber(previousSummary.final_balance)) : 0;
+            const totalDebit = Math.max(0, toNumber(tenant.annual_rent));
+            const totalCredit = 0;
+            const finalBalance = Math.max(0, openingBalance + totalDebit - totalCredit);
+
+            const payload = {
+                tenant_code: tenant.tenant_code,
+                year: yearNum,
+                opening_balance: openingBalance,
+                total_debit: totalDebit,
+                total_credit: totalCredit,
+                final_balance: finalBalance
+            };
+
+            const { data, error } = await supabaseClient
                 .from('tenant_yearly_summary')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .order('year', { ascending: true });
+                .insert([payload])
+                .select()
+                .single();
 
             if (error) throw error;
-            if (!rows?.length) return;
-
-            const targetRows = rows.filter((r) => Number(r.year) >= Number(fromYear));
-            if (!targetRows.length) return;
-
-            const previousRow = rows
-                .filter((r) => Number(r.year) < Number(fromYear))
-                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
-
-            let carryBalance = previousRow ? Math.max(0, toNumber(previousRow.final_balance)) : 0;
-
-            for (const row of targetRows) {
-                const totalDebit = Math.max(0, toNumber(row.total_debit));
-                const totalCredit = Math.max(0, toNumber(row.total_credit));
-                const newOpeningBalance = carryBalance;
-                const newFinalBalance = Math.max(0, newOpeningBalance + totalDebit - totalCredit);
-
-                const { error: updateError } = await supabaseClient
-                    .from('tenant_yearly_summary')
-                    .update({
-                        opening_balance: newOpeningBalance,
-                        final_balance: newFinalBalance
-                    })
-                    .eq('id', row.id);
-
-                if (updateError) throw updateError;
-
-                carryBalance = newFinalBalance;
-            }
+            return data;
         }
 
         async function submitTransaction() {
@@ -1557,18 +1460,12 @@
                     throw new Error('رقم السند مستخدم مسبقاً');
                 }
 
+                const tenant = allTenants.find((t) => t.tenant_code === code);
+                if (!tenant) throw new Error('المستأجر غير موجود');
+
                 const yearNum = new Date(date).getFullYear();
 
-                const summaryRow = allSummaries.find(
-                    (r) => r.tenant_code === code && Number(r.year) === Number(yearNum)
-                );
-
-                if (!summaryRow) {
-                    throw new Error(`لا يوجد tenant_yearly_summary للمستأجر ${code} لسنة ${yearNum}`);
-                }
-
-                const currentTotalCredit = Math.max(0, toNumber(summaryRow.total_credit));
-                const newTotalCredit = currentTotalCredit + amount;
+                let summaryRow = await ensureYearlySummaryExists(tenant, yearNum);
 
                 const { error: insertTxError } = await supabaseClient
                     .from('tenant_transactions')
@@ -1584,20 +1481,25 @@
 
                 if (insertTxError) throw insertTxError;
 
+                const currentTotalCredit = Math.max(0, toNumber(summaryRow.total_credit));
+                const openingBalance = Math.max(0, toNumber(summaryRow.opening_balance));
+                const totalDebit = Math.max(0, toNumber(summaryRow.total_debit));
+                const newTotalCredit = currentTotalCredit + amount;
+                const newFinalBalance = Math.max(0, openingBalance + totalDebit - newTotalCredit);
+
                 const { error: updateSummaryError } = await supabaseClient
                     .from('tenant_yearly_summary')
                     .update({
-                        total_credit: newTotalCredit
+                        total_credit: newTotalCredit,
+                        final_balance: newFinalBalance
                     })
                     .eq('id', summaryRow.id);
 
                 if (updateSummaryError) throw updateSummaryError;
 
-                await recalculateTenantSummaries(code, yearNum);
                 await refresh(code);
-
                 clearTransactionForm();
-                showStatus('تم حفظ الدفعة وتحديث السنوات المرتبطة بنجاح', 'success');
+                showStatus(`تم حفظ دفعة سنة ${yearNum} بنجاح`, 'success');
             } catch (err) {
                 console.error(err);
                 showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
@@ -1632,7 +1534,8 @@
 
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
-            const amount = roundMoney(tenant.currentInstallmentGap ?? tenant.currentBalance);
+            const amount = roundMoney(tenant.currentBalance);
+
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
