@@ -1,3 +1,20 @@
+تمام — هذا tenant.html كامل ومعدّل حسب اللي اتفقنا عليه:
+
+ما الذي تغيّر هنا
+	•	لا يوجد جمع لكل السنوات
+	•	الصفحة تعتمد فقط على:
+	•	آخر سنة موجودة في tenant_yearly_summary = السنة الحالية المعروضة
+	•	والسنة التي قبلها فقط للمقارنة في الخط
+	•	لا يوجد اعتماد محاسبي على tenant_transactions
+	•	لا يوجد منطق cycle / contract_date / أقساط معقد
+	•	المدفوع = total_credit لآخر سنة فقط
+	•	المتبقي = final_balance لآخر سنة فقط
+	•	الاتجاه خلال سنتين = مقارنة آخر سنة مع السنة السابقة فقط
+	•	الإشعارات بقيت كما هي
+
+⸻
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -626,82 +643,31 @@
             return 6;
         }
 
-        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
-            const contract = new Date(contractDate);
-            if (Number.isNaN(contract.getTime())) return null;
+        function getLatestAndPreviousSummaries(summaryRows) {
+            const rows = (summaryRows || [])
+                .filter(row => Number(row.year) > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
 
-            const candidate = new Date(
-                referenceDate.getFullYear(),
-                contract.getMonth(),
-                contract.getDate()
-            );
-
-            if (referenceDate < candidate) {
-                candidate.setFullYear(candidate.getFullYear() - 1);
-            }
-
-            return candidate;
-        }
-
-        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
-            const base = getCycleBaseDate(contractDate, referenceDate);
-            return base ? base.getFullYear() : referenceDate.getFullYear();
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (Number.isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
-        }
-
-        function getInstallmentPlan(contractDate, annualAmount, previousBalance = 0, referenceDate = new Date()) {
-            const safeAnnual = Math.max(0, toNumber(annualAmount));
-            const installmentAmount = safeAnnual / 3;
-            const safePreviousBalance = Math.max(0, toNumber(previousBalance));
-            const base = getCycleBaseDate(contractDate, referenceDate);
-
-            if (!base) {
+            if (!rows.length) {
                 return {
-                    installmentAmount,
-                    dueUntilToday: safePreviousBalance,
-                    currentInstallment: safePreviousBalance + installmentAmount
+                    currentSummary: null,
+                    previousSummary: null,
+                    chartRows: []
                 };
             }
 
-            const firstDate = new Date(base);
-            const secondDate = addMonthsSafe(base, 5);
-            const thirdDate = addMonthsSafe(base, 8);
-
-            let dueUntilToday = safePreviousBalance + installmentAmount;
-            let currentInstallment = safePreviousBalance + installmentAmount;
-
-            if (referenceDate >= secondDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 2);
-                currentInstallment = installmentAmount;
-            }
-
-            if (referenceDate >= thirdDate) {
-                dueUntilToday = safePreviousBalance + (installmentAmount * 3);
-                currentInstallment = installmentAmount;
-            }
+            const currentSummary = rows[rows.length - 1] || null;
+            const previousSummary = rows.length > 1 ? rows[rows.length - 2] : null;
 
             return {
-                installmentAmount,
-                dueUntilToday,
-                currentInstallment
+                currentSummary,
+                previousSummary,
+                chartRows: [previousSummary, currentSummary].filter(Boolean)
             };
         }
 
-        function getDynamicMonthlyPlan(currentBalance, dueNow) {
+        function getDynamicMonthlyPlan(currentBalance) {
             const safeBalance = Math.max(0, toNumber(currentBalance));
-            const safeDueNow = Math.max(0, toNumber(dueNow));
 
             if (safeBalance <= 0) {
                 return {
@@ -710,20 +676,13 @@
                 };
             }
 
-            let monthsToClose = 18;
+            let monthsToClose = 12;
+            if (safeBalance <= 500) monthsToClose = 4;
+            else if (safeBalance <= 1500) monthsToClose = 6;
+            else if (safeBalance <= 3000) monthsToClose = 10;
+            else monthsToClose = 12;
 
-            if (safeBalance <= 500) monthsToClose = 6;
-            else if (safeBalance <= 1500) monthsToClose = 10;
-            else if (safeBalance <= 3000) monthsToClose = 15;
-            else monthsToClose = 18;
-
-            let recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
-
-            if (safeDueNow > 0) {
-                const minByDue = Math.ceil(safeDueNow / Math.min(monthsToClose, 6));
-                recommendedMonthly = Math.max(recommendedMonthly, minByDue);
-                monthsToClose = Math.ceil(safeBalance / recommendedMonthly);
-            }
+            const recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
 
             return {
                 monthsToClose,
@@ -737,7 +696,7 @@
             return { text: '⚠ جزئي', cls: 'partial' };
         }
 
-        function getAccountingAdvice(current, previous, tenant) {
+        function getAccountingAdvice(current, previous) {
             if (!current) {
                 return {
                     message: 'لا توجد بيانات كافية حالياً',
@@ -745,38 +704,32 @@
                 };
             }
 
-            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
-            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
+            const year = Number(current?.year || 0);
+            const openingBalance = Math.max(0, Number(current?.opening_balance || 0));
+            const currentDebit = Math.max(0, Number(current?.total_debit || 0));
             const currentCredit = Math.max(0, Number(current?.total_credit || 0));
-            const annualDebit = Math.max(0, Number(current?.total_debit || tenant?.annual_rent || 0));
+            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
 
             if (currentBalance <= 0) {
                 return {
-                    message: 'لا يوجد رصيد مستحق حالياً',
-                    subnote: 'الاستمرار على نفس وتيرة السداد يحافظ على انتظام الحساب'
+                    message: `لا يوجد رصيد مستحق حالياً لسنة ${year}`,
+                    subnote: 'حسابك منظم حتى آخر تحديث'
                 };
             }
 
-            const plan = getInstallmentPlan(tenant?.contract_date, annualDebit, previousBalance);
-            const dueNow = Math.max(0, plan.dueUntilToday - currentCredit);
-            const monthlyPlan = getDynamicMonthlyPlan(currentBalance, dueNow);
-
-            if (monthlyPlan.recommendedMonthly <= 0) {
-                return {
-                    message: 'يوجد رصيد مستحق، ويُنصح بتنظيم دفعة قريبة للمحافظة على انتظام الحساب.',
-                    subnote: ''
-                };
-            }
+            const monthlyPlan = getDynamicMonthlyPlan(currentBalance);
 
             return {
-                message: `المطلوب حالياً: ${formatNumber(plan.currentInstallment)}
+                message: `سنة ${year}
 
-ينصح بسداد ${monthlyPlan.recommendedMonthly} شهرياً
-للمحافظة على انتظام الحساب
-وتقليل الرصيد تدريجياً
+الرصيد المرحل: ${formatNumber(openingBalance)}
+مدين السنة: ${formatNumber(currentDebit)}
+الدائن المسجل: ${formatNumber(currentCredit)}
+الرصيد الحالي: ${formatNumber(currentBalance)}
 
-إغلاق الحساب خلال ${monthlyPlan.monthsToClose} أشهر`,
-                subnote: 'الالتزام بالدفع الشهري يساعد على تجنب تراكم المبالغ'
+ينصح بسداد ${formatNumber(monthlyPlan.recommendedMonthly)} شهرياً
+لإغلاق الرصيد خلال ${monthlyPlan.monthsToClose} أشهر تقريباً`,
+                subnote: 'البيانات المعروضة تعتمد على tenant_yearly_summary فقط'
             };
         }
 
@@ -802,7 +755,7 @@
             if (diff > 0) {
                 return {
                     type: 'warning',
-                    text: `الرصيد الحالي أعلى من السنة الماضية بـ ${Math.round(diff)}، والانتظام في الدفع خلال الأشهر القادمة سيحسن وضع الحساب`
+                    text: `الرصيد الحالي أعلى من السنة الماضية بـ ${Math.round(diff)}`
                 };
             }
 
@@ -836,13 +789,13 @@
             if (percent >= 35) {
                 return {
                     type: 'neutral',
-                    text: 'تم دفع جزء من المستحق، ويُنصح بالاستمرار على نفس الوتيرة'
+                    text: 'تم دفع جزء جيد من رصيد السنة الحالية'
                 };
             }
 
             return {
                 type: 'warning',
-                text: 'تم دفع جزء بسيط من المستحق، ويُنصح برفع وتيرة الدفع'
+                text: 'يوجد رصيد متبقٍ واضح ويُنصح برفع وتيرة السداد'
             };
         }
 
@@ -1053,39 +1006,6 @@
             });
         }
 
-        function getCurrentAndPreviousSummaries(summaryRows, contractDate) {
-            const rows = (summaryRows || [])
-                .filter(row => Number(row.year) > 0)
-                .sort((a, b) => Number(a.year) - Number(b.year));
-
-            if (!rows.length) {
-                return {
-                    currentSummary: null,
-                    previousSummary: null,
-                    chartRows: []
-                };
-            }
-
-            const cycleYear = getCurrentCycleYear(contractDate);
-            const currentSummary =
-                rows.find(row => Number(row.year) === Number(cycleYear)) ||
-                rows[rows.length - 1] ||
-                null;
-
-            const previousSummary =
-                rows.find(row => Number(row.year) === Number(cycleYear - 1)) ||
-                rows.filter(row => Number(row.year) < Number(currentSummary?.year || 0)).slice(-1)[0] ||
-                null;
-
-            const chartRows = [previousSummary, currentSummary].filter(Boolean);
-
-            return {
-                currentSummary,
-                previousSummary,
-                chartRows
-            };
-        }
-
         async function init() {
             try {
                 const { data: tenant, error: tenantError } = await supabaseClient
@@ -1115,7 +1035,7 @@
                     document.getElementById('t_name').innerText = tenantCode;
                 }
 
-                const { currentSummary, previousSummary, chartRows } = getCurrentAndPreviousSummaries(summaryData || [], tenant?.contract_date);
+                const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
 
                 const currentCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
                 const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
@@ -1138,7 +1058,7 @@
                 animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
 
-                const advice = getAccountingAdvice(currentSummary, previousSummary, tenant);
+                const advice = getAccountingAdvice(currentSummary, previousSummary);
                 document.getElementById('smart_message').innerText = advice.message;
                 document.getElementById('smart_subnote').innerText = advice.subnote || '';
 
