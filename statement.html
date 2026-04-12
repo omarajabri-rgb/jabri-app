@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>مجمع جبري | كشف الحساب التفصيلي</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -1122,9 +1123,7 @@
             const lastItem = count ? sorted[count - 1] : null;
             const lastPayment = lastItem ? formatCurrency(getAmount(lastItem)) : '-';
             const lastDate = lastItem ? formatShortDate(lastItem.date) : '-';
-            const averagePayment = count ? formatCurrency(total / count) : '0';
 
-            const frequency = count >= 3 ? 'نشط' : count >= 1 ? 'متوسط' : 'ضعيف';
             let noteText = 'لا توجد دفعات مسجلة';
             let noteClass = 'danger';
 
@@ -1141,8 +1140,6 @@
                 total,
                 lastPayment,
                 lastDate,
-                averagePayment,
-                frequency,
                 noteText,
                 noteClass
             };
