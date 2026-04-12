@@ -1,3 +1,21 @@
+تمام — هذا كود صفحة المستأجر tenant.html كامل ومحدّث على نفس منطق النظام اللي ثبتناه:
+
+شو تم تثبيته هنا
+	•	الصفحة تعتمد محاسبيًا فقط على tenant_yearly_summary
+	•	لا تعتمد محاسبيًا على tenant_transactions
+	•	تعرض آخر سنة موجودة فقط
+	•	المدفوع = total_credit
+	•	المتبقي = final_balance
+	•	الخط البياني يقارن:
+	•	آخر سنة
+	•	والسنة التي قبلها فقط
+	•	الإشعارات تبقى من tenant_notifications
+	•	يقرأ tenantCode من:
+	•	?tenant=JC-xx إذا موجود
+	•	أو localStorage إذا لم يوجد
+
+إذا بدك تربطه على مستأجر معيّن يدويًا، غيّر فقط سطر tenantCodeResolved بعد الكود.
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
