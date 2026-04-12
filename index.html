@@ -59,6 +59,7 @@
         }
 
         .logo-area { margin-bottom: 28px; }
+
         .logo-area h1 {
             margin: 0;
             font-size: 31px;
@@ -66,6 +67,7 @@
             font-weight: 900;
             letter-spacing: 0.6px;
         }
+
         .logo-area p {
             margin: 10px 0 0;
             color: var(--muted);
@@ -162,6 +164,14 @@
             text-align: right;
         }
 
+        .login-note {
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.9;
+        }
+
         #loader {
             position: fixed;
             inset: 0;
@@ -181,7 +191,10 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-4px); }
@@ -200,14 +213,39 @@
         </div>
 
         <div class="form-group">
-            <label>أدخل كود الوحدة الخاص بك</label>
-            <input type="text" id="tenant_code_input" placeholder="مثلاً: JC-01" autocomplete="off" spellcheck="false">
+            <label>رقم الجوال</label>
+            <input
+                type="tel"
+                id="phone_input"
+                placeholder="مثلاً: 0791234567"
+                autocomplete="username"
+                inputmode="numeric"
+                spellcheck="false"
+            >
+        </div>
+
+        <div class="form-group">
+            <label>كلمة المرور</label>
+            <input
+                type="password"
+                id="password_input"
+                placeholder="آخر 4 أرقام"
+                autocomplete="current-password"
+                inputmode="numeric"
+                maxlength="4"
+                spellcheck="false"
+            >
         </div>
 
         <button class="btn-login" id="login_btn" onclick="handleLogin()">
             دخول للمنصة
             <i data-lucide="log-in" size="18"></i>
         </button>
+
+        <div class="login-note">
+            اسم المستخدم هو رقم الجوال<br>
+            وكلمة المرور هي آخر 4 أرقام من رقمك
+        </div>
 
         <div id="error_msg" class="status-box"></div>
         <div id="debug_msg" class="status-box"></div>
@@ -229,12 +267,21 @@
             document.getElementById('loader').style.display = 'none';
             if (window.lucide) lucide.createIcons();
 
-            const input = document.getElementById('tenant_code_input');
-            input.addEventListener('input', function () {
-                this.value = this.value.toUpperCase().replace(/\s+/g, '');
+            const phoneInput = document.getElementById('phone_input');
+            const passwordInput = document.getElementById('password_input');
+
+            phoneInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^\d]/g, '');
             });
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') handleLogin();
+
+            passwordInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^\d]/g, '').slice(0, 4);
+            });
+
+            [phoneInput, passwordInput].forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') handleLogin();
+                });
             });
 
             localStorage.removeItem('jabri_tenant_session');
@@ -249,11 +296,14 @@
             const debugEl = document.getElementById('debug_msg');
             try {
                 const { error } = await supabaseClient.from('tenants').select('tenant_code').limit(1);
+
                 debugEl.style.display = 'block';
+
                 if (error) {
                     debugEl.innerText = 'فحص الاتصال فشل:\n' + error.message;
                     return;
                 }
+
                 debugEl.innerText = 'الاتصال بقاعدة البيانات ناجح.';
             } catch (err) {
                 debugEl.style.display = 'block';
@@ -262,14 +312,21 @@
         }
 
         async function handleLogin() {
-            const code = document.getElementById('tenant_code_input').value.trim().toUpperCase();
+            const phone = document.getElementById('phone_input').value.trim();
+            const password = document.getElementById('password_input').value.trim();
             const errorEl = document.getElementById('error_msg');
             const debugEl = document.getElementById('debug_msg');
             const loginBtn = document.getElementById('login_btn');
             const card = document.querySelector('.login-card');
 
-            if (!code) {
-                showError('يرجى إدخال كود الوحدة.');
+            if (!phone) {
+                showError('يرجى إدخال رقم الجوال.');
+                shakeCard(card);
+                return;
+            }
+
+            if (!password) {
+                showError('يرجى إدخال كلمة المرور.');
                 shakeCard(card);
                 return;
             }
@@ -281,8 +338,9 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, tenant_name, shop_no')
-                    .eq('tenant_code', code)
+                    .select('tenant_code, tenant_name, shop_no, phone, password')
+                    .eq('phone', phone)
+                    .eq('password', password)
                     .maybeSingle();
 
                 if (error) {
@@ -292,13 +350,14 @@
                 }
 
                 if (!data) {
-                    showError('لم يتم العثور على هذا الكود: ' + code);
+                    showError('رقم الجوال أو كلمة المرور غير صحيحة.');
                     shakeCard(card);
                     return;
                 }
 
                 debugEl.style.display = 'block';
-                debugEl.innerText = `تم العثور على المستأجر:\n${data.tenant_name}\nالوحدة: ${data.shop_no || '-'}`;
+                debugEl.innerText =
+                    `تم تسجيل الدخول بنجاح:\n${data.tenant_name || '-'}\nالوحدة: ${data.shop_no || '-'}`;
 
                 localStorage.setItem('jabri_tenant_session', 'active');
                 localStorage.setItem('jabri_tenant_code', data.tenant_code);
@@ -325,7 +384,9 @@
 
         function shakeCard(card) {
             card.style.animation = 'shake 0.35s ease';
-            setTimeout(() => card.style.animation = '', 350);
+            setTimeout(() => {
+                card.style.animation = '';
+            }, 350);
         }
     </script>
 </body>
