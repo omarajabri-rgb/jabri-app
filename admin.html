@@ -1,23 +1,9 @@
-تمام — هذا admin.html كامل ومحدّث على المنطق الصحيح الذي اتفقنا عليه:
-
-ما الذي تم إصلاحه
-	•	الدفعة الجديدة تعدّل سنة الدفعة فقط
-	•	لا نعيد ترحيل كل السنوات بعد كل دفعة
-	•	إذا دخلت دفعة لسنة جديدة مثل 2027 ولم يكن هناك صف لها:
-	•	ينشئ النظام سنة جديدة تلقائيًا
-	•	opening_balance = final_balance للسنة السابقة
-	•	total_debit = annual_rent
-	•	total_credit = 0
-	•	ثم يضيف الدفعة عليها
-	•	التحليل في الأدمن صار يعتمد على آخر سنة موجودة للمستأجر
-	•	فتح كشف الحساب من الأدمن يبقى كما هو
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.38</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.39</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -723,7 +709,7 @@
             .form-grid{ grid-template-columns:1fr; }
             .select-with-chip{ align-items:stretch; }
             .tenant-mini-chips{ align-items:flex-start; }
-            .tx-actions .btn{ width:100%; }
+            .tx_actions .btn, .tx-actions .btn{ width:100%; }
             .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; }
             .quick-ai-card{ min-height:220px; }
         }
@@ -766,7 +752,7 @@
                 <div class="smart-ai-header">
                     <div class="panel-title">
                         <h3>تحليل المستأجر</h3>
-                        <p>تحليل ذكي مباشر لحالة المستأجر المحدد</p>
+                        <p>يعتمد على آخر سنة موجودة فقط داخل tenant_yearly_summary</p>
                     </div>
                     <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
@@ -824,7 +810,7 @@
                     <div class="quick-ai-card" id="ai_card_total_credit">
                         <span>دائن</span>
                         <b id="kpi_total_credit">0</b>
-                        <small>إجمالي الدفعات المسجلة للسنة الحالية</small>
+                        <small>إجمالي الدفعات في آخر سنة</small>
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_balance">
@@ -901,7 +887,13 @@
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
-                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث سنة الدفعة فقط داخل tenant_yearly_summary. وإذا كانت سنة جديدة غير موجودة سيتم إنشاؤها تلقائياً.</div>
+                    <div class="sub-section-note">
+                        النظام الصحيح هنا:
+                        <br>• المحاسبة تعتمد فقط على tenant_yearly_summary
+                        <br>• tenant_transactions فقط للسندات والبحث
+                        <br>• الدفعة الجديدة تنزل على آخر سنة محاسبية مفتوحة للمستأجر
+                        <br>• إذا دخلت سنة جديدة فعلًا، يتم فتح صف جديد تلقائيًا
+                    </div>
 
                     <div class="form-grid">
                         <div class="field">
@@ -942,7 +934,7 @@
             كشف حساب المستأجر
         </button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.38</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.39</div>
     </div>
 
     <script>
@@ -1330,7 +1322,7 @@
             document.getElementById('ai_tenant_type_text').innerText =
                 currentBalance === 0 ? 'رصيد السنة مغلق' :
                 totalCredit > 0 ? `يوجد دائن في سنة ${latestYear}` :
-                `الرصيد ما زال كاملاً تقريباً في سنة ${latestYear}`;
+                `الرصيد ما زال قائماً في سنة ${latestYear}`;
 
             setMoodClass(document.getElementById('ai_card_type'), currentBalance === 0 ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
 
@@ -1373,26 +1365,11 @@
             setDotMood('dot_recommendation', currentBalance === 0 ? 'good' : 'warn');
 
             const flags = [
-                {
-                    text: `السنة الحالية: ${latestYear}`,
-                    cls: 'flag-warning'
-                },
-                {
-                    text: `الرصيد السابق: ${roundMoney(previousBalance)}`,
-                    cls: previousBalance > 0 ? 'flag-danger' : 'flag-success'
-                },
-                {
-                    text: `رصيد أول السنة: ${roundMoney(openingBalance)}`,
-                    cls: openingBalance > 0 ? 'flag-warning' : 'flag-success'
-                },
-                {
-                    text: `مدين السنة: ${roundMoney(totalDebit)}`,
-                    cls: totalDebit > 0 ? 'flag-warning' : 'flag-success'
-                },
-                {
-                    text: `إغلاق السنة: ${roundMoney(currentBalance)}`,
-                    cls: currentBalance > 0 ? 'flag-danger' : 'flag-success'
-                }
+                { text: `السنة الحالية: ${latestYear}`, cls: 'flag-warning' },
+                { text: `الرصيد السابق: ${roundMoney(previousBalance)}`, cls: previousBalance > 0 ? 'flag-danger' : 'flag-success' },
+                { text: `رصيد أول السنة: ${roundMoney(openingBalance)}`, cls: openingBalance > 0 ? 'flag-warning' : 'flag-success' },
+                { text: `مدين السنة: ${roundMoney(totalDebit)}`, cls: totalDebit > 0 ? 'flag-warning' : 'flag-success' },
+                { text: `إغلاق السنة: ${roundMoney(currentBalance)}`, cls: currentBalance > 0 ? 'flag-danger' : 'flag-success' }
             ];
 
             document.getElementById('ai_risk_flags').innerHTML =
@@ -1407,7 +1384,7 @@
             const openingBalance = previousSummary ? Math.max(0, toNumber(previousSummary.final_balance)) : 0;
             const totalDebit = Math.max(0, toNumber(tenant.annual_rent));
             const totalCredit = 0;
-            const finalBalance = Math.max(0, openingBalance + totalDebit - totalCredit);
+            const finalBalance = Math.max(0, openingBalance + totalDebit);
 
             const payload = {
                 tenant_code: tenant.tenant_code,
@@ -1463,7 +1440,14 @@
                 const tenant = allTenants.find((t) => t.tenant_code === code);
                 if (!tenant) throw new Error('المستأجر غير موجود');
 
-                const yearNum = new Date(date).getFullYear();
+                const txYear = new Date(date).getFullYear();
+
+                const latestSummary = getLatestSummary(code);
+                let yearNum = latestSummary ? Number(latestSummary.year) : txYear;
+
+                if (!latestSummary || txYear > yearNum) {
+                    yearNum = txYear;
+                }
 
                 let summaryRow = await ensureYearlySummaryExists(tenant, yearNum);
 
@@ -1499,7 +1483,7 @@
 
                 await refresh(code);
                 clearTransactionForm();
-                showStatus(`تم حفظ دفعة سنة ${yearNum} بنجاح`, 'success');
+                showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
             } catch (err) {
                 console.error(err);
                 showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
@@ -1535,7 +1519,6 @@
         function buildNotificationText(type, tenant) {
             if (!tenant) return '';
             const amount = roundMoney(tenant.currentBalance);
-
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 7);
             const dueDateText = dueDate.toLocaleDateString('en-GB');
