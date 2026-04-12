@@ -648,32 +648,6 @@
             return base ? base.getFullYear() : referenceDate.getFullYear();
         }
 
-        function getCurrentAndPreviousSummaries(summaryRows, contractDate) {
-            const rows = (summaryRows || [])
-                .filter(row => Number(row.year) > 0)
-                .sort((a, b) => Number(a.year) - Number(b.year));
-
-            if (!rows.length) {
-                return {
-                    currentSummary: null,
-                    previousSummary: null,
-                    chartRows: []
-                };
-            }
-
-            const cycleYear = getCurrentCycleYear(contractDate);
-            const currentSummary = rows.find(row => Number(row.year) === Number(cycleYear)) || null;
-            const previousSummary = rows.find(row => Number(row.year) === Number(cycleYear - 1)) || null;
-
-            const chartRows = [previousSummary, currentSummary].filter(Boolean);
-
-            return {
-                currentSummary,
-                previousSummary,
-                chartRows
-            };
-        }
-
         function addMonthsSafe(dateInput, months) {
             const d = new Date(dateInput);
             if (Number.isNaN(d.getTime())) return null;
@@ -774,7 +748,7 @@
             const currentBalance = Math.max(0, Number(current?.final_balance || 0));
             const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
             const currentCredit = Math.max(0, Number(current?.total_credit || 0));
-            const annualDebit = Math.max(0, Number(current?.total_debit || 0));
+            const annualDebit = Math.max(0, Number(current?.total_debit || tenant?.annual_rent || 0));
 
             if (currentBalance <= 0) {
                 return {
@@ -1079,6 +1053,39 @@
             });
         }
 
+        function getCurrentAndPreviousSummaries(summaryRows, contractDate) {
+            const rows = (summaryRows || [])
+                .filter(row => Number(row.year) > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
+
+            if (!rows.length) {
+                return {
+                    currentSummary: null,
+                    previousSummary: null,
+                    chartRows: []
+                };
+            }
+
+            const cycleYear = getCurrentCycleYear(contractDate);
+            const currentSummary =
+                rows.find(row => Number(row.year) === Number(cycleYear)) ||
+                rows[rows.length - 1] ||
+                null;
+
+            const previousSummary =
+                rows.find(row => Number(row.year) === Number(cycleYear - 1)) ||
+                rows.filter(row => Number(row.year) < Number(currentSummary?.year || 0)).slice(-1)[0] ||
+                null;
+
+            const chartRows = [previousSummary, currentSummary].filter(Boolean);
+
+            return {
+                currentSummary,
+                previousSummary,
+                chartRows
+            };
+        }
+
         async function init() {
             try {
                 const { data: tenant, error: tenantError } = await supabaseClient
@@ -1104,13 +1111,21 @@
                         .eq('tenant_code', tenantCode);
 
                     document.getElementById('t_name').innerText = tenant.tenant_name || tenantCode;
+                } else {
+                    document.getElementById('t_name').innerText = tenantCode;
                 }
 
                 const { currentSummary, previousSummary, chartRows } = getCurrentAndPreviousSummaries(summaryData || [], tenant?.contract_date);
+
                 const currentCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
                 const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
 
-                const realLastUpdate = currentSummary?.updated_at || currentSummary?.created_at || tenant?.updated_at || null;
+                const realLastUpdate =
+                    currentSummary?.updated_at ||
+                    currentSummary?.created_at ||
+                    tenant?.updated_at ||
+                    null;
+
                 document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
 
                 const status = getTenantStatus(currentBalance, currentCredit);
@@ -1143,6 +1158,7 @@
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
+
                 document.querySelectorAll('.reveal').forEach((el, i) => {
                     setTimeout(() => el.classList.add('active'), i * 80);
                 });
