@@ -933,6 +933,11 @@
     </div>
 
     <script>
+        const session = localStorage.getItem('jabri_admin_session');
+
+    if (session !== 'active') {
+        window.location.href = 'admin-login.html';
+    }
         const { createClient } = supabase;
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
