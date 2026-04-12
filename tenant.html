@@ -568,7 +568,13 @@
     </div>
 
     <script>
-        const tenantCode = localStorage.getItem('jabri_tenant_code');
+        const session = localStorage.getItem('jabri_tenant_session');
+
+if (session !== 'active') {
+    window.location.href = 'index.html';
+}
+
+const tenantCode = localStorage.getItem('jabri_tenant_code');
         if (!tenantCode) window.location.href = "index.html";
 
         const { createClient } = supabase;
