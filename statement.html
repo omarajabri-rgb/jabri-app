@@ -895,7 +895,12 @@
         </div>
     </div>
 
-    <script type="module">
+            <script type="module">
+    const session = localStorage.getItem('jabri_tenant_session');
+
+    if (session !== 'active') {
+        window.location.href = 'index.html';
+    }
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const urlParams = new URLSearchParams(window.location.search);
