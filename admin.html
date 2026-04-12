@@ -707,7 +707,6 @@
         @media (max-width: 768px){
             .tenant-select-grid,
             .form-grid{ grid-template-columns:1fr; }
-
             .select-with-chip{ align-items:stretch; }
             .tenant-mini-chips{ align-items:flex-start; }
             .tx-actions .btn{ width:100%; }
@@ -888,7 +887,7 @@
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
-                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث tenant_yearly_summary مباشرة مع ترحيل الأثر على السنوات التالية</div>
+                    <div class="sub-section-note">سيتم حفظ الدفعة في tenant_transactions وتحديث tenant_yearly_summary مع إعادة ترحيل السنوات التالية لنفس المستأجر</div>
 
                     <div class="form-grid">
                         <div class="field">
@@ -934,7 +933,6 @@
 
     <script>
         const session = localStorage.getItem('jabri_admin_session');
-
         if (session !== 'active') {
             window.location.href = 'admin-login.html';
         }
@@ -953,86 +951,15 @@
         let monthlyChart = null;
         let isSavingTransaction = false;
 
-        const toNumber = v => {
+        const toNumber = (v) => {
             const cleaned = String(v ?? 0).replace(/,/g, '').trim();
             const n = parseFloat(cleaned);
             return Number.isFinite(n) ? n : 0;
         };
 
-        const roundMoney = v => Math.round(toNumber(v));
+        const roundMoney = (v) => Math.round(toNumber(v));
 
-        function setMoodClass(el, mood) {
-            if (!el) return;
-            el.classList.remove('good', 'warn', 'bad', 'ai-good', 'ai-warn', 'ai-bad', 'ai-neutral');
-
-            if (el.classList.contains('hero-mini')) {
-                if (mood === 'good') el.classList.add('good');
-                else if (mood === 'warn') el.classList.add('warn');
-                else if (mood === 'bad') el.classList.add('bad');
-            } else {
-                if (mood === 'good') el.classList.add('ai-good');
-                else if (mood === 'warn') el.classList.add('ai-warn');
-                else if (mood === 'bad') el.classList.add('ai-bad');
-                else el.classList.add('ai-neutral');
-            }
-        }
-
-        function setDotMood(id, mood) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.classList.remove('dot-good', 'dot-warn', 'dot-bad');
-            if (mood === 'good') el.classList.add('dot-good');
-            else if (mood === 'bad') el.classList.add('dot-bad');
-            else el.classList.add('dot-warn');
-        }
-
-        function getLatestSummary(tenantCode) {
-            const rows = allSummaries
-                .filter(r => r.tenant_code === tenantCode)
-                .sort((a, b) => Number(b.year) - Number(a.year));
-            return rows[0] || null;
-        }
-
-        function formatLastSeen(dateStr) {
-            if (!dateStr) return '—';
-            const d = new Date(dateStr);
-            if (Number.isNaN(d.getTime())) return '—';
-
-            const now = new Date();
-            const diffMs = now - d;
-            const diffMin = Math.floor(diffMs / 60000);
-            const diffHour = Math.floor(diffMin / 60);
-            const diffDay = Math.floor(diffHour / 24);
-
-            if (diffMin < 1) return 'الآن';
-            if (diffMin < 60) return `${diffMin} د`;
-            if (diffHour < 24) return `${diffHour} س`;
-            if (diffDay <= 7) return `${diffDay} ي`;
-            return d.toLocaleDateString('en-GB');
-        }
-
-        function monthsSince(dateStr) {
-            if (!dateStr) return null;
-            const d = new Date(dateStr);
-            if (Number.isNaN(d.getTime())) return null;
-            const now = new Date();
-            return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
-        }
-
-        function addMonthsSafe(dateInput, months) {
-            const d = new Date(dateInput);
-            if (Number.isNaN(d.getTime())) return null;
-
-            const originalDay = d.getDate();
-            d.setDate(1);
-            d.setMonth(d.getMonth() + months);
-
-            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            d.setDate(Math.min(originalDay, lastDay));
-            return d;
-        }
-
-        function getCurrentCycleStart(contractDate, referenceDate = new Date()) {
+        function getCycleBaseDate(contractDate, referenceDate = new Date()) {
             const contract = new Date(contractDate);
             if (Number.isNaN(contract.getTime())) return null;
 
@@ -1049,9 +976,27 @@
             return candidate;
         }
 
+        function getCurrentCycleYear(contractDate, referenceDate = new Date()) {
+            const base = getCycleBaseDate(contractDate, referenceDate);
+            return base ? base.getFullYear() : referenceDate.getFullYear();
+        }
+
+        function addMonthsSafe(dateInput, months) {
+            const d = new Date(dateInput);
+            if (Number.isNaN(d.getTime())) return null;
+
+            const originalDay = d.getDate();
+            d.setDate(1);
+            d.setMonth(d.getMonth() + months);
+
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            d.setDate(Math.min(originalDay, lastDay));
+            return d;
+        }
+
         function getSummaryByYear(tenantCode, year) {
             return allSummaries.find(
-                r => r.tenant_code === tenantCode && Number(r.year) === Number(year)
+                (r) => r.tenant_code === tenantCode && Number(r.year) === Number(year)
             ) || null;
         }
 
@@ -1061,7 +1006,7 @@
             const safePreviousBalance = Math.max(0, toNumber(previousBalance));
 
             let firstDate, secondDate, thirdDate;
-            const base = getCurrentCycleStart(contractDate, referenceDate);
+            const base = getCycleBaseDate(contractDate, referenceDate);
 
             if (!base) {
                 const year = referenceDate.getFullYear();
@@ -1117,9 +1062,60 @@
             };
         }
 
+        function setMoodClass(el, mood) {
+            if (!el) return;
+            el.classList.remove('good', 'warn', 'bad', 'ai-good', 'ai-warn', 'ai-bad', 'ai-neutral');
+
+            if (el.classList.contains('hero-mini')) {
+                if (mood === 'good') el.classList.add('good');
+                else if (mood === 'warn') el.classList.add('warn');
+                else if (mood === 'bad') el.classList.add('bad');
+            } else {
+                if (mood === 'good') el.classList.add('ai-good');
+                else if (mood === 'warn') el.classList.add('ai-warn');
+                else if (mood === 'bad') el.classList.add('ai-bad');
+                else el.classList.add('ai-neutral');
+            }
+        }
+
+        function setDotMood(id, mood) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('dot-good', 'dot-warn', 'dot-bad');
+            if (mood === 'good') el.classList.add('dot-good');
+            else if (mood === 'bad') el.classList.add('dot-bad');
+            else el.classList.add('dot-warn');
+        }
+
+        function formatLastSeen(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return '—';
+
+            const now = new Date();
+            const diffMs = now - d;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+
+            if (diffMin < 1) return 'الآن';
+            if (diffMin < 60) return `${diffMin} د`;
+            if (diffHour < 24) return `${diffHour} س`;
+            if (diffDay <= 7) return `${diffDay} ي`;
+            return d.toLocaleDateString('en-GB');
+        }
+
+        function monthsSince(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return null;
+            const now = new Date();
+            return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+        }
+
         function getSelectedTenant() {
             const code = document.getElementById('tenant_select').value;
-            return tenantBalances.find(x => x.tenant_code === code) || null;
+            return tenantBalances.find((x) => x.tenant_code === code) || null;
         }
 
         function showStatus(message, type = 'soft') {
@@ -1171,45 +1167,42 @@
             allTransactions = tx.data || [];
             allSummaries = sum.data || [];
 
-            tenantBalances = allTenants.map(tn => {
+            tenantBalances = allTenants.map((tn) => {
                 const contractDate = tn.contract_date || null;
-                const currentYear = new Date().getFullYear();
+                const currentYear = getCurrentCycleYear(contractDate);
                 const previousYear = currentYear - 1;
 
-                const currentSummary =
-                    getSummaryByYear(tn.tenant_code, currentYear) ||
-                    getLatestSummary(tn.tenant_code);
-
+                const currentSummary = getSummaryByYear(tn.tenant_code, currentYear);
                 const previousSummary = getSummaryByYear(tn.tenant_code, previousYear);
 
-                const annualRent = toNumber(tn.annual_rent);
-                const totalCredit = toNumber(currentSummary?.total_credit);
-                const currentBalance = Math.max(0, toNumber(currentSummary?.final_balance));
-                const previousBalance = Math.max(0, toNumber(previousSummary?.final_balance));
-                const yearlyDebit = Math.max(0, toNumber(currentSummary?.total_debit || annualRent));
-                const openingBalance = Math.max(0, toNumber(currentSummary?.opening_balance));
+                const annualRent = Math.max(0, toNumber(tn.annual_rent));
+                const openingBalance = currentSummary ? Math.max(0, toNumber(currentSummary.opening_balance)) : Math.max(0, toNumber(previousSummary?.final_balance));
+                const totalDebit = currentSummary ? Math.max(0, toNumber(currentSummary.total_debit)) : 0;
+                const totalCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
+                const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : Math.max(0, openingBalance + totalDebit - totalCredit);
+                const previousBalance = previousSummary ? Math.max(0, toNumber(previousSummary.final_balance)) : 0;
 
-                const plan = getInstallmentPlanFromContract(contractDate, annualRent, previousBalance);
+                const plan = getInstallmentPlanFromContract(contractDate, annualRent || totalDebit, previousBalance);
 
                 return {
                     ...tn,
                     contractDate,
                     currentCycleYear: currentYear,
                     previousCycleYear: previousYear,
-                    previousBalance,
                     openingBalance,
-                    totalDebit: yearlyDebit,
+                    previousBalance,
                     annualRent,
+                    totalDebit,
                     totalCredit,
                     currentBalance,
                     dueUntilToday: Math.max(0, plan.dueUntilToday),
-                    currentInstallmentValue: Math.max(0, plan.currentDueValue),
                     currentInstallmentGap: Math.max(0, plan.dueUntilToday - totalCredit),
+                    currentInstallmentValue: Math.max(0, plan.currentDueValue),
                     installmentAmount: Math.max(0, plan.installmentAmount),
                     nextInstallment: plan.nextInstallment,
+                    dueInstallmentsCount: plan.dueInstallmentsCount,
                     latestSummary: currentSummary,
-                    lastSeen: tn.last_seen || null,
-                    dueInstallmentsCount: plan.dueInstallmentsCount
+                    lastSeen: tn.last_seen || null
                 };
             });
         }
@@ -1247,7 +1240,7 @@
             const ctx = canvas.getContext('2d');
             if (collectionChart) collectionChart.destroy();
 
-            const paid = toNumber(totalCredit);
+            const paid = Math.max(0, toNumber(totalCredit));
             const remaining = Math.max(0, toNumber(totalBalance));
             const total = paid + remaining;
             const ratio = total > 0 ? Math.round((paid / total) * 100) : 0;
@@ -1305,16 +1298,16 @@
             for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
-                labels.push(d.toLocaleDateString('en-GB', { month:'short' }));
+                labels.push(d.toLocaleDateString('en-GB', { month: 'short' }));
 
-                const monthTx = allTransactions.filter(tx => {
+                const monthTx = allTransactions.filter((tx) => {
                     const txDate = new Date(tx.date);
                     return tx.tenant_code === tenant.tenant_code &&
                         txDate.getMonth() === d.getMonth() &&
                         txDate.getFullYear() === d.getFullYear();
                 });
 
-                credits.push(monthTx.reduce((s, row) => s + toNumber(row.credit), 0));
+                credits.push(monthTx.reduce((s, row) => s + Math.max(0, toNumber(row.credit)), 0));
             }
 
             monthlyChart = new Chart(ctx, {
@@ -1357,17 +1350,17 @@
                 : 100;
 
             const txs = allTransactions
-                .filter(x => x.tenant_code === tenant.tenant_code)
+                .filter((x) => x.tenant_code === tenant.tenant_code)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            const pays = txs.filter(x => toNumber(x.credit) > 0);
+            const pays = txs.filter((x) => toNumber(x.credit) > 0);
             const lastPay = pays[pays.length - 1] || null;
             const monthsWithoutPayment = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
 
             const monthlyAverage = (() => {
                 if (!pays.length) return 0;
                 const monthsSet = new Set(
-                    pays.map(row => {
+                    pays.map((row) => {
                         const d = new Date(row.date);
                         return `${d.getFullYear()}-${d.getMonth()}`;
                     })
@@ -1437,14 +1430,14 @@
             setMoodClass(document.getElementById('ai_card_months_without_payment'), monthsWithoutPayment <= 1 ? 'good' : monthsWithoutPayment <= 3 ? 'warn' : 'bad');
 
             const last3 = allSummaries
-                .filter(r => r.tenant_code === tenant.tenant_code)
+                .filter((r) => r.tenant_code === tenant.tenant_code)
                 .sort((a, b) => Number(b.year) - Number(a.year))
                 .slice(0, 3);
 
             const last3Ratio = last3.length
                 ? Math.round(last3.reduce((sum, row) => {
-                    const debitBase = Math.max(0, toNumber(row.total_debit || tenant.annualRent || tenant.totalDebit));
-                    const c = toNumber(row.total_credit);
+                    const debitBase = Math.max(0, toNumber(row.total_debit));
+                    const c = Math.max(0, toNumber(row.total_credit));
                     return sum + (debitBase > 0 ? Math.min(100, Math.round((c / debitBase) * 100)) : 0);
                 }, 0) / last3.length)
                 : 0;
@@ -1452,17 +1445,10 @@
             document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`;
             document.getElementById('ai_last3_ratio_text').innerText =
                 last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
-
-            setMoodClass(
-                document.getElementById('ai_card_total_credit'),
-                totalCredit >= dueUntilToday ? 'good' : totalCredit > 0 ? 'warn' : 'bad'
-            );
-
-            setMoodClass(
-                document.getElementById('ai_card_balance'),
-                currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad'
-            );
+            setMoodClass(document.getElementById('ai_card_total_credit'), totalCredit >= dueUntilToday ? 'good' : totalCredit > 0 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_balance'), currentBalance === 0 ? 'good' : currentBalance <= installmentAmount ? 'warn' : 'bad');
 
             document.getElementById('ai_close_estimate').innerText = `المستحق الحالي: ${roundMoney(currentInstallmentGap)}`;
             document.getElementById('ai_recommendation').innerText =
@@ -1497,29 +1483,35 @@
             ];
 
             document.getElementById('ai_risk_flags').innerHTML =
-                flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
+                flags.map((f) => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
 
         async function recalculateTenantSummaries(tenantCode, fromYear) {
-            const rows = allSummaries
-                .filter(r => r.tenant_code === tenantCode && Number(r.year) >= Number(fromYear))
-                .sort((a, b) => Number(a.year) - Number(b.year));
+            const { data: rows, error } = await supabaseClient
+                .from('tenant_yearly_summary')
+                .select('*')
+                .eq('tenant_code', tenantCode)
+                .order('year', { ascending: true });
 
-            if (!rows.length) return;
+            if (error) throw error;
+            if (!rows?.length) return;
 
-            const previousRow = allSummaries
-                .filter(r => r.tenant_code === tenantCode && Number(r.year) < Number(fromYear))
+            const targetRows = rows.filter((r) => Number(r.year) >= Number(fromYear));
+            if (!targetRows.length) return;
+
+            const previousRow = rows
+                .filter((r) => Number(r.year) < Number(fromYear))
                 .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
 
-            let carryFinalBalance = previousRow ? Math.max(0, toNumber(previousRow.final_balance)) : 0;
+            let carryBalance = previousRow ? Math.max(0, toNumber(previousRow.final_balance)) : 0;
 
-            for (const row of rows) {
+            for (const row of targetRows) {
                 const totalDebit = Math.max(0, toNumber(row.total_debit));
                 const totalCredit = Math.max(0, toNumber(row.total_credit));
-                const newOpeningBalance = Math.max(0, carryFinalBalance);
+                const newOpeningBalance = carryBalance;
                 const newFinalBalance = Math.max(0, newOpeningBalance + totalDebit - totalCredit);
 
-                const { error } = await supabaseClient
+                const { error: updateError } = await supabaseClient
                     .from('tenant_yearly_summary')
                     .update({
                         opening_balance: newOpeningBalance,
@@ -1527,9 +1519,9 @@
                     })
                     .eq('id', row.id);
 
-                if (error) throw error;
+                if (updateError) throw updateError;
 
-                carryFinalBalance = newFinalBalance;
+                carryBalance = newFinalBalance;
             }
         }
 
@@ -1539,7 +1531,7 @@
             const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
             const desc = document.getElementById('tx_desc').value.trim();
-            const amount = toNumber(document.getElementById('tx_amount').value);
+            const amount = Math.max(0, toNumber(document.getElementById('tx_amount').value));
             const receiptNo = document.getElementById('tx_receipt').value.trim();
             const saveBtn = document.getElementById('save_tx_btn');
 
@@ -1568,7 +1560,7 @@
                 const yearNum = new Date(date).getFullYear();
 
                 const summaryRow = allSummaries.find(
-                    r => r.tenant_code === code && Number(r.year) === Number(yearNum)
+                    (r) => r.tenant_code === code && Number(r.year) === Number(yearNum)
                 );
 
                 if (!summaryRow) {
@@ -1601,12 +1593,11 @@
 
                 if (updateSummaryError) throw updateSummaryError;
 
-                await refresh(code);
                 await recalculateTenantSummaries(code, yearNum);
                 await refresh(code);
 
                 clearTransactionForm();
-                showStatus('تم حفظ الدفعة وتحديث جميع السنوات المرتبطة بنجاح', 'success');
+                showStatus('تم حفظ الدفعة وتحديث السنوات المرتبطة بنجاح', 'success');
             } catch (err) {
                 console.error(err);
                 showStatus(`حدث خطأ أثناء الحفظ: ${err.message}`, 'danger');
@@ -1719,7 +1710,7 @@
         }
 
         async function renderSelectedTenant(code) {
-            const tenant = tenantBalances.find(x => x.tenant_code === code) || null;
+            const tenant = tenantBalances.find((x) => x.tenant_code === code) || null;
             updateTenantStatusChip(tenant);
 
             if (tenant) {
@@ -1743,7 +1734,7 @@
 
             select.innerHTML =
                 '<option value="">اختر المستأجر</option>' +
-                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
+                allTenants.map((t) => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
 
             if (selectedCode) {
                 select.value = selectedCode;
