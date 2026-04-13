@@ -1,3 +1,6 @@
+وصل! هذا الكود الكامل والمعدل حسب جميع طلباتك. تم حذف النص الطويل، وتنسيق المربعات 2x2، وإضافة حماية أمنية.
+
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -72,14 +75,6 @@
         .ai-warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
         .ai-bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
         .ai-neutral{ background:#fff; }
-        .insight-list{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-        .insight-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border-radius:18px; background:#fff; border:1px solid var(--line); box-shadow:var(--soft-shadow); }
-        .insight-row span{ display:block; font-size:11px; color:var(--muted); font-weight:800; margin-bottom:4px; }
-        .insight-row b{ display:block; font-size:18px; color:#4e3c24; font-weight:900; }
-        .insight-dot{ width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-        .dot-good{ background:var(--success); }
-        .dot-warn{ background:var(--warning); }
-        .dot-bad{ background:var(--danger); }
         .chart-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:18px; margin-bottom:18px; }
         .chart-wrap{ background:rgba(255,255,255,0.76); border:1px solid var(--line); border-radius:22px; padding:16px; height:300px; }
         .chart-meta{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:12px; font-weight:900; font-size:14px; color:#6b4f2b; }
@@ -89,7 +84,6 @@
         .form-shell{ background:rgba(255,255,255,0.58); border:1px solid rgba(201,164,107,0.16); border-radius:24px; padding:16px; }
         .entry-box{ background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58)); border:1px solid rgba(201,164,107,0.14); border-radius:22px; padding:16px; overflow:hidden; }
         .sub-section-title{ display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-size:12px; font-weight:900; color:#6b4f2b; background:rgba(201,164,107,0.12); border:1px solid rgba(201,164,107,0.18); margin-bottom:14px; }
-        .sub-section-note{ margin-top:-4px; margin-bottom:12px; font-size:11px; font-weight:800; color:var(--muted); }
         .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
         .form-grid > *{ min-width:0; }
         .quick-descs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
@@ -101,9 +95,14 @@
         .spinner{ width:40px; height:40px; border:3px solid rgba(201,164,107,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin{ to{ transform:rotate(360deg); } }
         @media (max-width: 1200px){ .hero-ai-card{ grid-template-columns:1fr; } }
-        @media (max-width: 900px){ .chart-grid, .insight-list{ grid-template-columns:1fr; } }
-        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:1fr; gap:12px; } .quick-ai-card{ min-height:220px; } }
+        @media (max-width: 900px){ .chart-grid{ grid-template-columns:1fr; } }
+        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; } .quick-ai-card{ min-height:220px; } }
     </style>
+    <!-- Security Meta Tags -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
@@ -151,10 +150,6 @@
                     <div class="quick-ai-card" id="ai_card_total_credit"><span>دائن</span><b id="kpi_total_credit">0</b><small>إجمالي الدفعات في آخر سنة</small></div>
                     <div class="quick-ai-card" id="ai_card_balance"><span>الرصيد الحالي</span><b id="kpi_balance">0</b><small>رصيد آخر سنة موجودة</small></div>
                 </div>
-                <div class="insight-list">
-                    <div class="insight-row"><div><span>المستحق الحالي</span><b id="ai_close_estimate">—</b></div><div class="insight-dot dot-warn" id="dot_close_estimate"></div></div>
-                    <div class="insight-row"><div><span>التوصية الإدارية</span><b id="ai_recommendation">—</b></div><div class="insight-dot dot-good" id="dot_recommendation"></div></div>
-                </div>
             </div>
         </section>
         <section class="chart-grid">
@@ -191,7 +186,6 @@
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
-                    <div class="sub-section-note">النظام الصحيح هنا:<br>• المحاسبة تعتمد فقط على tenant_yearly_summary<br>• tenant_transactions فقط للسندات والبحث<br>• الدفعة الجديدة تنزل على آخر سنة محاسبية مفتوحة للمستأجر<br>• إذا دخلت سنة جديدة فعلًا، يتم فتح صف جديد تلقائيًا</div>
                     <div class="form-grid">
                         <div class="field"><label>التاريخ</label><input type="date" id="tx_date"></div>
                         <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt" placeholder="رقم السند"></div>
@@ -211,11 +205,18 @@
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.39</div>
     </div>
     <script>
+        // --- SECURITY: Authentication Check ---
         const session = localStorage.getItem('jabri_admin_session');
         if (session !== 'active') window.location.href = 'admin-login.html';
+        
+        // --- Supabase Client ---
         const { createClient } = supabase;
         const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
+        
+        // --- Global Variables ---
         let allTenants=[], allTransactions=[], allSummaries=[], tenantBalances=[], collectionChart=null, monthlyChart=null, isSavingTransaction=false;
+        
+        // --- Helper Functions ---
         const toNumber = v => { const c = String(v ?? 0).replace(/,/g, '').trim(); const n = parseFloat(c); return isFinite(n) ? n : 0; };
         const roundMoney = v => Math.round(toNumber(v));
         const getLatestSummary = tc => allSummaries.filter(r => r.tenant_code === tc).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
@@ -230,6 +231,8 @@
         const hideStatus = () => { const el = document.getElementById('status_msg'); el.style.display='none'; el.innerText=''; };
         const quickFillDesc = t => { document.getElementById('tx_desc').value = t; };
         const clearTransactionForm = () => { const d = document.getElementById('tx_date'); if(d) d.valueAsDate = new Date(); document.getElementById('tx_receipt').value=''; document.getElementById('tx_desc').value='دفعة من الايجار'; document.getElementById('tx_amount').value=''; };
+        
+        // --- Data Loading ---
         async function loadData(){
             const [t, tx, sum] = await Promise.all([supabaseClient.from('tenants').select('*').order('tenant_name'), supabaseClient.from('tenant_transactions').select('*').order('date'), supabaseClient.from('tenant_yearly_summary').select('*').order('year')]);
             allTenants = t.data || []; allTransactions = tx.data || []; allSummaries = sum.data || [];
@@ -239,6 +242,7 @@
                 return { ...tn, latestSummary: ls, latestYear: ls ? Number(ls.year) : null, previousBalance: pb, openingBalance: ob, totalDebit: td, annualRent: ar, totalCredit: tc, currentBalance: cb, lastSeen: tn.last_seen || null };
             });
         }
+        
         function updateTenantStatusChip(tenant){
             const chip = document.getElementById('tenant_status_chip'), seen = document.getElementById('last_seen_chip');
             chip.classList.remove('paid','partial','credit'); seen.innerText = formatLastSeen(tenant?.lastSeen);
@@ -249,6 +253,7 @@
             else if(paid > 0){ chip.innerText='جزئي'; chip.classList.add('partial'); }
             else { chip.innerText='متأخر'; }
         }
+        
         function drawCollectionChart(tc, tb){
             const canvas = document.getElementById('collectionChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(collectionChart) collectionChart.destroy();
             const paid = Math.max(0, toNumber(tc)), rem = Math.max(0, toNumber(tb)), tot = paid + rem, ratio = tot > 0 ? Math.round((paid/tot)*100) : 0;
@@ -256,11 +261,13 @@
             document.getElementById('pie_paid_value').innerText = roundMoney(paid); document.getElementById('pie_balance_value').innerText = roundMoney(rem);
             const lbl = document.getElementById('pie_balance_label'); if(toNumber(tb) < 0) lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${roundMoney(Math.abs(tb))}</b>`; else lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${roundMoney(tb)}</b>`;
         }
+        
         function drawMonthlyChart(tenant){
             const canvas = document.getElementById('monthlyChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(monthlyChart) monthlyChart.destroy(); if(!tenant) return;
             const labels=[], credits=[]; for(let i=11; i>=0; i--){ const d = new Date(); d.setMonth(d.getMonth()-i); labels.push(d.toLocaleDateString('en-GB',{month:'short'})); const monthTx = allTransactions.filter(tx => { const td = new Date(tx.date); return tx.tenant_code === tenant.tenant_code && td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); }); credits.push(monthTx.reduce((s,row)=> s + Math.max(0, toNumber(row.credit)), 0)); }
             monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'الدائن', data: credits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         }
+        
         function renderAi(tenant){
             if(!tenant) return;
             const tc = toNumber(tenant.totalCredit), cb = toNumber(tenant.currentBalance), pb = toNumber(tenant.previousBalance), td = toNumber(tenant.totalDebit), ob = toNumber(tenant.openingBalance), ly = tenant.latestYear || '—';
@@ -290,17 +297,15 @@
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_credit'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_balance'), cb <= 0 ? 'good' : cb <= Math.max(1, td*0.25) ? 'warn' : 'bad');
-            document.getElementById('ai_close_estimate').innerText = cb < 0 ? `رصيد دائن سنة ${ly}: ${roundMoney(Math.abs(cb))}` : `رصيد سنة ${ly}: ${roundMoney(cb)}`;
-            document.getElementById('ai_recommendation').innerText = cb < 0 ? 'المستأجر دائن — لا حاجة للمتابعة' : cb === 0 ? 'لا حاجة لمتابعة حالياً' : `متابعة رصيد سنة ${ly}`;
-            setDotMood('dot_close_estimate', cb <= 0 ? 'good' : cb <= Math.max(1, td*0.25) ? 'warn' : 'bad');
-            setDotMood('dot_recommendation', cb <= 0 ? 'good' : 'warn');
         }
+        
         async function ensureYearlySummaryExists(tenant, yearNum){
             let row = getSummaryByYear(tenant.tenant_code, yearNum); if(row) return row;
             const prev = getPreviousSummary(tenant.tenant_code, yearNum), ob = prev ? toNumber(prev.final_balance) : 0, td = toNumber(tenant.annual_rent), tc = 0, fb = ob + td - tc;
             const { data, error } = await supabaseClient.from('tenant_yearly_summary').insert([{ tenant_code: tenant.tenant_code, year: yearNum, opening_balance: ob, total_debit: td, total_credit: tc, final_balance: fb }]).select().single();
             if(error) throw error; return data;
         }
+        
         async function submitTransaction(){
             if(isSavingTransaction) return;
             const code = document.getElementById('tenant_select').value, date = document.getElementById('tx_date').value, desc = document.getElementById('tx_desc').value.trim(), amount = Math.max(0, toNumber(document.getElementById('tx_amount').value)), receipt = document.getElementById('tx_receipt').value.trim(), btn = document.getElementById('save_tx_btn');
@@ -318,6 +323,7 @@
             } catch(err){ console.error(err); showStatus(`حدث خطأ: ${err.message}`, 'danger'); }
             finally { isSavingTransaction=false; btn.disabled=false; btn.innerText='حفظ الدفعة'; }
         }
+        
         const getNotificationTitle = t => { if(t==='first') return 'المطالبة الأولى'; if(t==='second') return 'المطالبة الثانية'; if(t==='third') return 'المطالبة الثالثة'; if(t==='legal') return 'إنذار عدلي'; if(t==='lawyer') return 'تحويل للمحامي'; return 'رسالة عامة'; };
         const getNotificationLifetimeDays = t => { if(t==='first') return 5; if(t==='second') return 5; if(t==='third') return 10; if(t==='legal') return 15; if(t==='lawyer') return 30; return 7; };
         const shouldHideAfterSeen = t => !(t==='legal' || t==='lawyer');
@@ -331,6 +337,7 @@
             if(type==='lawyer') return `إشعار قانوني: تم تحويل ملفكم إلى المحامي المختص بخصوص المبلغ المستحق وقدره ${amt}، وسيتم استكمال الإجراءات القانونية حسب الأصول.`;
             return '';
         }
+        
         function updateNotificationComposer(){ const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message'); if(!type){ msg.value=''; return; } if(type==='general') return; if(!t) return; msg.value = buildNotificationText(type, t); }
         async function sendNotification(){
             const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message').value.trim();
@@ -340,6 +347,7 @@
             if(error){ console.error(error); alert('حدث خطأ'); return; }
             alert('تم إرسال الإشعار بنجاح'); document.getElementById('notification_type').value=''; document.getElementById('notification_message').value='';
         }
+        
         async function renderSelectedTenant(code){ const t = tenantBalances.find(x => x.tenant_code === code) || null; updateTenantStatusChip(t); if(t){ renderAi(t); drawCollectionChart(t.totalCredit, t.currentBalance); drawMonthlyChart(t); document.getElementById('statementBtn').disabled=false; } else { document.getElementById('statementBtn').disabled=true; } updateNotificationComposer(); }
         async function refresh(code=null){ document.getElementById('loader').style.display='flex'; await loadData(); const sel = document.getElementById('tenant_select'); const selCode = code || sel.value || allTenants[0]?.tenant_code || ''; sel.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join(''); if(selCode){ sel.value = selCode; await renderSelectedTenant(selCode); } else { document.getElementById('last_seen_chip').innerText='—'; document.getElementById('tenant_status_chip').innerText='جزئي'; document.getElementById('tenant_status_chip').classList.remove('paid','partial','credit'); document.getElementById('statementBtn').disabled=true; } document.getElementById('loader').style.display='none'; }
         function openTenantStatement(){ const code = document.getElementById('tenant_select').value; if(!code) return alert('اختر المستأجر أولاً'); localStorage.setItem('jabri_tenant_code', code); localStorage.setItem('jabri_admin_session', 'active'); window.open(`statement.html?tenant=${encodeURIComponent(code)}`, '_blank'); }
@@ -348,3 +356,4 @@
     </script>
 </body>
 </html>
+```
