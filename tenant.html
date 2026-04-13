@@ -1,3 +1,12 @@
+هذا الكود كامل محدث على نفس صفحتك، وفيه التعديلات التي طلبتها فقط:
+	•	رجّعت الإشعارات بشكل ذكي حسب المدة:
+	•	إشعار عادي: 7 أيام
+	•	مطالبة أولى: 15 يوم
+	•	مطالبة ثانية: 15 يوم
+	•	مطالبة نهائية / إنذار: 30 يوم
+	•	غيرت اسم المربع من مستحق السنة إلى رصيد
+	•	عدلت AI نصيحة مالية لتكون سطر واحد مدموج وتعتمد على الرصيد، وتعطي اقتراح دفع شهري لإغلاق الحساب خلال 8 أشهر أو 18 شهرًا إذا كان المبلغ كبير
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -20,74 +29,476 @@
             --glass-soft-shadow: 0 14px 30px rgba(120,95,56,0.08);
             --glass-blur: blur(14px);
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
-        body { margin: 0; color: var(--text); padding: 16px; opacity: 0; transform: translateY(8px); transition: all 0.45s ease; background: linear-gradient(135deg, var(--bg), var(--bg-2)); direction: rtl; text-align: right; }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            padding: 16px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.45s ease;
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
+            direction: rtl;
+            text-align: right;
+        }
+
         body.loaded { opacity: 1; transform: translateY(0); }
-        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
-        .brand strong { color: var(--gold-deep); font-size: 18px; font-weight: 900; }
-        .brand small { display: block; font-size: 11px; letter-spacing: 1.8px; color: var(--muted); font-weight: 800; margin-bottom: 4px; }
-        .ghost-btn { padding: 12px 16px; border-radius: 16px; border: var(--glass-border); background: rgba(255,255,255,0.70); color: var(--text); font-size: 12px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 22px rgba(120,95,56,0.10); transition: all 0.25s ease; }
-        .ghost-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(120,95,56,0.12); }
-        .hero-card { border-radius: 26px; padding: 24px; margin-bottom: 16px; text-align: right; background: var(--glass-bg); border: var(--glass-border); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; }
-        .hero-status { position: absolute; left: 18px; top: 18px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; letter-spacing: 0.4px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-        .hero-status.paid { background: rgba(47,158,111,0.12); color: var(--success); border: 1px solid rgba(47,158,111,0.25); }
-        .hero-status.partial { background: rgba(195,138,46,0.12); color: var(--warning); border: 1px solid rgba(195,138,46,0.24); }
-        .hero-status.late { background: rgba(201,90,82,0.10); color: var(--danger); border: 1px solid rgba(201,90,82,0.25); }
-        .hero-status.credit { background: rgba(47,158,111,0.12); color: var(--success); border: 1px solid rgba(47,158,111,0.25); }
-        .hero-card h1 { margin: 0; font-size: 28px; font-weight: 900; color: var(--gold-deep); padding-left: 110px; }
-        .hero-note { margin-top: 8px; color: var(--text); font-size: 13px; font-weight: 800; }
-        .chip-header { display: flex; justify-content: flex-start; margin-bottom: 12px; width: 100%; padding-right: 10px; }
-        .chip { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 999px; min-width: 100px; font-size: 12px; font-weight: 900; color: var(--gold-deep); background: rgba(201,164,107,0.12); border: 1px solid rgba(201,164,107,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.40); }
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 22px; }
-        .soft-card { border-radius: 26px; border: var(--glass-border); background: var(--glass-card-bg); box-shadow: var(--glass-soft-shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); text-align: center; padding: 22px; transition: all 0.3s ease; min-height: 146px; display: flex; flex-direction: column; justify-content: center; }
-        .soft-card span { display: block; font-size: 14px; font-weight: 900; margin-bottom: 8px; color: var(--muted); }
-        .soft-card b { display: block; font-size: 28px; font-weight: 900; }
-        .credit-card { background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25)); border-color: rgba(47,158,111,0.24); color: var(--success); }
-        .warning-card { background: linear-gradient(135deg, rgba(195,138,46,0.12), rgba(255,255,255,0.25)); border-color: rgba(195,138,46,0.22); color: var(--warning); }
-        .panel { padding: 24px; margin-bottom: 22px; border-radius: 26px; border: var(--glass-border); background: var(--glass-card-bg); box-shadow: var(--glass-soft-shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
-        .smart-body { font-size: 16px; line-height: 2.2; font-weight: 800; color: var(--text); text-align: right; margin-top: 10px; white-space: pre-line; }
-        .smart-subnote { margin-top: 12px; font-size: 13px; line-height: 1.9; color: var(--muted); font-weight: 700; }
-        .pie-text-stats { margin-top: 16px; text-align: center; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; font-size: 15px; font-weight: 900; }
-        .pie-text-item b { font-weight: 900; margin-right: 4px; }
-        .chart-wrap { min-height: 220px; display: flex; align-items: center; justify-content: center; margin-top: 10px; position: relative; }
+
+        .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding-bottom: 42px;
+            width: 100%;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .brand strong {
+            color: var(--gold-deep);
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .brand small {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 1.8px;
+            color: var(--muted);
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .ghost-btn {
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: var(--glass-border);
+            background: rgba(255,255,255,0.70);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 22px rgba(120,95,56,0.10);
+            transition: all 0.25s ease;
+        }
+
+        .ghost-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(120,95,56,0.12);
+        }
+
+        .hero-card {
+            border-radius: 26px;
+            padding: 24px;
+            margin-bottom: 16px;
+            text-align: right;
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: relative;
+        }
+
+        .hero-status {
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.4px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .hero-status.paid {
+            background: rgba(47,158,111,0.12);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.25);
+        }
+
+        .hero-status.partial {
+            background: rgba(195,138,46,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(195,138,46,0.24);
+        }
+
+        .hero-status.late {
+            background: rgba(201,90,82,0.10);
+            color: var(--danger);
+            border: 1px solid rgba(201,90,82,0.25);
+        }
+
+        .hero-status.credit {
+            background: rgba(47,158,111,0.12);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.25);
+        }
+
+        .hero-card h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            padding-left: 110px;
+        }
+
+        .hero-note {
+            margin-top: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            width: 100%;
+            padding-right: 10px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            min-width: 100px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .soft-card {
+            border-radius: 26px;
+            border: var(--glass-border);
+            background: var(--glass-card-bg);
+            box-shadow: var(--glass-soft-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            text-align: center;
+            padding: 22px;
+            transition: all 0.3s ease;
+            min-height: 146px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .soft-card span {
+            display: block;
+            font-size: 14px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: var(--muted);
+        }
+
+        .soft-card b {
+            display: block;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .credit-card {
+            background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+            color: var(--success);
+        }
+
+        .warning-card {
+            background: linear-gradient(135deg, rgba(195,138,46,0.12), rgba(255,255,255,0.25));
+            border-color: rgba(195,138,46,0.22);
+            color: var(--warning);
+        }
+
+        .panel {
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 26px;
+            border: var(--glass-border);
+            background: var(--glass-card-bg);
+            box-shadow: var(--glass-soft-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .smart-body {
+            font-size: 16px;
+            line-height: 2.2;
+            font-weight: 800;
+            color: var(--text);
+            text-align: right;
+            margin-top: 10px;
+            white-space: normal;
+        }
+
+        .pie-text-stats {
+            margin-top: 16px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .pie-text-item b {
+            font-weight: 900;
+            margin-right: 4px;
+        }
+
+        .chart-wrap {
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            position: relative;
+        }
+
         .timeline-wrap { min-height: 300px; }
-        .chart-caption { margin-top: 14px; padding: 14px 16px; border-radius: 18px; font-size: 14px; font-weight: 900; text-align: center; border: 1px solid transparent; }
-        .chart-caption.good { color: var(--success); background: rgba(47,158,111,0.10); border-color: rgba(47,158,111,0.18); }
-        .chart-caption.warning { color: var(--danger); background: rgba(201,90,82,0.10); border-color: rgba(201,90,82,0.18); }
-        .chart-caption.neutral { color: var(--neutral); background: rgba(139,127,112,0.10); border-color: rgba(139,127,112,0.18); }
-        .action-btn { width: 100%; max-width: 300px; margin: 24px auto 0; padding: 16px; border-radius: 24px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; box-shadow: 0 18px 35px rgba(201,164,107,0.25); }
-        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+
+        .chart-caption {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .chart-caption.good {
+            color: var(--success);
+            background: rgba(47,158,111,0.10);
+            border-color: rgba(47,158,111,0.18);
+        }
+
+        .chart-caption.warning {
+            color: var(--danger);
+            background: rgba(201,90,82,0.10);
+            border-color: rgba(201,90,82,0.18);
+        }
+
+        .chart-caption.neutral {
+            color: var(--neutral);
+            background: rgba(139,127,112,0.10);
+            border-color: rgba(139,127,112,0.18);
+        }
+
+        .notif-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .notif-item {
+            border-radius: 20px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(247,244,237,0.72));
+            border: 1px solid rgba(201,164,107,0.16);
+            box-shadow: 0 8px 18px rgba(120,95,56,0.05);
+        }
+
+        .notif-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .notif-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .notif-badge {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            border: 1px solid transparent;
+        }
+
+        .notif-badge.normal {
+            background: rgba(139,127,112,0.10);
+            color: var(--neutral);
+            border-color: rgba(139,127,112,0.18);
+        }
+
+        .notif-badge.first,
+        .notif-badge.second {
+            background: rgba(195,138,46,0.12);
+            color: var(--warning);
+            border-color: rgba(195,138,46,0.20);
+        }
+
+        .notif-badge.final {
+            background: rgba(201,90,82,0.10);
+            color: var(--danger);
+            border-color: rgba(201,90,82,0.20);
+        }
+
+        .notif-message {
+            font-size: 14px;
+            line-height: 2;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .notif-meta {
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .notif-empty {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--muted);
+            padding: 10px 0 0;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+            margin: 24px auto 0;
+            padding: 16px;
+            border-radius: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 18px 35px rgba(201,164,107,0.25);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 18px;
+            font-weight: 800;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: var(--gold-deep);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
-        .reveal { opacity: 0; transform: translateY(14px); transition: all 0.55s ease; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        @media (max-width: 768px) { .stats-grid { gap: 14px; } .soft-card { min-height: 132px; padding: 18px 12px; } .soft-card span { font-size: 13px; } .soft-card b { font-size: 21px; } .hero-card h1 { padding-left: 0; padding-top: 34px; font-size: 24px; } }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: all 0.55s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { gap: 14px; }
+            .soft-card { min-height: 132px; padding: 18px 12px; }
+            .soft-card span { font-size: 13px; }
+            .soft-card b { font-size: 21px; }
+            .hero-card h1 { padding-left: 0; padding-top: 34px; font-size: 24px; }
+        }
     </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
+
     <div class="wrap">
         <div class="topbar reveal">
-            <div class="brand"><small>MANAGED BUSINESS SPACES</small><strong>JABRI COMPLEX</strong></div>
+            <div class="brand">
+                <small>MANAGED BUSINESS SPACES</small>
+                <strong>JABRI COMPLEX</strong>
+            </div>
             <button class="ghost-btn" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
         </div>
+
         <section class="hero-card reveal">
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
             <div id="last_update" class="hero-note">-</div>
         </section>
 
-        <!-- المربعات المتبقية: 2 فقط -->
         <div class="stats-grid">
-            <div class="soft-card credit-card reveal"><span>إجمالي المدفوع</span><b id="val_credit">0</b></div>
-            <div class="soft-card warning-card reveal"><span>مستحق السنة</span><b id="val_debit">0</b></div>
+            <div class="soft-card credit-card reveal">
+                <span>إجمالي المدفوع</span>
+                <b id="val_credit">0</b>
+            </div>
+            <div class="soft-card warning-card reveal">
+                <span>الرصيد</span>
+                <b id="val_balance">0</b>
+            </div>
         </div>
 
         <div class="panel reveal">
             <div class="chip-header"><div class="chip">AI نصيحة مالية</div></div>
             <div id="smart_message" class="smart-body">تحليل البيانات...</div>
-            <div id="smart_subnote" class="smart-subnote"></div>
+        </div>
+
+        <div class="panel reveal">
+            <div class="chip-header"><div class="chip">الإشعارات</div></div>
+            <div id="notifications_list" class="notif-list"></div>
         </div>
 
         <div class="panel reveal">
@@ -112,27 +523,412 @@
 
     <script>
         const { createClient } = supabase;
-        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
         const urlParams = new URLSearchParams(window.location.search);
         const tenantFromURL = urlParams.get('tenant');
         const tenantFromStorage = localStorage.getItem('jabri_tenant_code');
         const tenantCode = tenantFromURL || tenantFromStorage;
-        if (!tenantCode) { document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>لم يتم تحديد المستأجر</h2></div>'; throw new Error('No tenant code'); }
-        let pieChartInstance = null, timelineChartInstance = null;
-        const toNumber = (v) => { const n = parseFloat(String(v ?? 0).replace(/,/g, '')); return Number.isNaN(n) ? 0 : n; };
+
+        if (!tenantCode) {
+            document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>لم يتم تحديد المستأجر</h2></div>';
+            throw new Error('No tenant code');
+        }
+
+        let pieChartInstance = null;
+        let timelineChartInstance = null;
+
+        const toNumber = (v) => {
+            const n = parseFloat(String(v ?? 0).replace(/,/g, ''));
+            return Number.isNaN(n) ? 0 : n;
+        };
+
         const formatNumber = (v) => String(Math.round(toNumber(v)));
-        const formatRealLastUpdate = (value) => { if (!value) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`; const d = new Date(value); if (Number.isNaN(d.getTime())) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`; return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`; };
-        function getLatestAndPreviousSummaries(rows) { const normalized = (rows || []).filter(row => Number(row.year) > 0).sort((a, b) => Number(a.year) - Number(b.year)); if (!normalized.length) return { currentSummary: null, previousSummary: null, chartRows: [] }; const current = normalized[normalized.length - 1] || null; const previous = normalized.length > 1 ? normalized[normalized.length - 2] : null; return { currentSummary: current, previousSummary: previous, chartRows: [previous, current].filter(Boolean) }; }
-        function getTenantStatus(balance, credit) { const b = toNumber(balance), c = toNumber(credit); if (b < 0) return { text: '✔ رصيد دائن', cls: 'credit' }; if (b === 0) return { text: '✔ مسدد', cls: 'paid' }; if (c > 0) return { text: '⚠ جزئي', cls: 'partial' }; return { text: '⚠ متأخر', cls: 'late' }; }
-        function getSmartFinancialAdvice(summary) { if (!summary) return { message: 'لا توجد بيانات كافية حالياً', subnote: '' }; const balance = toNumber(summary.final_balance); if (balance < 0) return { message: `لديك رصيد دائن ${formatNumber(Math.abs(balance))}، سيتم احتسابه لصالحك.`, subnote: 'وضعك المالي مريح حالياً' }; if (balance === 0) return { message: 'حسابك مسدد بالكامل، وضعك ممتاز.', subnote: 'استمر بنفس وتيرة الالتزام' }; let riskText = balance > 3000 ? 'مستوى الالتزام: يحتاج متابعة' : balance > 1500 ? 'مستوى الالتزام: متوسط' : 'مستوى الالتزام: جيد'; return { message: `الرصيد المتبقي: ${formatNumber(balance)}`, subnote: riskText }; }
-        function getLineInsight(current, previous) { if (!current || !previous) return { type: 'neutral', text: 'لا توجد بيانات كافية للمقارنة حالياً' }; const curr = toNumber(current.final_balance), prev = toNumber(previous.final_balance), diff = curr - prev; if (curr < 0) return { type: 'good', text: `✅ لديك رصيد دائن ${formatNumber(Math.abs(curr))}` }; if (diff < 0) return { type: 'good', text: `✅ الرصيد انخفض بمقدار ${formatNumber(Math.abs(diff))}` }; if (diff > 0) return { type: 'warning', text: `⚠ الرصيد ارتفع بمقدار ${formatNumber(diff)}` }; return { type: 'neutral', text: 'الرصيد مستقر' }; }
-        function animateNumber(el, end) { if (!el) return; const dur = 800, start = performance.now(); function step(now) { const prog = Math.min((now - start) / dur, 1); el.innerText = String(Math.floor(prog * end)); if (prog < 1) requestAnimationFrame(step); } requestAnimationFrame(step); }
-        function renderPieChart(credit, balance) { const canvas = document.getElementById('balancePieChart'); if (pieChartInstance) pieChartInstance.destroy(); const creditValue = Math.max(0, toNumber(credit)); const realBalance = toNumber(balance); const balanceValue = realBalance > 0 ? realBalance : 0; const total = creditValue + balanceValue; const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0; pieChartInstance = new Chart(canvas, { type: 'doughnut', data: { labels: ['المدفوع', 'المتبقي'], datasets: [{ data: [creditValue, balanceValue], backgroundColor: ['#2f9e6f', '#c95a52'], borderWidth: 0 }] }, options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }, plugins: [{ id: 'centerText', beforeDraw(chart) { const { width, height, ctx } = chart; if (typeof chart._animatedValue !== 'number') chart._animatedValue = 0; chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08; const val = Math.round(chart._animatedValue); ctx.save(); ctx.font = 'bold 52px Tajawal'; ctx.fillStyle = '#2f2a24'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillText(`${val}%`, width / 2, height / 2 - 8); ctx.restore(); if (Math.abs(chart._animatedValue - percentTarget) > 0.1) requestAnimationFrame(() => chart.draw()); } }] }); document.getElementById('pie_balance_label_text').innerText = realBalance < 0 ? 'رصيد دائن:' : 'المتبقي:'; }
-        function renderTimelineChart(rows) { const canvas = document.getElementById('timelineChart'); if (timelineChartInstance) timelineChartInstance.destroy(); const normalized = (rows || []).filter(Boolean); const labels = normalized.map(r => String(r.year)); const balances = normalized.map(r => toNumber(r.final_balance)); let trendColor = '#c9a46b', fillColor = 'rgba(201,90,82,0.05)'; if (balances.length >= 2) { const prev = balances[0], curr = balances[1]; if (curr < prev) { trendColor = '#2f9e6f'; fillColor = 'rgba(47,158,111,0.08)'; } else if (curr > prev) { trendColor = '#c95a52'; fillColor = 'rgba(201,90,82,0.05)'; } } timelineChartInstance = new Chart(canvas, { type: 'line', data: { labels: labels.length ? labels : ['—'], datasets: [{ label: 'الرصيد', data: balances.length ? balances : [0], borderColor: trendColor, backgroundColor: fillColor, borderWidth: 4, tension: 0.35, pointRadius: 5, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, rtl: true } }, scales: { y: { beginAtZero: false, ticks: { callback: v => formatNumber(v) } } } } }); }
-        async function init() { try { const { data: tenant, error: tenantError } = await supabaseClient.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle(); if (tenantError) throw tenantError; const { data: summaryData, error: summaryError } = await supabaseClient.from('tenant_yearly_summary').select('*').eq('tenant_code', tenantCode).order('year', { ascending: true }); if (summaryError) throw summaryError; if (tenant) await supabaseClient.from('tenants').update({ last_seen: new Date().toISOString() }).eq('tenant_code', tenantCode); const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []); const currentOpening = currentSummary ? toNumber(currentSummary.opening_balance) : 0; const currentDebit = currentSummary ? toNumber(currentSummary.total_debit) : 0; const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0; const currentBalance = currentSummary ? (currentOpening + currentDebit - currentCredit) : 0; const realLastUpdate = currentSummary?.updated_at || currentSummary?.created_at || tenant?.updated_at || null; document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode; document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate); const status = getTenantStatus(currentBalance, currentCredit); const chip = document.getElementById('account_status_chip'); chip.innerText = status.text; chip.className = `hero-status ${status.cls}`; animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit))); animateNumber(document.getElementById('val_debit'), Math.round(Math.max(0, currentDebit))); animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit))); animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.abs(currentBalance))); const advice = getSmartFinancialAdvice({ ...currentSummary, final_balance: currentBalance }); document.getElementById('smart_message').innerText = advice.message; document.getElementById('smart_subnote').innerText = advice.subnote || ''; const pieCapText = currentBalance < 0 ? `لديك رصيد دائن ${formatNumber(Math.abs(currentBalance))}` : (currentBalance === 0 ? 'الحساب مسدد بالكامل' : `نسبة السداد ${Math.round((currentCredit / (currentCredit + currentBalance)) * 100)}%`); const pieCapEl = document.getElementById('pie_caption'); pieCapEl.className = `chart-caption ${currentBalance <= 0 ? 'good' : (currentCredit > 0 ? 'neutral' : 'warning')}`; pieCapEl.innerText = pieCapText; const lineIns = getLineInsight({ final_balance: currentBalance }, previousSummary); const lineEl = document.getElementById('line_insight'); lineEl.className = `chart-caption ${lineIns.type}`; lineEl.innerText = lineIns.text; renderPieChart(currentCredit, currentBalance); renderTimelineChart(chartRows); document.getElementById('loader').style.display = 'none'; document.body.classList.add('loaded'); document.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 80)); if (window.lucide) lucide.createIcons(); } catch (e) { console.error(e); document.getElementById('loader').style.display = 'none'; document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>خطأ في تحميل البيانات</h2></div>'; } }
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
-        function goToStatement() { window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`; }
+
+        function formatRealLastUpdate(value) {
+            if (!value) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return `آخر تحديث: ${new Date().toLocaleDateString('en-GB')}`;
+            return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function formatShortDate(value) {
+            if (!value) return '-';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return String(value);
+            return d.toLocaleDateString('en-GB');
+        }
+
+        function getLatestAndPreviousSummaries(rows) {
+            const normalized = (rows || [])
+                .filter(row => Number(row.year) > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
+
+            if (!normalized.length) {
+                return { currentSummary: null, previousSummary: null, chartRows: [] };
+            }
+
+            const current = normalized[normalized.length - 1] || null;
+            const previous = normalized.length > 1 ? normalized[normalized.length - 2] : null;
+
+            return {
+                currentSummary: current,
+                previousSummary: previous,
+                chartRows: [previous, current].filter(Boolean)
+            };
+        }
+
+        function getTenantStatus(balance, credit) {
+            const b = toNumber(balance);
+            const c = toNumber(credit);
+
+            if (b < 0) return { text: '✔ رصيد دائن', cls: 'credit' };
+            if (b === 0) return { text: '✔ مسدد', cls: 'paid' };
+            if (c > 0) return { text: '⚠ جزئي', cls: 'partial' };
+            return { text: '⚠ متأخر', cls: 'late' };
+        }
+
+        function getSmartFinancialAdvice(balance) {
+            const due = Math.max(0, toNumber(balance));
+
+            if (due === 0) {
+                return 'حسابك الحالي مغلق ولا يوجد رصيد مستحق، ووضعك المالي ممتاز.';
+            }
+
+            const months = due > 1800 ? 18 : 8;
+            const monthly = Math.ceil(due / months);
+
+            if (due > 1800) {
+                return `رصيدك الحالي ${formatNumber(due)}، وننصح بدفع ${formatNumber(monthly)} شهريًا لإغلاق الحساب خلال ${months} شهرًا بطريقة أريح وأكثر انتظامًا.`;
+            }
+
+            return `رصيدك الحالي ${formatNumber(due)}، وننصح بدفع ${formatNumber(monthly)} شهريًا لإغلاق الحساب خلال ${months} أشهر والمحافظة على وضع مالي أفضل.`;
+        }
+
+        function getLineInsight(current, previous) {
+            if (!current || !previous) {
+                return { type: 'neutral', text: 'لا توجد بيانات كافية للمقارنة حالياً' };
+            }
+
+            const curr = toNumber(current.final_balance);
+            const prev = toNumber(previous.final_balance);
+            const diff = curr - prev;
+
+            if (curr < 0) {
+                return { type: 'good', text: `✅ لديك رصيد دائن ${formatNumber(Math.abs(curr))}` };
+            }
+            if (diff < 0) {
+                return { type: 'good', text: `✅ الرصيد انخفض بمقدار ${formatNumber(Math.abs(diff))}` };
+            }
+            if (diff > 0) {
+                return { type: 'warning', text: `⚠ الرصيد ارتفع بمقدار ${formatNumber(diff)}` };
+            }
+            return { type: 'neutral', text: 'الرصيد مستقر' };
+        }
+
+        function animateNumber(el, end) {
+            if (!el) return;
+            const dur = 800;
+            const start = performance.now();
+
+            function step(now) {
+                const prog = Math.min((now - start) / dur, 1);
+                el.innerText = String(Math.floor(prog * end));
+                if (prog < 1) requestAnimationFrame(step);
+            }
+
+            requestAnimationFrame(step);
+        }
+
+        function renderPieChart(credit, balance) {
+            const canvas = document.getElementById('balancePieChart');
+            if (pieChartInstance) pieChartInstance.destroy();
+
+            const creditValue = Math.max(0, toNumber(credit));
+            const realBalance = toNumber(balance);
+            const balanceValue = realBalance > 0 ? realBalance : 0;
+            const total = creditValue + balanceValue;
+            const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0;
+
+            pieChartInstance = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['المدفوع', 'المتبقي'],
+                    datasets: [{
+                        data: [creditValue, balanceValue],
+                        backgroundColor: ['#2f9e6f', '#c95a52'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    beforeDraw(chart) {
+                        const { width, height, ctx } = chart;
+                        if (typeof chart._animatedValue !== 'number') chart._animatedValue = 0;
+                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
+                        const val = Math.round(chart._animatedValue);
+
+                        ctx.save();
+                        ctx.font = 'bold 52px Tajawal';
+                        ctx.fillStyle = '#2f2a24';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${val}%`, width / 2, height / 2 - 8);
+                        ctx.restore();
+
+                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
+                            requestAnimationFrame(() => chart.draw());
+                        }
+                    }
+                }]
+            });
+
+            document.getElementById('pie_balance_label_text').innerText = realBalance < 0 ? 'رصيد دائن:' : 'المتبقي:';
+        }
+
+        function renderTimelineChart(rows) {
+            const canvas = document.getElementById('timelineChart');
+            if (timelineChartInstance) timelineChartInstance.destroy();
+
+            const normalized = (rows || []).filter(Boolean);
+            const labels = normalized.map(r => String(r.year));
+            const balances = normalized.map(r => toNumber(r.final_balance));
+
+            let trendColor = '#c9a46b';
+            let fillColor = 'rgba(201,90,82,0.05)';
+
+            if (balances.length >= 2) {
+                const prev = balances[0];
+                const curr = balances[1];
+
+                if (curr < prev) {
+                    trendColor = '#2f9e6f';
+                    fillColor = 'rgba(47,158,111,0.08)';
+                } else if (curr > prev) {
+                    trendColor = '#c95a52';
+                    fillColor = 'rgba(201,90,82,0.05)';
+                }
+            }
+
+            timelineChartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['—'],
+                    datasets: [{
+                        label: 'الرصيد',
+                        data: balances.length ? balances : [0],
+                        borderColor: trendColor,
+                        backgroundColor: fillColor,
+                        borderWidth: 4,
+                        tension: 0.35,
+                        pointRadius: 5,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, rtl: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: v => formatNumber(v)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getNotificationCategory(item) {
+            const text = `${item?.title || ''} ${item?.message || ''} ${item?.type || ''}`.toLowerCase();
+
+            if (text.includes('مطالبة أول') || text.includes('الاولى') || text.includes('الأولى') || text.includes('first')) {
+                return { key: 'first', label: 'مطالبة أولى', days: 15 };
+            }
+
+            if (text.includes('مطالبة ثاني') || text.includes('الثانية') || text.includes('second')) {
+                return { key: 'second', label: 'مطالبة ثانية', days: 15 };
+            }
+
+            if (text.includes('نهائي') || text.includes('إنذار') || text.includes('انذار') || text.includes('final') || text.includes('warning')) {
+                return { key: 'final', label: 'مطالبة نهائية / إنذار', days: 30 };
+            }
+
+            return { key: 'normal', label: 'إشعار', days: 7 };
+        }
+
+        function isNotificationActive(item) {
+            const activeValue = item?.is_active;
+            if (activeValue === false || activeValue === 'false' || activeValue === 0) return false;
+
+            const now = Date.now();
+            const createdAt = item?.created_at ? new Date(item.created_at).getTime() : now;
+            const expiresAt = item?.expires_at ? new Date(item.expires_at).getTime() : null;
+
+            if (expiresAt && !Number.isNaN(expiresAt)) {
+                return expiresAt >= now;
+            }
+
+            const category = getNotificationCategory(item);
+            const fallbackExpiry = createdAt + (category.days * 24 * 60 * 60 * 1000);
+
+            return fallbackExpiry >= now;
+        }
+
+        function renderNotifications(list) {
+            const box = document.getElementById('notifications_list');
+            const items = (list || [])
+                .filter(isNotificationActive)
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+            if (!items.length) {
+                box.innerHTML = `<div class="notif-empty">لا توجد إشعارات فعالة حالياً</div>`;
+                return;
+            }
+
+            box.innerHTML = items.map(item => {
+                const cat = getNotificationCategory(item);
+                const created = formatShortDate(item.created_at);
+                const expiry = item?.expires_at
+                    ? formatShortDate(item.expires_at)
+                    : formatShortDate(new Date(new Date(item.created_at || Date.now()).getTime() + (cat.days * 24 * 60 * 60 * 1000)));
+
+                return `
+                    <div class="notif-item">
+                        <div class="notif-top">
+                            <div class="notif-title">${item.title || cat.label}</div>
+                            <div class="notif-badge ${cat.key}">${cat.label}</div>
+                        </div>
+                        <div class="notif-message">${item.message || 'لا يوجد نص للإشعار'}</div>
+                        <div class="notif-meta">تاريخ الإشعار: ${created} — ينتهي: ${expiry}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function init() {
+            try {
+                const { data: tenant, error: tenantError } = await supabaseClient
+                    .from('tenants')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .maybeSingle();
+
+                if (tenantError) throw tenantError;
+
+                const { data: summaryData, error: summaryError } = await supabaseClient
+                    .from('tenant_yearly_summary')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('year', { ascending: true });
+
+                if (summaryError) throw summaryError;
+
+                const { data: notificationsData, error: notifError } = await supabaseClient
+                    .from('tenant_notifications')
+                    .select('*')
+                    .eq('tenant_code', tenantCode)
+                    .order('created_at', { ascending: false });
+
+                if (notifError) {
+                    console.warn('NOTIFICATIONS WARNING:', notifError);
+                }
+
+                if (tenant) {
+                    await supabaseClient
+                        .from('tenants')
+                        .update({ last_seen: new Date().toISOString() })
+                        .eq('tenant_code', tenantCode);
+                }
+
+                const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
+
+                const currentOpening = currentSummary ? toNumber(currentSummary.opening_balance) : 0;
+                const currentDebit = currentSummary ? toNumber(currentSummary.total_debit) : 0;
+                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
+                const currentBalance = currentSummary ? (currentOpening + currentDebit - currentCredit) : 0;
+
+                const realLastUpdate =
+                    currentSummary?.updated_at ||
+                    currentSummary?.created_at ||
+                    tenant?.updated_at ||
+                    null;
+
+                document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode;
+                document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
+
+                const status = getTenantStatus(currentBalance, currentCredit);
+                const chip = document.getElementById('account_status_chip');
+                chip.innerText = status.text;
+                chip.className = `hero-status ${status.cls}`;
+
+                animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit)));
+                animateNumber(document.getElementById('val_balance'), Math.round(Math.abs(currentBalance)));
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit)));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.abs(currentBalance)));
+
+                document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
+
+                const pieCapText =
+                    currentBalance < 0
+                        ? `لديك رصيد دائن ${formatNumber(Math.abs(currentBalance))}`
+                        : currentBalance === 0
+                            ? 'الحساب مسدد بالكامل'
+                            : `نسبة السداد ${Math.round((currentCredit / Math.max(1, (currentCredit + currentBalance))) * 100)}%`;
+
+                const pieCapEl = document.getElementById('pie_caption');
+                pieCapEl.className = `chart-caption ${currentBalance <= 0 ? 'good' : (currentCredit > 0 ? 'neutral' : 'warning')}`;
+                pieCapEl.innerText = pieCapText;
+
+                const lineIns = getLineInsight({ final_balance: currentBalance }, previousSummary);
+                const lineEl = document.getElementById('line_insight');
+                lineEl.className = `chart-caption ${lineIns.type}`;
+                lineEl.innerText = lineIns.text;
+
+                renderNotifications(notificationsData || []);
+                renderPieChart(currentCredit, currentBalance);
+                renderTimelineChart(chartRows);
+
+                document.getElementById('loader').style.display = 'none';
+                document.body.classList.add('loaded');
+
+                document.querySelectorAll('.reveal').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('active'), i * 80);
+                });
+
+                if (window.lucide) lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').style.display = 'none';
+                document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>خطأ في تحميل البيانات</h2></div>';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function goToStatement() {
+            window.location.href = `statement.html?tenant=${encodeURIComponent(tenantCode)}`;
+        }
+
         window.onload = init;
     </script>
 </body>
 </html>
+
+إذا بدك، أطلع لك النسخة نفسها على 2 parts copy/paste.
