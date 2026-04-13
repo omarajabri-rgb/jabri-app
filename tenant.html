@@ -147,6 +147,12 @@
             border: 1px solid rgba(201,90,82,0.25);
         }
 
+        .hero-status.credit {
+            background: rgba(47,158,111,0.12);
+            color: var(--success);
+            border: 1px solid rgba(47,158,111,0.25);
+        }
+
         .hero-card h1 {
             margin: 0;
             font-size: 28px;
@@ -201,6 +207,7 @@
             -webkit-backdrop-filter: var(--glass-blur);
             text-align: center;
             padding: 24px;
+            transition: all 0.3s ease;
         }
 
         .soft-card span {
@@ -227,6 +234,12 @@
             background: linear-gradient(135deg, rgba(201,90,82,0.10), rgba(255,255,255,0.25));
             border-color: rgba(201,90,82,0.22);
             color: var(--danger);
+        }
+
+        .balance-card.credit {
+            background: linear-gradient(135deg, rgba(47,158,111,0.12), rgba(255,255,255,0.25));
+            border-color: rgba(47,158,111,0.24);
+            color: var(--success);
         }
 
         .panel {
@@ -513,8 +526,8 @@
                 <span>المدفوع</span>
                 <b id="val_credit">0</b>
             </div>
-            <div class="soft-card balance-card reveal">
-                <span>المتبقي</span>
+            <div class="soft-card balance-card reveal" id="balance_card">
+                <span id="balance_label">المتبقي</span>
                 <b id="val_balance">0</b>
             </div>
         </div>
@@ -673,12 +686,16 @@
             };
         }
 
+        // ========== FIXED: getTenantStatus recognizes negative as credit ==========
         function getTenantStatus(currentBalance, currentCredit) {
-            if (currentBalance <= 0) return { text: '✔ مسدد', cls: 'paid' };
-            if (currentCredit > 0) return { text: '⚠ جزئي', cls: 'partial' };
+            const bal = toNumber(currentBalance);
+            if (bal < 0) return { text: '✔ رصيد دائن', cls: 'credit' };
+            if (bal <= 0) return { text: '✔ مسدد', cls: 'paid' };
+            if (toNumber(currentCredit) > 0) return { text: '⚠ جزئي', cls: 'partial' };
             return { text: '⚠ جزئي', cls: 'partial' };
         }
 
+        // ========== FIXED: getAccountingAdvice with proper debit/credit explanation ==========
         function getAccountingAdvice(current, previous) {
             if (!current) {
                 return {
@@ -688,34 +705,38 @@
             }
 
             const year = Number(current?.year || 0);
-            const openingBalance = Math.max(0, Number(current?.opening_balance || 0));
-            const currentDebit = Math.max(0, Number(current?.total_debit || 0));
-            const currentCredit = Math.max(0, Number(current?.total_credit || 0));
-            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
+            const openingBalance = toNumber(current?.opening_balance || 0);
+            const currentDebit = toNumber(current?.total_debit || 0);
+            const currentCredit = toNumber(current?.total_credit || 0);
+            const currentBalance = toNumber(current?.final_balance || 0);
+            
+            // Verify calculation
+            const calculated = openingBalance + currentDebit - currentCredit;
+            const mismatch = Math.abs(calculated - currentBalance) > 0.01;
 
-            if (currentBalance <= 0) {
+            if (currentBalance < 0) {
                 return {
-                    message: `لا يوجد رصيد مستحق حالياً لسنة ${year}`,
-                    subnote: 'حسابك منظم حتى آخر تحديث'
+                    message: `سنة ${year}\n\nالرصيد المرحل: ${formatNumber(openingBalance)}\nمدين السنة (مستحق عليك): ${formatNumber(currentDebit)}\nالدائن المسجل (مدفوعاتك): ${formatNumber(currentCredit)}\n\n✅ رصيد دائن لصالحك: ${formatNumber(Math.abs(currentBalance))}\n(لديك رصيد زائد يمكن استخدامه للسنة القادمة)`,
+                    subnote: mismatch ? '⚠ تنبيه: الحسابات غير متطابقة - راجع الإدارة' : ''
+                };
+            }
+
+            if (currentBalance === 0) {
+                return {
+                    message: `سنة ${year}\n\nالرصيد المرحل: ${formatNumber(openingBalance)}\nمدين السنة (مستحق عليك): ${formatNumber(currentDebit)}\nالدائن المسجل (مدفوعاتك): ${formatNumber(currentCredit)}\n\n✅ الحساب مسدد بالكامل`,
+                    subnote: mismatch ? '⚠ تنبيه: الحسابات غير متطابقة - راجع الإدارة' : ''
                 };
             }
 
             const monthlyPlan = getDynamicMonthlyPlan(currentBalance);
 
             return {
-                message: `سنة ${year}
-
-الرصيد المرحل: ${formatNumber(openingBalance)}
-مدين السنة: ${formatNumber(currentDebit)}
-الدائن المسجل: ${formatNumber(currentCredit)}
-الرصيد الحالي: ${formatNumber(currentBalance)}
-
-ينصح بسداد ${formatNumber(monthlyPlan.recommendedMonthly)} شهرياً
-لإغلاق الرصيد خلال ${monthlyPlan.monthsToClose} أشهر تقريباً`,
-                subnote: 'البيانات المعروضة تعتمد على tenant_yearly_summary فقط'
+                message: `سنة ${year}\n\nالرصيد المرحل: ${formatNumber(openingBalance)}\nمدين السنة (مستحق عليك): ${formatNumber(currentDebit)}\nالدائن المسجل (مدفوعاتك): ${formatNumber(currentCredit)}\n\n📊 الرصيد المتبقي عليك: ${formatNumber(currentBalance)}\n\nينصح بسداد ${formatNumber(monthlyPlan.recommendedMonthly)} شهرياً\nلإغلاق الرصيد خلال ${monthlyPlan.monthsToClose} أشهر`,
+                subnote: mismatch ? '⚠ تنبيه: الحسابات غير متطابقة - راجع الإدارة' : 'البيانات المعروضة تعتمد على tenant_yearly_summary فقط'
             };
         }
 
+        // ========== FIXED: getLineInsight handles negative balances ==========
         function getLineInsight(current, previous) {
             if (!current || !previous) {
                 return {
@@ -724,21 +745,29 @@
                 };
             }
 
-            const currentBalance = Math.max(0, Number(current?.final_balance || 0));
-            const previousBalance = Math.max(0, Number(previous?.final_balance || 0));
+            const currentBalance = toNumber(current?.final_balance || 0);
+            const previousBalance = toNumber(previous?.final_balance || 0);
             const diff = currentBalance - previousBalance;
+
+            // Negative balance is good for tenant
+            if (currentBalance < 0) {
+                return {
+                    type: 'good',
+                    text: `✅ لديك رصيد دائن ${formatNumber(Math.abs(currentBalance))} (زيادة مدفوعات)`
+                };
+            }
 
             if (diff < 0) {
                 return {
                     type: 'good',
-                    text: `الرصيد انخفض عن السنة الماضية بمقدار ${Math.abs(Math.round(diff))}`
+                    text: `✅ الرصيد انخفض عن السنة الماضية بمقدار ${formatNumber(Math.abs(diff))}`
                 };
             }
 
             if (diff > 0) {
                 return {
                     type: 'warning',
-                    text: `الرصيد الحالي أعلى من السنة الماضية بـ ${Math.round(diff)}`
+                    text: `⚠ الرصيد الحالي أعلى من السنة الماضية بـ ${formatNumber(diff)}`
                 };
             }
 
@@ -926,13 +955,14 @@
             });
         }
 
+        // ========== FIXED: renderTimelineChart allows negative balances ==========
         function renderTimelineChart(chartRows) {
             const canvas = document.getElementById('timelineChart');
             if (timelineChartInstance) timelineChartInstance.destroy();
 
             const rows = (chartRows || []).filter(Boolean);
             const labels = rows.map(row => String(row.year));
-            const balances = rows.map(row => Math.max(0, toNumber(row.final_balance)));
+            const balances = rows.map(row => toNumber(row.final_balance));
 
             let trendColor = '#c9a46b';
             let fillColor = 'rgba(201,90,82,0.05)';
@@ -979,7 +1009,7 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
+                            beginAtZero: false,
                             ticks: {
                                 callback: v => formatNumber(v)
                             }
@@ -1020,8 +1050,9 @@
 
                 const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
 
-                const currentCredit = currentSummary ? Math.max(0, toNumber(currentSummary.total_credit)) : 0;
-                const currentBalance = currentSummary ? Math.max(0, toNumber(currentSummary.final_balance)) : 0;
+                // ========== FIXED: Don't force positive ==========
+                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
+                const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
 
                 const realLastUpdate =
                     currentSummary?.updated_at ||
@@ -1036,10 +1067,25 @@
                 chip.innerText = status.text;
                 chip.className = `hero-status ${status.cls}`;
 
-                animateNumber(document.getElementById('val_credit'), Math.round(currentCredit));
-                animateNumber(document.getElementById('val_balance'), Math.round(currentBalance));
-                animateNumber(document.getElementById('pie_paid_value'), Math.round(currentCredit));
-                animateNumber(document.getElementById('pie_balance_value'), Math.round(currentBalance));
+                // ========== FIXED: Dynamic balance card styling ==========
+                const balanceCard = document.getElementById('balance_card');
+                const balanceLabel = document.getElementById('balance_label');
+                
+                if (currentBalance < 0) {
+                    balanceCard.classList.add('credit');
+                    balanceLabel.innerText = 'رصيد دائن (لك)';
+                } else if (currentBalance === 0) {
+                    balanceCard.classList.add('credit');
+                    balanceLabel.innerText = 'المتبقي';
+                } else {
+                    balanceCard.classList.remove('credit');
+                    balanceLabel.innerText = 'المتبقي عليك';
+                }
+
+                animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit)));
+                animateNumber(document.getElementById('val_balance'), Math.round(Math.abs(currentBalance)));
+                animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit)));
+                animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.max(0, currentBalance)));
 
                 const advice = getAccountingAdvice(currentSummary, previousSummary);
                 document.getElementById('smart_message').innerText = advice.message;
