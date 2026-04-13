@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- ======================== 🔒 SECURITY HEADERS 🔒 ======================== -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <!-- ========================================================================= -->
+
     <title>مجمع جبري | لوحة المستأجر</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -10,9 +18,17 @@
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #f7f4ed; --bg-2: #fdfbf6; --surface: rgba(255,255,255,0.80);
-            --text: #2f2a24; --muted: #7a6c59; --gold: #c9a46b; --gold-deep: #b18a52;
-            --success: #2f9e6f; --danger: #c95a52; --warning: #c38a2e; --neutral: #8b7f70;
+            --bg: #f7f4ed;
+            --bg-2: #fdfbf6;
+            --surface: rgba(255,255,255,0.80);
+            --text: #2f2a24;
+            --muted: #7a6c59;
+            --gold: #c9a46b;
+            --gold-deep: #b18a52;
+            --success: #2f9e6f;
+            --danger: #c95a52;
+            --warning: #c38a2e;
+            --neutral: #8b7f70;
             --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(247,244,237,0.82));
             --glass-card-bg: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.85));
             --glass-border: 1px solid rgba(201,164,107,0.18);
@@ -39,7 +55,10 @@
             text-align: right;
         }
 
-        body.loaded { opacity: 1; transform: translateY(0); }
+        body.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         .wrap {
             max-width: 1120px;
@@ -59,14 +78,14 @@
 
         .brand strong {
             color: var(--gold-deep);
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
         }
 
         .brand small {
             display: block;
             font-size: 11px;
-            letter-spacing: 1.8px;
+            letter-spacing: 0.6px;
             color: var(--muted);
             font-weight: 800;
             margin-bottom: 4px;
@@ -150,7 +169,7 @@
             font-size: 28px;
             font-weight: 900;
             color: var(--gold-deep);
-            padding-left: 110px;
+            padding-left: 130px;
         }
 
         .hero-note {
@@ -200,7 +219,7 @@
             text-align: center;
             padding: 22px;
             transition: all 0.3s ease;
-            min-height: 146px;
+            min-height: 150px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -218,6 +237,13 @@
             display: block;
             font-size: 28px;
             font-weight: 900;
+        }
+
+        .smart-mini {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--muted);
         }
 
         .credit-card {
@@ -278,7 +304,9 @@
             position: relative;
         }
 
-        .timeline-wrap { min-height: 300px; }
+        .timeline-wrap {
+            min-height: 300px;
+        }
 
         .chart-caption {
             margin-top: 14px;
@@ -431,7 +459,9 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         .reveal {
             opacity: 0;
@@ -446,7 +476,7 @@
 
         @media (max-width: 768px) {
             .stats-grid { gap: 14px; }
-            .soft-card { min-height: 132px; padding: 18px 12px; }
+            .soft-card { min-height: 136px; padding: 18px 12px; }
             .soft-card span { font-size: 13px; }
             .soft-card b { font-size: 21px; }
             .hero-card h1 { padding-left: 0; padding-top: 34px; font-size: 24px; }
@@ -459,8 +489,8 @@
     <div class="wrap">
         <div class="topbar reveal">
             <div class="brand">
-                <small>MANAGED BUSINESS SPACES</small>
-                <strong>JABRI COMPLEX</strong>
+                <small>لوحة المستأجر</small>
+                <strong>مجمع جبري الصناعي</strong>
             </div>
             <button class="ghost-btn" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
         </div>
@@ -476,9 +506,11 @@
                 <span>إجمالي المدفوع</span>
                 <b id="val_credit">0</b>
             </div>
+
             <div class="soft-card warning-card reveal">
                 <span>الرصيد</span>
                 <b id="val_balance">0</b>
+                <div id="balance_smart_text" class="smart-mini">...</div>
             </div>
         </div>
 
@@ -513,15 +545,19 @@
     </div>
 
     <script>
+        // ======================== SECURITY: Input Sanitization ========================
+        const sanitizeInput = (input) => String(input ?? '').replace(/[<>'"]/g, '');
+        
         const { createClient } = supabase;
+
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
         const urlParams = new URLSearchParams(window.location.search);
-        const tenantFromURL = urlParams.get('tenant');
-        const tenantFromStorage = localStorage.getItem('jabri_tenant_code');
+        const tenantFromURL = sanitizeInput(urlParams.get('tenant'));
+        const tenantFromStorage = sanitizeInput(localStorage.getItem('jabri_tenant_code'));
         const tenantCode = tenantFromURL || tenantFromStorage;
 
         if (!tenantCode) {
@@ -578,7 +614,7 @@
 
             if (b < 0) return { text: '✔ رصيد دائن', cls: 'credit' };
             if (b === 0) return { text: '✔ مسدد', cls: 'paid' };
-            if (c > 0) return { text: '⚠ جزئي', cls: 'partial' };
+            if (c > 0) return { text: '⚠ متابعة مطلوبة', cls: 'partial' };
             return { text: '⚠ متأخر', cls: 'late' };
         }
 
@@ -597,6 +633,16 @@
             }
 
             return `رصيدك الحالي ${formatNumber(due)}، وننصح بدفع ${formatNumber(monthly)} شهريًا لإغلاق الحساب خلال ${months} أشهر والمحافظة على وضع مالي أفضل.`;
+        }
+
+        function getBalanceSmartText(balance) {
+            const b = toNumber(balance);
+
+            if (b < 0) return 'رصيد دائن لصالحك';
+            if (b === 0) return 'وضع ممتاز';
+            if (b <= 500) return 'متابعة خفيفة';
+            if (b <= 1500) return 'متابعة متوسطة';
+            return 'يحتاج معالجة';
         }
 
         function getLineInsight(current, previous) {
@@ -658,7 +704,9 @@
                     cutout: '75%',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
+                    plugins: {
+                        legend: { display: false }
+                    }
                 },
                 plugins: [{
                     id: 'centerText',
@@ -781,6 +829,7 @@
 
         function renderNotifications(list) {
             const box = document.getElementById('notifications_list');
+
             const items = (list || [])
                 .filter(isNotificationActive)
                 .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
@@ -800,10 +849,10 @@
                 return `
                     <div class="notif-item">
                         <div class="notif-top">
-                            <div class="notif-title">${item.title || cat.label}</div>
+                            <div class="notif-title">${sanitizeInput(item.title) || cat.label}</div>
                             <div class="notif-badge ${cat.key}">${cat.label}</div>
                         </div>
-                        <div class="notif-message">${item.message || 'لا يوجد نص للإشعار'}</div>
+                        <div class="notif-message">${sanitizeInput(item.message) || 'لا يوجد نص للإشعار'}</div>
                         <div class="notif-meta">تاريخ الإشعار: ${created} — ينتهي: ${expiry}</div>
                     </div>
                 `;
@@ -847,10 +896,9 @@
 
                 const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
 
-                const currentOpening = currentSummary ? toNumber(currentSummary.opening_balance) : 0;
-                const currentDebit = currentSummary ? toNumber(currentSummary.total_debit) : 0;
+                // ========== FIXED: Use final_balance directly from database ==========
+                const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
                 const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
-                const currentBalance = currentSummary ? (currentOpening + currentDebit - currentCredit) : 0;
 
                 const realLastUpdate =
                     currentSummary?.updated_at ||
@@ -858,7 +906,7 @@
                     tenant?.updated_at ||
                     null;
 
-                document.getElementById('t_name').innerText = tenant?.tenant_name || tenantCode;
+                document.getElementById('t_name').innerText = sanitizeInput(tenant?.tenant_name) || tenantCode;
                 document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
 
                 const status = getTenantStatus(currentBalance, currentCredit);
@@ -871,6 +919,7 @@
                 animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit)));
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.abs(currentBalance)));
 
+                document.getElementById('balance_smart_text').innerText = getBalanceSmartText(currentBalance);
                 document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
 
                 const pieCapText =
@@ -921,5 +970,3 @@
     </script>
 </body>
 </html>
-
-إذا بدك، أطلع لك النسخة نفسها على 2 parts copy/paste.
