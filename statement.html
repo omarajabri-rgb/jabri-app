@@ -4,893 +4,125 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>مجمع جبري | كشف الحساب التفصيلي</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script defer src="https://unpkg.com/lucide@latest"></script>
-
     <style>
-        :root {
-            --bg: #f7f4ed;
-            --bg-2: #fdfbf6;
-            --text: #2f2a24;
-            --muted: #7a6c59;
-            --gold: #c9a46b;
-            --gold-deep: #b18a52;
-
-            --success: #5f9f7d;
-            --success-soft: rgba(95,159,125,0.10);
-            --success-border: rgba(95,159,125,0.20);
-
-            --danger: #c47a72;
-            --danger-soft: rgba(196,122,114,0.09);
-            --danger-border: rgba(196,122,114,0.18);
-
-            --warning: #ba9150;
-            --warning-soft: rgba(186,145,80,0.11);
-            --warning-border: rgba(186,145,80,0.20);
-
-            --info: #5e7fd8;
-
-            --card: rgba(255,255,255,0.84);
-            --card-2: rgba(247,244,237,0.78);
-            --border: rgba(201,164,107,0.16);
-
-            --table-head: #eee7da;
-            --table-row: rgba(255,255,255,0.70);
-            --table-row-alt: rgba(247,243,235,0.88);
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        body {
-            margin: 0;
-            color: var(--text);
-            padding: 16px;
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.45s ease;
-            background: linear-gradient(135deg, var(--bg), var(--bg-2));
-        }
-
-        body.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding-bottom: 42px;
-            width: 100%;
-        }
-
-        .statement-header {
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-            background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.84));
-            border: 1px solid var(--border);
-            box-shadow: 0 12px 28px rgba(120,95,56,0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-
-        .statement-header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold-deep);
-        }
-
-        .statement-header h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .header-meta {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            white-space: nowrap;
-            background: rgba(201,164,107,0.12);
-            color: var(--text);
-            border: 1px solid rgba(201,164,107,0.22);
-            min-height: 32px;
-        }
-
-        .search-card,
-        .year-card,
-        .search-results-card {
-            background: linear-gradient(135deg, var(--card), var(--card-2));
-            border: 1px solid rgba(201,164,107,0.14);
-            border-radius: 24px;
-            box-shadow: 0 10px 24px rgba(120,95,56,0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .search-card {
-            margin-bottom: 18px;
-            padding: 14px;
-        }
-
-        .search-title {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 900;
-            color: var(--muted);
-        }
-
-        .search-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .search-input-wrap {
-            flex: 1;
-            min-width: 240px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            height: 46px;
-            border-radius: 16px;
-            border: 1px solid rgba(201,164,107,0.18);
-            background: rgba(255,255,255,0.80);
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 900;
-            padding: 0 16px;
-            outline: none;
-        }
-
-        .search-btn,
-        .clear-btn,
-        .back-btn,
-        .save-btn {
-            height: 46px;
-            border-radius: 16px;
-            font-weight: 900;
-            font-size: 14px;
-            cursor: pointer;
-            border: 1px solid rgba(201,164,107,0.16);
-            box-shadow: 0 10px 22px rgba(120,95,56,0.08);
-            transition: all 0.25s ease;
-        }
-
-        .search-btn,
-        .save-btn {
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            color: #fff;
-            border: none;
-            padding: 0 18px;
-        }
-
-        .clear-btn,
-        .back-btn {
-            background: rgba(255,255,255,0.78);
-            color: var(--text);
-            padding: 0 18px;
-        }
-
-        .search-btn:hover,
-        .clear-btn:hover,
-        .back-btn:hover,
-        .save-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(120,95,56,0.13);
-        }
-
-        .search-hint {
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .search-results-card {
-            display: none;
-            margin-bottom: 18px;
-            padding: 16px;
-        }
-
-        .search-results-card.active {
-            display: block;
-        }
-
-        .search-results-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-
-        .search-results-title {
-            font-size: 14px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-status-badge {
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            border: 1px solid transparent;
-        }
-
-        .search-status-badge.found {
-            background: rgba(63,162,111,0.10);
-            color: var(--success);
-            border-color: rgba(63,162,111,0.20);
-        }
-
-        .search-status-badge.not-found {
-            background: rgba(196,122,114,0.10);
-            color: var(--danger);
-            border-color: rgba(196,122,114,0.20);
-        }
-
-        .search-status-badge.multi {
-            background: rgba(94,127,216,0.10);
-            color: var(--info);
-            border-color: rgba(94,127,216,0.20);
-        }
-
-        .search-empty {
-            text-align: center;
-            padding: 16px 10px 4px;
-            color: var(--muted);
-            font-weight: 800;
-        }
-
-        .result-item {
-            border-radius: 18px;
-            padding: 14px;
-            border: 1px solid rgba(201,164,107,0.14);
-            background: linear-gradient(135deg, rgba(255,255,255,0.76), rgba(247,244,237,0.68));
-            box-shadow: 0 8px 18px rgba(120,95,56,0.04);
-        }
-
-        .result-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .result-cell {
-            border-radius: 14px;
-            padding: 10px;
-            background: rgba(255,255,255,0.64);
-            border: 1px solid rgba(201,164,107,0.10);
-            text-align: center;
-        }
-
-        .result-cell span {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--muted);
-            margin-bottom: 5px;
-        }
-
-        .result-cell b {
-            display: block;
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--text);
-            word-break: break-word;
-        }
-
-        .result-amount {
-            color: var(--success) !important;
-        }
-
-        .search-table-wrap {
-            overflow-x: auto;
-            margin-top: 6px;
-        }
-
-        .search-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
-            min-width: 520px;
-        }
-
-        .search-table th {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--muted);
-            padding: 0 8px 6px;
-            text-align: center;
-        }
-
-        .search-table td {
-            background: rgba(255,255,255,0.72);
-            border: 1px solid rgba(201,164,107,0.12);
-            text-align: center;
-            padding: 14px 10px;
-            font-size: 14px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-table tbody tr td:first-child {
-            border-top-right-radius: 16px;
-            border-bottom-right-radius: 16px;
-        }
-
-        .search-table tbody tr td:last-child {
-            border-top-left-radius: 16px;
-            border-bottom-left-radius: 16px;
-        }
-
-        .search-table tbody tr.highlight-latest td {
-            background: rgba(63,162,111,0.08);
-            border-color: rgba(63,162,111,0.16);
-        }
-
-        .search-date-chip,
-        .search-receipt-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 34px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            white-space: nowrap;
-            border: 1px solid rgba(201,164,107,0.16);
-            background: rgba(201,164,107,0.08);
-        }
-
-        .search-receipt-chip {
-            color: var(--info);
-            border-color: rgba(94,127,216,0.18);
-            background: rgba(94,127,216,0.08);
-        }
-
-        .search-amount {
-            color: var(--success);
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        .search-total-box {
-            margin-top: 14px;
-            background: rgba(255,255,255,0.76);
-            border: 1px solid rgba(201,164,107,0.16);
-            border-radius: 18px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            box-shadow: 0 8px 18px rgba(120,95,56,0.04);
-            flex-wrap: wrap;
-        }
-
-        .search-total-box span {
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .search-total-box strong {
-            color: var(--success);
-            font-size: 22px;
-            font-weight: 900;
-        }
-
-        .search-ai-box {
-            margin-top: 14px;
-            padding: 16px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(248,252,249,0.78));
-            border: 1px solid rgba(63,162,111,0.14);
-            box-shadow: 0 10px 24px rgba(63,162,111,0.05);
-        }
-
-        .search-ai-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .search-ai-head h4 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-ai-badge {
-            padding: 7px 12px;
-            border-radius: 999px;
-            background: rgba(63,162,111,0.10);
-            color: var(--success);
-            border: 1px solid rgba(63,162,111,0.18);
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .search-ai-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .search-ai-item {
-            background: rgba(255,255,255,0.76);
-            border: 1px solid rgba(201,164,107,0.10);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .search-ai-item span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .search-ai-item b {
-            display: block;
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-ai-note {
-            margin-top: 12px;
-            padding: 12px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            text-align: center;
-            background: rgba(63,162,111,0.10);
-            border: 1px solid rgba(63,162,111,0.16);
-            color: var(--success);
-        }
-
-        .search-ai-note.warning {
-            background: rgba(186,145,80,0.10);
-            border-color: rgba(186,145,80,0.18);
-            color: var(--warning);
-        }
-
-        .search-ai-note.danger {
-            background: rgba(196,122,114,0.10);
-            border-color: rgba(196,122,114,0.18);
-            color: var(--danger);
-        }
-
-        .year-card {
-            border-radius: 28px;
-            margin-bottom: 18px;
-            overflow: hidden;
-            border: 1px solid rgba(201,164,107,0.14);
-            box-shadow: 0 10px 24px rgba(120,95,56,0.06);
-            background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.90));
-            break-inside: avoid;
-            page-break-inside: avoid;
-            opacity: 0;
-            transform: translateY(16px);
-            animation: cardIn .55s ease forwards;
-        }
-
+        :root { --bg: #f7f4ed; --bg-2: #fdfbf6; --text: #2f2a24; --muted: #7a6c59; --gold: #c9a46b; --gold-deep: #b18a52; --success: #5f9f7d; --success-soft: rgba(95,159,125,0.10); --success-border: rgba(95,159,125,0.20); --danger: #c47a72; --danger-soft: rgba(196,122,114,0.09); --danger-border: rgba(196,122,114,0.18); --warning: #ba9150; --warning-soft: rgba(186,145,80,0.11); --warning-border: rgba(186,145,80,0.20); --info: #5e7fd8; --card: rgba(255,255,255,0.84); --card-2: rgba(247,244,237,0.78); --border: rgba(201,164,107,0.16); --table-head: #eee7da; --table-row: rgba(255,255,255,0.70); --table-row-alt: rgba(247,243,235,0.88); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        body { margin: 0; color: var(--text); padding: 16px; opacity: 0; transform: translateY(8px); transition: all 0.45s ease; background: linear-gradient(135deg, var(--bg), var(--bg-2)); direction: rtl; }
+        body.loaded { opacity: 1; transform: translateY(0); }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
+        .statement-header { border-radius: 28px; padding: 24px; margin-bottom: 16px; text-align: center; background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.84)); border: 1px solid var(--border); box-shadow: 0 12px 28px rgba(120,95,56,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+        .statement-header h2 { margin: 0 0 8px; font-size: 20px; font-weight: 900; color: var(--text); }
+        .header-meta { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .chip { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; background: rgba(201,164,107,0.12); color: var(--text); border: 1px solid rgba(201,164,107,0.22); min-height: 32px; }
+        .search-card, .year-card, .search-results-card { background: linear-gradient(135deg, var(--card), var(--card-2)); border: 1px solid rgba(201,164,107,0.14); border-radius: 24px; box-shadow: 0 10px 24px rgba(120,95,56,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .search-card { margin-bottom: 18px; padding: 14px; }
+        .search-title { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 900; color: var(--muted); }
+        .search-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-input-wrap { flex: 1; min-width: 240px; position: relative; }
+        .search-input { width: 100%; height: 46px; border-radius: 16px; border: 1px solid rgba(201,164,107,0.18); background: rgba(255,255,255,0.80); color: var(--text); font-size: 15px; font-weight: 900; padding: 0 16px; outline: none; }
+        .search-btn, .clear-btn, .back-btn, .save-btn { height: 46px; border-radius: 16px; font-weight: 900; font-size: 14px; cursor: pointer; border: 1px solid rgba(201,164,107,0.16); box-shadow: 0 10px 22px rgba(120,95,56,0.08); transition: all 0.25s ease; }
+        .search-btn, .save-btn { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; border: none; padding: 0 18px; }
+        .clear-btn, .back-btn { background: rgba(255,255,255,0.78); color: var(--text); padding: 0 18px; }
+        .search-btn:hover, .clear-btn:hover, .back-btn:hover, .save-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(120,95,56,0.13); }
+        .search-hint { margin-top: 10px; font-size: 12px; color: var(--muted); font-weight: 700; }
+        .search-results-card { display: none; margin-bottom: 18px; padding: 16px; }
+        .search-results-card.active { display: block; }
+        .search-results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+        .search-results-title { font-size: 14px; font-weight: 900; color: var(--text); }
+        .search-status-badge { padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 900; border: 1px solid transparent; }
+        .search-status-badge.found { background: rgba(63,162,111,0.10); color: var(--success); border-color: rgba(63,162,111,0.20); }
+        .search-status-badge.not-found { background: rgba(196,122,114,0.10); color: var(--danger); border-color: rgba(196,122,114,0.20); }
+        .search-status-badge.multi { background: rgba(94,127,216,0.10); color: var(--info); border-color: rgba(94,127,216,0.20); }
+        .search-empty { text-align: center; padding: 16px 10px 4px; color: var(--muted); font-weight: 800; }
+        .result-item { border-radius: 18px; padding: 14px; border: 1px solid rgba(201,164,107,0.14); background: linear-gradient(135deg, rgba(255,255,255,0.76), rgba(247,244,237,0.68)); box-shadow: 0 8px 18px rgba(120,95,56,0.04); }
+        .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .result-cell { border-radius: 14px; padding: 10px; background: rgba(255,255,255,0.64); border: 1px solid rgba(201,164,107,0.10); text-align: center; }
+        .result-cell span { display: block; font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 5px; }
+        .result-cell b { display: block; font-size: 13px; font-weight: 900; color: var(--text); word-break: break-word; }
+        .result-amount { color: var(--success) !important; }
+        .search-table-wrap { overflow-x: auto; margin-top: 6px; }
+        .search-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 520px; }
+        .search-table th { font-size: 13px; font-weight: 900; color: var(--muted); padding: 0 8px 6px; text-align: center; }
+        .search-table td { background: rgba(255,255,255,0.72); border: 1px solid rgba(201,164,107,0.12); text-align: center; padding: 14px 10px; font-size: 14px; font-weight: 900; color: var(--text); }
+        .search-table tbody tr td:first-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+        .search-table tbody tr td:last-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .search-table tbody tr.highlight-latest td { background: rgba(63,162,111,0.08); border-color: rgba(63,162,111,0.16); }
+        .search-date-chip, .search-receipt-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap; border: 1px solid rgba(201,164,107,0.16); background: rgba(201,164,107,0.08); }
+        .search-receipt-chip { color: var(--info); border-color: rgba(94,127,216,0.18); background: rgba(94,127,216,0.08); }
+        .search-amount { color: var(--success); font-size: 18px; font-weight: 900; }
+        .search-total-box { margin-top: 14px; background: rgba(255,255,255,0.76); border: 1px solid rgba(201,164,107,0.16); border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 8px 18px rgba(120,95,56,0.04); flex-wrap: wrap; }
+        .search-total-box span { color: var(--muted); font-size: 13px; font-weight: 900; }
+        .search-total-box strong { color: var(--success); font-size: 22px; font-weight: 900; }
+        .search-ai-box { margin-top: 14px; padding: 16px; border-radius: 20px; background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(248,252,249,0.78)); border: 1px solid rgba(63,162,111,0.14); box-shadow: 0 10px 24px rgba(63,162,111,0.05); }
+        .search-ai-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .search-ai-head h4 { margin: 0; font-size: 15px; font-weight: 900; color: var(--text); }
+        .search-ai-badge { padding: 7px 12px; border-radius: 999px; background: rgba(63,162,111,0.10); color: var(--success); border: 1px solid rgba(63,162,111,0.18); font-size: 12px; font-weight: 900; }
+        .search-ai-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .search-ai-item { background: rgba(255,255,255,0.76); border: 1px solid rgba(201,164,107,0.10); border-radius: 16px; padding: 12px; text-align: center; }
+        .search-ai-item span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 6px; }
+        .search-ai-item b { display: block; font-size: 16px; font-weight: 900; color: var(--text); }
+        .search-ai-note { margin-top: 12px; padding: 12px 14px; border-radius: 14px; font-size: 13px; font-weight: 900; text-align: center; background: rgba(63,162,111,0.10); border: 1px solid rgba(63,162,111,0.16); color: var(--success); }
+        .search-ai-note.warning { background: rgba(186,145,80,0.10); border-color: rgba(186,145,80,0.18); color: var(--warning); }
+        .search-ai-note.danger { background: rgba(196,122,114,0.10); border-color: rgba(196,122,114,0.18); color: var(--danger); }
+        .year-card { border-radius: 28px; margin-bottom: 18px; overflow: hidden; border: 1px solid rgba(201,164,107,0.14); box-shadow: 0 10px 24px rgba(120,95,56,0.06); background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.90)); break-inside: avoid; page-break-inside: avoid; opacity: 0; transform: translateY(16px); animation: cardIn .55s ease forwards; }
         .year-card.status-paid { border-color: var(--success-border); }
         .year-card.status-partial { border-color: var(--warning-border); }
         .year-card.status-late { border-color: var(--danger-border); }
         .year-card.status-credit { border-color: var(--success-border); }
-
-        .year-head {
-            position: relative;
-            min-height: 74px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 18px;
-            background: linear-gradient(180deg, rgba(236,233,222,0.55), rgba(245,239,226,0.38));
-            border-bottom: 1px solid rgba(201,164,107,0.10);
-        }
-
-        .year-status {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 9px 16px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 900;
-            line-height: 1;
-            white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(120,95,56,0.05);
-            border: 1px solid transparent;
-            background: #fff;
-        }
-
-        .status-paid {
-            background: var(--success-soft);
-            color: var(--success);
-            border-color: var(--success-border);
-        }
-
-        .status-partial {
-            background: var(--warning-soft);
-            color: var(--warning);
-            border-color: var(--warning-border);
-        }
-
-        .status-late {
-            background: var(--danger-soft);
-            color: var(--danger);
-            border-color: var(--danger-border);
-        }
-
-        .status-credit {
-            background: var(--success-soft);
-            color: var(--success);
-            border-color: var(--success-border);
-        }
-
-        .year-title {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            text-align: center;
-        }
-
-        .year-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 102px;
-            min-height: 56px;
-            padding: 8px 20px;
-            border-radius: 999px;
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--gold-deep);
-            background: rgba(255,255,255,0.58);
-            border: 1.5px solid rgba(201,164,107,0.22);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
-        }
-
-        .year-body {
-            padding: 0;
-        }
-
-        .year-summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        .year-summary-table thead th {
-            background: var(--table-head);
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 900;
-            text-align: center;
-            padding: 16px 12px;
-            border-bottom: 1px solid rgba(201,164,107,0.12);
-        }
-
-        .year-summary-table tbody td {
-            text-align: center;
-            padding: 20px 12px;
-            font-size: 22px;
-            font-weight: 900;
-            border-bottom: 1px solid rgba(201,164,107,0.10);
-            border-left: 1px solid rgba(201,164,107,0.08);
-            background: var(--table-row);
-        }
-
-        .year-summary-table tbody tr:nth-child(even) td {
-            background: var(--table-row-alt);
-        }
-
-        .year-summary-table tbody td:last-child,
-        .year-summary-table thead th:last-child {
-            border-left: none;
-        }
-
-        .cell-opening {
-            color: var(--gold-deep);
-        }
-
-        .cell-debit {
-            color: var(--danger);
-        }
-
-        .cell-credit {
-            color: var(--success);
-        }
-
-        .cell-balance.ok {
-            color: var(--success);
-        }
-
-        .cell-balance.due {
-            color: var(--danger);
-        }
-
-        .cell-balance.credit {
-            color: var(--success);
-        }
-
-        .empty-state {
-            border-radius: 24px;
-            padding: 28px 18px;
-            text-align: center;
-            background: rgba(255,255,255,0.74);
-            border: 1px solid rgba(201,164,107,0.14);
-            color: var(--muted);
-            font-weight: 800;
-            box-shadow: 0 10px 24px rgba(120,95,56,0.04);
-        }
-
-        .bottom-actions {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 25px;
-            flex-wrap: nowrap;
-        }
-
-        .back-btn,
-        .save-btn {
-            flex: 1;
-            max-width: 200px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-            font-size: 15px;
-        }
-
-        #loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #eee;
-            border-top-color: var(--gold-deep);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes cardIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media screen and (max-width: 980px) {
-            .result-grid,
-            .search-ai-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .year-summary-table tbody td {
-                font-size: 20px;
-                padding: 18px 10px;
-            }
-
-            .year-summary-table thead th {
-                font-size: 14px;
-                padding: 14px 10px;
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            body { padding: 10px; }
-
-            .statement-header h1 { font-size: 22px; }
-            .statement-header h2 { font-size: 18px; }
-
-            .year-head {
-                min-height: 68px;
-                padding: 10px 12px;
-            }
-
-            .year-status {
-                left: 12px;
-                font-size: 11px;
-                padding: 8px 13px;
-            }
-
-            .year-chip {
-                min-width: 92px;
-                min-height: 50px;
-                font-size: 18px;
-            }
-
-            .year-summary-table thead th {
-                font-size: 13px;
-                padding: 13px 8px;
-            }
-
-            .year-summary-table tbody td {
-                font-size: 17px;
-                padding: 15px 8px;
-            }
-
-            .bottom-actions { flex-wrap: nowrap; }
-            .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; }
-        }
-
-        @media screen and (max-width: 560px) {
-            .result-grid,
-            .search-ai-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header-meta,
-            .search-row,
-            .search-total-box {
-                flex-direction: column;
-            }
-
-            .search-input-wrap,
-            .search-btn,
-            .clear-btn {
-                width: 100%;
-            }
-
-            .search-table {
-                min-width: 100%;
-            }
-
-            .year-status {
-                position: absolute;
-                left: 10px;
-                top: 10px;
-                transform: none;
-                margin-bottom: 0;
-            }
-
-            .year-head {
-                min-height: 78px;
-                padding-top: 18px;
-            }
-
-            .year-chip {
-                min-width: 88px;
-                min-height: 48px;
-                font-size: 17px;
-            }
-
-            .year-summary-table {
-                table-layout: auto;
-            }
-
-            .year-summary-table thead th {
-                font-size: 11px;
-                padding: 11px 6px;
-            }
-
-            .year-summary-table tbody td {
-                font-size: 15px;
-                padding: 13px 6px;
-            }
-        }
-
-        @page {
-            size: A4 portrait;
-            margin: 10mm;
-        }
-
-        @media print {
-            body {
-                background: white !important;
-                opacity: 1 !important;
-                transform: none !important;
-                padding: 0 !important;
-                color: var(--text) !important;
-            }
-
-            .bottom-actions,
-            #loader,
-            .search-card,
-            .search-results-card {
-                display: none !important;
-            }
-
-            .wrap {
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .year-card,
-            .statement-header {
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-            }
-        }
+        .year-head { position: relative; min-height: 74px; display: flex; align-items: center; justify-content: center; padding: 12px 18px; background: linear-gradient(180deg, rgba(236,233,222,0.55), rgba(245,239,226,0.38)); border-bottom: 1px solid rgba(201,164,107,0.10); }
+        .year-status { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); padding: 9px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; line-height: 1; white-space: nowrap; box-shadow: 0 3px 10px rgba(120,95,56,0.05); border: 1px solid transparent; background: #fff; }
+        .status-paid { background: var(--success-soft); color: var(--success); border-color: var(--success-border); }
+        .status-partial { background: var(--warning-soft); color: var(--warning); border-color: var(--warning-border); }
+        .status-late { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-border); }
+        .status-credit { background: var(--success-soft); color: var(--success); border-color: var(--success-border); }
+        .year-title { display: flex; justify-content: center; align-items: center; width: 100%; text-align: center; }
+        .year-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 102px; min-height: 56px; padding: 8px 20px; border-radius: 999px; font-size: 20px; font-weight: 900; color: var(--gold-deep); background: rgba(255,255,255,0.58); border: 1.5px solid rgba(201,164,107,0.22); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45); }
+        .year-body { padding: 0; }
+        .year-summary-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .year-summary-table thead th { background: var(--table-head); color: var(--text); font-size: 15px; font-weight: 900; text-align: center; padding: 16px 12px; border-bottom: 1px solid rgba(201,164,107,0.12); }
+        .year-summary-table tbody td { text-align: center; padding: 20px 12px; font-size: 22px; font-weight: 900; border-bottom: 1px solid rgba(201,164,107,0.10); border-left: 1px solid rgba(201,164,107,0.08); background: var(--table-row); }
+        .year-summary-table tbody tr:nth-child(even) td { background: var(--table-row-alt); }
+        .year-summary-table tbody td:last-child, .year-summary-table thead th:last-child { border-left: none; }
+        .cell-opening { color: var(--gold-deep); }
+        .cell-debit { color: var(--danger); }
+        .cell-credit { color: var(--success); }
+        .cell-balance.ok { color: var(--success); }
+        .cell-balance.due { color: var(--danger); }
+        .cell-balance.credit { color: var(--success); }
+        .empty-state { border-radius: 24px; padding: 28px 18px; text-align: center; background: rgba(255,255,255,0.74); border: 1px solid rgba(201,164,107,0.14); color: var(--muted); font-weight: 800; box-shadow: 0 10px 24px rgba(120,95,56,0.04); }
+        .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; flex-wrap: nowrap; }
+        .back-btn, .save-btn { flex: 1; max-width: 200px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-size: 15px; }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+        @media screen and (max-width: 980px) { .result-grid, .search-ai-grid { grid-template-columns: repeat(2, 1fr); } .year-summary-table tbody td { font-size: 20px; padding: 18px 10px; } .year-summary-table thead th { font-size: 14px; padding: 14px 10px; } }
+        @media screen and (max-width: 768px) { body { padding: 10px; } .statement-header h1 { font-size: 22px; } .statement-header h2 { font-size: 18px; } .year-head { min-height: 68px; padding: 10px 12px; } .year-status { left: 12px; font-size: 11px; padding: 8px 13px; } .year-chip { min-width: 92px; min-height: 50px; font-size: 18px; } .year-summary-table thead th { font-size: 13px; padding: 13px 8px; } .year-summary-table tbody td { font-size: 17px; padding: 15px 8px; } .bottom-actions { flex-wrap: nowrap; } .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; } }
+        @media screen and (max-width: 560px) { .result-grid, .search-ai-grid { grid-template-columns: 1fr; } .header-meta, .search-row, .search-total-box { flex-direction: column; } .search-input-wrap, .search-btn, .clear-btn { width: 100%; } .search-table { min-width: 100%; } .year-status { position: absolute; left: 10px; top: 10px; transform: none; margin-bottom: 0; } .year-head { min-height: 78px; padding-top: 18px; } .year-chip { min-width: 88px; min-height: 48px; font-size: 17px; } .year-summary-table { table-layout: auto; } .year-summary-table thead th { font-size: 11px; padding: 11px 6px; } .year-summary-table tbody td { font-size: 15px; padding: 13px 6px; } }
+        @page { size: A4 portrait; margin: 10mm; }
+        @media print { body { background: white !important; opacity: 1 !important; transform: none !important; padding: 0 !important; color: var(--text) !important; } .bottom-actions, #loader, .search-card, .search-results-card { display: none !important; } .wrap { max-width: 100% !important; margin: 0 !important; padding: 0 !important; } .year-card, .statement-header { break-inside: avoid !important; page-break-inside: avoid !important; } }
     </style>
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
-
     <div class="wrap">
         <div class="statement-header">
             <h1>مجمع جبري الصناعي التجاري</h1>
             <h2 id="statement_tenant_name">-</h2>
-            <div class="header-meta">
-                <span class="chip" id="statement_date">-</span>
-            </div>
+            <div class="header-meta"><span class="chip" id="statement_date">-</span></div>
         </div>
-
         <div class="search-card">
             <div class="search-title">بحث عن السند أو السنة</div>
             <div class="search-row">
-                <div class="search-input-wrap">
-                    <input
-                        id="receipt_search"
-                        class="search-input"
-                        type="text"
-                        placeholder="ابحث برقم السند أو السنة (مثال: 878 أو 2025)"
-                    />
-                </div>
+                <div class="search-input-wrap"><input id="receipt_search" class="search-input" type="text" placeholder="ابحث برقم السند أو السنة (مثال: 878 أو 2025)" /></div>
                 <button id="search_btn" class="search-btn" type="button">بحث</button>
                 <button id="clear_search_btn" class="clear-btn" type="button">مسح</button>
             </div>
-            <div class="search-hint">
-                مثال: 878 أو 2025
-            </div>
+            <div class="search-hint">مثال: 878 أو 2025</div>
         </div>
-
         <div id="search_results_card" class="search-results-card">
             <div class="search-results-head">
                 <div class="search-results-title" id="search_results_title">نتائج البحث</div>
@@ -898,617 +130,561 @@
             </div>
             <div id="search_results_body"></div>
         </div>
-
         <div id="years_container"></div>
+        <div class="bottom-actions">
+            <button class="back-btn" onclick="window.history.back()">رجوع</button>
+            <button class="save-btn" type="button" onclick="window.print()">حفظ PDF</button>
+        </div>
+    </div>
+    أكيد — هذا كود statement مقسوم إلى Part 1 و Part 2 فقط.
+انسخ Part 1 أولًا، ثم تحته مباشرة Part 2.
 
+Part 1
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | كشف الحساب التفصيلي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg: #f7f4ed; --bg-2: #fdfbf6; --text: #2f2a24; --muted: #7a6c59; --gold: #c9a46b; --gold-deep: #b18a52; --success: #5f9f7d; --success-soft: rgba(95,159,125,0.10); --success-border: rgba(95,159,125,0.20); --danger: #c47a72; --danger-soft: rgba(196,122,114,0.09); --danger-border: rgba(196,122,114,0.18); --warning: #ba9150; --warning-soft: rgba(186,145,80,0.11); --warning-border: rgba(186,145,80,0.20); --info: #5e7fd8; --card: rgba(255,255,255,0.84); --card-2: rgba(247,244,237,0.78); --border: rgba(201,164,107,0.16); --table-head: #eee7da; --table-row: rgba(255,255,255,0.70); --table-row-alt: rgba(247,243,235,0.88); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Tajawal', sans-serif; }
+        body { margin: 0; color: var(--text); padding: 16px; opacity: 0; transform: translateY(8px); transition: all 0.45s ease; background: linear-gradient(135deg, var(--bg), var(--bg-2)); direction: rtl; }
+        body.loaded { opacity: 1; transform: translateY(0); }
+        .wrap { max-width: 1120px; margin: 0 auto; padding-bottom: 42px; width: 100%; }
+        .statement-header { border-radius: 28px; padding: 24px; margin-bottom: 16px; text-align: center; background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(247,244,237,0.84)); border: 1px solid var(--border); box-shadow: 0 12px 28px rgba(120,95,56,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .statement-header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 900; color: var(--gold-deep); }
+        .statement-header h2 { margin: 0 0 8px; font-size: 20px; font-weight: 900; color: var(--text); }
+        .header-meta { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .chip { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; background: rgba(201,164,107,0.12); color: var(--text); border: 1px solid rgba(201,164,107,0.22); min-height: 32px; }
+        .search-card, .year-card, .search-results-card { background: linear-gradient(135deg, var(--card), var(--card-2)); border: 1px solid rgba(201,164,107,0.14); border-radius: 24px; box-shadow: 0 10px 24px rgba(120,95,56,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .search-card { margin-bottom: 18px; padding: 14px; }
+        .search-title { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 900; color: var(--muted); }
+        .search-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .search-input-wrap { flex: 1; min-width: 240px; position: relative; }
+        .search-input { width: 100%; height: 46px; border-radius: 16px; border: 1px solid rgba(201,164,107,0.18); background: rgba(255,255,255,0.80); color: var(--text); font-size: 15px; font-weight: 900; padding: 0 16px; outline: none; }
+        .search-btn, .clear-btn, .back-btn, .save-btn { height: 46px; border-radius: 16px; font-weight: 900; font-size: 14px; cursor: pointer; border: 1px solid rgba(201,164,107,0.16); box-shadow: 0 10px 22px rgba(120,95,56,0.08); transition: all 0.25s ease; }
+        .search-btn, .save-btn { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; border: none; padding: 0 18px; }
+        .clear-btn, .back-btn { background: rgba(255,255,255,0.78); color: var(--text); padding: 0 18px; }
+        .search-btn:hover, .clear-btn:hover, .back-btn:hover, .save-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(120,95,56,0.13); }
+        .search-hint { margin-top: 10px; font-size: 12px; color: var(--muted); font-weight: 700; }
+        .search-results-card { display: none; margin-bottom: 18px; padding: 16px; }
+        .search-results-card.active { display: block; }
+        .search-results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+        .search-results-title { font-size: 14px; font-weight: 900; color: var(--text); }
+        .search-status-badge { padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 900; border: 1px solid transparent; }
+        .search-status-badge.found { background: rgba(63,162,111,0.10); color: var(--success); border-color: rgba(63,162,111,0.20); }
+        .search-status-badge.not-found { background: rgba(196,122,114,0.10); color: var(--danger); border-color: rgba(196,122,114,0.20); }
+        .search-status-badge.multi { background: rgba(94,127,216,0.10); color: var(--info); border-color: rgba(94,127,216,0.20); }
+        .search-empty { text-align: center; padding: 16px 10px 4px; color: var(--muted); font-weight: 800; }
+        .result-item { border-radius: 18px; padding: 14px; border: 1px solid rgba(201,164,107,0.14); background: linear-gradient(135deg, rgba(255,255,255,0.76), rgba(247,244,237,0.68)); box-shadow: 0 8px 18px rgba(120,95,56,0.04); }
+        .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .result-cell { border-radius: 14px; padding: 10px; background: rgba(255,255,255,0.64); border: 1px solid rgba(201,164,107,0.10); text-align: center; }
+        .result-cell span { display: block; font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 5px; }
+        .result-cell b { display: block; font-size: 13px; font-weight: 900; color: var(--text); word-break: break-word; }
+        .result-amount { color: var(--success) !important; }
+        .search-table-wrap { overflow-x: auto; margin-top: 6px; }
+        .search-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 520px; }
+        .search-table th { font-size: 13px; font-weight: 900; color: var(--muted); padding: 0 8px 6px; text-align: center; }
+        .search-table td { background: rgba(255,255,255,0.72); border: 1px solid rgba(201,164,107,0.12); text-align: center; padding: 14px 10px; font-size: 14px; font-weight: 900; color: var(--text); }
+        .search-table tbody tr td:first-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+        .search-table tbody tr td:last-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .search-table tbody tr.highlight-latest td { background: rgba(63,162,111,0.08); border-color: rgba(63,162,111,0.16); }
+        .search-date-chip, .search-receipt-chip { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 900; white-space: nowrap; border: 1px solid rgba(201,164,107,0.16); background: rgba(201,164,107,0.08); }
+        .search-receipt-chip { color: var(--info); border-color: rgba(94,127,216,0.18); background: rgba(94,127,216,0.08); }
+        .search-amount { color: var(--success); font-size: 18px; font-weight: 900; }
+        .search-total-box { margin-top: 14px; background: rgba(255,255,255,0.76); border: 1px solid rgba(201,164,107,0.16); border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 8px 18px rgba(120,95,56,0.04); flex-wrap: wrap; }
+        .search-total-box span { color: var(--muted); font-size: 13px; font-weight: 900; }
+        .search-total-box strong { color: var(--success); font-size: 22px; font-weight: 900; }
+        .search-ai-box { margin-top: 14px; padding: 16px; border-radius: 20px; background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(248,252,249,0.78)); border: 1px solid rgba(63,162,111,0.14); box-shadow: 0 10px 24px rgba(63,162,111,0.05); }
+        .search-ai-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .search-ai-head h4 { margin: 0; font-size: 15px; font-weight: 900; color: var(--text); }
+        .search-ai-badge { padding: 7px 12px; border-radius: 999px; background: rgba(63,162,111,0.10); color: var(--success); border: 1px solid rgba(63,162,111,0.18); font-size: 12px; font-weight: 900; }
+        .search-ai-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .search-ai-item { background: rgba(255,255,255,0.76); border: 1px solid rgba(201,164,107,0.10); border-radius: 16px; padding: 12px; text-align: center; }
+        .search-ai-item span { display: block; font-size: 11px; color: var(--muted); font-weight: 800; margin-bottom: 6px; }
+        .search-ai-item b { display: block; font-size: 16px; font-weight: 900; color: var(--text); }
+        .search-ai-note { margin-top: 12px; padding: 12px 14px; border-radius: 14px; font-size: 13px; font-weight: 900; text-align: center; background: rgba(63,162,111,0.10); border: 1px solid rgba(63,162,111,0.16); color: var(--success); }
+        .search-ai-note.warning { background: rgba(186,145,80,0.10); border-color: rgba(186,145,80,0.18); color: var(--warning); }
+        .search-ai-note.danger { background: rgba(196,122,114,0.10); border-color: rgba(196,122,114,0.18); color: var(--danger); }
+        .year-card { border-radius: 28px; margin-bottom: 18px; overflow: hidden; border: 1px solid rgba(201,164,107,0.14); box-shadow: 0 10px 24px rgba(120,95,56,0.06); background: linear-gradient(135deg, rgba(252,251,246,0.98), rgba(247,244,237,0.90)); break-inside: avoid; page-break-inside: avoid; opacity: 0; transform: translateY(16px); animation: cardIn .55s ease forwards; }
+        .year-card.status-paid { border-color: var(--success-border); }
+        .year-card.status-partial { border-color: var(--warning-border); }
+        .year-card.status-late { border-color: var(--danger-border); }
+        .year-card.status-credit { border-color: var(--success-border); }
+        .year-head { position: relative; min-height: 74px; display: flex; align-items: center; justify-content: center; padding: 12px 18px; background: linear-gradient(180deg, rgba(236,233,222,0.55), rgba(245,239,226,0.38)); border-bottom: 1px solid rgba(201,164,107,0.10); }
+        .year-status { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); padding: 9px 16px; border-radius: 999px; font-size: 12px; font-weight: 900; line-height: 1; white-space: nowrap; box-shadow: 0 3px 10px rgba(120,95,56,0.05); border: 1px solid transparent; background: #fff; }
+        .status-paid { background: var(--success-soft); color: var(--success); border-color: var(--success-border); }
+        .status-partial { background: var(--warning-soft); color: var(--warning); border-color: var(--warning-border); }
+        .status-late { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-border); }
+        .status-credit { background: var(--success-soft); color: var(--success); border-color: var(--success-border); }
+        .year-title { display: flex; justify-content: center; align-items: center; width: 100%; text-align: center; }
+        .year-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 102px; min-height: 56px; padding: 8px 20px; border-radius: 999px; font-size: 20px; font-weight: 900; color: var(--gold-deep); background: rgba(255,255,255,0.58); border: 1.5px solid rgba(201,164,107,0.22); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45); }
+        .year-body { padding: 0; }
+        .year-summary-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .year-summary-table thead th { background: var(--table-head); color: var(--text); font-size: 15px; font-weight: 900; text-align: center; padding: 16px 12px; border-bottom: 1px solid rgba(201,164,107,0.12); }
+        .year-summary-table tbody td { text-align: center; padding: 20px 12px; font-size: 22px; font-weight: 900; border-bottom: 1px solid rgba(201,164,107,0.10); border-left: 1px solid rgba(201,164,107,0.08); background: var(--table-row); }
+        .year-summary-table tbody tr:nth-child(even) td { background: var(--table-row-alt); }
+        .year-summary-table tbody td:last-child, .year-summary-table thead th:last-child { border-left: none; }
+        .cell-opening { color: var(--gold-deep); }
+        .cell-debit { color: var(--danger); }
+        .cell-credit { color: var(--success); }
+        .cell-balance.ok { color: var(--success); }
+        .cell-balance.due { color: var(--danger); }
+        .cell-balance.credit { color: var(--success); }
+        .empty-state { border-radius: 24px; padding: 28px 18px; text-align: center; background: rgba(255,255,255,0.74); border: 1px solid rgba(201,164,107,0.14); color: var(--muted); font-weight: 800; box-shadow: 0 10px 24px rgba(120,95,56,0.04); }
+        .bottom-actions { display: flex; justify-content: center; gap: 12px; margin-top: 25px; flex-wrap: nowrap; }
+        .back-btn, .save-btn { flex: 1; max-width: 200px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-size: 15px; }
+        #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top-color: var(--gold-deep); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+        @media screen and (max-width: 980px) { .result-grid, .search-ai-grid { grid-template-columns: repeat(2, 1fr); } .year-summary-table tbody td { font-size: 20px; padding: 18px 10px; } .year-summary-table thead th { font-size: 14px; padding: 14px 10px; } }
+        @media screen and (max-width: 768px) { body { padding: 10px; } .statement-header h1 { font-size: 22px; } .statement-header h2 { font-size: 18px; } .year-head { min-height: 68px; padding: 10px 12px; } .year-status { left: 12px; font-size: 11px; padding: 8px 13px; } .year-chip { min-width: 92px; min-height: 50px; font-size: 18px; } .year-summary-table thead th { font-size: 13px; padding: 13px 8px; } .year-summary-table tbody td { font-size: 17px; padding: 15px 8px; } .bottom-actions { flex-wrap: nowrap; } .back-btn, .save-btn { width: auto; flex: 1; font-size: 14px; } }
+        @media screen and (max-width: 560px) { .result-grid, .search-ai-grid { grid-template-columns: 1fr; } .header-meta, .search-row, .search-total-box { flex-direction: column; } .search-input-wrap, .search-btn, .clear-btn { width: 100%; } .search-table { min-width: 100%; } .year-status { position: absolute; left: 10px; top: 10px; transform: none; margin-bottom: 0; } .year-head { min-height: 78px; padding-top: 18px; } .year-chip { min-width: 88px; min-height: 48px; font-size: 17px; } .year-summary-table { table-layout: auto; } .year-summary-table thead th { font-size: 11px; padding: 11px 6px; } .year-summary-table tbody td { font-size: 15px; padding: 13px 6px; } }
+        @page { size: A4 portrait; margin: 10mm; }
+        @media print { body { background: white !important; opacity: 1 !important; transform: none !important; padding: 0 !important; color: var(--text) !important; } .bottom-actions, #loader, .search-card, .search-results-card { display: none !important; } .wrap { max-width: 100% !important; margin: 0 !important; padding: 0 !important; } .year-card, .statement-header { break-inside: avoid !important; page-break-inside: avoid !important; } }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+    <div class="wrap">
+        <div class="statement-header">
+            <h1>مجمع جبري الصناعي التجاري</h1>
+            <h2 id="statement_tenant_name">-</h2>
+            <div class="header-meta"><span class="chip" id="statement_date">-</span></div>
+        </div>
+        <div class="search-card">
+            <div class="search-title">بحث عن السند أو السنة</div>
+            <div class="search-row">
+                <div class="search-input-wrap"><input id="receipt_search" class="search-input" type="text" placeholder="ابحث برقم السند أو السنة (مثال: 878 أو 2025)" /></div>
+                <button id="search_btn" class="search-btn" type="button">بحث</button>
+                <button id="clear_search_btn" class="clear-btn" type="button">مسح</button>
+            </div>
+            <div class="search-hint">مثال: 878 أو 2025</div>
+        </div>
+        <div id="search_results_card" class="search-results-card">
+            <div class="search-results-head">
+                <div class="search-results-title" id="search_results_title">نتائج البحث</div>
+                <div id="search_status_badge" class="search-status-badge found">موجود</div>
+            </div>
+            <div id="search_results_body"></div>
+        </div>
+        <div id="years_container"></div>
         <div class="bottom-actions">
             <button class="back-btn" onclick="window.history.back()">رجوع</button>
             <button class="save-btn" type="button" onclick="window.print()">حفظ PDF</button>
         </div>
     </div>
 
-    <script type="module">
-        const tenantSession = localStorage.getItem('jabri_tenant_session');
-        const adminSession = localStorage.getItem('jabri_admin_session');
+Part 2
 
-        if (tenantSession !== 'active' && adminSession !== 'active') {
-            window.location.href = 'index.html';
-        }
+    <script type="module">
+        const tenantSession = localStorage.getItem('jabri_tenant_session'), adminSession = localStorage.getItem('jabri_admin_session');
+        if (tenantSession !== 'active' && adminSession !== 'active') window.location.href = 'index.html';
 
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const tenantFromURL = urlParams.get('tenant');
-        const tenantFromStorage = localStorage.getItem('jabri_tenant_code');
-        const tenantCode = (tenantFromURL || tenantFromStorage || '').trim();
+        const urlParams = new URLSearchParams(window.location.search),
+              tenantFromURL = urlParams.get('tenant'),
+              tenantFromStorage = localStorage.getItem('jabri_tenant_code'),
+              tenantCode = (tenantFromURL || tenantFromStorage || '').trim();
 
         const supabase = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        let ALL_TRANSACTIONS = [];
-        let ALL_SUMMARIES = [];
-        let TENANT_DATA = null;
+        let ALL_TRANSACTIONS = [], ALL_SUMMARIES = [], TENANT_DATA = null;
 
-        function toNumber(v) {
-            return parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
-        }
+        const toNumber = v => parseFloat(String(v ?? '').replace(/,/g, '')) || 0;
+        const formatCurrency = v => String(toNumber(v).toFixed(0));
 
-        function formatCurrency(v) {
-            return String(toNumber(v).toFixed(0));
-        }
+        const formatShortDate = dv => {
+            if(!dv) return '-';
+            const raw = String(dv).trim();
+            const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if(iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
 
-        function formatShortDate(dateValue) {
-            if (!dateValue) return '-';
-
-            const raw = String(dateValue).trim();
-            const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) {
-                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-            }
-
-            const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (slashMatch) {
-                return `${String(Number(slashMatch[1])).padStart(2, '0')}/${String(Number(slashMatch[2])).padStart(2, '0')}/${slashMatch[3]}`;
-            }
+            const slash = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if(slash) return `${String(Number(slash[1])).padStart(2,'0')}/${String(Number(slash[2])).padStart(2,'0')}/${slash[3]}`;
 
             const d = new Date(raw);
-            if (!Number.isNaN(d.getTime())) {
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
+            if(!isNaN(d.getTime())){
+                const day = String(d.getDate()).padStart(2,'0'),
+                      month = String(d.getMonth()+1).padStart(2,'0'),
+                      year = d.getFullYear();
                 return `${day}/${month}/${year}`;
             }
-
             return raw;
-        }
+        };
 
-        function formatLastUpdate(value) {
-            if (value) {
-                const d = new Date(value);
-                if (!Number.isNaN(d.getTime())) {
-                    return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}`;
-                }
+        const formatLastUpdate = v => {
+            if(v){
+                const d = new Date(v);
+                if(!isNaN(d.getTime())) return `آخر تحديث: ${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
             }
-
             const now = new Date();
-            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            })}`;
-        }
+            return `آخر تحديث: ${now.toLocaleDateString('en-GB')} - ${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
+        };
 
-        function escapeHtml(text = '') {
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
+        const escapeHtml = (t='') => String(t)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#039;');
 
-        // ========== FIXED: getStatus handles negative balances as credit ==========
-        function getStatus(totalCredit, finalBalance) {
-            const balance = toNumber(finalBalance);
-            const credit = toNumber(totalCredit);
-            
-            if (balance < 0) {
-                return { text: 'دائن', className: 'status-credit' };
-            }
-            if (balance === 0) {
-                return { text: 'مسدد', className: 'status-paid' };
-            }
-            if (credit > 0) {
-                return { text: 'جزئي', className: 'status-partial' };
-            }
+        const getStatus = (tc, fb) => {
+            const b = toNumber(fb), c = toNumber(tc);
+            if(b < 0) return { text: 'دائن', className: 'status-credit' };
+            if(b === 0) return { text: 'مسدد', className: 'status-paid' };
+            if(c > 0) return { text: 'جزئي', className: 'status-partial' };
             return { text: 'متأخر', className: 'status-late' };
-        }
+        };
 
-        // ========== FIXED: getBalanceBoxClass handles negative balances ==========
-        function getBalanceBoxClass(balance) {
-            const bal = toNumber(balance);
-            if (bal < 0) return 'credit';
-            if (bal === 0) return 'ok';
+        const getBalanceBoxClass = b => {
+            const bal = toNumber(b);
+            if(bal < 0) return 'credit';
+            if(bal === 0) return 'ok';
             return 'due';
-        }
+        };
 
-        // ========== FIXED: formatBalanceDisplay shows negative as credit ==========
-        function formatBalanceDisplay(balance) {
-            const bal = toNumber(balance);
-            if (bal < 0) {
-                return `${formatCurrency(Math.abs(bal))} (دائن)`;
-            }
+        const formatBalanceDisplay = b => {
+            const bal = toNumber(b);
+            if(bal < 0) return `${formatCurrency(Math.abs(bal))} (دائن)`;
             return formatCurrency(bal);
-        }
+        };
 
-        function normalizeSearchText(value) {
-            return String(value || '')
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, ' ')
-                .replace(/[-_.]/g, '/');
-        }
+        const normalizeSearchText = v => String(v||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[-_.]/g,'/');
 
-        function extractDateParts(rawDate) {
-            const raw = String(rawDate || '').trim();
-            if (!raw) {
-                return {
-                    raw: '',
-                    rawNormalized: '',
-                    year: '',
-                    month: '',
-                    month2: '',
-                    day: '',
-                    day2: ''
-                };
+        const extractDateParts = rd => {
+            const raw = String(rd||'').trim();
+            if(!raw) return { raw:'', rawNormalized:'', year:'', month:'', month2:'', day:'', day2:'' };
+
+            const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if(iso){
+                const y=iso[1], m=String(Number(iso[2])), d=String(Number(iso[3]));
+                return { raw, rawNormalized: normalizeSearchText(raw), year: y, month: m, month2: m.padStart(2,'0'), day: d, day2: d.padStart(2,'0') };
             }
 
-            const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) {
-                const year = isoMatch[1];
-                const month = String(Number(isoMatch[2]));
-                const day = String(Number(isoMatch[3]));
-                return {
-                    raw,
-                    rawNormalized: normalizeSearchText(raw),
-                    year,
-                    month,
-                    month2: month.padStart(2, '0'),
-                    day,
-                    day2: day.padStart(2, '0')
-                };
+            const slash = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if(slash){
+                const d=String(Number(slash[1])), m=String(Number(slash[2])), y=slash[3];
+                return { raw, rawNormalized: normalizeSearchText(raw), year: y, month: m, month2: m.padStart(2,'0'), day: d, day2: d.padStart(2,'0') };
             }
 
-            const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (slashMatch) {
-                const day = String(Number(slashMatch[1]));
-                const month = String(Number(slashMatch[2]));
-                const year = slashMatch[3];
-                return {
-                    raw,
-                    rawNormalized: normalizeSearchText(raw),
-                    year,
-                    month,
-                    month2: month.padStart(2, '0'),
-                    day,
-                    day2: day.padStart(2, '0')
-                };
+            const p = new Date(raw);
+            let y='', m='', d='';
+            if(!isNaN(p.getTime())){
+                y=String(p.getFullYear());
+                m=String(p.getMonth()+1);
+                d=String(p.getDate());
             }
 
-            const parsed = new Date(raw);
-            let year = '';
-            let month = '';
-            let day = '';
+            return { raw, rawNormalized: normalizeSearchText(raw), year: y, month: m, month2: m?m.padStart(2,'0'):'', day: d, day2: d?d.padStart(2,'0'):'' };
+        };
 
-            if (!Number.isNaN(parsed.getTime())) {
-                year = String(parsed.getFullYear());
-                month = String(parsed.getMonth() + 1);
-                day = String(parsed.getDate());
-            }
+        const safeDateValue = r => {
+            const t = String(r||'').trim();
+            if(!t) return 0;
 
-            return {
-                raw,
-                rawNormalized: normalizeSearchText(raw),
-                year,
-                month,
-                month2: month ? month.padStart(2, '0') : '',
-                day,
-                day2: day ? day.padStart(2, '0') : ''
-            };
-        }
+            const iso = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if(iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00`).getTime();
 
-        function safeDateValue(raw) {
-            const text = String(raw || '').trim();
-            if (!text) return 0;
-
-            const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) return new Date(`${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}T00:00:00`).getTime();
-
-            const slashMatch = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (slashMatch) {
-                const dd = String(Number(slashMatch[1])).padStart(2, '0');
-                const mm = String(Number(slashMatch[2])).padStart(2, '0');
-                const yy = slashMatch[3];
+            const slash = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if(slash){
+                const dd=String(Number(slash[1])).padStart(2,'0'),
+                      mm=String(Number(slash[2])).padStart(2,'0'),
+                      yy=slash[3];
                 return new Date(`${yy}-${mm}-${dd}T00:00:00`).getTime();
             }
 
-            const parsed = new Date(text);
-            return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
-        }
+            const p = new Date(t);
+            return isNaN(p.getTime()) ? 0 : p.getTime();
+        };
 
-        function sortTransactionsAsc(list) {
-            return [...list].sort((a, b) => safeDateValue(a.date) - safeDateValue(b.date));
-        }
+        const sortTransactionsAsc = l => [...l].sort((a,b) => safeDateValue(a.date) - safeDateValue(b.date));
 
-        function isRealReceipt(item) {
-            const receipt = String(item.receipt_no || '').trim();
-            return receipt !== '' && receipt !== '-' && receipt.toLowerCase() !== 'null';
-        }
+        const isRealReceipt = i => {
+            const r = String(i.receipt_no||'').trim();
+            return r !== '' && r !== '-' && r.toLowerCase() !== 'null';
+        };
 
-        function transactionMatchesQuery(item, rawQuery) {
-            const q = normalizeSearchText(rawQuery);
-            if (!q) return false;
+        const transactionMatchesQuery = (i, q) => {
+            const nq = normalizeSearchText(q);
+            if(!nq) return false;
 
-            const dateParts = extractDateParts(item.date);
-            const receipt = normalizeSearchText(item.receipt_no || '');
+            const dp = extractDateParts(i.date),
+                  rec = normalizeSearchText(i.receipt_no||'');
 
-            if (/^\d{4}$/.test(q)) {
-                return dateParts.year === q && isRealReceipt(item);
-            }
+            if(/^\d{4}$/.test(nq)) return dp.year === nq && isRealReceipt(i);
+            return isRealReceipt(i) && rec.includes(nq);
+        };
 
-            return isRealReceipt(item) && receipt.includes(q);
-        }
+        const getAmount = i => toNumber(i.credit) || toNumber(i.debit) || 0;
 
-        function getAmount(item) {
-            return toNumber(item.credit) || toNumber(item.debit) || 0;
-        }
+        const buildAIDataForReceipts = receipts => {
+            const s = sortTransactionsAsc(receipts),
+                  cnt = s.length,
+                  tot = s.reduce((sum,i) => sum + getAmount(i), 0),
+                  last = cnt ? s[cnt-1] : null,
+                  lp = last ? formatCurrency(getAmount(last)) : '-',
+                  ld = last ? formatShortDate(last.date) : '-';
 
-        function buildAIDataForReceipts(receipts) {
-            const sorted = sortTransactionsAsc(receipts);
-            const count = sorted.length;
-            const total = sorted.reduce((sum, item) => sum + getAmount(item), 0);
-            const lastItem = count ? sorted[count - 1] : null;
-            const lastPayment = lastItem ? formatCurrency(getAmount(lastItem)) : '-';
-            const lastDate = lastItem ? formatShortDate(lastItem.date) : '-';
+            let note = 'لا توجد دفعات مسجلة', cls = 'danger';
+            if(cnt >= 3 && tot >= 1000){ note = 'مؤشر جيد: يوجد نشاط دفع واضح في هذه السنة'; cls = ''; }
+            else if(cnt >= 1){ note = 'مؤشر متوسط: توجد دفعات لكن تحتاج متابعة'; cls = 'warning'; }
 
-            let noteText = 'لا توجد دفعات مسجلة';
-            let noteClass = 'danger';
+            return { count: cnt, total: tot, lastPayment: lp, lastDate: ld, noteText: note, noteClass: cls };
+        };
 
-            if (count >= 3 && total >= 1000) {
-                noteText = 'مؤشر جيد: يوجد نشاط دفع واضح في هذه السنة';
-                noteClass = '';
-            } else if (count >= 1) {
-                noteText = 'مؤشر متوسط: توجد دفعات لكن تحتاج متابعة';
-                noteClass = 'warning';
-            }
+        const buildYearCard = (s, idx) => {
+            const tc = toNumber(s?.total_credit||0),
+                  fb = toNumber(s?.final_balance||0),
+                  ob = toNumber(s?.opening_balance||0),
+                  td = toNumber(s?.total_debit||0),
+                  st = getStatus(tc, fb),
+                  bc = getBalanceBoxClass(fb);
 
-            return {
-                count,
-                total,
-                lastPayment,
-                lastDate,
-                noteText,
-                noteClass
-            };
-        }
-
-        // ========== FIXED: buildYearCard with proper balance display ==========
-        function buildYearCard(summary, index) {
-            const totalCredit = toNumber(summary?.total_credit || 0);
-            const finalBalance = toNumber(summary?.final_balance || 0);
-            const openingBalance = toNumber(summary?.opening_balance || 0);
-            const totalDebit = toNumber(summary?.total_debit || 0);
-            
-            const status = getStatus(totalCredit, finalBalance);
-            const balanceClass = getBalanceBoxClass(finalBalance);
-
-            return `
-                <div class="year-card ${status.className}" style="animation-delay:${index * 0.06}s;">
-                    <div class="year-head">
-                        <div class="year-status ${status.className}">${status.text}</div>
-                        <div class="year-title">
-                            <span class="year-chip">${summary.year}</span>
-                        </div>
-                    </div>
-
-                    <div class="year-body">
-                        <table class="year-summary-table">
-                            <thead>
-                                <tr>
-                                    <th>الرصيد السابق</th>
-                                    <th>مدين السنة</th>
-                                    <th>دائن السنة</th>
-                                    <th>رصيد آخر السنة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="cell-opening">${formatCurrency(openingBalance)}</td>
-                                    <td class="cell-debit">${formatCurrency(totalDebit)}</td>
-                                    <td class="cell-credit">${formatCurrency(totalCredit)}</td>
-                                    <td class="cell-balance ${balanceClass}">${formatBalanceDisplay(finalBalance)}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            return `<div class="year-card ${st.className}" style="animation-delay:${idx*0.06}s;">
+                <div class="year-head">
+                    <div class="year-status ${st.className}">${st.text}</div>
+                    <div class="year-title"><span class="year-chip">${s.year}</span></div>
                 </div>
-            `;
-        }
+                <div class="year-body">
+                    <table class="year-summary-table">
+                        <thead>
+                            <tr>
+                                <th>الرصيد السابق</th>
+                                <th>مدين السنة</th>
+                                <th>دائن السنة</th>
+                                <th>رصيد آخر السنة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="cell-opening">${formatCurrency(ob)}</td>
+                                <td class="cell-debit">${formatCurrency(td)}</td>
+                                <td class="cell-credit">${formatCurrency(tc)}</td>
+                                <td class="cell-balance ${bc}">${formatBalanceDisplay(fb)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        };
 
-        function renderView() {
-            const container = document.getElementById('years_container');
-
-            if (!ALL_SUMMARIES.length) {
-                container.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
+        const renderView = () => {
+            const c = document.getElementById('years_container');
+            if(!ALL_SUMMARIES.length){
+                c.innerHTML = `<div class="empty-state">لا توجد بيانات لعرض كشف الحساب.</div>`;
                 return;
             }
 
-            container.innerHTML = [...ALL_SUMMARIES]
-                .sort((a, b) => Number(a.year) - Number(b.year))
-                .map((summary, index) => buildYearCard(summary, index))
+            c.innerHTML = [...ALL_SUMMARIES]
+                .sort((a,b) => Number(a.year) - Number(b.year))
+                .map((s,i) => buildYearCard(s,i))
                 .join('');
-        }
+        };
 
-        function setSearchStatus(type, text) {
-            const badge = document.getElementById('search_status_badge');
-            badge.className = `search-status-badge ${type}`;
-            badge.textContent = text;
-        }
+        const setSearchStatus = (ty, tx) => {
+            const b = document.getElementById('search_status_badge');
+            b.className = `search-status-badge ${ty}`;
+            b.textContent = tx;
+        };
 
-        function clearSearchResults() {
-            const card = document.getElementById('search_results_card');
-            const body = document.getElementById('search_results_body');
-            const title = document.getElementById('search_results_title');
-
+        const clearSearchResults = () => {
+            const card = document.getElementById('search_results_card'),
+                  body = document.getElementById('search_results_body'),
+                  title = document.getElementById('search_results_title');
             title.textContent = 'نتائج البحث';
             body.innerHTML = '';
             card.classList.remove('active');
-        }
+        };
 
-        function getLatestSummaryYear() {
-            if (!ALL_SUMMARIES.length) return null;
-            return Math.max(...ALL_SUMMARIES.map(row => Number(row.year)));
-        }
+        const getLatestSummaryYear = () => ALL_SUMMARIES.length ? Math.max(...ALL_SUMMARIES.map(r => Number(r.year))) : null;
 
-        // ========== UNTOUCHED: Search/tenant_transactions section ==========
-        function buildYearSearchTable(receipts, year) {
+        const buildYearSearchTable = (receipts, year) => {
             const sorted = sortTransactionsAsc(receipts);
             let total = 0;
-            const latestSummaryYear = getLatestSummaryYear();
+            const latestYear = getLatestSummaryYear();
 
-            const rows = sorted.map((item, index) => {
-                const amount = getAmount(item);
-                total += amount;
-                const isLatestYear = Number(year) === Number(latestSummaryYear) && index === sorted.length - 1;
+            const rows = sorted.map((item, idx) => {
+                const amt = getAmount(item);
+                total += amt;
+                const isLatest = Number(year) === Number(latestYear) && idx === sorted.length-1;
 
-                return `
-                    <tr class="${isLatestYear ? 'highlight-latest' : ''}">
-                        <td><span class="search-date-chip">${formatShortDate(item.date)}</span></td>
-                        <td><span class="search-amount">${formatCurrency(amount)}</span></td>
-                        <td><span class="search-receipt-chip">${escapeHtml(item.receipt_no)}</span></td>
-                    </tr>
-                `;
+                return `<tr class="${isLatest ? 'highlight-latest' : ''}">
+                    <td><span class="search-date-chip">${formatShortDate(item.date)}</span></td>
+                    <td><span class="search-amount">${formatCurrency(amt)}</span></td>
+                    <td><span class="search-receipt-chip">${escapeHtml(item.receipt_no)}</span></td>
+                </tr>`;
             }).join('');
 
             const ai = buildAIDataForReceipts(sorted);
 
-            return `
-                <div class="result-item">
-                    <div class="search-table-wrap">
-                        <table class="search-table">
-                            <thead>
-                                <tr>
-                                    <th>التاريخ</th>
-                                    <th>المبلغ</th>
-                                    <th>رقم السند</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rows}</tbody>
-                        </table>
-                    </div>
-
-                    <div class="search-total-box">
-                        <span>إجمالي قيمة السندات (${sorted.length} سند)</span>
-                        <strong>${formatCurrency(total)}</strong>
-                    </div>
-
-                    ${Number(year) === Number(latestSummaryYear) ? `
-                        <div class="search-ai-box">
-                            <div class="search-ai-head">
-                                <h4>التحليل الذكي لسنة ${year}</h4>
-                                <span class="search-ai-badge">AI ${year}</span>
-                            </div>
-
-                            <div class="search-ai-grid">
-                                <div class="search-ai-item">
-                                    <span>عدد السندات</span>
-                                    <b>${ai.count}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>إجمالي السندات</span>
-                                    <b>${formatCurrency(ai.total)}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>آخر دفعة</span>
-                                    <b>${ai.lastPayment}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>تاريخ آخر دفعة</span>
-                                    <b>${ai.lastDate}</b>
-                                </div>
-                            </div>
-
-                            <div class="search-ai-note ${ai.noteClass}">
-                                ${ai.noteText}
-                            </div>
-                        </div>
-                    ` : ''}
+            return `<div class="result-item">
+                <div class="search-table-wrap">
+                    <table class="search-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>المبلغ</th>
+                                <th>رقم السند</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
                 </div>
-            `;
-        }
+                <div class="search-total-box">
+                    <span>إجمالي قيمة السندات (${sorted.length} سند)</span>
+                    <strong>${formatCurrency(total)}</strong>
+                </div>
+                ${Number(year) === Number(latestYear) ? `
+                    <div class="search-ai-box">
+                        <div class="search-ai-head">
+                            <h4>التحليل الذكي لسنة ${year}</h4>
+                            <span class="search-ai-badge">AI ${year}</span>
+                        </div>
+                        <div class="search-ai-grid">
+                            <div class="search-ai-item"><span>عدد السندات</span><b>${ai.count}</b></div>
+                            <div class="search-ai-item"><span>إجمالي السندات</span><b>${formatCurrency(ai.total)}</b></div>
+                            <div class="search-ai-item"><span>آخر دفعة</span><b>${ai.lastPayment}</b></div>
+                            <div class="search-ai-item"><span>تاريخ آخر دفعة</span><b>${ai.lastDate}</b></div>
+                        </div>
+                        <div class="search-ai-note ${ai.noteClass}">${ai.noteText}</div>
+                    </div>
+                ` : ''}
+            </div>`;
+        };
 
-        function renderSearchResults(query) {
-            const q = normalizeSearchText(query);
-            const card = document.getElementById('search_results_card');
-            const body = document.getElementById('search_results_body');
-            const title = document.getElementById('search_results_title');
+        const renderSearchResults = query => {
+            const q = normalizeSearchText(query),
+                  card = document.getElementById('search_results_card'),
+                  body = document.getElementById('search_results_body'),
+                  title = document.getElementById('search_results_title');
 
-            if (!q) {
+            if(!q){
                 clearSearchResults();
                 return;
             }
 
-            const cleanedQuery = query.trim();
-            const isYearSearch = /^\d{4}$/.test(cleanedQuery);
+            const cleaned = query.trim(),
+                  isYear = /^\d{4}$/.test(cleaned);
 
             const results = ALL_TRANSACTIONS
-                .filter(item => transactionMatchesQuery(item, cleanedQuery))
-                .sort((a, b) => safeDateValue(b.date) - safeDateValue(a.date));
+                .filter(i => transactionMatchesQuery(i, cleaned))
+                .sort((a,b) => safeDateValue(b.date) - safeDateValue(a.date));
 
-            if (!results.length) {
-                setSearchStatus('not-found', 'غير موجود ❌');
+            if(!results.length){
+                setSearchStatus('not-found','غير موجود ❌');
                 body.innerHTML = `<div class="search-empty">لا توجد نتائج</div>`;
                 card.classList.add('active');
                 return;
             }
 
-            if (isYearSearch) {
-                title.textContent = `سندات سنة ${cleanedQuery}`;
-                const validReceipts = results.filter(isRealReceipt);
+            if(isYear){
+                title.textContent = `سندات سنة ${cleaned}`;
+                const valid = results.filter(isRealReceipt);
 
-                if (!validReceipts.length) {
-                    setSearchStatus('not-found', 'لا يوجد سندات');
+                if(!valid.length){
+                    setSearchStatus('not-found','لا يوجد سندات');
                     body.innerHTML = `<div class="search-empty">لا يوجد سندات لهذه السنة</div>`;
                     card.classList.add('active');
                     return;
                 }
 
-                body.innerHTML = buildYearSearchTable(validReceipts, cleanedQuery);
-                setSearchStatus('multi', `${validReceipts.length} سند`);
+                body.innerHTML = buildYearSearchTable(valid, cleaned);
+                setSearchStatus('multi',`${valid.length} سند`);
             } else {
                 const item = results.find(isRealReceipt);
 
-                if (!item) {
-                    setSearchStatus('not-found', 'غير موجود ❌');
+                if(!item){
+                    setSearchStatus('not-found','غير موجود ❌');
                     body.innerHTML = `<div class="search-empty">السند غير موجود</div>`;
                     card.classList.add('active');
                     return;
                 }
 
-                const amount = getAmount(item);
+                const amt = getAmount(item);
+                title.textContent = `السند ${cleaned}`;
+                setSearchStatus('found','محسوب ✅');
 
-                title.textContent = `السند ${cleanedQuery}`;
-                setSearchStatus('found', 'محسوب ✅');
-
-                body.innerHTML = `
-                    <div class="result-item">
-                        <div class="result-grid">
-                            <div class="result-cell">
-                                <span>التاريخ</span>
-                                <b>${formatShortDate(item.date)}</b>
-                            </div>
-
-                            <div class="result-cell">
-                                <span>رقم السند</span>
-                                <b>${escapeHtml(item.receipt_no)}</b>
-                            </div>
-
-                            <div class="result-cell">
-                                <span>المبلغ</span>
-                                <b class="result-amount">${formatCurrency(amount)}</b>
-                            </div>
-                        </div>
+                body.innerHTML = `<div class="result-item">
+                    <div class="result-grid">
+                        <div class="result-cell"><span>التاريخ</span><b>${formatShortDate(item.date)}</b></div>
+                        <div class="result-cell"><span>رقم السند</span><b>${escapeHtml(item.receipt_no)}</b></div>
+                        <div class="result-cell"><span>المبلغ</span><b class="result-amount">${formatCurrency(amt)}</b></div>
                     </div>
-                `;
+                </div>`;
             }
 
             card.classList.add('active');
-        }
+        };
 
-        function bindSearchEvents() {
-            const input = document.getElementById('receipt_search');
-            const searchBtn = document.getElementById('search_btn');
-            const clearBtn = document.getElementById('clear_search_btn');
+        const bindSearchEvents = () => {
+            const inp = document.getElementById('receipt_search'),
+                  sBtn = document.getElementById('search_btn'),
+                  cBtn = document.getElementById('clear_search_btn');
 
-            searchBtn.addEventListener('click', () => {
-                renderSearchResults(input.value);
-            });
+            sBtn.addEventListener('click', () => renderSearchResults(inp.value));
 
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
+            cBtn.addEventListener('click', () => {
+                inp.value = '';
                 clearSearchResults();
-                input.focus();
+                inp.focus();
             });
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    renderSearchResults(input.value);
-                }
+            inp.addEventListener('keydown', e => {
+                if(e.key === 'Enter') renderSearchResults(inp.value);
             });
 
-            input.addEventListener('input', () => {
-                if (!input.value.trim()) {
-                    clearSearchResults();
-                }
+            inp.addEventListener('input', () => {
+                if(!inp.value.trim()) clearSearchResults();
             });
-        }
+        };
 
-        async function loadTenantName() {
+        async function loadTenantName(){
             try {
-                const { data, error } = await supabase
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
-
-                if (error) {
-                    console.warn('TENANT QUERY WARNING:', error);
-                    return;
-                }
-
+                const { data, error } = await supabase.from('tenants').select('*').eq('tenant_code', tenantCode).maybeSingle();
+                if(error){ console.warn(error); return; }
                 TENANT_DATA = data || null;
-
-                document.getElementById('statement_tenant_name').innerText =
-                    data?.tenant_name ||
-                    data?.name ||
-                    tenantCode;
-            } catch (err) {
-                console.warn('TENANT NAME LOAD WARNING:', err);
+                document.getElementById('statement_tenant_name').innerText = data?.tenant_name || data?.name || tenantCode;
+            } catch(err){
+                console.warn(err);
             }
         }
 
-        async function loadTransactions() {
+        async function loadTransactions(){
             try {
-                const { data, error } = await supabase
-                    .from('tenant_transactions')
-                    .select('date, debit, credit, receipt_no')
-                    .eq('tenant_code', tenantCode)
-                    .order('date', { ascending: true });
-
-                if (error) {
-                    console.warn('TX QUERY WARNING:', error);
-                    ALL_TRANSACTIONS = [];
-                    return;
-                }
-
+                const { data, error } = await supabase.from('tenant_transactions').select('date, debit, credit, receipt_no').eq('tenant_code', tenantCode).order('date', { ascending: true });
+                if(error){ console.warn(error); ALL_TRANSACTIONS = []; return; }
                 ALL_TRANSACTIONS = Array.isArray(data) ? data : [];
-            } catch (err) {
-                console.warn('TX LOAD WARNING:', err);
+            } catch(err){
+                console.warn(err);
                 ALL_TRANSACTIONS = [];
             }
         }
 
-        async function loadSummaries() {
-            const { data, error } = await supabase
-                .from('tenant_yearly_summary')
-                .select('*')
-                .eq('tenant_code', tenantCode)
-                .order('year', { ascending: true });
-
-            if (error) throw error;
+        async function loadSummaries(){
+            const { data, error } = await supabase.from('tenant_yearly_summary').select('*').eq('tenant_code', tenantCode).order('year', { ascending: true });
+            if(error) throw error;
             ALL_SUMMARIES = Array.isArray(data) ? data : [];
         }
 
-        function updateHeaderDate() {
-            const latestSummary = [...ALL_SUMMARIES]
-                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
-
-            const dateValue =
-                latestSummary?.updated_at ||
-                latestSummary?.created_at ||
-                TENANT_DATA?.updated_at ||
-                null;
-
-            document.getElementById('statement_date').innerText = formatLastUpdate(dateValue);
+        function updateHeaderDate(){
+            const latest = [...ALL_SUMMARIES].sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
+            const dv = latest?.updated_at || latest?.created_at || TENANT_DATA?.updated_at || null;
+            document.getElementById('statement_date').innerText = formatLastUpdate(dv);
         }
 
-        async function init() {
-            if (!tenantCode) {
-                document.getElementById('loader').style.display = 'none';
+        async function init(){
+            if(!tenantCode){
+                document.getElementById('loader').style.display='none';
                 document.body.classList.add('loaded');
                 document.getElementById('years_container').innerHTML = `<div class="empty-state">لم يتم العثور على كود المستأجر.</div>`;
                 return;
@@ -1518,29 +694,18 @@
             document.getElementById('statement_date').innerText = formatLastUpdate();
 
             try {
-                await Promise.all([
-                    loadTenantName(),
-                    loadTransactions(),
-                    loadSummaries()
-                ]);
-
+                await Promise.all([loadTenantName(), loadTransactions(), loadSummaries()]);
                 updateHeaderDate();
                 bindSearchEvents();
                 renderView();
-
-                document.getElementById('loader').style.display = 'none';
+                document.getElementById('loader').style.display='none';
                 document.body.classList.add('loaded');
-
-                if (window.lucide) lucide.createIcons();
-            } catch (e) {
-                console.error('STATEMENT ERROR:', e);
-                document.getElementById('loader').style.display = 'none';
+                if(window.lucide) lucide.createIcons();
+            } catch(e){
+                console.error(e);
+                document.getElementById('loader').style.display='none';
                 document.body.classList.add('loaded');
-                document.getElementById('years_container').innerHTML = `
-                    <div class="empty-state">
-                        حدث خطأ أثناء تحميل كشف الحساب.
-                    </div>
-                `;
+                document.getElementById('years_container').innerHTML = `<div class="empty-state">حدث خطأ أثناء تحميل كشف الحساب.</div>`;
             }
         }
 
@@ -1548,3 +713,4 @@
     </script>
 </body>
 </html>
+    
