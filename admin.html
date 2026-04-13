@@ -525,7 +525,20 @@
 
         @media (max-width: 560px) {
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .soft-card {
+                min-height: 132px;
+                padding: 18px 12px;
+            }
+
+            .soft-card span {
+                font-size: 13px;
+            }
+
+            .soft-card b {
+                font-size: 21px;
             }
         }
     </style>
@@ -629,8 +642,7 @@
 
         <div class="footer reveal">© 2026 مجمع الجبري الصناعي التجاري</div>
     </div>
-
-    <script>
+        <script>
         const session = localStorage.getItem('jabri_tenant_session');
         if (session !== 'active') {
             window.location.href = 'index.html';
@@ -712,36 +724,12 @@
             };
         }
 
-        function getDynamicMonthlyPlan(currentBalance) {
-            const safeBalance = Math.max(0, toNumber(currentBalance));
-
-            if (safeBalance <= 0) {
-                return {
-                    monthsToClose: 0,
-                    recommendedMonthly: 0
-                };
-            }
-
-            let monthsToClose = 12;
-            if (safeBalance <= 500) monthsToClose = 2;
-            else if (safeBalance <= 1500) monthsToClose = 6;
-            else if (safeBalance <= 3000) monthsToClose = 10;
-            else monthsToClose = 12;
-
-            const recommendedMonthly = Math.ceil(safeBalance / monthsToClose);
-
-            return {
-                monthsToClose,
-                recommendedMonthly
-            };
-        }
-
         function getSuggestedPayment(balance) {
             const b = Math.max(0, toNumber(balance));
 
             if (b === 0) return 0;
-            if (b <= 500) return Math.ceil(b / 2);
-            if (b <= 1500) return 200;
+            if (b <= 500) return 150;
+            if (b <= 1500) return 250;
             if (b <= 3000) return 300;
             if (b <= 5000) return 400;
             return 500;
@@ -763,7 +751,7 @@
             return { text: '⚠ متأخر', cls: 'late' };
         }
 
-        function getSmartFinancialAdvice(currentSummary, previousSummary) {
+        function getSmartFinancialAdvice(currentSummary) {
             if (!currentSummary) {
                 return {
                     message: 'لا توجد بيانات كافية حالياً',
@@ -771,32 +759,19 @@
                 };
             }
 
-            const year = Number(currentSummary?.year || 0);
-            const openingBalance = toNumber(currentSummary?.opening_balance || 0);
-            const currentDebit = toNumber(currentSummary?.total_debit || 0);
-            const currentCredit = toNumber(currentSummary?.total_credit || 0);
-            const currentBalance = toNumber(currentSummary?.final_balance || 0);
-
-            const calculated = openingBalance + currentDebit - currentCredit;
-            const mismatch = Math.abs(calculated - currentBalance) > 0.01;
+            const currentBalance = toNumber(currentSummary.final_balance);
 
             if (currentBalance < 0) {
                 return {
-                    message: `سنة ${year}
-
-لديك رصيد دائن بقيمة ${formatNumber(Math.abs(currentBalance))}.
-هذا يعني أن مجموع دفعاتك أعلى من المستحق الحالي، وسيتم احتساب هذا الرصيد لصالحك في الفترة القادمة.`,
-                    subnote: mismatch ? '⚠ يوجد فرق في المعادلة ويُنصح بمراجعة الإدارة' : 'يعتمد هذا التحليل على آخر سنة محاسبية معتمدة'
+                    message: `لديك رصيد دائن ${formatNumber(Math.abs(currentBalance))}، سيتم احتسابه لصالحك.`,
+                    subnote: ''
                 };
             }
 
             if (currentBalance === 0) {
                 return {
-                    message: `سنة ${year}
-
-حسابك مسدد بالكامل حالياً.
-لا يوجد مبلغ مستحق عليك، واستمرارك بهذه الوتيرة ممتاز.`,
-                    subnote: mismatch ? '⚠ يوجد فرق في المعادلة ويُنصح بمراجعة الإدارة' : 'يعتمد هذا التحليل على آخر سنة محاسبية معتمدة'
+                    message: 'حسابك مسدد بالكامل، وضعك ممتاز.',
+                    subnote: ''
                 };
             }
 
@@ -804,14 +779,8 @@
             const months = getMonthsToClose(currentBalance, suggested);
 
             return {
-                message: `سنة ${year}
-
-الرصيد الحالي عليك ${formatNumber(currentBalance)}.
-
-💡 الدفعة الشهرية المقترحة: ${formatNumber(suggested)}
-
-📅 عند الالتزام بهذا المبلغ، يمكنك إغلاق الرصيد خلال ${months} شهر.`,
-                subnote: mismatch ? '⚠ يوجد فرق في المعادلة ويُنصح بمراجعة الإدارة' : 'يعتمد هذا التحليل على آخر سنة محاسبية معتمدة'
+                message: `ننصح بدفع ${formatNumber(suggested)} دينار شهرياً.\nلإنهاء الرصيد خلال ${months} شهر تقريباً.`,
+                subnote: ''
             };
         }
 
@@ -994,14 +963,13 @@
                 }, 1000);
             }
         }
-
-        function renderPieChart(credit, balance) {
+                    function renderPieChart(credit, balance) {
             const canvas = document.getElementById('balancePieChart');
             if (pieChartInstance) pieChartInstance.destroy();
 
             const creditValue = Math.max(0, toNumber(credit));
             const realBalance = toNumber(balance);
-            const balanceValue = Math.max(0, realBalance);
+            const balanceValue = realBalance > 0 ? realBalance : 0;
             const total = creditValue + balanceValue;
             const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0;
 
@@ -1143,9 +1111,13 @@
                 const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
 
                 const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
-                const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
                 const currentOpening = currentSummary ? toNumber(currentSummary.opening_balance) : 0;
                 const currentDebit = currentSummary ? toNumber(currentSummary.total_debit) : 0;
+
+                // المعادلة الأساسية
+                const currentBalance = currentSummary
+                    ? (currentOpening + currentDebit - currentCredit)
+                    : 0;
 
                 const suggestedPayment = getSuggestedPayment(currentBalance);
                 const monthsToClose = getMonthsToClose(currentBalance, suggestedPayment);
@@ -1186,7 +1158,11 @@
                 animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit)));
                 animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.abs(currentBalance)));
 
-                const advice = getSmartFinancialAdvice(currentSummary, previousSummary);
+                const advice = getSmartFinancialAdvice({
+                    ...currentSummary,
+                    final_balance: currentBalance
+                });
+
                 document.getElementById('smart_message').innerText = advice.message;
                 document.getElementById('smart_subnote').innerText = advice.subnote || '';
 
@@ -1195,7 +1171,11 @@
                 pieCapEl.className = `chart-caption ${pieCap.type}`;
                 pieCapEl.innerText = pieCap.text;
 
-                const lineIns = getLineInsight(currentSummary, previousSummary);
+                const lineIns = getLineInsight(
+                    currentSummary ? { ...currentSummary, final_balance: currentBalance } : null,
+                    previousSummary
+                );
+
                 const lineInsEl = document.getElementById('line_insight');
                 lineInsEl.className = `chart-caption ${lineIns.type}`;
                 lineInsEl.innerText = lineIns.text;
