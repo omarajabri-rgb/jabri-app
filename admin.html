@@ -80,13 +80,6 @@
         .dot-good{ background:var(--success); }
         .dot-warn{ background:var(--warning); }
         .dot-bad{ background:var(--danger); }
-        .flags-strip{ padding:14px; border-radius:18px; background:rgba(255,255,255,0.74); border:1px solid var(--line); }
-        .flags-strip-title{ font-size:12px; font-weight:900; color:#6b4f2b; margin-bottom:10px; text-align:center; }
-        .risk-flags{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-        .risk-flag{ display:inline-flex; align-items:center; justify-content:center; padding:7px 12px; border-radius:999px; font-size:11px; font-weight:900; color:#6b4f2b; background:rgba(201,164,107,0.10); border:1px solid rgba(201,164,107,0.18); }
-        .flag-danger{ color:var(--danger); background:rgba(209,77,77,0.10); border-color:rgba(209,77,77,0.18); }
-        .flag-warning{ color:var(--warning); background:rgba(215,146,31,0.10); border-color:rgba(215,146,31,0.18); }
-        .flag-success{ color:var(--success); background:rgba(21,154,111,0.10); border-color:rgba(21,154,111,0.18); }
         .chart-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:18px; margin-bottom:18px; }
         .chart-wrap{ background:rgba(255,255,255,0.76); border:1px solid var(--line); border-radius:22px; padding:16px; height:300px; }
         .chart-meta{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:12px; font-weight:900; font-size:14px; color:#6b4f2b; }
@@ -109,7 +102,7 @@
         @keyframes spin{ to{ transform:rotate(360deg); } }
         @media (max-width: 1200px){ .hero-ai-card{ grid-template-columns:1fr; } }
         @media (max-width: 900px){ .chart-grid, .insight-list{ grid-template-columns:1fr; } }
-        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; } .quick-ai-card{ min-height:220px; } }
+        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:1fr; gap:12px; } .quick-ai-card{ min-height:220px; } }
     </style>
 </head>
 <body>
@@ -153,8 +146,6 @@
                     </div>
                 </div>
                 <div class="quick-ai-grid">
-                    <div class="quick-ai-card" id="ai_card_type"><span>نوع المستأجر</span><b id="ai_tenant_type">—</b><small id="ai_tenant_type_text">—</small></div>
-                    <div class="quick-ai-card" id="ai_card_last_payment"><span>زخم الدفع</span><b id="ai_last_payment">—</b><small>نشاط الدفع خلال الفترة الأخيرة</small></div>
                     <div class="quick-ai-card" id="ai_card_months_without_payment"><span>أشهر بلا دفع</span><b id="ai_months_without_payment">0</b><small id="ai_months_without_payment_text">—</small></div>
                     <div class="quick-ai-card" id="ai_card_last3_ratio"><span>التزام 3 سنوات</span><b id="ai_last3_ratio">0%</b><small id="ai_last3_ratio_text">—</small></div>
                     <div class="quick-ai-card" id="ai_card_total_credit"><span>دائن</span><b id="kpi_total_credit">0</b><small>إجمالي الدفعات في آخر سنة</small></div>
@@ -164,7 +155,6 @@
                     <div class="insight-row"><div><span>المستحق الحالي</span><b id="ai_close_estimate">—</b></div><div class="insight-dot dot-warn" id="dot_close_estimate"></div></div>
                     <div class="insight-row"><div><span>التوصية الإدارية</span><b id="ai_recommendation">—</b></div><div class="insight-dot dot-good" id="dot_recommendation"></div></div>
                 </div>
-                <div class="flags-strip"><div class="flags-strip-title">أعلام المخاطر</div><div class="risk-flags" id="ai_risk_flags"></div></div>
             </div>
         </section>
         <section class="chart-grid">
@@ -220,7 +210,7 @@
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.39</div>
     </div>
-        <script>
+    <script>
         const session = localStorage.getItem('jabri_admin_session');
         if (session !== 'active') window.location.href = 'admin-login.html';
         const { createClient } = supabase;
@@ -274,7 +264,10 @@
         function renderAi(tenant){
             if(!tenant) return;
             const tc = toNumber(tenant.totalCredit), cb = toNumber(tenant.currentBalance), pb = toNumber(tenant.previousBalance), td = toNumber(tenant.totalDebit), ob = toNumber(tenant.openingBalance), ly = tenant.latestYear || '—';
-            const covBase = ob + td, covScore = covBase > 0 ? Math.min(100, Math.round((Math.max(0,tc) / covBase) * 100)) : 100;
+            const allYears = allSummaries.filter(r => r.tenant_code === tenant.tenant_code);
+            const totalDebitAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_debit), 0);
+            const totalCreditAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_credit), 0);
+            const covScore = totalDebitAllTime > 0 ? Math.min(100, Math.round((totalCreditAllTime / totalDebitAllTime) * 100)) : 100;
             const txs = allTransactions.filter(x => x.tenant_code === tenant.tenant_code).sort((a,b) => new Date(a.date) - new Date(b.date));
             const pays = txs.filter(x => toNumber(x.credit) > 0), lastPay = pays[pays.length-1] || null, mwp = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
             const monthlyAvg = (() => { if(!pays.length) return 0; const months = new Set(pays.map(r => { const d = new Date(r.date); return `${d.getFullYear()}-${d.getMonth()}`; })); const tot = pays.reduce((s,r) => s + toNumber(r.credit), 0); return months.size ? Math.round(tot / months.size) : 0; })();
@@ -290,10 +283,6 @@
             setMoodClass(document.getElementById('hero_commitment_card'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
-            document.getElementById('ai_tenant_type').innerText = cb < 0 ? 'دائن' : cb === 0 ? 'ملتزم' : tc > 0 ? 'جزئي' : 'متأخر';
-            document.getElementById('ai_tenant_type_text').innerText = cb < 0 ? `لديه رصيد دائن ${roundMoney(Math.abs(cb))}` : cb === 0 ? 'رصيد السنة مغلق' : tc > 0 ? `يوجد دائن في سنة ${ly}` : `الرصيد ما زال قائماً في سنة ${ly}`;
-            setMoodClass(document.getElementById('ai_card_type'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
-            document.getElementById('ai_last_payment').innerText = monthlyAvg ? roundMoney(monthlyAvg) : 0; setMoodClass(document.getElementById('ai_card_last_payment'), monthlyAvg >= 600 ? 'good' : monthlyAvg >= 300 ? 'warn' : 'bad');
             document.getElementById('ai_months_without_payment').innerText = mwp; document.getElementById('ai_months_without_payment_text').innerText = mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`; setMoodClass(document.getElementById('ai_card_months_without_payment'), mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad');
             const last3 = allSummaries.filter(r => r.tenant_code === tenant.tenant_code).sort((a,b) => Number(b.year) - Number(a.year)).slice(0,3);
             const last3Ratio = last3.length ? Math.round(last3.reduce((sum, row) => { const db = Math.max(0, toNumber(row.total_debit)), c = Math.max(0, toNumber(row.total_credit)); return sum + (db > 0 ? Math.min(100, Math.round((c/db)*100)) : 0); }, 0) / last3.length) : 0;
@@ -305,8 +294,6 @@
             document.getElementById('ai_recommendation').innerText = cb < 0 ? 'المستأجر دائن — لا حاجة للمتابعة' : cb === 0 ? 'لا حاجة لمتابعة حالياً' : `متابعة رصيد سنة ${ly}`;
             setDotMood('dot_close_estimate', cb <= 0 ? 'good' : cb <= Math.max(1, td*0.25) ? 'warn' : 'bad');
             setDotMood('dot_recommendation', cb <= 0 ? 'good' : 'warn');
-            const flags = [{ text: `السنة الحالية: ${ly}`, cls: 'flag-warning' }, { text: `الرصيد السابق: ${roundMoney(pb)}`, cls: pb > 0 ? 'flag-danger' : 'flag-success' }, { text: `رصيد أول السنة: ${roundMoney(ob)}`, cls: ob > 0 ? 'flag-warning' : 'flag-success' }, { text: `مدين السنة: ${roundMoney(td)}`, cls: td > 0 ? 'flag-warning' : 'flag-success' }, { text: `إغلاق السنة: ${cb < 0 ? roundMoney(Math.abs(cb)) + ' دائن' : roundMoney(cb)}`, cls: cb > 0 ? 'flag-danger' : 'flag-success' }];
-            document.getElementById('ai_risk_flags').innerHTML = flags.map(f => `<span class="risk-flag ${f.cls}">${f.text}</span>`).join('');
         }
         async function ensureYearlySummaryExists(tenant, yearNum){
             let row = getSummaryByYear(tenant.tenant_code, yearNum); if(row) return row;
