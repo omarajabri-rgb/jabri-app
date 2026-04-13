@@ -514,6 +514,7 @@
         .year-card.status-paid { border-color: var(--success-border); }
         .year-card.status-partial { border-color: var(--warning-border); }
         .year-card.status-late { border-color: var(--danger-border); }
+        .year-card.status-credit { border-color: var(--success-border); }
 
         .year-head {
             position: relative;
@@ -558,6 +559,12 @@
             background: var(--danger-soft);
             color: var(--danger);
             border-color: var(--danger-border);
+        }
+
+        .status-credit {
+            background: var(--success-soft);
+            color: var(--success);
+            border-color: var(--success-border);
         }
 
         .year-title {
@@ -641,6 +648,10 @@
 
         .cell-balance.due {
             color: var(--danger);
+        }
+
+        .cell-balance.credit {
+            color: var(--success);
         }
 
         .empty-state {
@@ -980,18 +991,38 @@
                 .replace(/'/g, '&#039;');
         }
 
+        // ========== FIXED: getStatus handles negative balances as credit ==========
         function getStatus(totalCredit, finalBalance) {
-            if (toNumber(finalBalance) <= 0) {
+            const balance = toNumber(finalBalance);
+            const credit = toNumber(totalCredit);
+            
+            if (balance < 0) {
+                return { text: 'دائن', className: 'status-credit' };
+            }
+            if (balance === 0) {
                 return { text: 'مسدد', className: 'status-paid' };
             }
-            if (toNumber(totalCredit) > 0) {
+            if (credit > 0) {
                 return { text: 'جزئي', className: 'status-partial' };
             }
             return { text: 'متأخر', className: 'status-late' };
         }
 
+        // ========== FIXED: getBalanceBoxClass handles negative balances ==========
         function getBalanceBoxClass(balance) {
-            return toNumber(balance) <= 0 ? 'ok' : 'due';
+            const bal = toNumber(balance);
+            if (bal < 0) return 'credit';
+            if (bal === 0) return 'ok';
+            return 'due';
+        }
+
+        // ========== FIXED: formatBalanceDisplay shows negative as credit ==========
+        function formatBalanceDisplay(balance) {
+            const bal = toNumber(balance);
+            if (bal < 0) {
+                return `${formatCurrency(Math.abs(bal))} (دائن)`;
+            }
+            return formatCurrency(bal);
         }
 
         function normalizeSearchText(value) {
@@ -1145,11 +1176,15 @@
             };
         }
 
+        // ========== FIXED: buildYearCard with proper balance display ==========
         function buildYearCard(summary, index) {
             const totalCredit = toNumber(summary?.total_credit || 0);
             const finalBalance = toNumber(summary?.final_balance || 0);
+            const openingBalance = toNumber(summary?.opening_balance || 0);
+            const totalDebit = toNumber(summary?.total_debit || 0);
+            
             const status = getStatus(totalCredit, finalBalance);
-            const balanceClass = getBalanceBoxClass(summary.final_balance);
+            const balanceClass = getBalanceBoxClass(finalBalance);
 
             return `
                 <div class="year-card ${status.className}" style="animation-delay:${index * 0.06}s;">
@@ -1172,10 +1207,10 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="cell-opening">${formatCurrency(summary.opening_balance)}</td>
-                                    <td class="cell-debit">${formatCurrency(summary.total_debit)}</td>
-                                    <td class="cell-credit">${formatCurrency(summary.total_credit)}</td>
-                                    <td class="cell-balance ${balanceClass}">${formatCurrency(summary.final_balance)}</td>
+                                    <td class="cell-opening">${formatCurrency(openingBalance)}</td>
+                                    <td class="cell-debit">${formatCurrency(totalDebit)}</td>
+                                    <td class="cell-credit">${formatCurrency(totalCredit)}</td>
+                                    <td class="cell-balance ${balanceClass}">${formatBalanceDisplay(finalBalance)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1219,6 +1254,7 @@
             return Math.max(...ALL_SUMMARIES.map(row => Number(row.year)));
         }
 
+        // ========== UNTOUCHED: Search/tenant_transactions section ==========
         function buildYearSearchTable(receipts, year) {
             const sorted = sortTransactionsAsc(receipts);
             let total = 0;
