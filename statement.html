@@ -404,94 +404,6 @@
             font-weight: 900;
         }
 
-        .search-ai-box {
-            margin-top: 14px;
-            padding: 16px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(248,252,249,0.78));
-            border: 1px solid rgba(63,162,111,0.14);
-            box-shadow: 0 10px 24px rgba(63,162,111,0.05);
-        }
-
-        .search-ai-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .search-ai-head h4 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-ai-badge {
-            padding: 7px 12px;
-            border-radius: 999px;
-            background: rgba(63,162,111,0.10);
-            color: var(--success);
-            border: 1px solid rgba(63,162,111,0.18);
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .search-ai-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .search-ai-item {
-            background: rgba(255,255,255,0.76);
-            border: 1px solid rgba(201,164,107,0.10);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .search-ai-item span {
-            display: block;
-            font-size: 11px;
-            color: var(--muted);
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .search-ai-item b {
-            display: block;
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--text);
-        }
-
-        .search-ai-note {
-            margin-top: 12px;
-            padding: 12px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            font-weight: 900;
-            text-align: center;
-            background: rgba(63,162,111,0.10);
-            border: 1px solid rgba(63,162,111,0.16);
-            color: var(--success);
-        }
-
-        .search-ai-note.warning {
-            background: rgba(186,145,80,0.10);
-            border-color: rgba(186,145,80,0.18);
-            color: var(--warning);
-        }
-
-        .search-ai-note.danger {
-            background: rgba(196,122,114,0.10);
-            border-color: rgba(196,122,114,0.18);
-            color: var(--danger);
-        }
-
         .year-card {
             border-radius: 28px;
             margin-bottom: 18px;
@@ -694,8 +606,7 @@
         }
 
         @media screen and (max-width: 980px) {
-            .result-grid,
-            .search-ai-grid {
+            .result-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
@@ -748,8 +659,7 @@
         }
 
         @media screen and (max-width: 560px) {
-            .result-grid,
-            .search-ai-grid {
+            .result-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -882,7 +792,8 @@
             <button class="save-btn" type="button" onclick="window.print()">حفظ PDF</button>
         </div>
     </div>
-        <script type="module">
+
+    <script type="module">
         const tenantSession = localStorage.getItem('jabri_tenant_session');
         const adminSession = localStorage.getItem('jabri_admin_session');
 
@@ -1068,37 +979,7 @@
             const receipt = String(item.receipt_no || '').trim().toLowerCase();
             return isRealReceipt(item) && receipt === String(receiptText).trim().toLowerCase();
         }
-
-        function buildAIDataForReceipts(receipts) {
-            const sorted = sortTransactionsAsc(receipts);
-            const count = sorted.length;
-            const total = sorted.reduce((sum, item) => sum + getAmount(item), 0);
-            const lastItem = count ? sorted[count - 1] : null;
-            const lastPayment = lastItem ? formatCurrency(getAmount(lastItem)) : '-';
-            const lastDate = lastItem ? formatShortDate(lastItem.date) : '-';
-
-            let noteText = 'لا توجد دفعات مسجلة';
-            let noteClass = 'danger';
-
-            if (count >= 3 && total >= 1000) {
-                noteText = 'مؤشر جيد: يوجد نشاط دفع واضح في هذه السنة';
-                noteClass = '';
-            } else if (count >= 1) {
-                noteText = 'مؤشر متوسط: توجد دفعات لكن تحتاج متابعة';
-                noteClass = 'warning';
-            }
-
-            return {
-                count,
-                total,
-                lastPayment,
-                lastDate,
-                noteText,
-                noteClass
-            };
-        }
-
-        function buildYearCard(summary, index) {
+                function buildYearCard(summary, index) {
             const totalCredit = toNumber(summary?.total_credit || 0);
             const finalBalance = toNumber(summary?.final_balance || 0);
             const openingBalance = toNumber(summary?.opening_balance || 0);
@@ -1193,8 +1074,6 @@
                 `;
             }).join('');
 
-            const ai = buildAIDataForReceipts(sorted);
-
             return `
                 <div class="result-item">
                     <div class="search-table-wrap">
@@ -1214,38 +1093,6 @@
                         <span>إجمالي قيمة السندات (${sorted.length} سند)</span>
                         <strong>${formatCurrency(total)}</strong>
                     </div>
-
-                    ${Number(year) === Number(latestSummaryYear) ? `
-                        <div class="search-ai-box">
-                            <div class="search-ai-head">
-                                <h4>التحليل الذكي لسنة ${year}</h4>
-                                <span class="search-ai-badge">AI ${year}</span>
-                            </div>
-
-                            <div class="search-ai-grid">
-                                <div class="search-ai-item">
-                                    <span>عدد السندات</span>
-                                    <b>${ai.count}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>إجمالي السندات</span>
-                                    <b>${formatCurrency(ai.total)}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>آخر دفعة</span>
-                                    <b>${ai.lastPayment}</b>
-                                </div>
-                                <div class="search-ai-item">
-                                    <span>تاريخ آخر دفعة</span>
-                                    <b>${ai.lastDate}</b>
-                                </div>
-                            </div>
-
-                            <div class="search-ai-note ${ai.noteClass}">
-                                ${ai.noteText}
-                            </div>
-                        </div>
-                    ` : ''}
                 </div>
             `;
         }
