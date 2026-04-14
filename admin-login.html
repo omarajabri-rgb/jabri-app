@@ -252,7 +252,10 @@
             <label>كلمة المرور</label>
             <input id="admin_pass" type="password" placeholder="Password" autocomplete="off">
         </div>
-
+<div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:18px;">
+    <input type="checkbox" id="remember_admin" style="width:auto;">
+    <label style="margin:0;font-size:12px;font-weight:800;color:#7a6c59;">تذكرني</label>
+</div>
         <button id="login_btn" class="btn-login" onclick="handleAdminLogin()">
             <i data-lucide="log-in"></i>
             دخول الإدارة
@@ -312,16 +315,31 @@
             if (window.lucide) lucide.createIcons();
 
             setTimeout(() => {
-                if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
-                    localStorage.setItem('jabri_admin_session', 'active');
-                    localStorage.setItem('jabri_admin_user', user);
-                    showMessage('تم تسجيل الدخول بنجاح، جاري التحويل...', 'success');
+    if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
 
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 450);
-                    return;
-                }
+        // 👇 هذا اللي نضيفه
+        const remember = document.getElementById('remember_admin').checked;
+
+        if (remember) {
+            localStorage.setItem('jabri_admin_remember', 'yes');
+            localStorage.setItem('jabri_admin_saved_user', user);
+            localStorage.setItem('jabri_admin_saved_pass', pass);
+        } else {
+            localStorage.removeItem('jabri_admin_remember');
+            localStorage.removeItem('jabri_admin_saved_user');
+            localStorage.removeItem('jabri_admin_saved_pass');
+        }
+
+        // 👇 خلي الباقي مثل ما هو
+        localStorage.setItem('jabri_admin_session', 'active');
+        localStorage.setItem('jabri_admin_user', user);
+        showMessage('تم تسجيل الدخول بنجاح، جاري التحويل...', 'success');
+
+        setTimeout(() => {
+            window.location.href = 'admin.html';
+        }, 450);
+        return;
+    }
 
                 btn.disabled = false;
                 btn.innerHTML = `<i data-lucide="log-in"></i> دخول الإدارة`;
