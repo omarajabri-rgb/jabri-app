@@ -157,21 +157,6 @@
             border: 1px solid rgba(204,90,80,0.12);
         }
 
-        #debug_msg {
-            color: var(--success);
-            background: rgba(47,158,111,0.10);
-            border: 1px solid rgba(47,158,111,0.12);
-            text-align: right;
-        }
-
-        .login-note {
-            margin-top: 16px;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1.9;
-        }
-
         #loader {
             position: fixed;
             inset: 0;
@@ -237,18 +222,18 @@
             >
         </div>
 
+        <!-- تذكرني checkbox -->
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:18px;">
+            <input type="checkbox" id="remember_me" style="width:auto;">
+            <label style="margin:0;font-size:12px;font-weight:800;color:#7a6c59;">تذكرني</label>
+        </div>
+
         <button class="btn-login" id="login_btn" onclick="handleLogin()">
             دخول للمنصة
             <i data-lucide="log-in" size="18"></i>
         </button>
 
-        <div class="login-note">
-            اسم المستخدم هو رقم الجوال<br>
-            وكلمة المرور هي آخر 4 أرقام من رقمك
-        </div>
-
         <div id="error_msg" class="status-box"></div>
-        <div id="debug_msg" class="status-box"></div>
 
         <div style="margin-top:28px; font-size:10px; color:var(--muted); font-weight:800; letter-spacing:1px;">
             © 2026 JABRI INDUSTRIAL COMPLEX
@@ -284,38 +269,28 @@
                 });
             });
 
-            localStorage.removeItem('jabri_tenant_session');
-            localStorage.removeItem('jabri_tenant_code');
-            localStorage.removeItem('jabri_tenant_name');
-            localStorage.removeItem('jabri_tenant_unit');
+            // 🔥 Auto Login إذا كان "تذكرني" مفعلاً
+            const remember = localStorage.getItem('jabri_remember');
+            // جعل checkbox محددًا تلقائيًا إذا كان التذكر مفعلاً
+            document.getElementById('remember_me').checked = remember === 'yes';
 
-            await testConnection();
-        };
-
-        async function testConnection() {
-            const debugEl = document.getElementById('debug_msg');
-            try {
-                const { error } = await supabaseClient.from('tenants').select('tenant_code').limit(1);
-
-                debugEl.style.display = 'block';
-
-                if (error) {
-                    debugEl.innerText = 'فحص الاتصال فشل:\n' + error.message;
-                    return;
+            if (remember === 'yes') {
+                const savedPhone = localStorage.getItem('jabri_phone');
+                const savedPass = localStorage.getItem('jabri_pass');
+                if (savedPhone && savedPass) {
+                    document.getElementById('phone_input').value = savedPhone;
+                    document.getElementById('password_input').value = savedPass;
+                    setTimeout(() => {
+                        handleLogin();
+                    }, 300);
                 }
-
-                debugEl.innerText = 'الاتصال بقاعدة البيانات ناجح.';
-            } catch (err) {
-                debugEl.style.display = 'block';
-                debugEl.innerText = 'خطأ عام في الاتصال:\n' + err.message;
             }
-        }
+        };
 
         async function handleLogin() {
             const phone = document.getElementById('phone_input').value.trim();
             const password = document.getElementById('password_input').value.trim();
             const errorEl = document.getElementById('error_msg');
-            const debugEl = document.getElementById('debug_msg');
             const loginBtn = document.getElementById('login_btn');
             const card = document.querySelector('.login-card');
 
@@ -355,9 +330,17 @@
                     return;
                 }
 
-                debugEl.style.display = 'block';
-                debugEl.innerText =
-                    `تم تسجيل الدخول بنجاح:\n${data.tenant_name || '-'}\nالوحدة: ${data.shop_no || '-'}`;
+                // حفظ بيانات "تذكرني"
+                const remember = document.getElementById('remember_me').checked;
+                if (remember) {
+                    localStorage.setItem('jabri_remember', 'yes');
+                    localStorage.setItem('jabri_phone', phone);
+                    localStorage.setItem('jabri_pass', password);
+                } else {
+                    localStorage.removeItem('jabri_remember');
+                    localStorage.removeItem('jabri_phone');
+                    localStorage.removeItem('jabri_pass');
+                }
 
                 localStorage.setItem('jabri_tenant_session', 'active');
                 localStorage.setItem('jabri_tenant_code', data.tenant_code);
