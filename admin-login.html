@@ -280,7 +280,22 @@
 
         window.onload = () => {
             if (window.lucide) lucide.createIcons();
+const remember = localStorage.getItem('jabri_admin_remember');
+document.getElementById('remember_admin').checked = remember === 'yes';
 
+if (remember === 'yes') {
+    const savedUser = localStorage.getItem('jabri_admin_saved_user');
+    const savedPass = localStorage.getItem('jabri_admin_saved_pass');
+
+    if (savedUser && savedPass) {
+        document.getElementById('admin_user').value = savedUser;
+        document.getElementById('admin_pass').value = savedPass;
+
+        setTimeout(() => {
+            handleAdminLogin();
+        }, 300);
+    }
+}
             document.getElementById('admin_user').addEventListener('keypress', onEnter);
             document.getElementById('admin_pass').addEventListener('keypress', onEnter);
 
