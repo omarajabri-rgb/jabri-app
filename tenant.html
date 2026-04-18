@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* ========== YOUR EXISTING STYLES (KEPT EXACTLY THE SAME) ========== */
         :root {
             --bg: #f7f4ed;
             --bg-2: #fdfbf6;
@@ -74,6 +75,7 @@
             margin-bottom: 16px;
             gap: 12px;
             flex-wrap: wrap;
+            position: relative; /* ADDED for burger menu positioning */
         }
 
         .brand strong {
@@ -89,6 +91,13 @@
             color: var(--muted);
             font-weight: 800;
             margin-bottom: 4px;
+        }
+
+        /* ========== NEW: Topbar Actions Container ========== */
+        .topbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .ghost-btn {
@@ -114,6 +123,101 @@
             box-shadow: 0 14px 26px rgba(120,95,56,0.12);
         }
 
+        /* ========== NEW: Burger Menu Styles ========== */
+        .burger-menu {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            padding: 8px;
+            z-index: 1000;
+            min-width: 200px;
+            display: none;
+            border: 1px solid rgba(201,164,107,0.18);
+        }
+
+        .menu-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background 0.2s;
+            color: var(--text);
+        }
+
+        .menu-item:hover {
+            background: rgba(201,164,107,0.1);
+        }
+
+        .menu-item i {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ========== NEW: Modal Styles ========== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-content h3 {
+            margin: 0 0 20px 0;
+            color: var(--gold-deep);
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line, #ccc) !important;
+            color: var(--text);
+        }
+
+        /* ========== YOUR EXISTING STYLES CONTINUE (UNCHANGED) ========== */
         .hero-card {
             border-radius: 26px;
             padding: 24px;
@@ -483,26 +587,78 @@
         }
     </style>
     <!-- PWA / App Icon Setup -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#c9a46b">
-
-<!-- iOS Support -->
-<link rel="apple-touch-icon" href="/IMG_2028.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c9a46b">
+    <link rel="apple-touch-icon" href="/IMG_2028.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
 
     <div class="wrap">
+        <!-- ========== NEW: Topbar with Burger Menu ========== -->
         <div class="topbar reveal">
             <div class="brand">
                 <small>لوحة المستأجر</small>
                 <strong>مجمع جبري الصناعي</strong>
             </div>
-            <button class="ghost-btn" onclick="logout()"><i data-lucide="log-out"></i> خروج</button>
+            <div class="topbar-actions">
+                <button class="ghost-btn" onclick="toggleMenu()">
+                    <i data-lucide="menu"></i>
+                </button>
+                <button class="ghost-btn" onclick="logout()">
+                    <i data-lucide="log-out"></i> خروج
+                </button>
+            </div>
+            
+            <!-- ========== NEW: Burger Menu Dropdown ========== -->
+            <div id="burger_menu" class="burger-menu">
+                <div class="menu-item" onclick="goToDashboard()">
+                    <i data-lucide="layout-dashboard"></i> لوحة التحكم
+                </div>
+                <div class="menu-item" onclick="goToStatement()">
+                    <i data-lucide="file-text"></i> كشف الحساب
+                </div>
+                <div class="menu-item" onclick="openChangePasswordModal()">
+                    <i data-lucide="key"></i> تغيير كلمة المرور
+                </div>
+                <div class="menu-item" onclick="logout()">
+                    <i data-lucide="log-out"></i> تسجيل الخروج
+                </div>
+            </div>
         </div>
 
+        <!-- ========== NEW: Password Change Modal ========== -->
+        <div id="passwordModal" class="modal">
+            <div class="modal-content">
+                <h3>تغيير كلمة المرور</h3>
+                
+                <div class="field" style="margin-bottom: 16px;">
+                    <label>كلمة المرور الحالية</label>
+                    <input type="password" id="current_password" placeholder="****" maxlength="4" inputmode="numeric" style="text-align: center;">
+                </div>
+                
+                <div class="field" style="margin-bottom: 16px;">
+                    <label>كلمة المرور الجديدة (4 أرقام)</label>
+                    <input type="password" id="new_password" placeholder="1234" maxlength="4" inputmode="numeric" style="text-align: center;">
+                </div>
+                
+                <div class="field" style="margin-bottom: 16px;">
+                    <label>تأكيد كلمة المرور</label>
+                    <input type="password" id="confirm_password" placeholder="1234" maxlength="4" inputmode="numeric" style="text-align: center;">
+                </div>
+                
+                <div id="password_error" style="color: var(--danger); margin-bottom: 10px; display: none; font-weight: 700; text-align: center;"></div>
+                
+                <div class="modal-actions">
+                    <button class="btn-soft" onclick="closePasswordModal()">إلغاء</button>
+                    <button class="btn-gold" onclick="changePassword()">حفظ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== YOUR EXISTING CONTENT (UNCHANGED) ========== -->
         <section class="hero-card reveal">
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
@@ -573,6 +729,9 @@
             throw new Error('No tenant code');
         }
 
+        // ========== NEW: Store current password for verification ==========
+        let currentTenantPassword = '';
+
         let pieChartInstance = null;
         let timelineChartInstance = null;
 
@@ -627,25 +786,24 @@
         }
 
         function getSmartFinancialAdvice(balance) {
-    const due = Math.max(0, toNumber(balance));
-    const yearlyRent = 1836;
+            const due = Math.max(0, toNumber(balance));
+            const yearlyRent = 1836;
 
-    if (due === 0) {
-        return 'حسابك الحالي مغلق ولا يوجد رصيد مستحق، ووضعك المالي ممتاز.';
-    }
+            if (due === 0) {
+                return 'حسابك الحالي مغلق ولا يوجد رصيد مستحق، ووضعك المالي ممتاز.';
+            }
 
-    const minimum = Math.round(yearlyRent / 12);
-    const recommended = Math.round(minimum + (due / 24));
-    const fast = Math.round(minimum + (due / 12));
+            const minimum = Math.round(yearlyRent / 12);
+            const recommended = Math.round(minimum + (due / 24));
+            const fast = Math.round(minimum + (due / 12));
 
-    return `
-
+            return `
 • الحد الأدنى: ${minimum} شهريًا (للمحافظة على الحساب)
 • الدفع الموصى به: ${recommended} شهريًا (لتقليل الرصيد)
 • الدفع السريع: ${fast} شهريًا (لإغلاق الحساب بسرعة)
 هذه القيم تقديرية وقد تتغير حسب الإيجارات المستقبلية.
 `;
-}
+        }
 
         function getBalanceSmartText(balance) {
             const b = toNumber(balance);
@@ -871,6 +1029,80 @@
             }).join('');
         }
 
+        // ========== NEW: Burger Menu Functions ==========
+        function toggleMenu() {
+            const menu = document.getElementById('burger_menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function goToDashboard() {
+            document.getElementById('burger_menu').style.display = 'none';
+            window.location.href = 'tenant.html';
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('burger_menu').style.display = 'none';
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('password_error').style.display = 'none';
+            document.getElementById('current_password').value = '';
+            document.getElementById('new_password').value = '';
+            document.getElementById('confirm_password').value = '';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('current_password').value.trim();
+            const newPass = document.getElementById('new_password').value.trim();
+            const confirm = document.getElementById('confirm_password').value.trim();
+            const errorEl = document.getElementById('password_error');
+            
+            // Validation
+            if (current !== currentTenantPassword) {
+                errorEl.innerText = 'كلمة المرور الحالية غير صحيحة';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (newPass.length !== 4 || !/^\d+$/.test(newPass)) {
+                errorEl.innerText = 'كلمة المرور الجديدة يجب أن تكون 4 أرقام';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                errorEl.innerText = 'كلمة المرور الجديدة غير متطابقة';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            // Update in database
+            const { error } = await supabaseClient
+                .from('tenants')
+                .update({ password: newPass })
+                .eq('tenant_code', tenantCode);
+            
+            if (error) {
+                errorEl.innerText = 'حدث خطأ: ' + error.message;
+                errorEl.style.display = 'block';
+            } else {
+                currentTenantPassword = newPass;
+                alert('تم تغيير كلمة المرور بنجاح');
+                closePasswordModal();
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('burger_menu');
+            const menuBtn = e.target.closest('.ghost-btn');
+            if (menu && !menu.contains(e.target) && !menuBtn?.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
         async function init() {
             try {
                 const { data: tenant, error: tenantError } = await supabaseClient
@@ -880,6 +1112,11 @@
                     .maybeSingle();
 
                 if (tenantError) throw tenantError;
+                
+                // ========== NEW: Store current password ==========
+                if (tenant) {
+                    currentTenantPassword = tenant.password || '';
+                }
 
                 const { data: summaryData, error: summaryError } = await supabaseClient
                     .from('tenant_yearly_summary')
