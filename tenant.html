@@ -69,14 +69,29 @@
         }
 
         .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            gap: 12px;
-            flex-wrap: wrap;
-            position: relative; /* ADDED for burger menu positioning */
-        }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1000;  /* ← ADD THIS LINE ONLY */
+}
+
+.burger-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    padding: 8px;
+    z-index: 99999;  /* ← CHANGE THIS from 9999 to 99999 */
+    min-width: 200px;
+    display: none;
+    border: 1px solid rgba(201,164,107,0.18);
+}
 
         .brand strong {
             color: var(--gold-deep);
