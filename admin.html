@@ -212,6 +212,7 @@
         
         // --- Global Variables ---
         let allTenants=[], allTransactions=[], allSummaries=[], tenantBalances=[], collectionChart=null, monthlyChart=null, isSavingTransaction=false;
+        let isComplexWideMode = true; // Track current view mode
         
         // --- Helper Functions ---
         const toNumber = v => { const c = String(v ?? 0).replace(/,/g, '').trim(); const n = parseFloat(c); return isFinite(n) ? n : 0; };
@@ -220,7 +221,6 @@
         const getPreviousSummary = (tc, y) => allSummaries.filter(r => r.tenant_code === tc && Number(r.year) < Number(y)).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
         const getSummaryByYear = (tc, y) => allSummaries.find(r => r.tenant_code === tc && Number(r.year) === Number(y)) || null;
         const setMoodClass = (el, mood) => { if(!el) return; el.classList.remove('good','warn','bad','ai-good','ai-warn','ai-bad','ai-neutral'); if(el.classList.contains('hero-mini')){ if(mood==='good') el.classList.add('good'); else if(mood==='warn') el.classList.add('warn'); else if(mood==='bad') el.classList.add('bad'); } else { if(mood==='good') el.classList.add('ai-good'); else if(mood==='warn') el.classList.add('ai-warn'); else if(mood==='bad') el.classList.add('ai-bad'); else el.classList.add('ai-neutral'); } };
-        const setDotMood = (id, mood) => { const el = document.getElementById(id); if(!el) return; el.classList.remove('dot-good','dot-warn','dot-bad'); if(mood==='good') el.classList.add('dot-good'); else if(mood==='bad') el.classList.add('dot-bad'); else el.classList.add('dot-warn'); };
         const formatLastSeen = ds => { if(!ds) return '—'; const d = new Date(ds); if(isNaN(d.getTime())) return '—'; const now = new Date(), diff = now - d; const min = Math.floor(diff/60000), hr = Math.floor(min/60), day = Math.floor(hr/24); if(min < 1) return 'الآن'; if(min < 60) return `${min} د`; if(hr < 24) return `${hr} س`; if(day <= 7) return `${day} ي`; return d.toLocaleDateString('en-GB'); };
         const monthsSince = ds => { if(!ds) return null; const d = new Date(ds); if(isNaN(d.getTime())) return null; const now = new Date(); return Math.max(0, (now.getFullYear() - d.getFullYear())*12 + (now.getMonth() - d.getMonth())); };
         const getSelectedTenant = () => { const code = document.getElementById('tenant_select').value; return tenantBalances.find(x => x.tenant_code === code) || null; };
@@ -259,10 +259,85 @@
             const lbl = document.getElementById('pie_balance_label'); if(toNumber(tb) < 0) lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${roundMoney(Math.abs(tb))}</b>`; else lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${roundMoney(tb)}</b>`;
         }
         
+        function drawMonthlyChart_AllTenants(){
+            const canvas = document.getElementById('monthlyChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(monthlyChart) monthlyChart.destroy();
+            const labels=[], allCredits=[];
+            for(let i=11; i>=0; i--){
+                const d = new Date(); d.setMonth(d.getMonth()-i);
+                labels.push(d.toLocaleDateString('en-GB',{month:'short'}));
+                let monthTotal = 0;
+                allTransactions.forEach(tx => {
+                    const td = new Date(tx.date);
+                    if(td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear()){
+                        monthTotal += Math.max(0, toNumber(tx.credit));
+                    }
+                });
+                allCredits.push(monthTotal);
+            }
+            monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'إجمالي الدائن (كل المستأجرين)', data: allCredits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, rtl: true } }, scales: { y: { beginAtZero: true } } } });
+        }
+        
         function drawMonthlyChart(tenant){
             const canvas = document.getElementById('monthlyChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(monthlyChart) monthlyChart.destroy(); if(!tenant) return;
-            const labels=[], credits=[]; for(let i=11; i>=0; i--){ const d = new Date(); d.setMonth(d.getMonth()-i); labels.push(d.toLocaleDateString('en-GB',{month:'short'})); const monthTx = allTransactions.filter(tx => { const td = new Date(tx.date); return tx.tenant_code === tenant.tenant_code && td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); }); credits.push(monthTx.reduce((s,row)=> s + Math.max(0, toNumber(row.credit)), 0)); }
+            const labels=[], credits=[];
+            for(let i=11; i>=0; i--){ const d = new Date(); d.setMonth(d.getMonth()-i); labels.push(d.toLocaleDateString('en-GB',{month:'short'})); const monthTx = allTransactions.filter(tx => { const td = new Date(tx.date); return tx.tenant_code === tenant.tenant_code && td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); }); credits.push(monthTx.reduce((s,row)=> s + Math.max(0, toNumber(row.credit)), 0)); }
             monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'الدائن', data: credits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+        }
+        
+        // ========== NEW: Complex-Wide View ==========
+        function renderComplexWideView(){
+            isComplexWideMode = true;
+            
+            let totalComplexCredit = 0, totalComplexBalance = 0, totalComplexDebit = 0, tenantCount = 0;
+            allTenants.forEach(tenant => {
+                const latest = getLatestSummary(tenant.tenant_code);
+                if(latest){
+                    totalComplexCredit += toNumber(latest.total_credit);
+                    totalComplexBalance += toNumber(latest.final_balance);
+                    totalComplexDebit += toNumber(latest.total_debit);
+                    tenantCount++;
+                }
+            });
+            
+            const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
+            const nextProb = Math.max(5, Math.min(95, avgCommitment));
+            const defProb = 100 - nextProb;
+            
+            document.getElementById('tenant_status_chip').innerText = `${tenantCount} مستأجر`;
+            document.getElementById('last_seen_chip').innerText = '—';
+            document.getElementById('ai_badge').innerText = 'نظرة عامة';
+            document.getElementById('ai_badge').className = 'smart-ai-badge badge-good';
+            document.getElementById('ai_score_value').innerText = `${avgCommitment}/100`;
+            document.getElementById('ai_score_text').innerText = `إجمالي ${tenantCount} مستأجر نشط`;
+            document.getElementById('ai_commitment_ratio').innerText = `${avgCommitment}%`;
+            document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
+            document.getElementById('ai_default_probability').innerText = `${defProb}%`;
+            document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
+            document.getElementById('kpi_balance').innerText = roundMoney(totalComplexBalance);
+            document.getElementById('ai_months_without_payment').innerText = '—';
+            document.getElementById('ai_months_without_payment_text').innerText = 'كل المستأجرين';
+            document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
+            document.getElementById('ai_last3_ratio_text').innerText = `متوسط ${tenantCount} مستأجر`;
+            
+            const balEl = document.getElementById('kpi_balance');
+            balEl.style.color = totalComplexBalance < 0 ? '#159a6f' : (totalComplexBalance > 0 ? '#d14d4d' : '#159a6f');
+            
+            setMoodClass(document.getElementById('hero_commitment_card'), avgCommitment >= 75 ? 'good' : avgCommitment >= 50 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_total_credit'), 'good');
+            setMoodClass(document.getElementById('ai_card_balance'), totalComplexBalance <= 0 ? 'good' : 'warn');
+            
+            drawCollectionChart(totalComplexCredit, totalComplexBalance);
+            drawMonthlyChart_AllTenants();
+            
+            // Lock notification dropdown to "رسالة عامة"
+            const notifType = document.getElementById('notification_type');
+            notifType.value = 'general';
+            notifType.disabled = true;
+            document.getElementById('notification_message').value = '';
+            
+            document.getElementById('statementBtn').disabled = true;
         }
         
         function renderAi(tenant){
@@ -324,6 +399,7 @@
         const getNotificationTitle = t => { if(t==='first') return 'المطالبة الأولى'; if(t==='second') return 'المطالبة الثانية'; if(t==='third') return 'المطالبة الثالثة'; if(t==='legal') return 'إنذار عدلي'; if(t==='lawyer') return 'تحويل للمحامي'; return 'رسالة عامة'; };
         const getNotificationLifetimeDays = t => { if(t==='first') return 5; if(t==='second') return 5; if(t==='third') return 10; if(t==='legal') return 15; if(t==='lawyer') return 30; return 7; };
         const shouldHideAfterSeen = t => !(t==='legal' || t==='lawyer');
+        
         function buildNotificationText(type, tenant){
             if(!tenant) return ''; const amt = roundMoney(Math.abs(tenant.currentBalance)), isCredit = tenant.currentBalance < 0, due = new Date(); due.setDate(due.getDate()+7); const dueTxt = due.toLocaleDateString('en-GB');
             if(isCredit) return `نود إعلامكم بوجود رصيد دائن لصالحكم بقيمة ${amt}.`;
@@ -335,22 +411,153 @@
             return '';
         }
         
-        function updateNotificationComposer(){ const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message'); if(!type){ msg.value=''; return; } if(type==='general') return; if(!t) return; msg.value = buildNotificationText(type, t); }
-        async function sendNotification(){
-            const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message').value.trim();
-            if(!t) return alert('اختر المستأجر أولاً'); if(!type) return alert('اختر موضوع الإشعار'); if(!msg) return alert('أدخل نص الإشعار');
-            const now = new Date(), exp = new Date(now); exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
-            const { error } = await supabaseClient.from('tenant_notifications').insert([{ tenant_code: t.tenant_code, title: getNotificationTitle(type), message: msg, type, is_read: false, is_active: true, hide_after_seen: shouldHideAfterSeen(type), seen_at: null, created_at: now.toISOString(), expires_at: exp.toISOString() }]);
-            if(error){ console.error(error); alert('حدث خطأ'); return; }
-            alert('تم إرسال الإشعار بنجاح'); document.getElementById('notification_type').value=''; document.getElementById('notification_message').value='';
+        function updateNotificationComposer(){ 
+            if(isComplexWideMode) return;
+            const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message'); 
+            if(!type){ msg.value=''; return; } 
+            if(type==='general') return; 
+            if(!t) return; 
+            msg.value = buildNotificationText(type, t); 
         }
         
-        async function renderSelectedTenant(code){ const t = tenantBalances.find(x => x.tenant_code === code) || null; updateTenantStatusChip(t); if(t){ renderAi(t); drawCollectionChart(t.totalCredit, t.currentBalance); drawMonthlyChart(t); document.getElementById('statementBtn').disabled=false; } else { document.getElementById('statementBtn').disabled=true; } updateNotificationComposer(); }
-        async function refresh(code=null){ document.getElementById('loader').style.display='flex'; await loadData(); const sel = document.getElementById('tenant_select'); const selCode = code || sel.value || ''; sel.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join(''); if(selCode){ sel.value = selCode; await renderSelectedTenant(selCode); } else { document.getElementById('last_seen_chip').innerText='—'; document.getElementById('tenant_status_chip').innerText='جزئي'; document.getElementById('tenant_status_chip').classList.remove('paid','partial','credit'); document.getElementById('statementBtn').disabled=true; } document.getElementById('loader').style.display='none'; }
-        function openTenantStatement(){ const code = document.getElementById('tenant_select').value; if(!code) return alert('اختر المستأجر أولاً'); localStorage.setItem('jabri_tenant_code', code); localStorage.setItem('jabri_admin_session', 'active'); window.open(`statement.html?tenant=${encodeURIComponent(code)}`, '_blank'); }
+        async function sendNotification(){
+            const t = getSelectedTenant();
+            const type = document.getElementById('notification_type').value;
+            const msg = document.getElementById('notification_message').value.trim();
+            
+            if(!type) return alert('اختر موضوع الإشعار');
+            if(!msg) return alert('أدخل نص الإشعار');
+            
+            // Complex-Wide Mode: Send to ALL tenants (only "رسالة عامة" allowed)
+            if(isComplexWideMode || !t){
+                if(type !== 'general'){
+                    alert('في وضع المجمع، يمكن فقط إرسال "رسالة عامة" لجميع المستأجرين.');
+                    return;
+                }
+                
+                const now = new Date(), exp = new Date(now);
+                exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
+                
+                let successCount = 0;
+                for(const tenant of allTenants){
+                    const { error } = await supabaseClient.from('tenant_notifications').insert([{
+                        tenant_code: tenant.tenant_code,
+                        title: 'رسالة عامة',
+                        message: msg,
+                        type: 'general',
+                        is_read: false,
+                        is_active: true,
+                        hide_after_seen: shouldHideAfterSeen(type),
+                        seen_at: null,
+                        created_at: now.toISOString(),
+                        expires_at: exp.toISOString()
+                    }]);
+                    if(!error) successCount++;
+                }
+                
+                alert(`تم إرسال الرسالة إلى ${successCount} مستأجر بنجاح`);
+                document.getElementById('notification_type').value = 'general';
+                document.getElementById('notification_message').value = '';
+                return;
+            }
+            
+            // Individual Tenant Mode (existing logic)
+            if(!t) return alert('اختر المستأجر أولاً');
+            
+            const now = new Date(), exp = new Date(now);
+            exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
+            
+            const { error } = await supabaseClient.from('tenant_notifications').insert([{
+                tenant_code: t.tenant_code,
+                title: getNotificationTitle(type),
+                message: msg,
+                type,
+                is_read: false,
+                is_active: true,
+                hide_after_seen: shouldHideAfterSeen(type),
+                seen_at: null,
+                created_at: now.toISOString(),
+                expires_at: exp.toISOString()
+            }]);
+            
+            if(error){ console.error(error); alert('حدث خطأ'); return; }
+            alert('تم إرسال الإشعار بنجاح');
+            document.getElementById('notification_type').value = '';
+            document.getElementById('notification_message').value = '';
+        }
+        
+        async function renderSelectedTenant(code){
+            const t = tenantBalances.find(x => x.tenant_code === code) || null;
+            
+            if(!code || code === ''){
+                // Complex-wide view
+                isComplexWideMode = true;
+                renderComplexWideView();
+                return;
+            }
+            
+            // Individual tenant view
+            isComplexWideMode = false;
+            
+            // Re-enable notification dropdown
+            const notifType = document.getElementById('notification_type');
+            notifType.disabled = false;
+            notifType.value = '';
+            
+            updateTenantStatusChip(t);
+            if(t){
+                renderAi(t);
+                drawCollectionChart(t.totalCredit, t.currentBalance);
+                drawMonthlyChart(t);
+                document.getElementById('statementBtn').disabled = false;
+            } else {
+                document.getElementById('statementBtn').disabled = true;
+            }
+            updateNotificationComposer();
+        }
+        
+        async function refresh(code=null){
+            document.getElementById('loader').style.display = 'flex';
+            await loadData();
+            const sel = document.getElementById('tenant_select');
+            const selCode = code || sel.value || '';
+            sel.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
+            
+            if(selCode){
+                sel.value = selCode;
+                await renderSelectedTenant(selCode);
+            } else {
+                // Default: Complex-wide view
+                await renderSelectedTenant('');
+            }
+            
+            document.getElementById('loader').style.display = 'none';
+        }
+        
+        function openTenantStatement(){
+            if(isComplexWideMode){
+                alert('الرجاء اختيار مستأجر محدد لعرض كشف الحساب.');
+                return;
+            }
+            const code = document.getElementById('tenant_select').value;
+            if(!code) return alert('اختر المستأجر أولاً');
+            localStorage.setItem('jabri_tenant_code', code);
+            localStorage.setItem('jabri_admin_session', 'active');
+            window.open(`statement.html?tenant=${encodeURIComponent(code)}`, '_blank');
+        }
+        
         function logoutAdmin(){ localStorage.removeItem('jabri_admin_session'); location.reload(); }
-        window.onload = async () => { document.body.style.opacity='1'; clearTransactionForm(); await refresh(); document.getElementById('tenant_select').addEventListener('change', async e => { await renderSelectedTenant(e.target.value); }); document.getElementById('notification_type').addEventListener('change', updateNotificationComposer); document.body.classList.add('loaded'); };
+        
+        window.onload = async () => {
+            document.body.style.opacity = '1';
+            clearTransactionForm();
+            await refresh();
+            document.getElementById('tenant_select').addEventListener('change', async e => {
+                await renderSelectedTenant(e.target.value);
+            });
+            document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
+            document.body.classList.add('loaded');
+        };
     </script>
 </body>
 </html>
-```
