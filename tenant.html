@@ -515,8 +515,8 @@
         </div>
 
         <div class="panel reveal">
-            <div class="chip-header"><div class="chip">AI نصيحة مالية</div></div>
-            <div id="smart_message" class="smart-body">تحليل البيانات...</div>
+            <div class="chip-header"><div class="chip"> نصيحة مالية</div></div>
+            <div id="smart_message" class="smart-body" style="white-space: pre-line;">تحليل البيانات...</div>
         </div>
 
         <div class="panel reveal">
@@ -619,21 +619,27 @@
         }
 
         function getSmartFinancialAdvice(balance) {
-            const due = Math.max(0, toNumber(balance));
+    const due = Math.max(0, toNumber(balance));
+    const yearlyRent = 1836;
 
-            if (due === 0) {
-                return 'حسابك الحالي مغلق ولا يوجد رصيد مستحق، ووضعك المالي ممتاز.';
-            }
+    if (due === 0) {
+        return 'حسابك الحالي مغلق ولا يوجد رصيد مستحق، ووضعك المالي ممتاز.';
+    }
 
-            const months = due > 1800 ? 18 : 8;
-            const monthly = Math.ceil(due / months);
+    const minimum = Math.round(yearlyRent / 12);
+    const recommended = Math.round(minimum + (due / 24));
+    const fast = Math.round(minimum + (due / 12));
 
-            if (due > 1800) {
-                return `رصيدك الحالي ${formatNumber(due)}، وننصح بدفع ${formatNumber(monthly)} شهريًا لإغلاق الحساب خلال ${months} شهرًا بطريقة أريح وأكثر انتظامًا.`;
-            }
+    return `
+رصيدك الحالي ${formatNumber(due)} دينار.
 
-            return `رصيدك الحالي ${formatNumber(due)}، وننصح بدفع ${formatNumber(monthly)} شهريًا لإغلاق الحساب خلال ${months} أشهر والمحافظة على وضع مالي أفضل.`;
-        }
+• الحد الأدنى: ${minimum} شهريًا (للمحافظة على الحساب)
+• الدفع الموصى به: ${recommended} شهريًا (لتقليل الرصيد)
+• الدفع السريع: ${fast} شهريًا (لإغلاق الحساب بسرعة)
+
+هذه القيم تقديرية وقد تتغير حسب الإيجارات المستقبلية.
+`;
+}
 
         function getBalanceSmartText(balance) {
             const b = toNumber(balance);
