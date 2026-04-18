@@ -125,18 +125,18 @@
 
         /* ========== NEW: Burger Menu Styles ========== */
         .burger-menu {
-            position: absolute;
-            top: 60px;
-            right: 0;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-            padding: 8px;
-            z-index: 1000;
-            min-width: 200px;
-            display: none;
-            border: 1px solid rgba(201,164,107,0.18);
-        }
+    position: fixed;  /* ← Changed from absolute to fixed */
+    top: 70px;
+    right: 16px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 99999;  /* ← Very high */
+    min-width: 200px;
+    display: none;
+    border: 1px solid rgba(201,164,107,0.18);
+}
 
         .menu-item {
             padding: 14px 16px;
@@ -170,7 +170,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: 999999;
             padding: 20px;
         }
 
