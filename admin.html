@@ -73,11 +73,11 @@
         .ai-warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
         .ai-bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
         .ai-neutral{ background:#fff; }
-        .chart-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:18px; margin-bottom:18px; }
-        .chart-wrap{ background:rgba(255,255,255,0.76); border:1px solid var(--line); border-radius:22px; padding:16px; height:300px; }
-        .chart-meta{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:12px; font-weight:900; font-size:14px; color:#6b4f2b; }
-        .chart-meta .good{ color:var(--success); }
-        .chart-meta .bad{ color:var(--danger); }
+        
+        /* NEW STYLES: Vertical stacking */
+        .chart-single { width: 100%; margin-bottom: 18px; }
+        .chart-wrap { background: rgba(255,255,255,0.76); border: 1px solid var(--line); border-radius: 22px; padding: 16px; height: 300px; width: 100%; }
+        .chart-meta { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-weight: 900; font-size: 14px; color: #6b4f2b; }
         .notify-builder{ display:grid; grid-template-columns:1fr; gap:14px; }
         .form-shell{ background:rgba(255,255,255,0.58); border:1px solid rgba(201,164,107,0.16); border-radius:24px; padding:16px; }
         .entry-box{ background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58)); border:1px solid rgba(201,164,107,0.14); border-radius:22px; padding:16px; overflow:hidden; }
@@ -111,6 +111,8 @@
             .notifications-table th, .notifications-table td { padding: 8px 6px; font-size: 11px; }
             .read-status { padding: 2px 6px; }
             .filter-buttons .btn-sm { padding: 6px 10px; font-size: 10px; }
+            .hero-ai-card { grid-template-columns: 1fr; }
+            .quick-ai-grid { grid-template-columns: 1fr; }
         }
     </style>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
@@ -129,6 +131,7 @@
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
 
+        <!-- اختيار المستأجر وتحليل ذكي -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
             <div class="tenant-select-grid">
@@ -168,28 +171,35 @@
             </div>
         </section>
 
-        <section class="chart-grid">
+        <!-- 1. وضع الحساب (Pie Chart) -->
+        <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">وضع الحساب</div></div>
                 <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
                 <div class="chart-meta"><span class="good">دائن: <b id="pie_paid_value">0</b></span><span class="bad" id="pie_balance_label">الرصيد: <b id="pie_balance_value">0</b></span></div>
             </div>
+        </div>
+
+        <!-- 2. الحركة الشهرية (تحت Pie Chart) -->
+        <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
             </div>
-        </section>
+        </div>
 
-        <!-- NEW: 5-YEAR COLLECTION RATE CHART (MOVED HERE - AFTER PIE CHART) -->
-        <section class="panel">
-            <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
-            <div class="chart-wrap" style="height: 360px;">
-                <canvas id="fiveYearCollectionChart"></canvas>
+        <!-- 3. نسبة التحصيل السنوية (آخر 5 سنوات) - تحتهم وياخذ عرض كامل -->
+        <div class="chart-single">
+            <div class="panel">
+                <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
+                <div class="chart-wrap" style="height: 360px;">
+                    <canvas id="fiveYearCollectionChart"></canvas>
+                </div>
+                <div id="fiveYearInsight" class="insight-text"></div>
             </div>
-            <div id="fiveYearInsight" class="insight-text"></div>
-        </section>
+        </div>
 
-        <!-- NEW: SMART NOTIFICATIONS SECTION WITH READ STATUS -->
+        <!-- 4. سجل الإشعارات -->
         <section class="panel">
             <div class="chip-header">
                 <div class="chip-title">📬 سجل الإشعارات المرسلة</div>
@@ -205,6 +215,7 @@
             </div>
         </section>
 
+        <!-- 5. إرسال إشعار -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
@@ -224,6 +235,7 @@
             </div>
         </section>
 
+        <!-- 6. إدخال دفعة جديدة -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
@@ -313,19 +325,16 @@
         
         // --- NOTIFICATIONS DISPLAY WITH READ STATUS ---
         async function loadNotifications() {
-            await loadData(); // Refresh notifications data
+            await loadData();
             const container = document.getElementById('notificationsList');
             if(!container) return;
             
             let filteredNotifs = [...allNotifications];
-            
-            // Filter by selected tenant or complex-wide
             const selectedCode = document.getElementById('tenant_select').value;
             if(selectedCode && selectedCode !== '') {
                 filteredNotifs = filteredNotifs.filter(n => n.tenant_code === selectedCode);
             }
             
-            // Apply read/unread filter
             if(currentNotificationFilter === 'read') {
                 filteredNotifs = filteredNotifs.filter(n => n.is_read === true);
             } else if(currentNotificationFilter === 'unread') {
@@ -337,13 +346,7 @@
                 return;
             }
             
-            let html = `
-                <table class="notifications-table">
-                    <thead>
-                        <tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th></tr>
-                    </thead>
-                    <tbody>
-            `;
+            let html = `<table class="notifications-table"><thead><tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th></tr></thead><tbody>`;
             
             for(const notif of filteredNotifs) {
                 const tenantName = getTenantName(notif.tenant_code);
@@ -353,19 +356,10 @@
                 const typeMap = { first:'مطالبة أولى', second:'مطالبة ثانية', third:'مطالبة ثالثة', legal:'إنذار عدلي', lawyer:'تحويل محامي', general:'رسالة عامة' };
                 const typeName = typeMap[notif.type] || notif.type || '—';
                 
-                html += `
-                    <tr>
-                        <td>${tenantName}</td>
-                        <td>${typeName}</td>
-                        <td>${shortMsg}</td>
-                        <td>${formatDateTime(notif.created_at)}</td>
-                        <td><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td>
-                        <td>${readDate}</td>
-                    </tr>
-                `;
+                html += `<tr><td>${tenantName}</td><td>${typeName}</td><td>${shortMsg}</td><td>${formatDateTime(notif.created_at)}</td><td><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td><td>${readDate}</td></tr>`;
             }
             
-            html += `</tbody></table>`;
+            html += `</tbody><td>`;
             container.innerHTML = html;
         }
         
@@ -446,7 +440,7 @@
                 plugins: [{
                     id: 'targetLine',
                     afterDraw(chart) {
-                        const { ctx, chartArea: { top, bottom, left, right }, scales } = chart;
+                        const { ctx, chartArea: { left, right }, scales } = chart;
                         if(scales.y && scales.y.getPixelForValue) {
                             const yTarget = scales.y.getPixelForValue(70);
                             ctx.save();
@@ -505,10 +499,7 @@
             const summaries = allSummaries.filter(s => s.tenant_code === tenantCode);
             summaries.forEach(sum => {
                 const year = Number(sum.year);
-                yearlyMap[year] = {
-                    total_debit: toNumber(sum.total_debit),
-                    total_credit: toNumber(sum.total_credit)
-                };
+                yearlyMap[year] = { total_debit: toNumber(sum.total_debit), total_credit: toNumber(sum.total_credit) };
             });
             return yearlyMap;
         }
@@ -608,7 +599,7 @@
         
         function renderAi(tenant){
             if(!tenant) return;
-            const tc = toNumber(tenant.totalCredit), cb = toNumber(tenant.currentBalance), pb = toNumber(tenant.previousBalance), td = toNumber(tenant.totalDebit), ob = toNumber(tenant.openingBalance), ly = tenant.latestYear || '—';
+            const tc = toNumber(tenant.totalCredit), cb = toNumber(tenant.currentBalance), td = toNumber(tenant.totalDebit);
             const allYears = allSummaries.filter(r => r.tenant_code === tenant.tenant_code);
             const totalDebitAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_debit), 0);
             const totalCreditAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_credit), 0);
@@ -622,8 +613,8 @@
             const badge = document.getElementById('ai_badge');
             if(cb < 0){ badge.className='smart-ai-badge badge-credit'; badge.innerText='دائن'; document.getElementById('ai_score_text').innerText = `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`; }
             else if(cb === 0){ badge.className='smart-ai-badge badge-excellent'; badge.innerText='ملتزم'; document.getElementById('ai_score_text').innerText = 'لا يوجد رصيد مستحق حالياً'; }
-            else if(tc > 0){ badge.className='smart-ai-badge badge-good'; badge.innerText='جزئي'; document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة في سنة ${ly}`; }
-            else { badge.className='smart-ai-badge badge-risk'; badge.innerText='متأخر'; document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل في سنة ${ly}`; }
+            else if(tc > 0){ badge.className='smart-ai-badge badge-good'; badge.innerText='جزئي'; document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة`; }
+            else { badge.className='smart-ai-badge badge-risk'; badge.innerText='متأخر'; document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل`; }
             setMoodClass(document.getElementById('hero_commitment_card'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
