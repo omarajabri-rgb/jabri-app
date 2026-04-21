@@ -987,40 +987,46 @@
         }
 
         function updateTrafficLight(balance) {
-            const status = getTrafficLightStatus(balance);
-            
-            const redLight = document.getElementById('light_red');
-            const yellowLight = document.getElementById('light_yellow');
-            const greenLight = document.getElementById('light_green');
-            const statusText = document.getElementById('traffic_status_text');
-            
-            redLight.classList.remove('active');
-            yellowLight.classList.remove('active');
-            greenLight.classList.remove('active');
-            
-            if (status.active === 'red') {
-                redLight.classList.add('active');
-                statusText.innerHTML = status.text;
-                statusText.style.background = 'rgba(201,90,82,0.1)';
-                statusText.style.color = 'var(--danger)';
-                statusText.style.borderRadius = '20px';
-                statusText.style.padding = '12px';
-            } else if (status.active === 'yellow') {
-                yellowLight.classList.add('active');
-                statusText.innerHTML = status.text;
-                statusText.style.background = 'rgba(195,138,46,0.1)';
-                statusText.style.color = 'var(--warning)';
-                statusText.style.borderRadius = '20px';
-                statusText.style.padding = '12px';
-            } else {
-                greenLight.classList.add('active');
-                statusText.innerHTML = status.text;
-                statusText.style.background = 'rgba(47,158,111,0.1)';
-                statusText.style.color = 'var(--success)';
-                statusText.style.borderRadius = '20px';
-                statusText.style.padding = '12px';
-            }
-        }
+    const status = getTrafficLightStatus(balance);
+    
+    const redLight = document.getElementById('light_red');
+    const yellowLight = document.getElementById('light_yellow');
+    const greenLight = document.getElementById('light_green');
+    const statusText = document.getElementById('traffic_status_text');
+    
+    redLight.classList.remove('active');
+    yellowLight.classList.remove('active');
+    greenLight.classList.remove('active');
+    
+    // الرقم المتبقي
+    const remaining = Math.max(0, balance);
+    
+    // النص الجديد المدمج
+    const finalText = `🔴 الرصيد المستحق ${formatNumber(remaining)} (ارتفاع +936)`;
+    
+    if (status.active === 'red') {
+        redLight.classList.add('active');
+        statusText.innerHTML = finalText;
+        statusText.style.background = 'rgba(201,90,82,0.1)';
+        statusText.style.color = 'var(--danger)';
+        statusText.style.borderRadius = '20px';
+        statusText.style.padding = '12px';
+    } else if (status.active === 'yellow') {
+        yellowLight.classList.add('active');
+        statusText.innerHTML = finalText;
+        statusText.style.background = 'rgba(195,138,46,0.1)';
+        statusText.style.color = 'var(--warning)';
+        statusText.style.borderRadius = '20px';
+        statusText.style.padding = '12px';
+    } else {
+        greenLight.classList.add('active');
+        statusText.innerHTML = finalText;
+        statusText.style.background = 'rgba(47,158,111,0.1)';
+        statusText.style.color = 'var(--success)';
+        statusText.style.borderRadius = '20px';
+        statusText.style.padding = '12px';
+    }
+}
 
         function getNotificationCategory(item) {
             const text = `${item?.title || ''} ${item?.message || ''} ${item?.type || ''}`.toLowerCase();
