@@ -24,8 +24,9 @@
         .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff; box-shadow:0 12px 24px rgba(201,164,107,0.22); }
         .btn-danger{ background:rgba(209,77,77,0.12); color:var(--danger); border:1px solid rgba(209,77,77,0.18); }
         .btn-soft{ background:#fff; border:1px solid var(--line); color:var(--text); }
+        .btn-sm{ padding:8px 12px; font-size:12px; }
         .panel{ background:var(--card); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.72); box-shadow:var(--shadow); border-radius:28px; padding:16px; margin-bottom:18px; }
-        .chip-header{ display:flex; justify-content:flex-start; width:100%; margin-bottom:12px; }
+        .chip-header{ display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px; flex-wrap:wrap; gap:10px; }
         .chip-title{ display:inline-flex; align-items:center; padding:8px 16px; border-radius:999px; font-size:12px; font-weight:900; color:var(--gold-deep); background:rgba(201,164,107,0.12); border:1px solid rgba(201,164,107,0.22); }
         .tenant-select-grid{ display:grid; grid-template-columns:1fr; gap:10px; align-items:end; }
         .field{ display:flex; flex-direction:column; gap:8px; min-width:0; }
@@ -91,16 +92,27 @@
         #loader{ position:fixed; inset:0; background:#f8f4ec; display:flex; align-items:center; justify-content:center; z-index:9999; }
         .spinner{ width:40px; height:40px; border:3px solid rgba(201,164,107,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin{ to{ transform:rotate(360deg); } }
-        @media (max-width: 1200px){ .hero-ai-card{ grid-template-columns:1fr; } }
-        @media (max-width: 900px){ .chart-grid{ grid-template-columns:1fr; } }
-        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; } .quick-ai-card{ min-height:220px; } }
-        /* New Styles for Smart 5-Year Chart */
+        
+        /* Notification Table Styles */
+        .notifications-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .notifications-table th, .notifications-table td { padding: 12px 10px; text-align: right; border-bottom: 1px solid var(--line); font-size: 13px; }
+        .notifications-table th { background: rgba(201,164,107,0.08); font-weight: 800; color: #6b4f2b; }
+        .notifications-table tr:hover { background: rgba(201,164,107,0.05); }
+        .read-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+        .read-status.read { background: rgba(21,154,111,0.12); color: var(--success); }
+        .read-status.unread { background: rgba(209,77,77,0.12); color: var(--danger); }
+        .filter-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
         .insight-text { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 8px; text-align: center; }
         .trend-up { color: var(--success); }
         .trend-down { color: var(--danger); }
         .trend-neutral { color: var(--warning); }
+        
+        @media (max-width: 768px){
+            .notifications-table th, .notifications-table td { padding: 8px 6px; font-size: 11px; }
+            .read-status { padding: 2px 6px; }
+            .filter-buttons .btn-sm { padding: 6px 10px; font-size: 10px; }
+        }
     </style>
-    <!-- Security Meta Tags -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -116,15 +128,6 @@
             </div>
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
-
-        <!-- NEW: SMART 5-YEAR COLLECTION RATE CHART -->
-        <section class="panel">
-            <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
-            <div class="chart-wrap" style="height: 360px;">
-                <canvas id="fiveYearCollectionChart"></canvas>
-            </div>
-            <div id="fiveYearInsight" class="insight-text"></div>
-        </section>
 
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
@@ -164,6 +167,7 @@
                 </div>
             </div>
         </section>
+
         <section class="chart-grid">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">وضع الحساب</div></div>
@@ -175,6 +179,32 @@
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
             </div>
         </section>
+
+        <!-- NEW: 5-YEAR COLLECTION RATE CHART (MOVED HERE - AFTER PIE CHART) -->
+        <section class="panel">
+            <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
+            <div class="chart-wrap" style="height: 360px;">
+                <canvas id="fiveYearCollectionChart"></canvas>
+            </div>
+            <div id="fiveYearInsight" class="insight-text"></div>
+        </section>
+
+        <!-- NEW: SMART NOTIFICATIONS SECTION WITH READ STATUS -->
+        <section class="panel">
+            <div class="chip-header">
+                <div class="chip-title">📬 سجل الإشعارات المرسلة</div>
+                <div class="filter-buttons">
+                    <button class="btn btn-soft btn-sm" onclick="filterNotifications('all')">الكل</button>
+                    <button class="btn btn-soft btn-sm" onclick="filterNotifications('read')">المقروءة</button>
+                    <button class="btn btn-soft btn-sm" onclick="filterNotifications('unread')">غير المقروءة</button>
+                    <button class="btn btn-gold btn-sm" onclick="loadNotifications()">تحديث</button>
+                </div>
+            </div>
+            <div id="notificationsList" style="overflow-x: auto;">
+                <div style="text-align: center; padding: 40px; color: var(--muted);">جاري تحميل الإشعارات...</div>
+            </div>
+        </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
@@ -193,6 +223,7 @@
                 <button class="btn btn-gold" style="width:100%;" onclick="sendNotification()">إرسال الإشعار</button>
             </div>
         </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
@@ -213,6 +244,7 @@
                 </div>
             </div>
         </section>
+        
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.39</div>
     </div>
@@ -226,15 +258,19 @@
         const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
         
         // --- Global Variables ---
-        let allTenants=[], allTransactions=[], allSummaries=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, isSavingTransaction=false;
-        let isComplexWideMode = true; // Track current view mode
+        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, isSavingTransaction=false;
+        let isComplexWideMode = true;
+        let currentNotificationFilter = 'all';
         
         // --- Helper Functions ---
         const toNumber = v => { const c = String(v ?? 0).replace(/,/g, '').trim(); const n = parseFloat(c); return isFinite(n) ? n : 0; };
         const roundMoney = v => Math.round(toNumber(v));
+        const formatDate = (d) => { if(!d) return '—'; const dt = new Date(d); if(isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('ar-EG'); };
+        const formatDateTime = (d) => { if(!d) return '—'; const dt = new Date(d); if(isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('ar-EG') + ' ' + dt.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}); };
         const getLatestSummary = tc => allSummaries.filter(r => r.tenant_code === tc).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
         const getPreviousSummary = (tc, y) => allSummaries.filter(r => r.tenant_code === tc && Number(r.year) < Number(y)).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
         const getSummaryByYear = (tc, y) => allSummaries.find(r => r.tenant_code === tc && Number(r.year) === Number(y)) || null;
+        const getTenantName = (code) => { const t = allTenants.find(tn => tn.tenant_code === code); return t ? (t.tenant_name || code) : code; };
         const setMoodClass = (el, mood) => { if(!el) return; el.classList.remove('good','warn','bad','ai-good','ai-warn','ai-bad','ai-neutral'); if(el.classList.contains('hero-mini')){ if(mood==='good') el.classList.add('good'); else if(mood==='warn') el.classList.add('warn'); else if(mood==='bad') el.classList.add('bad'); } else { if(mood==='good') el.classList.add('ai-good'); else if(mood==='warn') el.classList.add('ai-warn'); else if(mood==='bad') el.classList.add('ai-bad'); else el.classList.add('ai-neutral'); } };
         const formatLastSeen = ds => { if(!ds) return '—'; const d = new Date(ds); if(isNaN(d.getTime())) return '—'; const now = new Date(), diff = now - d; const min = Math.floor(diff/60000), hr = Math.floor(min/60), day = Math.floor(hr/24); if(min < 1) return 'الآن'; if(min < 60) return `${min} د`; if(hr < 24) return `${hr} س`; if(day <= 7) return `${day} ي`; return d.toLocaleDateString('en-GB'); };
         const monthsSince = ds => { if(!ds) return null; const d = new Date(ds); if(isNaN(d.getTime())) return null; const now = new Date(); return Math.max(0, (now.getFullYear() - d.getFullYear())*12 + (now.getMonth() - d.getMonth())); };
@@ -246,8 +282,17 @@
         
         // --- Data Loading ---
         async function loadData(){
-            const [t, tx, sum] = await Promise.all([supabaseClient.from('tenants').select('*').order('tenant_name'), supabaseClient.from('tenant_transactions').select('*').order('date'), supabaseClient.from('tenant_yearly_summary').select('*').order('year')]);
-            allTenants = t.data || []; allTransactions = tx.data || []; allSummaries = sum.data || [];
+            const [t, tx, sum, notif] = await Promise.all([
+                supabaseClient.from('tenants').select('*').order('tenant_name'),
+                supabaseClient.from('tenant_transactions').select('*').order('date'),
+                supabaseClient.from('tenant_yearly_summary').select('*').order('year'),
+                supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false })
+            ]);
+            allTenants = t.data || [];
+            allTransactions = tx.data || [];
+            allSummaries = sum.data || [];
+            allNotifications = notif.data || [];
+            
             tenantBalances = allTenants.map(tn => {
                 const ls = getLatestSummary(tn.tenant_code), ps = ls ? getPreviousSummary(tn.tenant_code, ls.year) : null;
                 const tc = ls ? toNumber(ls.total_credit) : 0, cb = ls ? toNumber(ls.final_balance) : 0, pb = ps ? toNumber(ps.final_balance) : 0, ob = ls ? toNumber(ls.opening_balance) : 0, td = ls ? toNumber(ls.total_debit) : toNumber(tn.annual_rent), ar = toNumber(tn.annual_rent);
@@ -266,9 +311,71 @@
             else { chip.innerText='متأخر'; }
         }
         
-        // --- NEW SMART 5-YEAR CHART LOGIC ---
+        // --- NOTIFICATIONS DISPLAY WITH READ STATUS ---
+        async function loadNotifications() {
+            await loadData(); // Refresh notifications data
+            const container = document.getElementById('notificationsList');
+            if(!container) return;
+            
+            let filteredNotifs = [...allNotifications];
+            
+            // Filter by selected tenant or complex-wide
+            const selectedCode = document.getElementById('tenant_select').value;
+            if(selectedCode && selectedCode !== '') {
+                filteredNotifs = filteredNotifs.filter(n => n.tenant_code === selectedCode);
+            }
+            
+            // Apply read/unread filter
+            if(currentNotificationFilter === 'read') {
+                filteredNotifs = filteredNotifs.filter(n => n.is_read === true);
+            } else if(currentNotificationFilter === 'unread') {
+                filteredNotifs = filteredNotifs.filter(n => n.is_read !== true);
+            }
+            
+            if(filteredNotifs.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--muted);">📭 لا توجد إشعارات</div>';
+                return;
+            }
+            
+            let html = `
+                <table class="notifications-table">
+                    <thead>
+                        <tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th></tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for(const notif of filteredNotifs) {
+                const tenantName = getTenantName(notif.tenant_code);
+                const shortMsg = notif.message ? (notif.message.substring(0, 50) + (notif.message.length > 50 ? '...' : '')) : '—';
+                const isRead = notif.is_read === true;
+                const readDate = notif.seen_at ? formatDateTime(notif.seen_at) : '—';
+                const typeMap = { first:'مطالبة أولى', second:'مطالبة ثانية', third:'مطالبة ثالثة', legal:'إنذار عدلي', lawyer:'تحويل محامي', general:'رسالة عامة' };
+                const typeName = typeMap[notif.type] || notif.type || '—';
+                
+                html += `
+                    <tr>
+                        <td>${tenantName}</td>
+                        <td>${typeName}</td>
+                        <td>${shortMsg}</td>
+                        <td>${formatDateTime(notif.created_at)}</td>
+                        <td><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td>
+                        <td>${readDate}</td>
+                    </tr>
+                `;
+            }
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+        
+        function filterNotifications(filter) {
+            currentNotificationFilter = filter;
+            loadNotifications();
+        }
+        
+        // --- 5-YEAR CHART FUNCTIONS ---
         function drawFiveYearChart(dataMap) {
-            // dataMap: { year: { total_debit, total_credit, collection_rate } }
             const canvas = document.getElementById('fiveYearCollectionChart');
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -292,11 +399,10 @@
                 creditTotals.push(data ? data.total_credit : 0);
             });
             
-            // Define colors based on performance
             const backgroundColors = rates.map(r => {
-                if(r >= 75) return 'rgba(21, 154, 111, 0.85)'; // Good
-                if(r >= 60) return 'rgba(215, 146, 31, 0.85)'; // Warning
-                return 'rgba(209, 77, 77, 0.85)'; // Bad
+                if(r >= 75) return 'rgba(21, 154, 111, 0.85)';
+                if(r >= 60) return 'rgba(215, 146, 31, 0.85)';
+                return 'rgba(209, 77, 77, 0.85)';
             });
             
             fiveYearChart = new Chart(ctx, {
@@ -333,16 +439,8 @@
                         legend: { display: false }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: 'نسبة التحصيل %', font: { weight: 'bold' } },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            title: { display: true, text: 'السنة', font: { weight: 'bold' } },
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'نسبة التحصيل %', font: { weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { title: { display: true, text: 'السنة', font: { weight: 'bold' } }, grid: { display: false } }
                     }
                 },
                 plugins: [{
@@ -360,12 +458,9 @@
                             ctx.setLineDash([8, 6]);
                             ctx.stroke();
                             ctx.restore();
-                            
-                            // Add label
                             ctx.save();
                             ctx.font = 'bold 12px Tajawal';
                             ctx.fillStyle = '#d7921f';
-                            ctx.shadowBlur = 0;
                             ctx.fillText('الهدف 70%', right - 40, yTarget - 5);
                             ctx.restore();
                         }
@@ -373,7 +468,6 @@
                 }]
             });
             
-            // Update insight text
             let insightHtml = '';
             if(rates.length >= 2) {
                 const lastRate = rates[rates.length-1];
@@ -419,7 +513,7 @@
             return yearlyMap;
         }
         
-        // --- EXISTING CHART FUNCTIONS (Unmodified) ---
+        // --- EXISTING CHART FUNCTIONS ---
         function drawCollectionChart(tc, tb){
             const canvas = document.getElementById('collectionChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(collectionChart) collectionChart.destroy();
             const paid = Math.max(0, toNumber(tc)), rem = Math.max(0, toNumber(tb)), tot = paid + rem, ratio = tot > 0 ? Math.round((paid/tot)*100) : 0;
@@ -453,7 +547,7 @@
             monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'الدائن', data: credits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         }
         
-        // ========== Complex-Wide View ==========
+        // --- COMPLEX WIDE VIEW ---
         function renderComplexWideView(){
             isComplexWideMode = true;
             
@@ -500,17 +594,16 @@
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
             
-            // NEW: Update 5-year chart for complex-wide
             const yearlyData = getComplexWideYearlyData();
             drawFiveYearChart(yearlyData);
             
-            // Lock notification dropdown to "رسالة عامة"
             const notifType = document.getElementById('notification_type');
             notifType.value = 'general';
             notifType.disabled = true;
             document.getElementById('notification_message').value = '';
-            
             document.getElementById('statementBtn').disabled = true;
+            
+            loadNotifications();
         }
         
         function renderAi(tenant){
@@ -522,7 +615,6 @@
             const covScore = totalDebitAllTime > 0 ? Math.min(100, Math.round((totalCreditAllTime / totalDebitAllTime) * 100)) : 100;
             const txs = allTransactions.filter(x => x.tenant_code === tenant.tenant_code).sort((a,b) => new Date(a.date) - new Date(b.date));
             const pays = txs.filter(x => toNumber(x.credit) > 0), lastPay = pays[pays.length-1] || null, mwp = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
-            const monthlyAvg = (() => { if(!pays.length) return 0; const months = new Set(pays.map(r => { const d = new Date(r.date); return `${d.getFullYear()}-${d.getMonth()}`; })); const tot = pays.reduce((s,r) => s + toNumber(r.credit), 0); return months.size ? Math.round(tot / months.size) : 0; })();
             const nextProb = Math.max(5, Math.min(95, Math.round((covScore*0.55) + ((mwp<=1?90:mwp<=3?55:20)*0.45)))), defProb = 100 - nextProb;
             document.getElementById('ai_score_value').innerText = `${covScore}/100`; document.getElementById('ai_commitment_ratio').innerText = `${covScore}%`; document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`; document.getElementById('ai_default_probability').innerText = `${defProb}%`; document.getElementById('kpi_total_credit').innerText = roundMoney(Math.max(0,tc));
             const balEl = document.getElementById('kpi_balance'); if(balEl){ if(cb < 0){ balEl.innerText = roundMoney(Math.abs(cb)); balEl.style.color = '#159a6f'; } else { balEl.innerText = roundMoney(cb); balEl.style.color = cb > 0 ? '#d14d4d' : '#159a6f'; } }
@@ -574,18 +666,13 @@
         const shouldHideAfterSeen = t => !(t==='legal' || t==='lawyer');
         
         function buildNotificationText(type, tenant){
-            if(!tenant) return ''; const amt = roundMoney(Math.abs(tenant.currentBalance)), isCredit = tenant.currentBalance < 0, due = new Date(); due.setDate(due.getDate()+7); const dueTxt = due.toLocaleDateString('en-GB');
+            if(!tenant) return ''; const amt = roundMoney(Math.abs(tenant.currentBalance)), isCredit = tenant.currentBalance < 0;
             if(isCredit) return `نود إعلامكم بوجود رصيد دائن لصالحكم بقيمة ${amt}.`;
-            if(type==='first') return `نود إشعاركم بوجود رصيد مستحق على حسابكم،
-نرجو المبادرة بمراجعته وتسويته في أقرب وقت.`;
-            if(type==='second') return `نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم،
-نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.`;
-            if(type==='third') return `نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل،
-وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type==='legal') return `نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم،
-وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type==='lawyer') return `تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم،
-وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.`;
+            if(type==='first') return `نود إشعاركم بوجود رصيد مستحق على حسابكم، نرجو المبادرة بمراجعته وتسويته في أقرب وقت.`;
+            if(type==='second') return `نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم، نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.`;
+            if(type==='third') return `نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل، وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
+            if(type==='legal') return `نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم، وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
+            if(type==='lawyer') return `تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم، وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.`;
             return '';
         }
         
@@ -606,16 +693,13 @@
             if(!type) return alert('اختر موضوع الإشعار');
             if(!msg) return alert('أدخل نص الإشعار');
             
-            // Complex-Wide Mode: Send to ALL tenants (only "رسالة عامة" allowed)
             if(isComplexWideMode || !t){
                 if(type !== 'general'){
                     alert('في وضع المجمع، يمكن فقط إرسال "رسالة عامة" لجميع المستأجرين.');
                     return;
                 }
-                
                 const now = new Date(), exp = new Date(now);
                 exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
-                
                 let successCount = 0;
                 for(const tenant of allTenants){
                     const { error } = await supabaseClient.from('tenant_notifications').insert([{
@@ -632,19 +716,16 @@
                     }]);
                     if(!error) successCount++;
                 }
-                
                 alert(`تم إرسال الرسالة إلى ${successCount} مستأجر بنجاح`);
                 document.getElementById('notification_type').value = 'general';
                 document.getElementById('notification_message').value = '';
+                loadNotifications();
                 return;
             }
             
-            // Individual Tenant Mode (existing logic)
             if(!t) return alert('اختر المستأجر أولاً');
-            
             const now = new Date(), exp = new Date(now);
             exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
-            
             const { error } = await supabaseClient.from('tenant_notifications').insert([{
                 tenant_code: t.tenant_code,
                 title: getNotificationTitle(type),
@@ -657,27 +738,23 @@
                 created_at: now.toISOString(),
                 expires_at: exp.toISOString()
             }]);
-            
             if(error){ console.error(error); alert('حدث خطأ'); return; }
             alert('تم إرسال الإشعار بنجاح');
             document.getElementById('notification_type').value = '';
             document.getElementById('notification_message').value = '';
+            loadNotifications();
         }
         
         async function renderSelectedTenant(code){
             const t = tenantBalances.find(x => x.tenant_code === code) || null;
             
             if(!code || code === ''){
-                // Complex-wide view
                 isComplexWideMode = true;
                 renderComplexWideView();
                 return;
             }
             
-            // Individual tenant view
             isComplexWideMode = false;
-            
-            // Re-enable notification dropdown
             const notifType = document.getElementById('notification_type');
             notifType.disabled = false;
             notifType.value = '';
@@ -687,7 +764,6 @@
                 renderAi(t);
                 drawCollectionChart(t.totalCredit, t.currentBalance);
                 drawMonthlyChart(t);
-                // Update 5-year chart for selected tenant
                 const tenantYearlyData = getTenantYearlyData(code);
                 drawFiveYearChart(tenantYearlyData);
                 document.getElementById('statementBtn').disabled = false;
@@ -695,6 +771,7 @@
                 document.getElementById('statementBtn').disabled = true;
             }
             updateNotificationComposer();
+            loadNotifications();
         }
         
         async function refresh(code=null){
@@ -708,10 +785,8 @@
                 sel.value = selCode;
                 await renderSelectedTenant(selCode);
             } else {
-                // Default: Complex-wide view
                 await renderSelectedTenant('');
             }
-            
             document.getElementById('loader').style.display = 'none';
         }
         
