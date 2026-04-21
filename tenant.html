@@ -14,7 +14,6 @@
     <title>مجمع جبري | لوحة المستأجر</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* ========== YOUR EXISTING STYLES (KEPT EXACTLY THE SAME) ========== */
@@ -69,29 +68,29 @@
         }
 
         .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    gap: 12px;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1000;  /* ← ADD THIS LINE ONLY */
-}
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1000;
+        }
 
-.burger-menu {
-    position: absolute;
-    top: 60px;
-    right: 0;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-    padding: 8px;
-    z-index: 99999;  /* ← CHANGE THIS from 9999 to 99999 */
-    min-width: 200px;
-    display: none;
-    border: 1px solid rgba(201,164,107,0.18);
-}
+        .burger-menu {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            padding: 8px;
+            z-index: 99999;
+            min-width: 200px;
+            display: none;
+            border: 1px solid rgba(201,164,107,0.18);
+        }
 
         .brand strong {
             color: var(--gold-deep);
@@ -108,7 +107,6 @@
             margin-bottom: 4px;
         }
 
-        /* ========== NEW: Topbar Actions Container ========== */
         .topbar-actions {
             display: flex;
             gap: 8px;
@@ -138,20 +136,19 @@
             box-shadow: 0 14px 26px rgba(120,95,56,0.12);
         }
 
-        /* ========== NEW: Burger Menu Styles ========== */
         .burger-menu {
-    position: fixed;  /* ← Changed from absolute to fixed */
-    top: 70px;
-    right: 16px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    padding: 8px;
-    z-index: 99999;  /* ← Very high */
-    min-width: 200px;
-    display: none;
-    border: 1px solid rgba(201,164,107,0.18);
-}
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 99999;
+            min-width: 200px;
+            display: none;
+            border: 1px solid rgba(201,164,107,0.18);
+        }
 
         .menu-item {
             padding: 14px 16px;
@@ -174,7 +171,6 @@
             height: 20px;
         }
 
-        /* ========== NEW: Modal Styles ========== */
         .modal {
             position: fixed;
             top: 0;
@@ -232,7 +228,6 @@
             color: var(--text);
         }
 
-        /* ========== YOUR EXISTING STYLES CONTINUE (UNCHANGED) ========== */
         .hero-card {
             border-radius: 26px;
             padding: 24px;
@@ -398,61 +393,129 @@
             white-space: normal;
         }
 
-        .pie-text-stats {
-            margin-top: 16px;
-            text-align: center;
+        /* ========== NEW: Progress Bar Styles ========== */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-label {
             display: flex;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            font-size: 15px;
-            font-weight: 900;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--text);
         }
 
-        .pie-text-item b {
-            font-weight: 900;
-            margin-right: 4px;
+        .progress-bar-bg {
+            background: rgba(139,127,112,0.2);
+            border-radius: 999px;
+            height: 24px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .chart-wrap {
-            min-height: 220px;
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--success), var(--gold-deep));
+            width: 0%;
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.8s ease-out;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        .timeline-wrap {
-            min-height: 300px;
-        }
-
-        .chart-caption {
-            margin-top: 14px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            font-size: 14px;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-size: 12px;
             font-weight: 900;
+        }
+
+        /* ========== NEW: Traffic Light Styles ========== */
+        .traffic-light {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .traffic-light-item {
             text-align: center;
-            border: 1px solid transparent;
+            flex: 1;
         }
 
-        .chart-caption.good {
-            color: var(--success);
-            background: rgba(47,158,111,0.10);
-            border-color: rgba(47,158,111,0.18);
+        .light {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            opacity: 0.2;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .chart-caption.warning {
-            color: var(--danger);
-            background: rgba(201,90,82,0.10);
-            border-color: rgba(201,90,82,0.18);
+        .light.active {
+            opacity: 1;
+            box-shadow: 0 0 16px rgba(0,0,0,0.2);
         }
 
-        .chart-caption.neutral {
+        .light.red {
+            background: var(--danger);
+        }
+
+        .light.yellow {
+            background: var(--warning);
+        }
+
+        .light.green {
+            background: var(--success);
+        }
+
+        .traffic-label {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .traffic-status-text {
+            text-align: center;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 16px;
+        }
+
+        /* ========== NEW: KPI Card Styles (kept your existing card look) ========== */
+        .kpi-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .kpi-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            line-height: 1.2;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
             color: var(--neutral);
-            background: rgba(139,127,112,0.10);
-            border-color: rgba(139,127,112,0.18);
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(201,164,107,0.2);
+            margin: 16px 0;
         }
 
         .notif-list {
@@ -599,6 +662,8 @@
             .soft-card span { font-size: 13px; }
             .soft-card b { font-size: 21px; }
             .hero-card h1 { padding-left: 0; padding-top: 34px; font-size: 24px; }
+            .light { width: 45px; height: 45px; }
+            .kpi-number { font-size: 36px; }
         }
     </style>
     <!-- PWA / App Icon Setup -->
@@ -612,7 +677,6 @@
     <div id="loader"><div class="spinner"></div></div>
 
     <div class="wrap">
-        <!-- ========== NEW: Topbar with Burger Menu ========== -->
         <div class="topbar reveal">
             <div class="brand">
                 <small>لوحة المستأجر</small>
@@ -627,15 +691,13 @@
                 </button>
             </div>
             
-            <!-- ========== NEW: Burger Menu Dropdown ========== -->
             <div id="burger_menu" class="burger-menu">
-    <div class="menu-item" onclick="openChangePasswordModal()">
-        <i data-lucide="key"></i> تغيير كلمة المرور
-    </div>
-</div>
+                <div class="menu-item" onclick="openChangePasswordModal()">
+                    <i data-lucide="key"></i> تغيير كلمة المرور
+                </div>
+            </div>
         </div>
 
-        <!-- ========== NEW: Password Change Modal ========== -->
         <div id="passwordModal" class="modal">
             <div class="modal-content">
                 <h3>تغيير كلمة المرور</h3>
@@ -664,7 +726,6 @@
             </div>
         </div>
 
-        <!-- ========== YOUR EXISTING CONTENT (UNCHANGED) ========== -->
         <section class="hero-card reveal">
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
@@ -685,7 +746,7 @@
         </div>
 
         <div class="panel reveal">
-            <div class="chip-header"><div class="chip"> نصيحة مالية</div></div>
+            <div class="chip-header"><div class="chip">نصيحة مالية</div></div>
             <div id="smart_message" class="smart-body" style="white-space: pre-line;">تحليل البيانات...</div>
         </div>
 
@@ -694,20 +755,44 @@
             <div id="notifications_list" class="notif-list"></div>
         </div>
 
+        <!-- ========== REPLACED: Pie Chart with Progress Bar + KPI ========== -->
         <div class="panel reveal">
-            <div class="chip-header"><div class="chip">وضع الحساب</div></div>
-            <div class="chart-wrap"><canvas id="balancePieChart"></canvas></div>
-            <div class="pie-text-stats">
-                <span class="pie-text-item paid">المدفوع: <b id="pie_paid_value">0</b></span>
-                <span class="pie-text-item balance"><span id="pie_balance_label_text">المتبقي:</span> <b id="pie_balance_value">0</b></span>
+            <div class="chip-header"><div class="chip">نسبة السداد</div></div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="payment_percentage">0%</div>
+                <div class="kpi-label">نسبة السداد الإجمالية</div>
             </div>
-            <div id="pie_caption" class="chart-caption neutral">لا توجد بيانات كافية لحساب نسبة السداد حالياً</div>
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>المدفوع</span>
+                    <span id="progress_text">0 / 0</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress_fill" style="width: 0%;">0%</div>
+                </div>
+            </div>
+            <div id="progress_caption" class="chart-caption neutral">لا توجد بيانات كافية لحساب نسبة السداد حالياً</div>
         </div>
 
+        <!-- ========== REPLACED: Line Chart with Traffic Light ========== -->
         <div class="panel reveal">
-            <div class="chip-header"><div class="chip">اتجاه الرصيد خلال سنتين</div></div>
-            <div class="chart-wrap timeline-wrap"><canvas id="timelineChart"></canvas></div>
-            <div id="line_insight" class="chart-caption neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
+            <div class="chip-header"><div class="chip">حالة الرصيد</div></div>
+            <div class="traffic-light">
+                <div class="traffic-light-item">
+                    <div class="light red" id="light_red"></div>
+                    <div class="traffic-label">مرتفع</div>
+                </div>
+                <div class="traffic-light-item">
+                    <div class="light yellow" id="light_yellow"></div>
+                    <div class="traffic-label">متوسط</div>
+                </div>
+                <div class="traffic-light-item">
+                    <div class="light green" id="light_green"></div>
+                    <div class="traffic-label">جيد</div>
+                </div>
+            </div>
+            <div id="traffic_status_text" class="traffic-status-text"></div>
+            <div id="balance_trend_text" class="chart-caption neutral">لا توجد بيانات كافية للمقارنة حالياً</div>
         </div>
 
         <button class="action-btn reveal" onclick="goToStatement()"><i data-lucide="file-text"></i> كشف الحساب بالتفصيل</button>
@@ -735,11 +820,7 @@
             throw new Error('No tenant code');
         }
 
-        // ========== NEW: Store current password for verification ==========
         let currentTenantPassword = '';
-
-        let pieChartInstance = null;
-        let timelineChartInstance = null;
 
         const toNumber = (v) => {
             const n = parseFloat(String(v ?? 0).replace(/,/g, ''));
@@ -821,7 +902,21 @@
             return 'يحتاج معالجة';
         }
 
-        function getLineInsight(current, previous) {
+        // ========== NEW: Traffic Light Logic ==========
+        function getTrafficLightStatus(balance) {
+            const b = Math.max(0, toNumber(balance));
+            
+            if (b === 0) {
+                return { active: 'green', text: '✅ وضع ممتاز - الرصيد مسدد بالكامل', color: 'green' };
+            } else if (b <= 1000) {
+                return { active: 'yellow', text: '⚠️ تنبيه بسيط - رصيد متبقٍ أقل من 1000', color: 'yellow' };
+            } else {
+                return { active: 'red', text: '🔴 مهم - رصيد مستحق كبير يرجى السداد', color: 'red' };
+            }
+        }
+
+        // ========== NEW: Balance Trend Logic (replaces line chart) ==========
+        function getBalanceTrend(current, previous) {
             if (!current || !previous) {
                 return { type: 'neutral', text: 'لا توجد بيانات كافية للمقارنة حالياً' };
             }
@@ -831,15 +926,15 @@
             const diff = curr - prev;
 
             if (curr < 0) {
-                return { type: 'good', text: `✅ لديك رصيد دائن ${formatNumber(Math.abs(curr))}` };
+                return { type: 'good', text: `✅ لديك رصيد دائن ${formatNumber(Math.abs(curr))} لصالحك` };
             }
             if (diff < 0) {
-                return { type: 'good', text: `✅ الرصيد انخفض بمقدار ${formatNumber(Math.abs(diff))}` };
+                return { type: 'good', text: `✅ الرصيد انخفض بمقدار ${formatNumber(Math.abs(diff))} خلال السنة الماضية` };
             }
             if (diff > 0) {
-                return { type: 'warning', text: `⚠ الرصيد ارتفع بمقدار ${formatNumber(diff)}` };
+                return { type: 'warning', text: `⚠️ الرصيد ارتفع بمقدار ${formatNumber(diff)} خلال السنة الماضية` };
             }
-            return { type: 'neutral', text: 'الرصيد مستقر' };
+            return { type: 'neutral', text: 'الرصيد مستقر خلال السنة الماضية' };
         }
 
         function animateNumber(el, end) {
@@ -856,115 +951,85 @@
             requestAnimationFrame(step);
         }
 
-        function renderPieChart(credit, balance) {
-            const canvas = document.getElementById('balancePieChart');
-            if (pieChartInstance) pieChartInstance.destroy();
-
+        // ========== NEW: Update Progress Bar ==========
+        function updateProgressBar(credit, balance) {
             const creditValue = Math.max(0, toNumber(credit));
-            const realBalance = toNumber(balance);
-            const balanceValue = realBalance > 0 ? realBalance : 0;
+            const balanceValue = Math.max(0, toNumber(balance));
             const total = creditValue + balanceValue;
-            const percentTarget = total > 0 ? Math.round((creditValue / total) * 100) : 0;
-
-            pieChartInstance = new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['المدفوع', 'المتبقي'],
-                    datasets: [{
-                        data: [creditValue, balanceValue],
-                        backgroundColor: ['#2f9e6f', '#c95a52'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: '75%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    }
-                },
-                plugins: [{
-                    id: 'centerText',
-                    beforeDraw(chart) {
-                        const { width, height, ctx } = chart;
-                        if (typeof chart._animatedValue !== 'number') chart._animatedValue = 0;
-                        chart._animatedValue += (percentTarget - chart._animatedValue) * 0.08;
-                        const val = Math.round(chart._animatedValue);
-
-                        ctx.save();
-                        ctx.font = 'bold 52px Tajawal';
-                        ctx.fillStyle = '#2f2a24';
-                        ctx.textBaseline = 'middle';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(`${val}%`, width / 2, height / 2 - 8);
-                        ctx.restore();
-
-                        if (Math.abs(chart._animatedValue - percentTarget) > 0.1) {
-                            requestAnimationFrame(() => chart.draw());
-                        }
-                    }
-                }]
-            });
-
-            document.getElementById('pie_balance_label_text').innerText = realBalance < 0 ? 'رصيد دائن:' : 'المتبقي:';
+            
+            let percentage = 0;
+            if (total > 0) {
+                percentage = Math.round((creditValue / total) * 100);
+            } else if (balanceValue === 0 && creditValue === 0) {
+                percentage = 100;
+            }
+            
+            const progressFill = document.getElementById('progress_fill');
+            const percentageEl = document.getElementById('payment_percentage');
+            const progressText = document.getElementById('progress_text');
+            
+            percentageEl.innerText = `${percentage}%`;
+            progressText.innerText = `${formatNumber(creditValue)} / ${formatNumber(total)}`;
+            
+            if (progressFill) {
+                progressFill.style.width = `${percentage}%`;
+                progressFill.innerText = `${percentage}%`;
+            }
+            
+            const captionEl = document.getElementById('progress_caption');
+            if (balanceValue === 0 && creditValue > 0) {
+                captionEl.innerText = '✔ الحساب مسدد بالكامل';
+                captionEl.className = 'chart-caption good';
+            } else if (balanceValue > 0 && percentage >= 50) {
+                captionEl.innerText = `نسبة السداد ${percentage}%، متبقي ${formatNumber(balanceValue)}`;
+                captionEl.className = 'chart-caption neutral';
+            } else if (balanceValue > 0 && percentage < 50) {
+                captionEl.innerText = `⚠ نسبة السداد ${percentage}% فقط، متبقي ${formatNumber(balanceValue)}`;
+                captionEl.className = 'chart-caption warning';
+            } else if (balanceValue < 0) {
+                captionEl.innerText = `✔ رصيد دائن ${formatNumber(Math.abs(balanceValue))} لصالحك`;
+                captionEl.className = 'chart-caption good';
+            } else {
+                captionEl.innerText = 'لا توجد بيانات كافية لحساب نسبة السداد حالياً';
+                captionEl.className = 'chart-caption neutral';
+            }
         }
 
-        function renderTimelineChart(rows) {
-            const canvas = document.getElementById('timelineChart');
-            if (timelineChartInstance) timelineChartInstance.destroy();
-
-            const normalized = (rows || []).filter(Boolean);
-            const labels = normalized.map(r => String(r.year));
-            const balances = normalized.map(r => toNumber(r.final_balance));
-
-            let trendColor = '#c9a46b';
-            let fillColor = 'rgba(201,90,82,0.05)';
-
-            if (balances.length >= 2) {
-                const prev = balances[0];
-                const curr = balances[1];
-
-                if (curr < prev) {
-                    trendColor = '#2f9e6f';
-                    fillColor = 'rgba(47,158,111,0.08)';
-                } else if (curr > prev) {
-                    trendColor = '#c95a52';
-                    fillColor = 'rgba(201,90,82,0.05)';
-                }
+        // ========== NEW: Update Traffic Light ==========
+        function updateTrafficLight(balance) {
+            const status = getTrafficLightStatus(balance);
+            
+            const redLight = document.getElementById('light_red');
+            const yellowLight = document.getElementById('light_yellow');
+            const greenLight = document.getElementById('light_green');
+            const statusText = document.getElementById('traffic_status_text');
+            
+            redLight.classList.remove('active');
+            yellowLight.classList.remove('active');
+            greenLight.classList.remove('active');
+            
+            if (status.active === 'red') {
+                redLight.classList.add('active');
+                statusText.innerHTML = status.text;
+                statusText.style.background = 'rgba(201,90,82,0.1)';
+                statusText.style.color = 'var(--danger)';
+                statusText.style.borderRadius = '20px';
+                statusText.style.padding = '12px';
+            } else if (status.active === 'yellow') {
+                yellowLight.classList.add('active');
+                statusText.innerHTML = status.text;
+                statusText.style.background = 'rgba(195,138,46,0.1)';
+                statusText.style.color = 'var(--warning)';
+                statusText.style.borderRadius = '20px';
+                statusText.style.padding = '12px';
+            } else {
+                greenLight.classList.add('active');
+                statusText.innerHTML = status.text;
+                statusText.style.background = 'rgba(47,158,111,0.1)';
+                statusText.style.color = 'var(--success)';
+                statusText.style.borderRadius = '20px';
+                statusText.style.padding = '12px';
             }
-
-            timelineChartInstance = new Chart(canvas, {
-                type: 'line',
-                data: {
-                    labels: labels.length ? labels : ['—'],
-                    datasets: [{
-                        label: 'الرصيد',
-                        data: balances.length ? balances : [0],
-                        borderColor: trendColor,
-                        backgroundColor: fillColor,
-                        borderWidth: 4,
-                        tension: 0.35,
-                        pointRadius: 5,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, rtl: true }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                callback: v => formatNumber(v)
-                            }
-                        }
-                    }
-                }
-            });
         }
 
         function getNotificationCategory(item) {
@@ -1035,7 +1100,6 @@
             }).join('');
         }
 
-        // ========== NEW: Burger Menu Functions ==========
         function toggleMenu() {
             const menu = document.getElementById('burger_menu');
             menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
@@ -1065,7 +1129,6 @@
             const confirm = document.getElementById('confirm_password').value.trim();
             const errorEl = document.getElementById('password_error');
             
-            // Validation
             if (current !== currentTenantPassword) {
                 errorEl.innerText = 'كلمة المرور الحالية غير صحيحة';
                 errorEl.style.display = 'block';
@@ -1084,7 +1147,6 @@
                 return;
             }
             
-            // Update in database
             const { error } = await supabaseClient
                 .from('tenants')
                 .update({ password: newPass })
@@ -1100,7 +1162,6 @@
             }
         }
 
-        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('burger_menu');
             const menuBtn = e.target.closest('.ghost-btn');
@@ -1119,7 +1180,6 @@
 
                 if (tenantError) throw tenantError;
                 
-                // ========== NEW: Store current password ==========
                 if (tenant) {
                     currentTenantPassword = tenant.password || '';
                 }
@@ -1151,7 +1211,6 @@
 
                 const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
 
-                // ========== FIXED: Use final_balance directly from database ==========
                 const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
                 const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
 
@@ -1171,31 +1230,23 @@
 
                 animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit)));
                 animateNumber(document.getElementById('val_balance'), Math.round(Math.abs(currentBalance)));
-                animateNumber(document.getElementById('pie_paid_value'), Math.round(Math.max(0, currentCredit)));
-                animateNumber(document.getElementById('pie_balance_value'), Math.round(Math.abs(currentBalance)));
 
                 document.getElementById('balance_smart_text').innerText = getBalanceSmartText(currentBalance);
                 document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
 
-                const pieCapText =
-                    currentBalance < 0
-                        ? `لديك رصيد دائن ${formatNumber(Math.abs(currentBalance))}`
-                        : currentBalance === 0
-                            ? 'الحساب مسدد بالكامل'
-                            : `نسبة السداد ${Math.round((currentCredit / Math.max(1, (currentCredit + currentBalance))) * 100)}%`;
+                // ========== NEW: Update Progress Bar ==========
+                updateProgressBar(currentCredit, currentBalance);
 
-                const pieCapEl = document.getElementById('pie_caption');
-                pieCapEl.className = `chart-caption ${currentBalance <= 0 ? 'good' : (currentCredit > 0 ? 'neutral' : 'warning')}`;
-                pieCapEl.innerText = pieCapText;
+                // ========== NEW: Update Traffic Light ==========
+                updateTrafficLight(currentBalance);
 
-                const lineIns = getLineInsight({ final_balance: currentBalance }, previousSummary);
-                const lineEl = document.getElementById('line_insight');
-                lineEl.className = `chart-caption ${lineIns.type}`;
-                lineEl.innerText = lineIns.text;
+                // ========== NEW: Update Balance Trend Text ==========
+                const trend = getBalanceTrend({ final_balance: currentBalance }, previousSummary);
+                const trendEl = document.getElementById('balance_trend_text');
+                trendEl.className = `chart-caption ${trend.type}`;
+                trendEl.innerText = trend.text;
 
                 renderNotifications(notificationsData || []);
-                renderPieChart(currentCredit, currentBalance);
-                renderTimelineChart(chartRows);
 
                 document.getElementById('loader').style.display = 'none';
                 document.body.classList.add('loaded');
