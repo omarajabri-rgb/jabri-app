@@ -164,7 +164,7 @@
                     </div>
                 </div>
 
-                <!-- الكروت الـ 6 الذكية (منقولة إلى هنا) -->
+                <!-- الكروت الـ 6 الذكية -->
                 <div class="quick-ai-grid">
                     <div class="quick-ai-card" id="kpi_total_debit_card">
                         <span>💰 إجمالي المستحق (مدين)</span>
@@ -228,7 +228,29 @@
             </div>
         </div>
 
-        <!-- 4. سجل الإشعارات -->
+        <!-- 4. المستحق الإجمالي (آخر 5 سنوات) - NEW -->
+        <div class="chart-single">
+            <div class="panel">
+                <div class="chip-header"><div class="chip-title">📈 المستحق الإجمالي (آخر 5 سنوات)</div></div>
+                <div class="chart-wrap" style="min-height: 320px;">
+                    <canvas id="totalDebitChart" style="width: 100%; height: 280px;"></canvas>
+                </div>
+                <div id="totalDebitInsight" class="insight-text"></div>
+            </div>
+        </div>
+
+        <!-- 5. تطور المتأخرات (الرصيد) (آخر 5 سنوات) - NEW -->
+        <div class="chart-single">
+            <div class="panel">
+                <div class="chip-header"><div class="chip-title">⚠️ تطور المتأخرات (الرصيد) (آخر 5 سنوات)</div></div>
+                <div class="chart-wrap" style="min-height: 320px;">
+                    <canvas id="balanceTrendChart" style="width: 100%; height: 280px;"></canvas>
+                </div>
+                <div id="balanceTrendInsight" class="insight-text"></div>
+            </div>
+        </div>
+
+        <!-- 6. سجل الإشعارات -->
         <section class="panel">
             <div class="chip-header">
                 <div class="chip-title">📬 سجل الإشعارات المرسلة</div>
@@ -244,7 +266,7 @@
             </div>
         </section>
 
-        <!-- 5. إرسال إشعار -->
+        <!-- 7. إرسال إشعار -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
@@ -264,7 +286,7 @@
             </div>
         </section>
 
-        <!-- 6. إدخال دفعة جديدة -->
+        <!-- 8. إدخال دفعة جديدة -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
@@ -299,7 +321,7 @@
         const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
         
         // --- Global Variables ---
-        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, isSavingTransaction=false;
+        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, totalDebitChart=null, balanceTrendChart=null, isSavingTransaction=false;
         let isComplexWideMode = true;
         let currentNotificationFilter = 'all';
         
@@ -487,6 +509,132 @@
             loadNotifications();
         }
         
+        // --- NEW: Total Debit Chart (المستحق الإجمالي) ---
+        function drawTotalDebitChart(dataMap) {
+            const canvas = document.getElementById('totalDebitChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(totalDebitChart) totalDebitChart.destroy();
+            
+            const sortedYears = Object.keys(dataMap).sort((a,b) => a - b);
+            const last5Years = sortedYears.slice(-5);
+            const debitValues = [];
+            
+            last5Years.forEach(y => {
+                const data = dataMap[y];
+                debitValues.push(data ? data.total_debit : 0);
+            });
+            
+            totalDebitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last5Years,
+                    datasets: [{
+                        label: 'المستحق الإجمالي (مدين)',
+                        data: debitValues,
+                        borderColor: '#c9a46b',
+                        backgroundColor: 'rgba(201,164,107,0.08)',
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#c9a46b',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    return `المستحق: ${Math.round(context.raw).toLocaleString()}`;
+                                }
+                            }
+                        },
+                        legend: { display: true, position: 'top', rtl: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'المبلغ', font: { weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { title: { display: true, text: 'السنة', font: { weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+            
+            // Insight
+            if(debitValues.length >= 2) {
+                const first = debitValues[0];
+                const last = debitValues[debitValues.length-1];
+                const change = last - first;
+                const percent = first > 0 ? Math.round((change / first) * 100) : 0;
+                const trendHtml = change > 0 ? `<span class="trend-up">▲ زيادة ${change.toLocaleString()} (${percent}%)</span>` : (change < 0 ? `<span class="trend-down">▼ انخفاض ${Math.abs(change).toLocaleString()} (${Math.abs(percent)}%)</span>` : '<span class="trend-neutral">➖ ثابت</span>');
+                document.getElementById('totalDebitInsight').innerHTML = `📈 إجمالي المستحق: ${trendHtml} خلال 5 سنوات`;
+            }
+        }
+        
+        // --- NEW: Balance Trend Chart (تطور المتأخرات) ---
+        function drawBalanceTrendChart(dataMap) {
+            const canvas = document.getElementById('balanceTrendChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(balanceTrendChart) balanceTrendChart.destroy();
+            
+            const sortedYears = Object.keys(dataMap).sort((a,b) => a - b);
+            const last5Years = sortedYears.slice(-5);
+            const balanceValues = [];
+            
+            last5Years.forEach(y => {
+                const data = dataMap[y];
+                balanceValues.push(data ? data.final_balance : 0);
+            });
+            
+            balanceTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last5Years,
+                    datasets: [{
+                        label: 'المتأخرات (الرصيد)',
+                        data: balanceValues,
+                        borderColor: '#d14d4d',
+                        backgroundColor: 'rgba(209,77,77,0.08)',
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#d14d4d',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    return `المتأخرات: ${Math.round(context.raw).toLocaleString()}`;
+                                }
+                            }
+                        },
+                        legend: { display: true, position: 'top', rtl: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'المبلغ', font: { weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { title: { display: true, text: 'السنة', font: { weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+            
+            // Insight
+            if(balanceValues.length >= 2) {
+                const first = balanceValues[0];
+                const last = balanceValues[balanceValues.length-1];
+                const change = last - first;
+                const percent = first > 0 ? Math.round((change / first) * 100) : 0;
+                const trendHtml = change > 0 ? `<span class="trend-down">▲ زيادة ${change.toLocaleString()} (${percent}%) - تنبيه!</span>` : (change < 0 ? `<span class="trend-up">▼ انخفاض ${Math.abs(change).toLocaleString()} (${Math.abs(percent)}%) - تحسن</span>` : '<span class="trend-neutral">➖ ثابت</span>');
+                document.getElementById('balanceTrendInsight').innerHTML = `⚠️ المتأخرات: ${trendHtml}`;
+            }
+        }
+        
         // --- 5-YEAR CHART FUNCTIONS ---
         function drawFiveYearChart(dataMap) {
             const canvas = document.getElementById('fiveYearCollectionChart');
@@ -605,9 +753,10 @@
                 const summaries = allSummaries.filter(s => s.tenant_code === tenant.tenant_code);
                 summaries.forEach(sum => {
                     const year = Number(sum.year);
-                    if(!yearlyMap[year]) yearlyMap[year] = { total_debit: 0, total_credit: 0 };
+                    if(!yearlyMap[year]) yearlyMap[year] = { total_debit: 0, total_credit: 0, final_balance: 0 };
                     yearlyMap[year].total_debit += toNumber(sum.total_debit);
                     yearlyMap[year].total_credit += toNumber(sum.total_credit);
+                    yearlyMap[year].final_balance += toNumber(sum.final_balance);
                 });
             });
             return yearlyMap;
@@ -618,7 +767,7 @@
             const summaries = allSummaries.filter(s => s.tenant_code === tenantCode);
             summaries.forEach(sum => {
                 const year = Number(sum.year);
-                yearlyMap[year] = { total_debit: toNumber(sum.total_debit), total_credit: toNumber(sum.total_credit) };
+                yearlyMap[year] = { total_debit: toNumber(sum.total_debit), total_credit: toNumber(sum.total_credit), final_balance: toNumber(sum.final_balance) };
             });
             return yearlyMap;
         }
@@ -694,6 +843,8 @@
             
             const yearlyData = getComplexWideYearlyData();
             drawFiveYearChart(yearlyData);
+            drawTotalDebitChart(yearlyData);
+            drawBalanceTrendChart(yearlyData);
             
             const notifType = document.getElementById('notification_type');
             notifType.value = 'general';
@@ -870,6 +1021,8 @@
                 drawMonthlyChart(t);
                 const tenantYearlyData = getTenantYearlyData(code);
                 drawFiveYearChart(tenantYearlyData);
+                drawTotalDebitChart(tenantYearlyData);
+                drawBalanceTrendChart(tenantYearlyData);
                 document.getElementById('statementBtn').disabled = false;
             } else {
                 document.getElementById('statementBtn').disabled = true;
