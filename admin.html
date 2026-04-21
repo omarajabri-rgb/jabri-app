@@ -94,6 +94,11 @@
         @media (max-width: 1200px){ .hero-ai-card{ grid-template-columns:1fr; } }
         @media (max-width: 900px){ .chart-grid{ grid-template-columns:1fr; } }
         @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; } .quick-ai-card{ min-height:220px; } }
+        /* New Styles for Smart 5-Year Chart */
+        .insight-text { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 8px; text-align: center; }
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        .trend-neutral { color: var(--warning); }
     </style>
     <!-- Security Meta Tags -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
@@ -111,12 +116,22 @@
             </div>
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
+
+        <!-- NEW: SMART 5-YEAR COLLECTION RATE CHART -->
+        <section class="panel">
+            <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
+            <div class="chart-wrap" style="height: 360px;">
+                <canvas id="fiveYearCollectionChart"></canvas>
+            </div>
+            <div id="fiveYearInsight" class="insight-text"></div>
+        </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
             <div class="tenant-select-grid">
                 <div class="field">
                     <div class="select-with-chip">
-                        <select id="tenant_select"><option value="">اختر المستأجر</option></select>
+                        <select id="tenant_select"><option value="">اختر المستأجر (لعرض نظرة عامة)</option></select>
                         <div class="tenant-mini-chips">
                             <div class="mini-chip status-chip" id="tenant_status_chip">جزئي</div>
                             <div class="mini-chip last-seen-chip" id="last_seen_chip">—</div>
@@ -211,7 +226,7 @@
         const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
         
         // --- Global Variables ---
-        let allTenants=[], allTransactions=[], allSummaries=[], tenantBalances=[], collectionChart=null, monthlyChart=null, isSavingTransaction=false;
+        let allTenants=[], allTransactions=[], allSummaries=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, isSavingTransaction=false;
         let isComplexWideMode = true; // Track current view mode
         
         // --- Helper Functions ---
@@ -251,6 +266,160 @@
             else { chip.innerText='متأخر'; }
         }
         
+        // --- NEW SMART 5-YEAR CHART LOGIC ---
+        function drawFiveYearChart(dataMap) {
+            // dataMap: { year: { total_debit, total_credit, collection_rate } }
+            const canvas = document.getElementById('fiveYearCollectionChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(fiveYearChart) fiveYearChart.destroy();
+            
+            const sortedYears = Object.keys(dataMap).sort((a,b) => a - b);
+            const last5Years = sortedYears.slice(-5);
+            const rates = [];
+            const debitTotals = [];
+            const creditTotals = [];
+            
+            last5Years.forEach(y => {
+                const data = dataMap[y];
+                if(data && data.total_debit > 0) {
+                    const rate = Math.round((data.total_credit / data.total_debit) * 100);
+                    rates.push(rate);
+                } else {
+                    rates.push(0);
+                }
+                debitTotals.push(data ? data.total_debit : 0);
+                creditTotals.push(data ? data.total_credit : 0);
+            });
+            
+            // Define colors based on performance
+            const backgroundColors = rates.map(r => {
+                if(r >= 75) return 'rgba(21, 154, 111, 0.85)'; // Good
+                if(r >= 60) return 'rgba(215, 146, 31, 0.85)'; // Warning
+                return 'rgba(209, 77, 77, 0.85)'; // Bad
+            });
+            
+            fiveYearChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: last5Years,
+                    datasets: [{
+                        label: 'نسبة التحصيل السنوية (%)',
+                        data: rates,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c.replace('0.85', '1')),
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barPercentage: 0.65,
+                        categoryPercentage: 0.8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    let label = context.dataset.label || '';
+                                    let val = context.raw;
+                                    let year = last5Years[context.dataIndex];
+                                    let debit = debitTotals[context.dataIndex];
+                                    let credit = creditTotals[context.dataIndex];
+                                    return [`${label}: ${val}%`, `المستحق: ${Math.round(debit).toLocaleString()}`, `المدفوع: ${Math.round(credit).toLocaleString()}`];
+                                }
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'نسبة التحصيل %', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'السنة', font: { weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'targetLine',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { top, bottom, left, right }, scales } = chart;
+                        if(scales.y && scales.y.getPixelForValue) {
+                            const yTarget = scales.y.getPixelForValue(70);
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(left, yTarget);
+                            ctx.lineTo(right, yTarget);
+                            ctx.strokeStyle = '#d7921f';
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([8, 6]);
+                            ctx.stroke();
+                            ctx.restore();
+                            
+                            // Add label
+                            ctx.save();
+                            ctx.font = 'bold 12px Tajawal';
+                            ctx.fillStyle = '#d7921f';
+                            ctx.shadowBlur = 0;
+                            ctx.fillText('الهدف 70%', right - 40, yTarget - 5);
+                            ctx.restore();
+                        }
+                    }
+                }]
+            });
+            
+            // Update insight text
+            let insightHtml = '';
+            if(rates.length >= 2) {
+                const lastRate = rates[rates.length-1];
+                const prevRate = rates[rates.length-2];
+                const diff = lastRate - prevRate;
+                if(diff > 0) insightHtml += `<span class="trend-up">▲ تحسن ${diff}% عن السنة الماضية</span> `;
+                else if(diff < 0) insightHtml += `<span class="trend-down">▼ تراجع ${Math.abs(diff)}% عن السنة الماضية</span> `;
+                else insightHtml += `<span class="trend-neutral">➖ استقرار عن السنة الماضية</span> `;
+                
+                if(lastRate < 60) insightHtml += `⚠️ نسبة التحصيل منخفضة، يُنصح بمراجعة الإجراءات.`;
+                else if(lastRate < 75) insightHtml += `⚡ نسبة التحصيل مقبولة لكن أقل من الهدف (70%).`;
+                else insightHtml += `✅ أداء ممتاز، نسبة التحصيل تفوق الهدف.`;
+            } else {
+                insightHtml = `📊 لا توجد بيانات كافية لآخر 5 سنوات.`;
+            }
+            document.getElementById('fiveYearInsight').innerHTML = insightHtml;
+        }
+        
+        function getComplexWideYearlyData() {
+            const yearlyMap = {};
+            allTenants.forEach(tenant => {
+                const summaries = allSummaries.filter(s => s.tenant_code === tenant.tenant_code);
+                summaries.forEach(sum => {
+                    const year = Number(sum.year);
+                    if(!yearlyMap[year]) yearlyMap[year] = { total_debit: 0, total_credit: 0 };
+                    yearlyMap[year].total_debit += toNumber(sum.total_debit);
+                    yearlyMap[year].total_credit += toNumber(sum.total_credit);
+                });
+            });
+            return yearlyMap;
+        }
+        
+        function getTenantYearlyData(tenantCode) {
+            const yearlyMap = {};
+            const summaries = allSummaries.filter(s => s.tenant_code === tenantCode);
+            summaries.forEach(sum => {
+                const year = Number(sum.year);
+                yearlyMap[year] = {
+                    total_debit: toNumber(sum.total_debit),
+                    total_credit: toNumber(sum.total_credit)
+                };
+            });
+            return yearlyMap;
+        }
+        
+        // --- EXISTING CHART FUNCTIONS (Unmodified) ---
         function drawCollectionChart(tc, tb){
             const canvas = document.getElementById('collectionChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(collectionChart) collectionChart.destroy();
             const paid = Math.max(0, toNumber(tc)), rem = Math.max(0, toNumber(tb)), tot = paid + rem, ratio = tot > 0 ? Math.round((paid/tot)*100) : 0;
@@ -284,7 +453,7 @@
             monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'الدائن', data: credits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         }
         
-        // ========== NEW: Complex-Wide View ==========
+        // ========== Complex-Wide View ==========
         function renderComplexWideView(){
             isComplexWideMode = true;
             
@@ -330,6 +499,10 @@
             
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
+            
+            // NEW: Update 5-year chart for complex-wide
+            const yearlyData = getComplexWideYearlyData();
+            drawFiveYearChart(yearlyData);
             
             // Lock notification dropdown to "رسالة عامة"
             const notifType = document.getElementById('notification_type');
@@ -514,6 +687,9 @@
                 renderAi(t);
                 drawCollectionChart(t.totalCredit, t.currentBalance);
                 drawMonthlyChart(t);
+                // Update 5-year chart for selected tenant
+                const tenantYearlyData = getTenantYearlyData(code);
+                drawFiveYearChart(tenantYearlyData);
                 document.getElementById('statementBtn').disabled = false;
             } else {
                 document.getElementById('statementBtn').disabled = true;
@@ -526,7 +702,7 @@
             await loadData();
             const sel = document.getElementById('tenant_select');
             const selCode = code || sel.value || '';
-            sel.innerHTML = '<option value="">اختر المستأجر</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
+            sel.innerHTML = '<option value="">اختر المستأجر (لعرض نظرة عامة)</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
             
             if(selCode){
                 sel.value = selCode;
