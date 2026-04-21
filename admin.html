@@ -64,12 +64,12 @@
         .hero-mini.warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
         .hero-mini.bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
         
-        /* NEW: 6 SMART KPI CARDS - نفس ستايل quick-ai-grid */
+        /* 6 SMART KPI CARDS */
         .quick-ai-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:14px; }
-        .quick-ai-card{ border-radius:20px; padding:16px; text-align:center; background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:160px; box-shadow:var(--soft-shadow); }
+        .quick-ai-card{ border-radius:20px; padding:16px; text-align:center; background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:140px; box-shadow:var(--soft-shadow); }
         .quick-ai-card span{ display:block; font-size:11px; color:var(--muted); font-weight:800; margin-bottom:6px; }
-        .quick-ai-card b{ font-size:22px; color:#4e3c24; font-weight:900; margin-bottom:6px; }
-        .quick-ai-card small{ font-size:11px; color:#6b4f2b; font-weight:700; line-height:1.5; }
+        .quick-ai-card b{ font-size:20px; color:#4e3c24; font-weight:900; margin-bottom:6px; }
+        .quick-ai-card small{ font-size:10px; color:#6b4f2b; font-weight:700; line-height:1.4; }
         .trend-up { color: var(--success); font-weight: 800; }
         .trend-down { color: var(--danger); font-weight: 800; }
         .trend-neutral { color: var(--warning); font-weight: 800; }
@@ -105,8 +105,8 @@
         
         @media (max-width: 768px){
             .quick-ai-grid { grid-template-columns: repeat(2, 1fr); }
-            .quick-ai-card { min-height: 140px; padding: 12px; }
-            .quick-ai-card b { font-size: 18px; }
+            .quick-ai-card { min-height: 120px; padding: 12px; }
+            .quick-ai-card b { font-size: 16px; }
             .notifications-table th, .notifications-table td { padding: 8px 6px; font-size: 11px; }
             .read-status { padding: 2px 6px; }
             .filter-buttons .btn-sm { padding: 6px 10px; font-size: 10px; }
@@ -130,44 +130,7 @@
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
 
-        <!-- NEW: 6 SMART KPI CARDS (بنفس ستايل quick-ai-grid) -->
-        <div class="quick-ai-grid">
-            <!-- الصف الأول: 3 كروت -->
-            <div class="quick-ai-card" id="kpi_total_debit_card">
-                <span>💰 إجمالي المستحق (مدين)</span>
-                <b id="kpi_total_debit_value">0</b>
-                <small id="kpi_total_debit_trend">—</small>
-            </div>
-            <div class="quick-ai-card" id="kpi_total_credit_card">
-                <span>💵 إجمالي المدفوع (دائن)</span>
-                <b id="kpi_total_credit_value">0</b>
-                <small id="kpi_total_credit_trend">—</small>
-            </div>
-            <div class="quick-ai-card" id="kpi_collection_rate_card">
-                <span>📊 نسبة التحصيل الحالية</span>
-                <b id="kpi_collection_rate_value">0%</b>
-                <small id="kpi_collection_rate_trend">—</small>
-            </div>
-            
-            <!-- الصف الثاني: 3 كروت -->
-            <div class="quick-ai-card" id="kpi_total_balance_card">
-                <span>⚠️ المتأخرات الكلية</span>
-                <b id="kpi_total_balance_value">0</b>
-                <small id="kpi_total_balance_trend">—</small>
-            </div>
-            <div class="quick-ai-card" id="kpi_overdue_tenants_card">
-                <span>👥 عدد المستأجرين المتأخرين</span>
-                <b id="kpi_overdue_tenants_value">0</b>
-                <small>من إجمالي <span id="kpi_total_tenants_count">0</span></small>
-            </div>
-            <div class="quick-ai-card" id="kpi_avg_delay_card">
-                <span>⏱️ متوسط أيام التأخير</span>
-                <b id="kpi_avg_delay_value">0</b>
-                <small id="kpi_avg_delay_trend">—</small>
-            </div>
-        </div>
-
-        <!-- اختيار المستأجر وتحليل ذكي -->
+        <!-- اختيار المستأجر وتحليل ذكي (مع الكروت الـ 6 داخله) -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
             <div class="tenant-select-grid">
@@ -186,6 +149,8 @@
                     <div class="panel-title"><h3>تحليل المستأجر</h3><p>يعتمد على آخر سنة موجودة فقط داخل tenant_yearly_summary</p></div>
                     <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
+                
+                <!-- التقييم الذكي -->
                 <div class="hero-ai-card">
                     <div class="hero-ai-main">
                         <div class="hero-ai-title">التقييم الذكي</div>
@@ -198,7 +163,40 @@
                         <div class="hero-mini" id="hero_commitment_card"><span>نسبة الالتزام</span><b id="ai_commitment_ratio">0%</b></div>
                     </div>
                 </div>
-                <!-- تم إزالة quick-ai-grid القديم واستبداله بالكروت الجديدة اللي فوق -->
+
+                <!-- الكروت الـ 6 الذكية (منقولة إلى هنا) -->
+                <div class="quick-ai-grid">
+                    <div class="quick-ai-card" id="kpi_total_debit_card">
+                        <span>💰 إجمالي المستحق (مدين)</span>
+                        <b id="kpi_total_debit_value">0</b>
+                        <small id="kpi_total_debit_trend">—</small>
+                    </div>
+                    <div class="quick-ai-card" id="kpi_total_credit_card">
+                        <span>💵 إجمالي المدفوع (دائن)</span>
+                        <b id="kpi_total_credit_value">0</b>
+                        <small id="kpi_total_credit_trend">—</small>
+                    </div>
+                    <div class="quick-ai-card" id="kpi_monthly_rent_card">
+                        <span>💰 إجمالي الإيجار الشهري</span>
+                        <b id="kpi_monthly_rent_value">0</b>
+                        <small id="kpi_monthly_rent_trend">—</small>
+                    </div>
+                    <div class="quick-ai-card" id="kpi_total_balance_card">
+                        <span>⚠️ المتأخرات الكلية</span>
+                        <b id="kpi_total_balance_value">0</b>
+                        <small id="kpi_total_balance_trend">—</small>
+                    </div>
+                    <div class="quick-ai-card" id="kpi_overdue_tenants_card">
+                        <span>👥 عدد المستأجرين المتأخرين</span>
+                        <b id="kpi_overdue_tenants_value">0</b>
+                        <small>من إجمالي <span id="kpi_total_tenants_count">0</span></small>
+                    </div>
+                    <div class="quick-ai-card" id="kpi_avg_delay_card">
+                        <span>⏱️ متوسط أيام التأخير</span>
+                        <b id="kpi_avg_delay_value">0</b>
+                        <small id="kpi_avg_delay_trend">—</small>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -211,7 +209,7 @@
             </div>
         </div>
 
-        <!-- 2. الحركة الشهرية (تحت Pie Chart) -->
+        <!-- 2. الحركة الشهرية -->
         <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
@@ -309,7 +307,7 @@
         let previousKpiData = {
             totalDebit: 0,
             totalCredit: 0,
-            collectionRate: 0,
+            monthlyRent: 0,
             totalBalance: 0,
             avgDelayDays: 0
         };
@@ -367,11 +365,15 @@
             let totalDebit = 0;
             let totalCredit = 0;
             let totalBalance = 0;
+            let totalMonthlyRent = 0;
             let overdueCount = 0;
             let totalDelayDays = 0;
             let tenantCount = allTenants.length;
             
             for(const tenant of allTenants) {
+                const annualRent = toNumber(tenant.annual_rent);
+                totalMonthlyRent += annualRent / 12;
+                
                 const latest = getLatestSummary(tenant.tenant_code);
                 if(latest) {
                     const debit = toNumber(latest.total_debit);
@@ -396,13 +398,12 @@
                 }
             }
             
-            const collectionRate = totalDebit > 0 ? Math.round((totalCredit / totalDebit) * 100) : 0;
             const avgDelayDays = overdueCount > 0 ? Math.round(totalDelayDays / overdueCount) : 0;
             
             // Update values
             document.getElementById('kpi_total_debit_value').innerText = roundMoney(totalDebit).toLocaleString();
             document.getElementById('kpi_total_credit_value').innerText = roundMoney(totalCredit).toLocaleString();
-            document.getElementById('kpi_collection_rate_value').innerText = `${collectionRate}%`;
+            document.getElementById('kpi_monthly_rent_value').innerText = roundMoney(totalMonthlyRent).toLocaleString();
             document.getElementById('kpi_total_balance_value').innerText = roundMoney(totalBalance).toLocaleString();
             document.getElementById('kpi_overdue_tenants_value').innerText = `${overdueCount}/${tenantCount}`;
             document.getElementById('kpi_total_tenants_count').innerText = tenantCount;
@@ -411,7 +412,7 @@
             // Calculate trends
             const debitTrend = totalDebit - previousKpiData.totalDebit;
             const creditTrend = totalCredit - previousKpiData.totalCredit;
-            const rateTrend = collectionRate - previousKpiData.collectionRate;
+            const rentTrend = totalMonthlyRent - previousKpiData.monthlyRent;
             const balanceTrend = totalBalance - previousKpiData.totalBalance;
             const delayTrend = avgDelayDays - previousKpiData.avgDelayDays;
             
@@ -422,8 +423,8 @@
             document.getElementById('kpi_total_credit_trend').innerHTML = creditTrend !== 0 ? 
                 (creditTrend > 0 ? `<span class="trend-up">▲ ${roundMoney(creditTrend).toLocaleString()}</span>` : `<span class="trend-down">▼ ${roundMoney(Math.abs(creditTrend)).toLocaleString()}</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
             
-            document.getElementById('kpi_collection_rate_trend').innerHTML = rateTrend !== 0 ? 
-                (rateTrend > 0 ? `<span class="trend-up">▲ ${rateTrend}%</span>` : `<span class="trend-down">▼ ${Math.abs(rateTrend)}%</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
+            document.getElementById('kpi_monthly_rent_trend').innerHTML = rentTrend !== 0 ? 
+                (rentTrend > 0 ? `<span class="trend-up">▲ ${roundMoney(rentTrend).toLocaleString()}</span>` : `<span class="trend-down">▼ ${roundMoney(Math.abs(rentTrend)).toLocaleString()}</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
             
             document.getElementById('kpi_total_balance_trend').innerHTML = balanceTrend !== 0 ? 
                 (balanceTrend < 0 ? `<span class="trend-up">▼ ${roundMoney(Math.abs(balanceTrend)).toLocaleString()} تحسن</span>` : `<span class="trend-down">▲ ${roundMoney(balanceTrend).toLocaleString()} تفاقم</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
@@ -435,7 +436,7 @@
             previousKpiData = {
                 totalDebit: totalDebit,
                 totalCredit: totalCredit,
-                collectionRate: collectionRate,
+                monthlyRent: totalMonthlyRent,
                 totalBalance: totalBalance,
                 avgDelayDays: avgDelayDays
             };
