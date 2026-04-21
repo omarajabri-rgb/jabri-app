@@ -4,19 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- ======================== 🔒 SECURITY HEADERS 🔒 ======================== -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    <!-- ========================================================================= -->
 
     <title>مجمع جبري | لوحة المستأجر</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* ========== YOUR EXISTING STYLES (KEPT EXACTLY THE SAME) ========== */
         :root {
             --bg: #f7f4ed;
             --bg-2: #fdfbf6;
@@ -79,12 +76,12 @@
         }
 
         .burger-menu {
-            position: absolute;
-            top: 60px;
-            right: 0;
+            position: fixed;
+            top: 70px;
+            right: 16px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             padding: 8px;
             z-index: 99999;
             min-width: 200px;
@@ -134,20 +131,6 @@
         .ghost-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 14px 26px rgba(120,95,56,0.12);
-        }
-
-        .burger-menu {
-            position: fixed;
-            top: 70px;
-            right: 16px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 8px;
-            z-index: 99999;
-            min-width: 200px;
-            display: none;
-            border: 1px solid rgba(201,164,107,0.18);
         }
 
         .menu-item {
@@ -393,7 +376,6 @@
             white-space: normal;
         }
 
-        /* ========== NEW: Progress Bar Styles ========== */
         .progress-container {
             margin: 20px 0;
         }
@@ -430,7 +412,6 @@
             font-weight: 900;
         }
 
-        /* ========== NEW: Traffic Light Styles ========== */
         .traffic-light {
             display: flex;
             justify-content: center;
@@ -485,7 +466,6 @@
             font-size: 16px;
         }
 
-        /* ========== NEW: KPI Card Styles (kept your existing card look) ========== */
         .kpi-card {
             text-align: center;
             padding: 20px;
@@ -505,17 +485,32 @@
             margin-top: 8px;
         }
 
-        .kpi-sub {
-            font-size: 12px;
-            font-weight: 700;
-            margin-top: 8px;
-            color: var(--neutral);
+        .chart-caption {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            border: 1px solid transparent;
         }
 
-        .divider {
-            height: 1px;
-            background: rgba(201,164,107,0.2);
-            margin: 16px 0;
+        .chart-caption.good {
+            color: var(--success);
+            background: rgba(47,158,111,0.10);
+            border-color: rgba(47,158,111,0.18);
+        }
+
+        .chart-caption.warning {
+            color: var(--danger);
+            background: rgba(201,90,82,0.10);
+            border-color: rgba(201,90,82,0.18);
+        }
+
+        .chart-caption.neutral {
+            color: var(--neutral);
+            background: rgba(139,127,112,0.10);
+            border-color: rgba(139,127,112,0.18);
         }
 
         .notif-list {
@@ -666,7 +661,6 @@
             .kpi-number { font-size: 36px; }
         }
     </style>
-    <!-- PWA / App Icon Setup -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#c9a46b">
     <link rel="apple-touch-icon" href="/IMG_2028.png">
@@ -755,7 +749,6 @@
             <div id="notifications_list" class="notif-list"></div>
         </div>
 
-        <!-- ========== REPLACED: Pie Chart with Progress Bar + KPI ========== -->
         <div class="panel reveal">
             <div class="chip-header"><div class="chip">نسبة السداد</div></div>
             <div class="kpi-card">
@@ -774,7 +767,6 @@
             <div id="progress_caption" class="chart-caption neutral">لا توجد بيانات كافية لحساب نسبة السداد حالياً</div>
         </div>
 
-        <!-- ========== REPLACED: Line Chart with Traffic Light ========== -->
         <div class="panel reveal">
             <div class="chip-header"><div class="chip">حالة الرصيد</div></div>
             <div class="traffic-light">
@@ -800,7 +792,6 @@
     </div>
 
     <script>
-        // ======================== SECURITY: Input Sanitization ========================
         const sanitizeInput = (input) => String(input ?? '').replace(/[<>'"]/g, '');
         
         const { createClient } = supabase;
@@ -902,7 +893,6 @@
             return 'يحتاج معالجة';
         }
 
-        // ========== NEW: Traffic Light Logic ==========
         function getTrafficLightStatus(balance) {
             const b = Math.max(0, toNumber(balance));
             
@@ -915,7 +905,6 @@
             }
         }
 
-        // ========== NEW: Balance Trend Logic (replaces line chart) ==========
         function getBalanceTrend(current, previous) {
             if (!current || !previous) {
                 return { type: 'neutral', text: 'لا توجد بيانات كافية للمقارنة حالياً' };
@@ -951,53 +940,52 @@
             requestAnimationFrame(step);
         }
 
-        // ========== NEW: Update Progress Bar ==========
+        // ========== الدالة المصححة نهائياً ==========
         function updateProgressBar(credit, balance) {
-    const creditValue = Math.max(0, toNumber(credit));
-    const balanceValue = Math.max(0, toNumber(balance));
-    const total = creditValue + balanceValue;
-    
-    let percentage = 0;
-    if (total > 0) {
-        percentage = Math.round((creditValue / total) * 100);
-    } else if (balanceValue === 0 && creditValue === 0) {
-        percentage = 100;
-    }
-    
-    const progressFill = document.getElementById('progress_fill');
-    const percentageEl = document.getElementById('payment_percentage');
-    const progressText = document.getElementById('progress_text');
-    
-    percentageEl.innerText = `${percentage}%`;
-    
-    // ✅ التصحيح: المدفوع / الإجمالي
-    progressText.innerText = `${formatNumber(creditValue)} / ${formatNumber(total)}`;
-    
-    if (progressFill) {
-        progressFill.style.width = `${percentage}%`;
-        progressFill.innerText = `${percentage}%`;
-    }
-    
-    const captionEl = document.getElementById('progress_caption');
-    if (balanceValue === 0 && creditValue > 0) {
-        captionEl.innerText = '✔ الحساب مسدد بالكامل';
-        captionEl.className = 'chart-caption good';
-    } else if (balanceValue > 0 && percentage >= 50) {
-        captionEl.innerText = `نسبة السداد ${percentage}%، متبقي ${formatNumber(balanceValue)}`;
-        captionEl.className = 'chart-caption neutral';
-    } else if (balanceValue > 0 && percentage < 50) {
-        captionEl.innerText = `⚠ نسبة السداد ${percentage}% فقط، متبقي ${formatNumber(balanceValue)}`;
-        captionEl.className = 'chart-caption warning';
-    } else if (balanceValue < 0) {
-        captionEl.innerText = `✔ رصيد دائن ${formatNumber(Math.abs(balanceValue))} لصالحك`;
-        captionEl.className = 'chart-caption good';
-    } else {
-        captionEl.innerText = 'لا توجد بيانات كافية لحساب نسبة السداد حالياً';
-        captionEl.className = 'chart-caption neutral';
-    }
-}
+            const creditValue = Math.max(0, toNumber(credit));
+            const balanceValue = Math.max(0, toNumber(balance));
+            const total = creditValue + balanceValue;
+            
+            let percentage = 0;
+            if (total > 0) {
+                percentage = Math.round((creditValue / total) * 100);
+            } else if (balanceValue === 0 && creditValue === 0) {
+                percentage = 100;
+            }
+            
+            const progressFill = document.getElementById('progress_fill');
+            const percentageEl = document.getElementById('payment_percentage');
+            const progressText = document.getElementById('progress_text');
+            
+            percentageEl.innerText = `${percentage}%`;
+            
+            // ✅ التصحيح النهائي: المدفوع / الإجمالي
+            progressText.innerText = `${formatNumber(creditValue)} / ${formatNumber(total)}`;
+            
+            if (progressFill) {
+                progressFill.style.width = `${percentage}%`;
+                progressFill.innerText = `${percentage}%`;
+            }
+            
+            const captionEl = document.getElementById('progress_caption');
+            if (balanceValue === 0 && creditValue > 0) {
+                captionEl.innerText = '✔ الحساب مسدد بالكامل';
+                captionEl.className = 'chart-caption good';
+            } else if (balanceValue > 0 && percentage >= 50) {
+                captionEl.innerText = `نسبة السداد ${percentage}%، متبقي ${formatNumber(balanceValue)}`;
+                captionEl.className = 'chart-caption neutral';
+            } else if (balanceValue > 0 && percentage < 50) {
+                captionEl.innerText = `⚠ نسبة السداد ${percentage}% فقط، متبقي ${formatNumber(balanceValue)}`;
+                captionEl.className = 'chart-caption warning';
+            } else if (balanceValue < 0) {
+                captionEl.innerText = `✔ رصيد دائن ${formatNumber(Math.abs(balanceValue))} لصالحك`;
+                captionEl.className = 'chart-caption good';
+            } else {
+                captionEl.innerText = 'لا توجد بيانات كافية لحساب نسبة السداد حالياً';
+                captionEl.className = 'chart-caption neutral';
+            }
+        }
 
-        // ========== NEW: Update Traffic Light ==========
         function updateTrafficLight(balance) {
             const status = getTrafficLightStatus(balance);
             
@@ -1107,11 +1095,6 @@
             menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
         }
 
-        function goToDashboard() {
-            document.getElementById('burger_menu').style.display = 'none';
-            window.location.href = 'tenant.html';
-        }
-
         function openChangePasswordModal() {
             document.getElementById('burger_menu').style.display = 'none';
             document.getElementById('passwordModal').style.display = 'flex';
@@ -1211,7 +1194,7 @@
                         .eq('tenant_code', tenantCode);
                 }
 
-                const { currentSummary, previousSummary, chartRows } = getLatestAndPreviousSummaries(summaryData || []);
+                const { currentSummary, previousSummary } = getLatestAndPreviousSummaries(summaryData || []);
 
                 const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
                 const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
@@ -1236,13 +1219,9 @@
                 document.getElementById('balance_smart_text').innerText = getBalanceSmartText(currentBalance);
                 document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
 
-                // ========== NEW: Update Progress Bar ==========
                 updateProgressBar(currentCredit, currentBalance);
-
-                // ========== NEW: Update Traffic Light ==========
                 updateTrafficLight(currentBalance);
 
-                // ========== NEW: Update Balance Trend Text ==========
                 const trend = getBalanceTrend({ final_balance: currentBalance }, previousSummary);
                 const trendEl = document.getElementById('balance_trend_text');
                 trendEl.className = `chart-caption ${trend.type}`;
