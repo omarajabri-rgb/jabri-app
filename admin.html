@@ -107,12 +107,13 @@
         .trend-down { color: var(--danger); }
         .trend-neutral { color: var(--warning); }
         
+        /* FIXED: 2x2 grid on all screen sizes */
         @media (max-width: 768px){
             .notifications-table th, .notifications-table td { padding: 8px 6px; font-size: 11px; }
             .read-status { padding: 2px 6px; }
             .filter-buttons .btn-sm { padding: 6px 10px; font-size: 10px; }
             .hero-ai-card { grid-template-columns: 1fr; }
-            .quick-ai-grid { grid-template-columns: 1fr; }
+            .quick-ai-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
@@ -356,10 +357,10 @@
                 const typeMap = { first:'مطالبة أولى', second:'مطالبة ثانية', third:'مطالبة ثالثة', legal:'إنذار عدلي', lawyer:'تحويل محامي', general:'رسالة عامة' };
                 const typeName = typeMap[notif.type] || notif.type || '—';
                 
-                html += `<tr><td>${tenantName}</td><td>${typeName}</td><td>${shortMsg}</td><td>${formatDateTime(notif.created_at)}</td><td><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td><td>${readDate}</td></tr>`;
+                html += `<tr><td style="padding: 10px;">${tenantName}</td><td style="padding: 10px;">${typeName}</td><td style="padding: 10px;">${shortMsg}</td><td style="padding: 10px;">${formatDateTime(notif.created_at)}</td><td style="padding: 10px;"><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td><td style="padding: 10px;">${readDate}</td></tr>`;
             }
             
-            html += `</tbody><td>`;
+            html += `</tbody></table>`;
             container.innerHTML = html;
         }
         
