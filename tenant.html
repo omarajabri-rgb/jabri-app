@@ -953,47 +953,49 @@
 
         // ========== NEW: Update Progress Bar ==========
         function updateProgressBar(credit, balance) {
-            const creditValue = Math.max(0, toNumber(credit));
-            const balanceValue = Math.max(0, toNumber(balance));
-            const total = creditValue + balanceValue;
-            
-            let percentage = 0;
-            if (total > 0) {
-                percentage = Math.round((creditValue / total) * 100);
-            } else if (balanceValue === 0 && creditValue === 0) {
-                percentage = 100;
-            }
-            
-            const progressFill = document.getElementById('progress_fill');
-            const percentageEl = document.getElementById('payment_percentage');
-            const progressText = document.getElementById('progress_text');
-            
-            percentageEl.innerText = `${percentage}%`;
-            progressText.innerText = `${formatNumber(creditValue)} / ${formatNumber(total)}`;
-            
-            if (progressFill) {
-                progressFill.style.width = `${percentage}%`;
-                progressFill.innerText = `${percentage}%`;
-            }
-            
-            const captionEl = document.getElementById('progress_caption');
-            if (balanceValue === 0 && creditValue > 0) {
-                captionEl.innerText = '✔ الحساب مسدد بالكامل';
-                captionEl.className = 'chart-caption good';
-            } else if (balanceValue > 0 && percentage >= 50) {
-                captionEl.innerText = `نسبة السداد ${percentage}%، متبقي ${formatNumber(balanceValue)}`;
-                captionEl.className = 'chart-caption neutral';
-            } else if (balanceValue > 0 && percentage < 50) {
-                captionEl.innerText = `⚠ نسبة السداد ${percentage}% فقط، متبقي ${formatNumber(balanceValue)}`;
-                captionEl.className = 'chart-caption warning';
-            } else if (balanceValue < 0) {
-                captionEl.innerText = `✔ رصيد دائن ${formatNumber(Math.abs(balanceValue))} لصالحك`;
-                captionEl.className = 'chart-caption good';
-            } else {
-                captionEl.innerText = 'لا توجد بيانات كافية لحساب نسبة السداد حالياً';
-                captionEl.className = 'chart-caption neutral';
-            }
-        }
+    const creditValue = Math.max(0, toNumber(credit));
+    const balanceValue = Math.max(0, toNumber(balance));
+    const total = creditValue + balanceValue;
+    
+    let percentage = 0;
+    if (total > 0) {
+        percentage = Math.round((creditValue / total) * 100);
+    } else if (balanceValue === 0 && creditValue === 0) {
+        percentage = 100;
+    }
+    
+    const progressFill = document.getElementById('progress_fill');
+    const percentageEl = document.getElementById('payment_percentage');
+    const progressText = document.getElementById('progress_text');
+    
+    percentageEl.innerText = `${percentage}%`;
+    
+    // ✅ التصحيح: المدفوع / الإجمالي
+    progressText.innerText = `${formatNumber(creditValue)} / ${formatNumber(total)}`;
+    
+    if (progressFill) {
+        progressFill.style.width = `${percentage}%`;
+        progressFill.innerText = `${percentage}%`;
+    }
+    
+    const captionEl = document.getElementById('progress_caption');
+    if (balanceValue === 0 && creditValue > 0) {
+        captionEl.innerText = '✔ الحساب مسدد بالكامل';
+        captionEl.className = 'chart-caption good';
+    } else if (balanceValue > 0 && percentage >= 50) {
+        captionEl.innerText = `نسبة السداد ${percentage}%، متبقي ${formatNumber(balanceValue)}`;
+        captionEl.className = 'chart-caption neutral';
+    } else if (balanceValue > 0 && percentage < 50) {
+        captionEl.innerText = `⚠ نسبة السداد ${percentage}% فقط، متبقي ${formatNumber(balanceValue)}`;
+        captionEl.className = 'chart-caption warning';
+    } else if (balanceValue < 0) {
+        captionEl.innerText = `✔ رصيد دائن ${formatNumber(Math.abs(balanceValue))} لصالحك`;
+        captionEl.className = 'chart-caption good';
+    } else {
+        captionEl.innerText = 'لا توجد بيانات كافية لحساب نسبة السداد حالياً';
+        captionEl.className = 'chart-caption neutral';
+    }
+}
 
         // ========== NEW: Update Traffic Light ==========
         function updateTrafficLight(balance) {
