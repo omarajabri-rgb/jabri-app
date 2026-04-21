@@ -63,6 +63,47 @@
         .hero-mini.good{ background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95)); border-color:rgba(21,154,111,0.18); }
         .hero-mini.warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
         .hero-mini.bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
+        
+        /* KPI Cards Grid (NEW) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .kpi-card {
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            background: #fff;
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--soft-shadow);
+        }
+        .kpi-card span {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .kpi-card b {
+            font-size: 24px;
+            color: #4e3c24;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+        .kpi-card small {
+            font-size: 11px;
+            color: #6b4f2b;
+            font-weight: 700;
+        }
+        .kpi-trend-up { color: var(--success); }
+        .kpi-trend-down { color: var(--danger); }
+        
         .quick-ai-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:14px; }
         .quick-ai-card{ border-radius:20px; padding:16px; text-align:center; background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:240px; box-shadow:var(--soft-shadow); }
         .quick-ai-card span{ display:block; font-size:11px; color:var(--muted); font-weight:800; margin-bottom:6px; }
@@ -74,9 +115,9 @@
         .ai-bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
         .ai-neutral{ background:#fff; }
         
-        /* NEW STYLES: Vertical stacking */
         .chart-single { width: 100%; margin-bottom: 18px; }
-        .chart-wrap { background: rgba(255,255,255,0.76); border: 1px solid var(--line); border-radius: 22px; padding: 16px; height: 300px; width: 100%; }
+        .chart-wrap { background: rgba(255,255,255,0.76); border: 1px solid var(--line); border-radius: 22px; padding: 16px; min-height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; overflow-x: auto; }
+        .chart-wrap canvas { display: block; margin: 0 auto; max-width: 100%; height: auto; max-height: 280px; }
         .chart-meta { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-weight: 900; font-size: 14px; color: #6b4f2b; }
         .notify-builder{ display:grid; grid-template-columns:1fr; gap:14px; }
         .form-shell{ background:rgba(255,255,255,0.58); border:1px solid rgba(201,164,107,0.16); border-radius:24px; padding:16px; }
@@ -93,7 +134,6 @@
         .spinner{ width:40px; height:40px; border:3px solid rgba(201,164,107,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin{ to{ transform:rotate(360deg); } }
         
-        /* Notification Table Styles */
         .notifications-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         .notifications-table th, .notifications-table td { padding: 12px 10px; text-align: right; border-bottom: 1px solid var(--line); font-size: 13px; }
         .notifications-table th { background: rgba(201,164,107,0.08); font-weight: 800; color: #6b4f2b; }
@@ -107,13 +147,14 @@
         .trend-down { color: var(--danger); }
         .trend-neutral { color: var(--warning); }
         
-        /* FIXED: 2x2 grid on all screen sizes */
         @media (max-width: 768px){
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .notifications-table th, .notifications-table td { padding: 8px 6px; font-size: 11px; }
             .read-status { padding: 2px 6px; }
             .filter-buttons .btn-sm { padding: 6px 10px; font-size: 10px; }
             .hero-ai-card { grid-template-columns: 1fr; }
             .quick-ai-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-wrap canvas { max-height: 220px; }
         }
     </style>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
@@ -130,6 +171,30 @@
                 <div><h1>مجمع جبري الصناعي التجاري</h1><p>لوحة الإدارة الذكية لإدارة المستأجرين والحسابات</p></div>
             </div>
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
+        </div>
+
+        <!-- NEW: KPI CARDS SECTION (بنفس ستايل البطاقات الأصلية) -->
+        <div class="kpi-grid">
+            <div class="kpi-card" id="kpi_collection_rate">
+                <span>📊 نسبة التحصيل الإجمالية</span>
+                <b id="kpi_rate_value">0%</b>
+                <small id="kpi_rate_trend">—</small>
+            </div>
+            <div class="kpi-card" id="kpi_total_credit_card">
+                <span>💰 إجمالي المتأخرات</span>
+                <b id="kpi_total_credit_value">0</b>
+                <small id="kpi_total_credit_trend">—</small>
+            </div>
+            <div class="kpi-card" id="kpi_avg_days">
+                <span>⏱️ متوسط أيام التأخير</span>
+                <b id="kpi_avg_days_value">0</b>
+                <small id="kpi_avg_days_trend">—</small>
+            </div>
+            <div class="kpi-card" id="kpi_overdue_tenants">
+                <span>👥 المستأجرين المتأخرين</span>
+                <b id="kpi_overdue_value">0</b>
+                <small id="kpi_overdue_total">من إجمالي <span id="kpi_total_tenants">0</span></small>
+            </div>
         </div>
 
         <!-- اختيار المستأجر وتحليل ذكي -->
@@ -189,12 +254,12 @@
             </div>
         </div>
 
-        <!-- 3. نسبة التحصيل السنوية (آخر 5 سنوات) - تحتهم وياخذ عرض كامل -->
+        <!-- 3. نسبة التحصيل السنوية (آخر 5 سنوات) -->
         <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">📊 نسبة التحصيل السنوية (آخر 5 سنوات)</div></div>
-                <div class="chart-wrap" style="height: 360px;">
-                    <canvas id="fiveYearCollectionChart"></canvas>
+                <div class="chart-wrap" style="min-height: 320px;">
+                    <canvas id="fiveYearCollectionChart" style="width: 100%; height: 280px;"></canvas>
                 </div>
                 <div id="fiveYearInsight" class="insight-text"></div>
             </div>
@@ -274,11 +339,11 @@
         let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, isSavingTransaction=false;
         let isComplexWideMode = true;
         let currentNotificationFilter = 'all';
+        let previousKpiData = { rate: 0, credit: 0, avgDays: 0 };
         
         // --- Helper Functions ---
         const toNumber = v => { const c = String(v ?? 0).replace(/,/g, '').trim(); const n = parseFloat(c); return isFinite(n) ? n : 0; };
         const roundMoney = v => Math.round(toNumber(v));
-        const formatDate = (d) => { if(!d) return '—'; const dt = new Date(d); if(isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('ar-EG'); };
         const formatDateTime = (d) => { if(!d) return '—'; const dt = new Date(d); if(isNaN(dt.getTime())) return '—'; return dt.toLocaleDateString('ar-EG') + ' ' + dt.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}); };
         const getLatestSummary = tc => allSummaries.filter(r => r.tenant_code === tc).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
         const getPreviousSummary = (tc, y) => allSummaries.filter(r => r.tenant_code === tc && Number(r.year) < Number(y)).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
@@ -324,7 +389,66 @@
             else { chip.innerText='متأخر'; }
         }
         
-        // --- NOTIFICATIONS DISPLAY WITH READ STATUS ---
+        // --- KPI UPDATE FUNCTION ---
+        async function updateKpiCards() {
+            let totalComplexCredit = 0, totalComplexBalance = 0, totalComplexDebit = 0, tenantCount = 0;
+            let overdueTenants = 0;
+            let totalOverdueDays = 0;
+            let tenantsWithOverdue = 0;
+            
+            for(const tenant of allTenants) {
+                const latest = getLatestSummary(tenant.tenant_code);
+                if(latest) {
+                    const balance = toNumber(latest.final_balance);
+                    totalComplexCredit += toNumber(latest.total_credit);
+                    totalComplexBalance += balance;
+                    totalComplexDebit += toNumber(latest.total_debit);
+                    tenantCount++;
+                    
+                    // Calculate overdue days based on last payment or negative balance
+                    const lastTx = allTransactions.filter(tx => tx.tenant_code === tenant.tenant_code && toNumber(tx.credit) > 0).sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+                    if(balance > 0) {
+                        overdueTenants++;
+                        if(lastTx) {
+                            const daysSince = Math.floor((new Date() - new Date(lastTx.date)) / (1000 * 60 * 60 * 24));
+                            totalOverdueDays += Math.min(daysSince, 180); // Cap at 180 days
+                            tenantsWithOverdue++;
+                        } else {
+                            totalOverdueDays += 90; // No payment history
+                            tenantsWithOverdue++;
+                        }
+                    }
+                }
+            }
+            
+            const collectionRate = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
+            const avgOverdueDays = tenantsWithOverdue > 0 ? Math.round(totalOverdueDays / tenantsWithOverdue) : 0;
+            
+            // Update KPI values
+            document.getElementById('kpi_rate_value').innerText = `${collectionRate}%`;
+            document.getElementById('kpi_total_credit_value').innerText = roundMoney(totalComplexBalance).toLocaleString();
+            document.getElementById('kpi_avg_days_value').innerText = avgOverdueDays;
+            document.getElementById('kpi_overdue_value').innerText = overdueTenants;
+            document.getElementById('kpi_total_tenants').innerText = tenantCount;
+            
+            // Trends
+            const rateTrend = collectionRate - previousKpiData.rate;
+            const creditTrend = totalComplexBalance - previousKpiData.credit;
+            const daysTrend = avgOverdueDays - previousKpiData.avgDays;
+            
+            const rateTrendHtml = rateTrend > 0 ? `<span class="kpi-trend-up">▲ +${rateTrend}%</span>` : (rateTrend < 0 ? `<span class="kpi-trend-down">▼ ${rateTrend}%</span>` : `<span>➖ ثابت</span>`);
+            const creditTrendHtml = creditTrend > 0 ? `<span class="kpi-trend-up">▲ +${roundMoney(creditTrend).toLocaleString()}</span>` : (creditTrend < 0 ? `<span class="kpi-trend-down">▼ ${roundMoney(Math.abs(creditTrend)).toLocaleString()}</span>` : `<span>➖ ثابت</span>`);
+            const daysTrendHtml = daysTrend > 0 ? `<span class="kpi-trend-up">▲ +${daysTrend} يوم</span>` : (daysTrend < 0 ? `<span class="kpi-trend-down">▼ ${Math.abs(daysTrend)} يوم</span>` : `<span>➖ ثابت</span>`);
+            
+            document.getElementById('kpi_rate_trend').innerHTML = rateTrendHtml;
+            document.getElementById('kpi_total_credit_trend').innerHTML = creditTrendHtml;
+            document.getElementById('kpi_avg_days_trend').innerHTML = daysTrendHtml;
+            
+            // Save for next comparison
+            previousKpiData = { rate: collectionRate, credit: totalComplexBalance, avgDays: avgOverdueDays };
+        }
+        
+        // --- NOTIFICATIONS DISPLAY ---
         async function loadNotifications() {
             await loadData();
             const container = document.getElementById('notificationsList');
@@ -417,7 +541,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     plugins: {
                         tooltip: {
                             callbacks: {
@@ -595,6 +719,8 @@
             document.getElementById('notification_message').value = '';
             document.getElementById('statementBtn').disabled = true;
             
+            // Update KPI cards
+            updateKpiCards();
             loadNotifications();
         }
         
@@ -763,6 +889,8 @@
                 document.getElementById('statementBtn').disabled = true;
             }
             updateNotificationComposer();
+            // Still update KPI for complex view when individual tenant selected? No, keep complex KPI.
+            // For individual tenant, we don't update KPI cards.
             loadNotifications();
         }
         
