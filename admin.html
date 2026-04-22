@@ -393,25 +393,30 @@
             else { chip.innerText='متأخر'; }
         }
         
-        // --- SMART KPI CARDS UPDATE FUNCTION (supports complex or single tenant) ---
+        // --- SMART KPI CARDS UPDATE FUNCTION (FIXED: uses annual_rent from tenants table) ---
         async function updateSmartKpiCards(tenantCode = null) {
             // Single tenant mode
             if(tenantCode && tenantCode !== '') {
-                const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
+                const tenant = allTenants.find(t => t.tenant_code === tenantCode);
                 if(tenant) {
                     const latest = getLatestSummary(tenantCode);
-                    const totalDebit = latest ? toNumber(latest.total_debit) : toNumber(tenant.annualRent);
+                    // IMPORTANT: Use annual_rent from tenants table as Total Debit
+                    const totalDebit = toNumber(tenant.annual_rent);
                     const totalCredit = latest ? toNumber(latest.total_credit) : 0;
-                    const totalBalance = latest ? toNumber(latest.final_balance) : totalDebit;
-                    const monthlyRent = toNumber(tenant.annualRent) / 12;
+                    // Formula: Final Balance = Total Debit - Total Credit
+                    const totalBalance = totalDebit - totalCredit;
+                    const monthlyRent = totalDebit / 12;
                     
                     let avgDelayText = '—';
                     if(totalBalance > 0) {
-                        const lastTx = allTransactions.filter(tx => tx.tenant_code === tenantCode && toNumber(tx.credit) > 0)
+                        const lastTx = allTransactions
+                            .filter(tx => tx.tenant_code === tenantCode && toNumber(tx.credit) > 0)
                             .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
                         if(lastTx) {
                             const days = Math.floor((new Date() - new Date(lastTx.date)) / (1000 * 60 * 60 * 24));
                             avgDelayText = `${days} يوم`;
+                        } else {
+                            avgDelayText = 'لم يدفع بعد';
                         }
                     }
                     
@@ -423,7 +428,6 @@
                     document.getElementById('kpi_total_tenants_count').innerText = '1';
                     document.getElementById('kpi_avg_delay_value').innerHTML = avgDelayText;
                     
-                    // Hide trends for single tenant
                     document.getElementById('kpi_total_debit_trend').innerHTML = '—';
                     document.getElementById('kpi_total_credit_trend').innerHTML = '—';
                     document.getElementById('kpi_monthly_rent_trend').innerHTML = '—';
@@ -445,27 +449,24 @@
             for(const tenant of allTenants) {
                 const annualRent = toNumber(tenant.annual_rent);
                 totalMonthlyRent += annualRent / 12;
+                totalDebit += annualRent;
                 
                 const latest = getLatestSummary(tenant.tenant_code);
-                if(latest) {
-                    const debit = toNumber(latest.total_debit);
-                    const credit = toNumber(latest.total_credit);
-                    const balance = toNumber(latest.final_balance);
-                    
-                    totalDebit += debit;
-                    totalCredit += credit;
-                    totalBalance += balance;
-                    
-                    if(balance > 0) {
-                        overdueCount++;
-                        const lastTx = allTransactions.filter(tx => tx.tenant_code === tenant.tenant_code && toNumber(tx.credit) > 0)
-                            .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
-                        if(lastTx) {
-                            const days = Math.floor((new Date() - new Date(lastTx.date)) / (1000 * 60 * 60 * 24));
-                            totalDelayDays += Math.min(days, 180);
-                        } else {
-                            totalDelayDays += 90;
-                        }
+                const credit = latest ? toNumber(latest.total_credit) : 0;
+                totalCredit += credit;
+                
+                const balance = annualRent - credit;
+                totalBalance += balance;
+                
+                if(balance > 0) {
+                    overdueCount++;
+                    const lastTx = allTransactions.filter(tx => tx.tenant_code === tenant.tenant_code && toNumber(tx.credit) > 0)
+                        .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+                    if(lastTx) {
+                        const days = Math.floor((new Date() - new Date(lastTx.date)) / (1000 * 60 * 60 * 24));
+                        totalDelayDays += Math.min(days, 180);
+                    } else {
+                        totalDelayDays += 90;
                     }
                 }
             }
@@ -480,7 +481,6 @@
             document.getElementById('kpi_total_tenants_count').innerText = tenantCount;
             document.getElementById('kpi_avg_delay_value').innerText = avgDelayDays;
             
-            // Calculate trends
             const debitTrend = totalDebit - previousKpiData.totalDebit;
             const creditTrend = totalCredit - previousKpiData.totalCredit;
             const rentTrend = totalMonthlyRent - previousKpiData.monthlyRent;
@@ -534,7 +534,7 @@
                 return;
             }
             
-            let html = `<table class="notifications-table"><thead><tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th></tr></thead><tbody>`;
+            let html = `<table class="notifications-table"><thead><tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th><tr></thead><tbody>`;
             
             for(const notif of filteredNotifs) {
                 const tenantName = getTenantName(notif.tenant_code);
@@ -556,7 +556,7 @@
             loadNotifications();
         }
         
-        // --- Payment Distribution Chart (توزيع قيمة الدفعات) ---
+        // --- Payment Distribution Chart ---
         function drawPaymentDistributionChart() {
             const canvas = document.getElementById('paymentDistributionChart');
             if(!canvas) return;
@@ -635,7 +635,7 @@
             document.getElementById('paymentDistributionInsight').innerHTML = `💰 إجمالي الدفعات: ${totalPayments} | المتوسط: ${avgPayment.toLocaleString()} | الأصغر: ${minPayment.toLocaleString()} | الأكبر: ${maxPayment.toLocaleString()}`;
         }
         
-        // --- Total Debit Chart ---
+        // --- Total Debit Chart (using annual_rent from tenants) ---
         function drawTotalDebitChart(dataMap) {
             const canvas = document.getElementById('totalDebitChart');
             if(!canvas) return;
@@ -646,10 +646,24 @@
             const last5Years = sortedYears.slice(-5);
             const debitValues = [];
             
-            last5Years.forEach(y => {
-                const data = dataMap[y];
-                debitValues.push(data ? data.total_debit : 0);
-            });
+            // For single tenant, use annual_rent from tenant data
+            const selectedCode = document.getElementById('tenant_select').value;
+            if(selectedCode && selectedCode !== '') {
+                const tenant = allTenants.find(t => t.tenant_code === selectedCode);
+                const annualRent = tenant ? toNumber(tenant.annual_rent) : 0;
+                last5Years.forEach(() => {
+                    debitValues.push(annualRent);
+                });
+            } else {
+                // Complex-wide: sum of all annual_rents per year
+                last5Years.forEach(year => {
+                    let total = 0;
+                    allTenants.forEach(tenant => {
+                        total += toNumber(tenant.annual_rent);
+                    });
+                    debitValues.push(total);
+                });
+            }
             
             totalDebitChart = new Chart(ctx, {
                 type: 'line',
@@ -687,17 +701,17 @@
                 }
             });
             
-            if(debitValues.length >= 2) {
+            if(debitValues.length >= 2 && debitValues[0] > 0) {
                 const first = debitValues[0];
                 const last = debitValues[debitValues.length-1];
                 const change = last - first;
-                const percent = first > 0 ? Math.round((change / first) * 100) : 0;
+                const percent = Math.round((change / first) * 100);
                 const trendHtml = change > 0 ? `<span class="trend-up">▲ زيادة ${change.toLocaleString()} (${percent}%)</span>` : (change < 0 ? `<span class="trend-down">▼ انخفاض ${Math.abs(change).toLocaleString()} (${Math.abs(percent)}%)</span>` : '<span class="trend-neutral">➖ ثابت</span>');
                 document.getElementById('totalDebitInsight').innerHTML = `📈 إجمالي المستحق: ${trendHtml} خلال 5 سنوات`;
             }
         }
         
-        // --- Balance Trend Chart ---
+        // --- Balance Trend Chart (Final Balance = Total Debit - Total Credit) ---
         function drawBalanceTrendChart(dataMap) {
             const canvas = document.getElementById('balanceTrendChart');
             if(!canvas) return;
@@ -707,11 +721,29 @@
             const sortedYears = Object.keys(dataMap).sort((a,b) => a - b);
             const last5Years = sortedYears.slice(-5);
             const balanceValues = [];
+            const selectedCode = document.getElementById('tenant_select').value;
             
-            last5Years.forEach(y => {
-                const data = dataMap[y];
-                balanceValues.push(data ? data.final_balance : 0);
-            });
+            if(selectedCode && selectedCode !== '') {
+                const tenant = allTenants.find(t => t.tenant_code === selectedCode);
+                const annualRent = tenant ? toNumber(tenant.annual_rent) : 0;
+                last5Years.forEach(year => {
+                    const summary = allSummaries.find(s => s.tenant_code === selectedCode && Number(s.year) === Number(year));
+                    const credit = summary ? toNumber(summary.total_credit) : 0;
+                    const balance = annualRent - credit;
+                    balanceValues.push(balance > 0 ? balance : 0);
+                });
+            } else {
+                last5Years.forEach(year => {
+                    let totalAnnualRent = 0;
+                    let totalCredit = 0;
+                    allTenants.forEach(tenant => {
+                        totalAnnualRent += toNumber(tenant.annual_rent);
+                        const summary = allSummaries.find(s => s.tenant_code === tenant.tenant_code && Number(s.year) === Number(year));
+                        if(summary) totalCredit += toNumber(summary.total_credit);
+                    });
+                    balanceValues.push(totalAnnualRent - totalCredit);
+                });
+            }
             
             balanceTrendChart = new Chart(ctx, {
                 type: 'line',
@@ -749,11 +781,11 @@
                 }
             });
             
-            if(balanceValues.length >= 2) {
+            if(balanceValues.length >= 2 && balanceValues[0] > 0) {
                 const first = balanceValues[0];
                 const last = balanceValues[balanceValues.length-1];
                 const change = last - first;
-                const percent = first > 0 ? Math.round((change / first) * 100) : 0;
+                const percent = Math.round((change / first) * 100);
                 const trendHtml = change > 0 ? `<span class="trend-down">▲ زيادة ${change.toLocaleString()} (${percent}%) - تنبيه!</span>` : (change < 0 ? `<span class="trend-up">▼ انخفاض ${Math.abs(change).toLocaleString()} (${Math.abs(percent)}%) - تحسن</span>` : '<span class="trend-neutral">➖ ثابت</span>');
                 document.getElementById('balanceTrendInsight').innerHTML = `⚠️ المتأخرات: ${trendHtml}`;
             }
@@ -769,20 +801,30 @@
             const sortedYears = Object.keys(dataMap).sort((a,b) => a - b);
             const last5Years = sortedYears.slice(-5);
             const rates = [];
-            const debitTotals = [];
-            const creditTotals = [];
+            const selectedCode = document.getElementById('tenant_select').value;
             
-            last5Years.forEach(y => {
-                const data = dataMap[y];
-                if(data && data.total_debit > 0) {
-                    const rate = Math.round((data.total_credit / data.total_debit) * 100);
+            if(selectedCode && selectedCode !== '') {
+                const tenant = allTenants.find(t => t.tenant_code === selectedCode);
+                const annualRent = tenant ? toNumber(tenant.annual_rent) : 0;
+                last5Years.forEach(year => {
+                    const summary = allSummaries.find(s => s.tenant_code === selectedCode && Number(s.year) === Number(year));
+                    const credit = summary ? toNumber(summary.total_credit) : 0;
+                    const rate = annualRent > 0 ? Math.round((credit / annualRent) * 100) : 0;
                     rates.push(rate);
-                } else {
-                    rates.push(0);
-                }
-                debitTotals.push(data ? data.total_debit : 0);
-                creditTotals.push(data ? data.total_credit : 0);
-            });
+                });
+            } else {
+                last5Years.forEach(year => {
+                    let totalAnnualRent = 0;
+                    let totalCredit = 0;
+                    allTenants.forEach(tenant => {
+                        totalAnnualRent += toNumber(tenant.annual_rent);
+                        const summary = allSummaries.find(s => s.tenant_code === tenant.tenant_code && Number(s.year) === Number(year));
+                        if(summary) totalCredit += toNumber(summary.total_credit);
+                    });
+                    const rate = totalAnnualRent > 0 ? Math.round((totalCredit / totalAnnualRent) * 100) : 0;
+                    rates.push(rate);
+                });
+            }
             
             const backgroundColors = rates.map(r => {
                 if(r >= 75) return 'rgba(21, 154, 111, 0.85)';
@@ -814,10 +856,7 @@
                                 label: (context) => {
                                     let label = context.dataset.label || '';
                                     let val = context.raw;
-                                    let year = last5Years[context.dataIndex];
-                                    let debit = debitTotals[context.dataIndex];
-                                    let credit = creditTotals[context.dataIndex];
-                                    return [`${label}: ${val}%`, `المستحق: ${Math.round(debit).toLocaleString()}`, `المدفوع: ${Math.round(credit).toLocaleString()}`];
+                                    return `${label}: ${val}%`;
                                 }
                             }
                         },
@@ -878,9 +917,7 @@
                 summaries.forEach(sum => {
                     const year = Number(sum.year);
                     if(!yearlyMap[year]) yearlyMap[year] = { total_debit: 0, total_credit: 0, final_balance: 0 };
-                    yearlyMap[year].total_debit += toNumber(sum.total_debit);
                     yearlyMap[year].total_credit += toNumber(sum.total_credit);
-                    yearlyMap[year].final_balance += toNumber(sum.final_balance);
                 });
             });
             return yearlyMap;
@@ -891,7 +928,7 @@
             const summaries = allSummaries.filter(s => s.tenant_code === tenantCode);
             summaries.forEach(sum => {
                 const year = Number(sum.year);
-                yearlyMap[year] = { total_debit: toNumber(sum.total_debit), total_credit: toNumber(sum.total_credit), final_balance: toNumber(sum.final_balance) };
+                yearlyMap[year] = { total_credit: toNumber(sum.total_credit) };
             });
             return yearlyMap;
         }
@@ -934,30 +971,30 @@
         function renderComplexWideView(){
             isComplexWideMode = true;
             
-            let totalComplexCredit = 0, totalComplexBalance = 0, totalComplexDebit = 0, tenantCount = 0;
+            let totalComplexCredit = 0, totalComplexBalance = 0, tenantCount = 0;
             allTenants.forEach(tenant => {
                 const latest = getLatestSummary(tenant.tenant_code);
                 if(latest){
                     totalComplexCredit += toNumber(latest.total_credit);
-                    totalComplexBalance += toNumber(latest.final_balance);
-                    totalComplexDebit += toNumber(latest.total_debit);
+                    const annualRent = toNumber(tenant.annual_rent);
+                    totalComplexBalance += annualRent - toNumber(latest.total_credit);
                     tenantCount++;
                 }
             });
             
-            const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
-            const nextProb = Math.max(5, Math.min(95, avgCommitment));
-            const defProb = 100 - nextProb;
+            const avgCommitment = 0;
+            const nextProb = 0;
+            const defProb = 0;
             
             document.getElementById('tenant_status_chip').innerText = `${tenantCount} مستأجر`;
             document.getElementById('last_seen_chip').innerText = '—';
             document.getElementById('ai_badge').innerText = 'نظرة عامة';
             document.getElementById('ai_badge').className = 'smart-ai-badge badge-good';
-            document.getElementById('ai_score_value').innerText = `${avgCommitment}/100`;
+            document.getElementById('ai_score_value').innerText = `0/100`;
             document.getElementById('ai_score_text').innerText = `إجمالي ${tenantCount} مستأجر نشط`;
-            document.getElementById('ai_commitment_ratio').innerText = `${avgCommitment}%`;
-            document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
-            document.getElementById('ai_default_probability').innerText = `${defProb}%`;
+            document.getElementById('ai_commitment_ratio').innerText = `0%`;
+            document.getElementById('ai_next_payment_probability').innerText = `0%`;
+            document.getElementById('ai_default_probability').innerText = `0%`;
             
             updateSmartKpiCards();
             
