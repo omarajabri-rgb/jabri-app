@@ -228,7 +228,7 @@
             </div>
         </div>
 
-        <!-- 4. المستحق الإجمالي (آخر 5 سنوات) - NEW -->
+        <!-- 4. المستحق الإجمالي (آخر 5 سنوات) -->
         <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">📈 المستحق الإجمالي (آخر 5 سنوات)</div></div>
@@ -239,7 +239,7 @@
             </div>
         </div>
 
-        <!-- 5. تطور المتأخرات (الرصيد) (آخر 5 سنوات) - NEW -->
+        <!-- 5. تطور المتأخرات (الرصيد) (آخر 5 سنوات) -->
         <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">⚠️ تطور المتأخرات (الرصيد) (آخر 5 سنوات)</div></div>
@@ -250,7 +250,18 @@
             </div>
         </div>
 
-        <!-- 6. سجل الإشعارات -->
+        <!-- 6. توزيع قيمة الدفعات (Distribution of Payments) - NEW -->
+        <div class="chart-single">
+            <div class="panel">
+                <div class="chip-header"><div class="chip-title">📊 توزيع قيمة الدفعات</div></div>
+                <div class="chart-wrap" style="min-height: 320px;">
+                    <canvas id="paymentDistributionChart" style="width: 100%; height: 280px;"></canvas>
+                </div>
+                <div id="paymentDistributionInsight" class="insight-text"></div>
+            </div>
+        </div>
+
+        <!-- 7. سجل الإشعارات -->
         <section class="panel">
             <div class="chip-header">
                 <div class="chip-title">📬 سجل الإشعارات المرسلة</div>
@@ -266,7 +277,7 @@
             </div>
         </section>
 
-        <!-- 7. إرسال إشعار -->
+        <!-- 8. إرسال إشعار -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
@@ -286,7 +297,7 @@
             </div>
         </section>
 
-        <!-- 8. إدخال دفعة جديدة -->
+        <!-- 9. إدخال دفعة جديدة -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
@@ -321,7 +332,7 @@
         const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
         
         // --- Global Variables ---
-        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, totalDebitChart=null, balanceTrendChart=null, isSavingTransaction=false;
+        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, fiveYearChart=null, totalDebitChart=null, balanceTrendChart=null, paymentDistributionChart=null, isSavingTransaction=false;
         let isComplexWideMode = true;
         let currentNotificationFilter = 'all';
         
@@ -382,8 +393,38 @@
             else { chip.innerText='متأخر'; }
         }
         
-        // --- SMART KPI CARDS UPDATE FUNCTION ---
-        async function updateSmartKpiCards() {
+        // --- SMART KPI CARDS UPDATE FUNCTION (supports complex or single tenant) ---
+        async function updateSmartKpiCards(tenantCode = null) {
+            // Single tenant mode
+            if(tenantCode && tenantCode !== '') {
+                const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
+                if(tenant) {
+                    const latest = getLatestSummary(tenantCode);
+                    const totalDebit = latest ? toNumber(latest.total_debit) : 0;
+                    const totalCredit = latest ? toNumber(latest.total_credit) : 0;
+                    const totalBalance = latest ? toNumber(latest.final_balance) : 0;
+                    const monthlyRent = toNumber(tenant.annual_rent) / 12;
+                    const isOverdue = totalBalance > 0;
+                    
+                    document.getElementById('kpi_total_debit_value').innerText = roundMoney(totalDebit).toLocaleString();
+                    document.getElementById('kpi_total_credit_value').innerText = roundMoney(totalCredit).toLocaleString();
+                    document.getElementById('kpi_monthly_rent_value').innerText = roundMoney(monthlyRent).toLocaleString();
+                    document.getElementById('kpi_total_balance_value').innerText = roundMoney(totalBalance).toLocaleString();
+                    document.getElementById('kpi_overdue_tenants_value').innerHTML = isOverdue ? 'نعم' : 'لا';
+                    document.getElementById('kpi_total_tenants_count').innerText = '1';
+                    document.getElementById('kpi_avg_delay_value').innerText = '—';
+                    
+                    // Hide trends for single tenant
+                    document.getElementById('kpi_total_debit_trend').innerHTML = '—';
+                    document.getElementById('kpi_total_credit_trend').innerHTML = '—';
+                    document.getElementById('kpi_monthly_rent_trend').innerHTML = '—';
+                    document.getElementById('kpi_total_balance_trend').innerHTML = '—';
+                    document.getElementById('kpi_avg_delay_trend').innerHTML = '—';
+                    return;
+                }
+            }
+            
+            // Complex-wide mode (original logic)
             let totalDebit = 0;
             let totalCredit = 0;
             let totalBalance = 0;
@@ -422,7 +463,6 @@
             
             const avgDelayDays = overdueCount > 0 ? Math.round(totalDelayDays / overdueCount) : 0;
             
-            // Update values
             document.getElementById('kpi_total_debit_value').innerText = roundMoney(totalDebit).toLocaleString();
             document.getElementById('kpi_total_credit_value').innerText = roundMoney(totalCredit).toLocaleString();
             document.getElementById('kpi_monthly_rent_value').innerText = roundMoney(totalMonthlyRent).toLocaleString();
@@ -438,7 +478,6 @@
             const balanceTrend = totalBalance - previousKpiData.totalBalance;
             const delayTrend = avgDelayDays - previousKpiData.avgDelayDays;
             
-            // Update trend displays
             document.getElementById('kpi_total_debit_trend').innerHTML = debitTrend !== 0 ? 
                 (debitTrend > 0 ? `<span class="trend-up">▲ ${roundMoney(debitTrend).toLocaleString()}</span>` : `<span class="trend-down">▼ ${roundMoney(Math.abs(debitTrend)).toLocaleString()}</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
             
@@ -454,7 +493,6 @@
             document.getElementById('kpi_avg_delay_trend').innerHTML = delayTrend !== 0 ? 
                 (delayTrend < 0 ? `<span class="trend-up">▼ ${Math.abs(delayTrend)} يوم تحسن</span>` : `<span class="trend-down">▲ ${delayTrend} يوم تفاقم</span>`) : '<span class="trend-neutral">➖ ثابت</span>';
             
-            // Save for next comparison
             previousKpiData = {
                 totalDebit: totalDebit,
                 totalCredit: totalCredit,
@@ -509,7 +547,91 @@
             loadNotifications();
         }
         
-        // --- NEW: Total Debit Chart (المستحق الإجمالي) ---
+        // --- NEW: Payment Distribution Chart (توزيع قيمة الدفعات) ---
+        function drawPaymentDistributionChart() {
+            const canvas = document.getElementById('paymentDistributionChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(paymentDistributionChart) paymentDistributionChart.destroy();
+            
+            // Get payments based on mode
+            let payments = [];
+            const selectedCode = document.getElementById('tenant_select').value;
+            
+            if(selectedCode && selectedCode !== '') {
+                // Single tenant mode
+                payments = allTransactions
+                    .filter(tx => tx.tenant_code === selectedCode && toNumber(tx.credit) > 0)
+                    .map(tx => toNumber(tx.credit));
+            } else {
+                // Complex-wide mode
+                payments = allTransactions
+                    .filter(tx => toNumber(tx.credit) > 0)
+                    .map(tx => toNumber(tx.credit));
+            }
+            
+            // Define value ranges
+            const ranges = [
+                { min: 0, max: 1000, label: '0 - 1,000' },
+                { min: 1000, max: 5000, label: '1,000 - 5,000' },
+                { min: 5000, max: 10000, label: '5,000 - 10,000' },
+                { min: 10000, max: 25000, label: '10,000 - 25,000' },
+                { min: 25000, max: Infinity, label: '25,000+' }
+            ];
+            
+            const counts = ranges.map(range => 
+                payments.filter(amount => amount >= range.min && amount < range.max).length
+            );
+            
+            const totalPayments = payments.length;
+            const avgPayment = totalPayments > 0 ? roundMoney(payments.reduce((a,b) => a + b, 0) / totalPayments) : 0;
+            const maxPayment = totalPayments > 0 ? Math.max(...payments) : 0;
+            const minPayment = totalPayments > 0 ? Math.min(...payments) : 0;
+            
+            paymentDistributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ranges.map(r => r.label),
+                    datasets: [{
+                        label: 'عدد الدفعات',
+                        data: counts,
+                        backgroundColor: 'rgba(21,154,111,0.7)',
+                        borderColor: '#159a6f',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    return `عدد الدفعات: ${context.raw}`;
+                                }
+                            }
+                        },
+                        legend: { display: true, position: 'top', rtl: true }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'عدد الدفعات', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { stepSize: 1, precision: 0 }
+                        },
+                        x: { title: { display: true, text: 'قيمة الدفعة', font: { weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+            
+            // Insight
+            document.getElementById('paymentDistributionInsight').innerHTML = `💰 إجمالي الدفعات: ${totalPayments} | المتوسط: ${avgPayment.toLocaleString()} | الأصغر: ${minPayment.toLocaleString()} | الأكبر: ${maxPayment.toLocaleString()}`;
+        }
+        
+        // --- Total Debit Chart (المستحق الإجمالي) ---
         function drawTotalDebitChart(dataMap) {
             const canvas = document.getElementById('totalDebitChart');
             if(!canvas) return;
@@ -561,7 +683,6 @@
                 }
             });
             
-            // Insight
             if(debitValues.length >= 2) {
                 const first = debitValues[0];
                 const last = debitValues[debitValues.length-1];
@@ -572,7 +693,7 @@
             }
         }
         
-        // --- NEW: Balance Trend Chart (تطور المتأخرات) ---
+        // --- Balance Trend Chart (تطور المتأخرات) ---
         function drawBalanceTrendChart(dataMap) {
             const canvas = document.getElementById('balanceTrendChart');
             if(!canvas) return;
@@ -624,7 +745,6 @@
                 }
             });
             
-            // Insight
             if(balanceValues.length >= 2) {
                 const first = balanceValues[0];
                 const last = balanceValues[balanceValues.length-1];
@@ -835,7 +955,7 @@
             document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             
-            // Update KPI cards
+            // Update KPI cards (complex-wide)
             updateSmartKpiCards();
             
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
@@ -845,6 +965,7 @@
             drawFiveYearChart(yearlyData);
             drawTotalDebitChart(yearlyData);
             drawBalanceTrendChart(yearlyData);
+            drawPaymentDistributionChart();
             
             const notifType = document.getElementById('notification_type');
             notifType.value = 'general';
@@ -1023,6 +1144,9 @@
                 drawFiveYearChart(tenantYearlyData);
                 drawTotalDebitChart(tenantYearlyData);
                 drawBalanceTrendChart(tenantYearlyData);
+                drawPaymentDistributionChart();
+                // Update KPI cards for single tenant
+                updateSmartKpiCards(code);
                 document.getElementById('statementBtn').disabled = false;
             } else {
                 document.getElementById('statementBtn').disabled = true;
