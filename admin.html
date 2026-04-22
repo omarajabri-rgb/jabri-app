@@ -130,7 +130,7 @@
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
 
-        <!-- اختيار المستأجر وتحليل ذكي (مع الكروت الـ 6 داخله) -->
+        <!-- اختيار المستأجر وتحليل ذكي -->
         <section class="panel">
             <div class="chip-header"><div class="chip-title">اختيار المستأجر</div></div>
             <div class="tenant-select-grid">
@@ -250,7 +250,7 @@
             </div>
         </div>
 
-        <!-- 6. توزيع قيمة الدفعات (Distribution of Payments) - NEW -->
+        <!-- 6. توزيع قيمة الدفعات -->
         <div class="chart-single">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">📊 توزيع قيمة الدفعات</div></div>
@@ -400,19 +400,28 @@
                 const tenant = tenantBalances.find(t => t.tenant_code === tenantCode);
                 if(tenant) {
                     const latest = getLatestSummary(tenantCode);
-                    const totalDebit = latest ? toNumber(latest.total_debit) : 0;
+                    const totalDebit = latest ? toNumber(latest.total_debit) : toNumber(tenant.annualRent);
                     const totalCredit = latest ? toNumber(latest.total_credit) : 0;
-                    const totalBalance = latest ? toNumber(latest.final_balance) : 0;
-                    const monthlyRent = toNumber(tenant.annual_rent) / 12;
-                    const isOverdue = totalBalance > 0;
+                    const totalBalance = latest ? toNumber(latest.final_balance) : totalDebit;
+                    const monthlyRent = toNumber(tenant.annualRent) / 12;
+                    
+                    let avgDelayText = '—';
+                    if(totalBalance > 0) {
+                        const lastTx = allTransactions.filter(tx => tx.tenant_code === tenantCode && toNumber(tx.credit) > 0)
+                            .sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+                        if(lastTx) {
+                            const days = Math.floor((new Date() - new Date(lastTx.date)) / (1000 * 60 * 60 * 24));
+                            avgDelayText = `${days} يوم`;
+                        }
+                    }
                     
                     document.getElementById('kpi_total_debit_value').innerText = roundMoney(totalDebit).toLocaleString();
                     document.getElementById('kpi_total_credit_value').innerText = roundMoney(totalCredit).toLocaleString();
                     document.getElementById('kpi_monthly_rent_value').innerText = roundMoney(monthlyRent).toLocaleString();
                     document.getElementById('kpi_total_balance_value').innerText = roundMoney(totalBalance).toLocaleString();
-                    document.getElementById('kpi_overdue_tenants_value').innerHTML = isOverdue ? 'نعم' : 'لا';
+                    document.getElementById('kpi_overdue_tenants_value').innerHTML = totalBalance > 0 ? 'نعم' : 'لا';
                     document.getElementById('kpi_total_tenants_count').innerText = '1';
-                    document.getElementById('kpi_avg_delay_value').innerText = '—';
+                    document.getElementById('kpi_avg_delay_value').innerHTML = avgDelayText;
                     
                     // Hide trends for single tenant
                     document.getElementById('kpi_total_debit_trend').innerHTML = '—';
@@ -424,7 +433,7 @@
                 }
             }
             
-            // Complex-wide mode (original logic)
+            // Complex-wide mode (all tenants)
             let totalDebit = 0;
             let totalCredit = 0;
             let totalBalance = 0;
@@ -547,30 +556,26 @@
             loadNotifications();
         }
         
-        // --- NEW: Payment Distribution Chart (توزيع قيمة الدفعات) ---
+        // --- Payment Distribution Chart (توزيع قيمة الدفعات) ---
         function drawPaymentDistributionChart() {
             const canvas = document.getElementById('paymentDistributionChart');
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             if(paymentDistributionChart) paymentDistributionChart.destroy();
             
-            // Get payments based on mode
             let payments = [];
             const selectedCode = document.getElementById('tenant_select').value;
             
             if(selectedCode && selectedCode !== '') {
-                // Single tenant mode
                 payments = allTransactions
                     .filter(tx => tx.tenant_code === selectedCode && toNumber(tx.credit) > 0)
                     .map(tx => toNumber(tx.credit));
             } else {
-                // Complex-wide mode
                 payments = allTransactions
                     .filter(tx => toNumber(tx.credit) > 0)
                     .map(tx => toNumber(tx.credit));
             }
             
-            // Define value ranges
             const ranges = [
                 { min: 0, max: 1000, label: '0 - 1,000' },
                 { min: 1000, max: 5000, label: '1,000 - 5,000' },
@@ -627,11 +632,10 @@
                 }
             });
             
-            // Insight
             document.getElementById('paymentDistributionInsight').innerHTML = `💰 إجمالي الدفعات: ${totalPayments} | المتوسط: ${avgPayment.toLocaleString()} | الأصغر: ${minPayment.toLocaleString()} | الأكبر: ${maxPayment.toLocaleString()}`;
         }
         
-        // --- Total Debit Chart (المستحق الإجمالي) ---
+        // --- Total Debit Chart ---
         function drawTotalDebitChart(dataMap) {
             const canvas = document.getElementById('totalDebitChart');
             if(!canvas) return;
@@ -693,7 +697,7 @@
             }
         }
         
-        // --- Balance Trend Chart (تطور المتأخرات) ---
+        // --- Balance Trend Chart ---
         function drawBalanceTrendChart(dataMap) {
             const canvas = document.getElementById('balanceTrendChart');
             if(!canvas) return;
@@ -755,7 +759,7 @@
             }
         }
         
-        // --- 5-YEAR CHART FUNCTIONS ---
+        // --- 5-YEAR CHART ---
         function drawFiveYearChart(dataMap) {
             const canvas = document.getElementById('fiveYearCollectionChart');
             if(!canvas) return;
@@ -955,7 +959,6 @@
             document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             
-            // Update KPI cards (complex-wide)
             updateSmartKpiCards();
             
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
@@ -1145,7 +1148,6 @@
                 drawTotalDebitChart(tenantYearlyData);
                 drawBalanceTrendChart(tenantYearlyData);
                 drawPaymentDistributionChart();
-                // Update KPI cards for single tenant
                 updateSmartKpiCards(code);
                 document.getElementById('statementBtn').disabled = false;
             } else {
