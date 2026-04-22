@@ -534,7 +534,7 @@
                 return;
             }
             
-            let html = `<table class="notifications-table"><thead><tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th><tr></thead><tbody>`;
+            let html = `<table class="notifications-table"><thead><tr><th>المستأجر</th><th>نوع الإشعار</th><th>نص مختصر</th><th>تاريخ الإرسال</th><th>الحالة</th><th>تاريخ القراءة</th></tr></thead><tbody>`;
             
             for(const notif of filteredNotifs) {
                 const tenantName = getTenantName(notif.tenant_code);
@@ -547,7 +547,7 @@
                 html += `<tr><td style="padding: 10px;">${tenantName}</td><td style="padding: 10px;">${typeName}</td><td style="padding: 10px;">${shortMsg}</td><td style="padding: 10px;">${formatDateTime(notif.created_at)}</td><td style="padding: 10px;"><span class="read-status ${isRead ? 'read' : 'unread'}">${isRead ? '✓ مقروء' : '○ لم يقرأ'}</span></td><td style="padding: 10px;">${readDate}</td></tr>`;
             }
             
-            html += `</tbody></table>`;
+            html += `</tbody><table>`;
             container.innerHTML = html;
         }
         
