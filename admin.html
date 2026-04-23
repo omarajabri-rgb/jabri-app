@@ -3,98 +3,631 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.39</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.40</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root{ --bg:#f7f4ec; --card:rgba(255,255,255,0.72); --text:#1f2937; --muted:#7a7469; --gold:#c9a46b; --gold-deep:#b78e54; --line:rgba(91,73,42,0.10); --success:#159a6f; --warning:#d7921f; --danger:#d14d4d; --shadow:0 18px 45px rgba(87,68,37,0.10); --soft-shadow:0 12px 28px rgba(87,68,37,0.08); }
-        *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Tajawal',sans-serif; }
-        body{ margin:0; color:var(--text); background:radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%), linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%); min-height:100vh; opacity:0; transition:opacity .45s ease; }
+        :root{
+            --bg:#f7f4ec;
+            --card:rgba(255,255,255,0.72);
+            --text:#1f2937;
+            --muted:#7a7469;
+            --gold:#c9a46b;
+            --gold-deep:#b78e54;
+            --line:rgba(91,73,42,0.10);
+            --success:#159a6f;
+            --warning:#d7921f;
+            --danger:#d14d4d;
+            --shadow:0 18px 45px rgba(87,68,37,0.10);
+            --soft-shadow:0 12px 28px rgba(87,68,37,0.08);
+        }
+
+        *{
+            box-sizing:border-box;
+            -webkit-tap-highlight-color:transparent;
+            font-family:'Tajawal',sans-serif;
+        }
+
+        body{
+            margin:0;
+            color:var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height:100vh;
+            opacity:0;
+            transition:opacity .45s ease;
+        }
+
         body.loaded{ opacity:1; }
-        .shell{ max-width:1400px; margin:0 auto; padding:18px; padding-bottom:70px; }
-        .topbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
-        .brand{ display:flex; align-items:center; gap:12px; }
-        .brand-badge{ width:46px; height:46px; border-radius:15px; background:linear-gradient(135deg, var(--gold), var(--gold-deep)); box-shadow:0 12px 24px rgba(201,164,107,0.22); }
-        .brand h1{ margin:0; font-size:24px; font-weight:900; color:#544128; }
-        .brand p{ margin:4px 0 0; font-size:12px; color:var(--muted); font-weight:700; }
-        .btn{ border:none; cursor:pointer; border-radius:16px; padding:13px 18px; font-size:14px; font-weight:900; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition:.25s ease; text-decoration:none; }
+
+        .shell{
+            max-width:1400px;
+            margin:0 auto;
+            padding:18px;
+            padding-bottom:70px;
+        }
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            margin-bottom:18px;
+            flex-wrap:wrap;
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .brand-badge{
+            width:46px;
+            height:46px;
+            border-radius:15px;
+            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+            box-shadow:0 12px 24px rgba(201,164,107,0.22);
+        }
+
+        .brand h1{
+            margin:0;
+            font-size:24px;
+            font-weight:900;
+            color:#544128;
+        }
+
+        .brand p{
+            margin:4px 0 0;
+            font-size:12px;
+            color:var(--muted);
+            font-weight:700;
+        }
+
+        .btn{
+            border:none;
+            cursor:pointer;
+            border-radius:16px;
+            padding:13px 18px;
+            font-size:14px;
+            font-weight:900;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.25s ease;
+            text-decoration:none;
+        }
+
         .btn:hover{ transform:translateY(-1px); }
-        .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
-        .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff; box-shadow:0 12px 24px rgba(201,164,107,0.22); }
-        .btn-danger{ background:rgba(209,77,77,0.12); color:var(--danger); border:1px solid rgba(209,77,77,0.18); }
-        .btn-soft{ background:#fff; border:1px solid var(--line); color:var(--text); }
-        .panel{ background:var(--card); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.72); box-shadow:var(--shadow); border-radius:28px; padding:16px; margin-bottom:18px; }
-        .chip-header{ display:flex; justify-content:flex-start; width:100%; margin-bottom:12px; }
-        .chip-title{ display:inline-flex; align-items:center; padding:8px 16px; border-radius:999px; font-size:12px; font-weight:900; color:var(--gold-deep); background:rgba(201,164,107,0.12); border:1px solid rgba(201,164,107,0.22); }
-        .tenant-select-grid{ display:grid; grid-template-columns:1fr; gap:10px; align-items:end; }
-        .field{ display:flex; flex-direction:column; gap:8px; min-width:0; }
-        .field label{ font-size:11px; font-weight:800; color:#8b6a3a; padding-right:4px; }
-        input, select, textarea{ width:100%; max-width:100%; min-width:0; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,0.84); padding:14px 15px; font-size:14px; font-weight:700; outline:none; }
-        input[type="date"]{ width:100%; min-width:0; display:block; }
-        textarea{ min-height:150px; resize:vertical; line-height:1.9; }
-        .select-with-chip{ display:flex; gap:8px; align-items:flex-start; min-width:0; }
-        .select-with-chip select{ flex:1; min-width:0; min-height:44px; padding:10px 14px; font-size:13px; }
-        .tenant-mini-chips{ display:flex; flex-direction:column; gap:6px; align-items:flex-start; flex-shrink:0; }
-        .mini-chip{ padding:4px 10px; border-radius:999px; font-size:10px; font-weight:900; line-height:1.2; white-space:nowrap; flex-shrink:0; }
-        .status-chip{ background:rgba(209,77,77,0.12); color:var(--danger); border:1px solid rgba(209,77,77,0.18); }
-        .status-chip.paid{ background:rgba(21,154,111,0.12); color:var(--success); border:1px solid rgba(21,154,111,0.18); }
-        .status-chip.partial{ background:rgba(215,146,31,0.12); color:var(--warning); border:1px solid rgba(215,146,31,0.18); }
-        .status-chip.credit{ background:rgba(21,154,111,0.12); color:var(--success); border:1px solid rgba(21,154,111,0.18); }
-        .last-seen-chip{ background:rgba(201,164,107,0.12); color:#6b4f2b; border:1px solid rgba(201,164,107,0.25); }
-        .smart-ai-box{ margin-top:14px; padding:16px; border-radius:22px; background:rgba(255,255,255,0.76); border:1px solid var(--line); }
-        .smart-ai-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
-        .panel-title h3{ margin:0; font-size:18px; color:#4e3c24; font-weight:900; }
-        .panel-title p{ margin:3px 0 0; font-size:11px; color:var(--muted); font-weight:700; }
-        .smart-ai-badge{ padding:8px 14px; border-radius:999px; font-size:12px; font-weight:900; }
-        .badge-excellent{ color:var(--success); background:rgba(21,154,111,0.12); border:1px solid rgba(21,154,111,0.18); }
-        .badge-good{ color:#8b6a3a; background:rgba(201,164,107,0.14); border:1px solid rgba(201,164,107,0.22); }
-        .badge-risk{ color:var(--danger); background:rgba(209,77,77,0.12); border:1px solid rgba(209,77,77,0.18); }
-        .badge-credit{ color:var(--success); background:rgba(21,154,111,0.12); border:1px solid rgba(21,154,111,0.18); }
-        .hero-ai-card{ border-radius:24px; padding:20px; margin-bottom:14px; background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(247,244,236,0.92)); border:1px solid rgba(201,164,107,0.20); display:grid; grid-template-columns:1.2fr .8fr; gap:14px; align-items:center; }
-        .hero-ai-title{ font-size:14px; font-weight:800; color:var(--muted); }
-        .hero-ai-score{ font-size:36px; font-weight:900; color:#4e3c24; margin:8px 0; }
-        .hero-ai-desc{ font-size:14px; font-weight:800; color:#6b4f2b; }
-        .hero-ai-side{ display:flex; flex-direction:column; gap:10px; }
-        .hero-mini{ border-radius:18px; padding:12px; text-align:center; background:#fff; border:1px solid var(--line); }
-        .hero-mini span{ display:block; font-size:10px; color:var(--muted); font-weight:800; margin-bottom:4px; }
-        .hero-mini b{ font-size:18px; color:#4e3c24; font-weight:900; }
-        .hero-mini.good{ background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95)); border-color:rgba(21,154,111,0.18); }
-        .hero-mini.warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
-        .hero-mini.bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
-        .quick-ai-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:14px; }
-        .quick-ai-card{ border-radius:20px; padding:16px; text-align:center; background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:240px; box-shadow:var(--soft-shadow); }
-        .quick-ai-card span{ display:block; font-size:11px; color:var(--muted); font-weight:800; margin-bottom:6px; }
-        .quick-ai-card b{ font-size:22px; color:#4e3c24; font-weight:900; margin-bottom:6px; }
-        .quick-ai-card small{ font-size:12px; color:#6b4f2b; font-weight:700; line-height:1.6; }
+
+        .btn:disabled{
+            opacity:.55;
+            cursor:not-allowed;
+            transform:none;
+        }
+
+        .btn-gold{
+            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color:#fff;
+            box-shadow:0 12px 24px rgba(201,164,107,0.22);
+        }
+
+        .btn-danger{
+            background:rgba(209,77,77,0.12);
+            color:var(--danger);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .btn-soft{
+            background:#fff;
+            border:1px solid var(--line);
+            color:var(--text);
+        }
+
+        .panel{
+            background:var(--card);
+            backdrop-filter:blur(14px);
+            border:1px solid rgba(255,255,255,0.72);
+            box-shadow:var(--shadow);
+            border-radius:28px;
+            padding:16px;
+            margin-bottom:18px;
+        }
+
+        .chip-header{
+            display:flex;
+            justify-content:flex-start;
+            width:100%;
+            margin-bottom:12px;
+        }
+
+        .chip-title{
+            display:inline-flex;
+            align-items:center;
+            padding:8px 16px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+            color:var(--gold-deep);
+            background:rgba(201,164,107,0.12);
+            border:1px solid rgba(201,164,107,0.22);
+        }
+
+        .tenant-select-grid{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:10px;
+            align-items:end;
+        }
+
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            min-width:0;
+        }
+
+        .field label{
+            font-size:11px;
+            font-weight:800;
+            color:#8b6a3a;
+            padding-right:4px;
+        }
+
+        input, select, textarea{
+            width:100%;
+            max-width:100%;
+            min-width:0;
+            border-radius:16px;
+            border:1px solid var(--line);
+            background:rgba(255,255,255,0.84);
+            padding:14px 15px;
+            font-size:14px;
+            font-weight:700;
+            outline:none;
+        }
+
+        input[type="date"]{
+            width:100%;
+            min-width:0;
+            display:block;
+        }
+
+        textarea{
+            min-height:150px;
+            resize:vertical;
+            line-height:1.9;
+        }
+
+        .select-with-chip{
+            display:flex;
+            gap:8px;
+            align-items:flex-start;
+            min-width:0;
+        }
+
+        .select-with-chip select{
+            flex:1;
+            min-width:0;
+            min-height:44px;
+            padding:10px 14px;
+            font-size:13px;
+        }
+
+        .tenant-mini-chips{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            align-items:flex-start;
+            flex-shrink:0;
+        }
+
+        .mini-chip{
+            padding:4px 10px;
+            border-radius:999px;
+            font-size:10px;
+            font-weight:900;
+            line-height:1.2;
+            white-space:nowrap;
+            flex-shrink:0;
+        }
+
+        .status-chip{
+            background:rgba(209,77,77,0.12);
+            color:var(--danger);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .status-chip.paid{
+            background:rgba(21,154,111,0.12);
+            color:var(--success);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .status-chip.partial{
+            background:rgba(215,146,31,0.12);
+            color:var(--warning);
+            border:1px solid rgba(215,146,31,0.18);
+        }
+
+        .status-chip.credit{
+            background:rgba(21,154,111,0.12);
+            color:var(--success);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .last-seen-chip{
+            background:rgba(201,164,107,0.12);
+            color:#6b4f2b;
+            border:1px solid rgba(201,164,107,0.25);
+        }
+
+        .smart-ai-box{
+            margin-top:14px;
+            padding:16px;
+            border-radius:22px;
+            background:rgba(255,255,255,0.76);
+            border:1px solid var(--line);
+        }
+
+        .smart-ai-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+            flex-wrap:wrap;
+        }
+
+        .panel-title h3{
+            margin:0;
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+        }
+
+        .panel-title p{
+            margin:3px 0 0;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:700;
+        }
+
+        .smart-ai-badge{
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+        }
+
+        .badge-excellent{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .badge-good{
+            color:#8b6a3a;
+            background:rgba(201,164,107,0.14);
+            border:1px solid rgba(201,164,107,0.22);
+        }
+
+        .badge-risk{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .badge-credit{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .hero-ai-card{
+            border-radius:24px;
+            padding:20px;
+            margin-bottom:14px;
+            background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(247,244,236,0.92));
+            border:1px solid rgba(201,164,107,0.20);
+            display:grid;
+            grid-template-columns:1.2fr .8fr;
+            gap:14px;
+            align-items:center;
+        }
+
+        .hero-ai-title{
+            font-size:14px;
+            font-weight:800;
+            color:var(--muted);
+        }
+
+        .hero-ai-score{
+            font-size:36px;
+            font-weight:900;
+            color:#4e3c24;
+            margin:8px 0;
+        }
+
+        .hero-ai-desc{
+            font-size:14px;
+            font-weight:800;
+            color:#6b4f2b;
+        }
+
+        .hero-ai-side{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        .hero-mini{
+            border-radius:18px;
+            padding:12px;
+            text-align:center;
+            background:#fff;
+            border:1px solid var(--line);
+        }
+
+        .hero-mini span{
+            display:block;
+            font-size:10px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:4px;
+        }
+
+        .hero-mini b{
+            font-size:18px;
+            color:#4e3c24;
+            font-weight:900;
+        }
+
+        .hero-mini.good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .hero-mini.warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .hero-mini.bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(209,77,77,0.18);
+        }
+
+        .quick-ai-grid{
+            display:grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap:12px;
+            margin-bottom:14px;
+        }
+
+        .quick-ai-card{
+            border-radius:20px;
+            padding:16px;
+            text-align:center;
+            background:#fff;
+            border:1px solid var(--line);
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            min-height:240px;
+            box-shadow:var(--soft-shadow);
+        }
+
+        .quick-ai-card span{
+            display:block;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:800;
+            margin-bottom:6px;
+        }
+
+        .quick-ai-card b{
+            font-size:22px;
+            color:#4e3c24;
+            font-weight:900;
+            margin-bottom:6px;
+        }
+
+        .quick-ai-card small{
+            font-size:12px;
+            color:#6b4f2b;
+            font-weight:700;
+            line-height:1.6;
+        }
+
         #ai_card_total_credit b{ color:var(--success); }
-        .ai-good{ background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95)); border-color:rgba(21,154,111,0.18); }
-        .ai-warn{ background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95)); border-color:rgba(215,146,31,0.18); }
-        .ai-bad{ background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95)); border-color:rgba(209,77,77,0.18); }
+
+        .ai-good{
+            background:linear-gradient(135deg, rgba(21,154,111,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(21,154,111,0.18);
+        }
+
+        .ai-warn{
+            background:linear-gradient(135deg, rgba(215,146,31,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(215,146,31,0.18);
+        }
+
+        .ai-bad{
+            background:linear-gradient(135deg, rgba(209,77,77,0.12), rgba(255,255,255,0.95));
+            border-color:rgba(209,77,77,0.18);
+        }
+
         .ai-neutral{ background:#fff; }
-        .chart-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:18px; margin-bottom:18px; }
-        .chart-wrap{ background:rgba(255,255,255,0.76); border:1px solid var(--line); border-radius:22px; padding:16px; height:300px; }
-        .chart-meta{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:12px; font-weight:900; font-size:14px; color:#6b4f2b; }
+
+        .chart-grid{
+            display:grid;
+            grid-template-columns:1.08fr .92fr;
+            gap:18px;
+            margin-bottom:18px;
+        }
+
+        .chart-wrap{
+            background:rgba(255,255,255,0.76);
+            border:1px solid var(--line);
+            border-radius:22px;
+            padding:16px;
+            height:240px;
+        }
+
+        .chart-meta{
+            display:flex;
+            justify-content:center;
+            gap:14px;
+            flex-wrap:wrap;
+            margin-top:12px;
+            font-weight:900;
+            font-size:14px;
+            color:#6b4f2b;
+        }
+
         .chart-meta .good{ color:var(--success); }
         .chart-meta .bad{ color:var(--danger); }
-        .notify-builder{ display:grid; grid-template-columns:1fr; gap:14px; }
-        .form-shell{ background:rgba(255,255,255,0.58); border:1px solid rgba(201,164,107,0.16); border-radius:24px; padding:16px; }
-        .entry-box{ background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58)); border:1px solid rgba(201,164,107,0.14); border-radius:22px; padding:16px; overflow:hidden; }
-        .sub-section-title{ display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-size:12px; font-weight:900; color:#6b4f2b; background:rgba(201,164,107,0.12); border:1px solid rgba(201,164,107,0.18); margin-bottom:14px; }
-        .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
+
+        .notify-builder{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:14px;
+        }
+
+        .form-shell{
+            background:rgba(255,255,255,0.58);
+            border:1px solid rgba(201,164,107,0.16);
+            border-radius:24px;
+            padding:16px;
+        }
+
+        .entry-box{
+            background:linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.58));
+            border:1px solid rgba(201,164,107,0.14);
+            border-radius:22px;
+            padding:16px;
+            overflow:hidden;
+        }
+
+        .sub-section-title{
+            display:inline-flex;
+            align-items:center;
+            padding:8px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:900;
+            color:#6b4f2b;
+            background:rgba(201,164,107,0.12);
+            border:1px solid rgba(201,164,107,0.18);
+            margin-bottom:14px;
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+            align-items:start;
+        }
+
         .form-grid > *{ min-width:0; }
-        .quick-descs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-        .quick-pill{ padding:9px 14px; border-radius:999px; border:1px solid rgba(201,164,107,0.16); background:#fff; font-size:12px; font-weight:900; color:#6b4f2b; cursor:pointer; }
-        .tx-actions{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
-        .status-msg{ display:none; margin-top:14px; border-radius:16px; padding:14px; font-size:13px; font-weight:800; }
-        .footer-note{ text-align:center; margin-top:20px; color:var(--muted); font-size:11px; font-weight:800; }
-        #loader{ position:fixed; inset:0; background:#f8f4ec; display:flex; align-items:center; justify-content:center; z-index:9999; }
-        .spinner{ width:40px; height:40px; border:3px solid rgba(201,164,107,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
-        @keyframes spin{ to{ transform:rotate(360deg); } }
-        @media (max-width: 1200px){ .hero-ai-card{ grid-template-columns:1fr; } }
-        @media (max-width: 900px){ .chart-grid{ grid-template-columns:1fr; } }
-        @media (max-width: 768px){ .tenant-select-grid, .form-grid{ grid-template-columns:1fr; } .select-with-chip{ align-items:stretch; } .tenant-mini-chips{ align-items:flex-start; } .tx_actions .btn, .tx-actions .btn{ width:100%; } .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; } .quick-ai-card{ min-height:220px; } }
+
+        .quick-descs{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-top:12px;
+        }
+
+        .quick-pill{
+            padding:9px 14px;
+            border-radius:999px;
+            border:1px solid rgba(201,164,107,0.16);
+            background:#fff;
+            font-size:12px;
+            font-weight:900;
+            color:#6b4f2b;
+            cursor:pointer;
+        }
+
+        .tx-actions{
+            display:flex;
+            gap:10px;
+            margin-top:16px;
+            flex-wrap:wrap;
+        }
+
+        .status-msg{
+            display:none;
+            margin-top:14px;
+            border-radius:16px;
+            padding:14px;
+            font-size:13px;
+            font-weight:800;
+        }
+
+        .footer-note{
+            text-align:center;
+            margin-top:20px;
+            color:var(--muted);
+            font-size:11px;
+            font-weight:800;
+        }
+
+        .hidden-panel{
+            display:none !important;
+        }
+
+        #loader{
+            position:fixed;
+            inset:0;
+            background:#f8f4ec;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:9999;
+        }
+
+        .spinner{
+            width:40px;
+            height:40px;
+            border:3px solid rgba(201,164,107,0.2);
+            border-top-color:var(--gold);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+        }
+
+        @keyframes spin{
+            to{ transform:rotate(360deg); }
+        }
+
+        @media (max-width: 1200px){
+            .hero-ai-card{ grid-template-columns:1fr; }
+        }
+
+        @media (max-width: 900px){
+            .chart-grid{ grid-template-columns:1fr; }
+        }
+
+        @media (max-width: 768px){
+            .tenant-select-grid,
+            .form-grid{
+                grid-template-columns:1fr;
+            }
+
+            .select-with-chip{ align-items:stretch; }
+            .tenant-mini-chips{ align-items:flex-start; }
+            .tx_actions .btn,
+            .tx-actions .btn{ width:100%; }
+            .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; }
+            .quick-ai-card{ min-height:220px; }
+            .chart-wrap{ height:220px; }
+        }
     </style>
+
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co; img-src 'self' data:;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -102,16 +635,22 @@
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
+
     <div class="shell">
         <div class="topbar">
             <div class="brand">
                 <div class="brand-badge"></div>
-                <div><h1>مجمع جبري الصناعي التجاري</h1><p>لوحة الإدارة لإدارة المستأجرين والحسابات</p></div>
+                <div>
+                    <h1>مجمع جبري الصناعي التجاري</h1>
+                    <p>لوحة الإدارة لإدارة المستأجرين والحسابات</p>
+                </div>
             </div>
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">لوحة الادارة</div></div>
+
             <div class="tenant-select-grid">
                 <div class="field">
                     <div class="select-with-chip">
@@ -123,42 +662,93 @@
                     </div>
                 </div>
             </div>
+
             <div class="smart-ai-box">
                 <div class="smart-ai-header">
-                    <div class="panel-title"><h3>تحليل المستأجر</h3><p>يعتمد على آخر سنة موجودة فقط داخل tenant_yearly_summary</p></div>
+                    <div class="panel-title">
+                        <h3>تحليل المستأجر</h3>
+                        <p>يعتمد على آخر سنة موجودة فقط داخل tenant_yearly_summary</p>
+                    </div>
                     <div id="ai_badge" class="smart-ai-badge badge-good">—</div>
                 </div>
+
                 <div class="hero-ai-card">
                     <div class="hero-ai-main">
                         <div class="hero-ai-title">التقييم الذكي</div>
                         <div class="hero-ai-score" id="ai_score_value">0/100</div>
                         <div class="hero-ai-desc" id="ai_score_text">—</div>
                     </div>
+
                     <div class="hero-ai-side">
-                        <div class="hero-mini" id="hero_next_payment_card"><span>احتمال السداد</span><b id="ai_next_payment_probability">0%</b></div>
-                        <div class="hero-mini" id="hero_default_card"><span>احتمال التعثر</span><b id="ai_default_probability">0%</b></div>
-                        <div class="hero-mini" id="hero_commitment_card"><span>نسبة الالتزام</span><b id="ai_commitment_ratio">0%</b></div>
+                        <div class="hero-mini" id="hero_next_payment_card">
+                            <span>احتمال السداد</span>
+                            <b id="ai_next_payment_probability">0%</b>
+                        </div>
+                        <div class="hero-mini" id="hero_default_card">
+                            <span>احتمال التعثر</span>
+                            <b id="ai_default_probability">0%</b>
+                        </div>
+                        <div class="hero-mini" id="hero_commitment_card">
+                            <span>نسبة الالتزام</span>
+                            <b id="ai_commitment_ratio">0%</b>
+                        </div>
                     </div>
                 </div>
+
                 <div class="quick-ai-grid">
-                    <div class="quick-ai-card" id="ai_card_months_without_payment"><span>أشهر بلا دفع</span><b id="ai_months_without_payment">0</b><small id="ai_months_without_payment_text">—</small></div>
-                    <div class="quick-ai-card" id="ai_card_last3_ratio"><span>التزام 3 سنوات</span><b id="ai_last3_ratio">0%</b><small id="ai_last3_ratio_text">—</small></div>
-                    <div class="quick-ai-card" id="ai_card_total_credit"><span>دائن</span><b id="kpi_total_credit">0</b><small>إجمالي الدفعات في آخر سنة</small></div>
-                    <div class="quick-ai-card" id="ai_card_balance"><span>الرصيد الحالي</span><b id="kpi_balance">0</b><small>رصيد آخر سنة موجودة</small></div>
+                    <div class="quick-ai-card" id="ai_card_months_without_payment">
+                        <span>أشهر بلا دفع</span>
+                        <b id="ai_months_without_payment">0</b>
+                        <small id="ai_months_without_payment_text">—</small>
+                    </div>
+
+                    <div class="quick-ai-card" id="ai_card_last3_ratio">
+                        <span>التزام 3 سنوات</span>
+                        <b id="ai_last3_ratio">0%</b>
+                        <small id="ai_last3_ratio_text">—</small>
+                    </div>
+
+                    <div class="quick-ai-card" id="ai_card_total_credit">
+                        <span>دائن</span>
+                        <b id="kpi_total_credit">0</b>
+                        <small>إجمالي الدفعات في آخر سنة</small>
+                    </div>
+
+                    <div class="quick-ai-card" id="ai_card_balance">
+                        <span>الرصيد الحالي</span>
+                        <b id="kpi_balance">0</b>
+                        <small>رصيد آخر سنة موجودة</small>
+                    </div>
                 </div>
             </div>
         </section>
+
         <section class="chart-grid">
             <div class="panel">
                 <div class="chip-header"><div class="chip-title">وضع الحساب</div></div>
                 <div class="chart-wrap"><canvas id="collectionChart"></canvas></div>
-                <div class="chart-meta"><span class="good">دائن: <b id="pie_paid_value">0</b></span><span class="bad" id="pie_balance_label">الرصيد: <b id="pie_balance_value">0</b></span></div>
+                <div class="chart-meta">
+                    <span class="good">دائن: <b id="pie_paid_value">0</b></span>
+                    <span class="bad" id="pie_balance_label">الرصيد: <b id="pie_balance_value">0</b></span>
+                </div>
             </div>
-            <div class="panel">
+
+            <div class="panel" id="complex_only_charts_panel">
                 <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
+
+                <div class="chip-header" style="margin-top:14px;">
+                    <div class="chip-title">معدل التحصيل الشهري</div>
+                </div>
+                <div class="chart-wrap"><canvas id="collectionRateChart"></canvas></div>
+
+                <div class="chip-header" style="margin-top:14px;">
+                    <div class="chip-title">توزيع قيمة الدفعات</div>
+                </div>
+                <div class="chart-wrap"><canvas id="paymentsDistributionChart"></canvas></div>
             </div>
         </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إرسال إشعار</div></div>
             <div class="notify-builder">
@@ -177,115 +767,538 @@
                 <button class="btn btn-gold" style="width:100%;" onclick="sendNotification()">إرسال الإشعار</button>
             </div>
         </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
+
                     <div class="form-grid">
-                        <div class="field"><label>التاريخ</label><input type="date" id="tx_date"></div>
-                        <div class="field"><label>رقم السند</label><input type="text" id="tx_receipt" placeholder="رقم السند"></div>
+                        <div class="field">
+                            <label>التاريخ</label>
+                            <input type="date" id="tx_date">
+                        </div>
+                        <div class="field">
+                            <label>رقم السند</label>
+                            <input type="text" id="tx_receipt" placeholder="رقم السند">
+                        </div>
                     </div>
-                    <div class="field" style="margin-top:10px;"><label>البيان</label><input type="text" id="tx_desc" placeholder="البيان" value="دفعة من الايجار"></div>
-                    <div class="quick-descs"><button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الايجار')">دفعة من الايجار</button></div>
-                    <div class="field" style="margin-top:10px;"><label>قيمة الدفعة</label><input type="number" id="tx_amount" placeholder="0"></div>
+
+                    <div class="field" style="margin-top:10px;">
+                        <label>البيان</label>
+                        <input type="text" id="tx_desc" placeholder="البيان" value="دفعة من الايجار">
+                    </div>
+
+                    <div class="quick-descs">
+                        <button class="quick-pill" type="button" onclick="quickFillDesc('دفعة من الايجار')">دفعة من الايجار</button>
+                    </div>
+
+                    <div class="field" style="margin-top:10px;">
+                        <label>قيمة الدفعة</label>
+                        <input type="number" id="tx_amount" placeholder="0">
+                    </div>
+
                     <div class="tx-actions">
                         <button class="btn btn-gold" id="save_tx_btn" onclick="submitTransaction()">حفظ الدفعة</button>
                         <button class="btn btn-soft" type="button" onclick="clearTransactionForm()">تفريغ الحقول</button>
                     </div>
+
                     <div id="status_msg" class="status-msg"></div>
                 </div>
             </div>
         </section>
+
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.39</div>
+
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.40</div>
     </div>
+
     <script>
         // --- SECURITY: Authentication Check ---
         const session = localStorage.getItem('jabri_admin_session');
         if (session !== 'active') window.location.href = 'admin-login.html';
-        
+
         // --- Supabase Client ---
         const { createClient } = supabase;
-        const supabaseClient = createClient('https://gzukfvxcpfblzqyjzkoz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU');
-        
+        const supabaseClient = createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
         // --- Global Variables ---
-        let allTenants=[], allTransactions=[], allSummaries=[], allNotifications=[], tenantBalances=[], collectionChart=null, monthlyChart=null, isSavingTransaction=false;
+        let allTenants = [];
+        let allTransactions = [];
+        let allSummaries = [];
+        let allNotifications = [];
+        let tenantBalances = [];
+
+        let collectionChart = null;
+        let monthlyChart = null;
+        let collectionRateChart = null;
+        let paymentsDistributionChart = null;
+
+        let isSavingTransaction = false;
         let isComplexWideMode = true;
-        
+
         // --- Helper Functions ---
-        const toNumber = v => { const c = String(v ?? 0).replace(/,/g, '').trim(); const n = parseFloat(c); return isFinite(n) ? n : 0; };
+        const toNumber = v => {
+            const c = String(v ?? 0).replace(/,/g, '').trim();
+            const n = parseFloat(c);
+            return isFinite(n) ? n : 0;
+        };
+
         const roundMoney = v => Math.round(toNumber(v));
-        const getLatestSummary = tc => allSummaries.filter(r => r.tenant_code === tc).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
-        const getPreviousSummary = (tc, y) => allSummaries.filter(r => r.tenant_code === tc && Number(r.year) < Number(y)).sort((a,b) => Number(b.year) - Number(a.year))[0] || null;
-        const getSummaryByYear = (tc, y) => allSummaries.find(r => r.tenant_code === tc && Number(r.year) === Number(y)) || null;
-        const setMoodClass = (el, mood) => { if(!el) return; el.classList.remove('good','warn','bad','ai-good','ai-warn','ai-bad','ai-neutral'); if(el.classList.contains('hero-mini')){ if(mood==='good') el.classList.add('good'); else if(mood==='warn') el.classList.add('warn'); else if(mood==='bad') el.classList.add('bad'); } else { if(mood==='good') el.classList.add('ai-good'); else if(mood==='warn') el.classList.add('ai-warn'); else if(mood==='bad') el.classList.add('ai-bad'); else el.classList.add('ai-neutral'); } };
-        const formatLastSeen = ds => { if(!ds) return '—'; const d = new Date(ds); if(isNaN(d.getTime())) return '—'; const now = new Date(), diff = now - d; const min = Math.floor(diff/60000), hr = Math.floor(min/60), day = Math.floor(hr/24); if(min < 1) return 'الآن'; if(min < 60) return `${min} د`; if(hr < 24) return `${hr} س`; if(day <= 7) return `${day} ي`; return d.toLocaleDateString('en-GB'); };
-        const monthsSince = ds => { if(!ds) return null; const d = new Date(ds); if(isNaN(d.getTime())) return null; const now = new Date(); return Math.max(0, (now.getFullYear() - d.getFullYear())*12 + (now.getMonth() - d.getMonth())); };
-        const getSelectedTenant = () => { const code = document.getElementById('tenant_select').value; return tenantBalances.find(x => x.tenant_code === code) || null; };
-        const showStatus = (msg, type='soft') => { const el = document.getElementById('status_msg'); el.style.display='block'; el.innerText=msg; if(type==='danger'){ el.style.background='rgba(209,77,77,0.12)'; el.style.color='#d14d4d'; el.style.border='1px solid rgba(209,77,77,0.18)'; } else if(type==='success'){ el.style.background='rgba(21,154,111,0.12)'; el.style.color='#159a6f'; el.style.border='1px solid rgba(21,154,111,0.18)'; } else { el.style.background='rgba(201,164,107,0.12)'; el.style.color='#6b4f2b'; el.style.border='1px solid rgba(201,164,107,0.18)'; } };
-        const hideStatus = () => { const el = document.getElementById('status_msg'); el.style.display='none'; el.innerText=''; };
-        const quickFillDesc = t => { document.getElementById('tx_desc').value = t; };
-        const clearTransactionForm = () => { const d = document.getElementById('tx_date'); if(d) d.valueAsDate = new Date(); document.getElementById('tx_receipt').value=''; document.getElementById('tx_desc').value='دفعة من الايجار'; document.getElementById('tx_amount').value=''; };
-        
+
+        const getLatestSummary = tc =>
+            allSummaries
+                .filter(r => r.tenant_code === tc)
+                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
+
+        const getPreviousSummary = (tc, y) =>
+            allSummaries
+                .filter(r => r.tenant_code === tc && Number(r.year) < Number(y))
+                .sort((a, b) => Number(b.year) - Number(a.year))[0] || null;
+
+        const getSummaryByYear = (tc, y) =>
+            allSummaries.find(r => r.tenant_code === tc && Number(r.year) === Number(y)) || null;
+
+        const setMoodClass = (el, mood) => {
+            if(!el) return;
+            el.classList.remove('good','warn','bad','ai-good','ai-warn','ai-bad','ai-neutral');
+
+            if(el.classList.contains('hero-mini')){
+                if(mood === 'good') el.classList.add('good');
+                else if(mood === 'warn') el.classList.add('warn');
+                else if(mood === 'bad') el.classList.add('bad');
+            } else {
+                if(mood === 'good') el.classList.add('ai-good');
+                else if(mood === 'warn') el.classList.add('ai-warn');
+                else if(mood === 'bad') el.classList.add('ai-bad');
+                else el.classList.add('ai-neutral');
+            }
+        };
+
+        const formatLastSeen = ds => {
+            if(!ds) return '—';
+            const d = new Date(ds);
+            if(isNaN(d.getTime())) return '—';
+
+            const now = new Date();
+            const diff = now - d;
+            const min = Math.floor(diff / 60000);
+            const hr = Math.floor(min / 60);
+            const day = Math.floor(hr / 24);
+
+            if(min < 1) return 'الآن';
+            if(min < 60) return `${min} د`;
+            if(hr < 24) return `${hr} س`;
+            if(day <= 7) return `${day} ي`;
+            return d.toLocaleDateString('en-GB');
+        };
+
+        const monthsSince = ds => {
+            if(!ds) return null;
+            const d = new Date(ds);
+            if(isNaN(d.getTime())) return null;
+            const now = new Date();
+            return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+        };
+
+        const getSelectedTenant = () => {
+            const code = document.getElementById('tenant_select').value;
+            return tenantBalances.find(x => x.tenant_code === code) || null;
+        };
+
+        const showStatus = (msg, type='soft') => {
+            const el = document.getElementById('status_msg');
+            el.style.display = 'block';
+            el.innerText = msg;
+
+            if(type === 'danger'){
+                el.style.background = 'rgba(209,77,77,0.12)';
+                el.style.color = '#d14d4d';
+                el.style.border = '1px solid rgba(209,77,77,0.18)';
+            } else if(type === 'success'){
+                el.style.background = 'rgba(21,154,111,0.12)';
+                el.style.color = '#159a6f';
+                el.style.border = '1px solid rgba(21,154,111,0.18)';
+            } else {
+                el.style.background = 'rgba(201,164,107,0.12)';
+                el.style.color = '#6b4f2b';
+                el.style.border = '1px solid rgba(201,164,107,0.18)';
+            }
+        };
+
+        const hideStatus = () => {
+            const el = document.getElementById('status_msg');
+            el.style.display = 'none';
+            el.innerText = '';
+        };
+
+        const quickFillDesc = t => {
+            document.getElementById('tx_desc').value = t;
+        };
+
+        const clearTransactionForm = () => {
+            const d = document.getElementById('tx_date');
+            if(d) d.valueAsDate = new Date();
+            document.getElementById('tx_receipt').value = '';
+            document.getElementById('tx_desc').value = 'دفعة من الايجار';
+            document.getElementById('tx_amount').value = '';
+        };
+
+        function setComplexChartsVisibility(show){
+            const panel = document.getElementById('complex_only_charts_panel');
+            if(!panel) return;
+            panel.classList.toggle('hidden-panel', !show);
+        }
+
+        function destroyComplexCharts(){
+            if(monthlyChart){
+                monthlyChart.destroy();
+                monthlyChart = null;
+            }
+            if(collectionRateChart){
+                collectionRateChart.destroy();
+                collectionRateChart = null;
+            }
+            if(paymentsDistributionChart){
+                paymentsDistributionChart.destroy();
+                paymentsDistributionChart = null;
+            }
+        }
+
         // --- Data Loading ---
         async function loadData(){
-            const [t, tx, sum, notif] = await Promise.all([supabaseClient.from('tenants').select('*').order('tenant_name'), supabaseClient.from('tenant_transactions').select('*').order('date'), supabaseClient.from('tenant_yearly_summary').select('*').order('year'), supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false })]);
-            allTenants = t.data || []; allTransactions = tx.data || []; allSummaries = sum.data || []; allNotifications = notif.data || [];
+            const [t, tx, sum, notif] = await Promise.all([
+                supabaseClient.from('tenants').select('*').order('tenant_name'),
+                supabaseClient.from('tenant_transactions').select('*').order('date'),
+                supabaseClient.from('tenant_yearly_summary').select('*').order('year'),
+                supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false })
+            ]);
+
+            allTenants = t.data || [];
+            allTransactions = tx.data || [];
+            allSummaries = sum.data || [];
+            allNotifications = notif.data || [];
+
             tenantBalances = allTenants.map(tn => {
-                const ls = getLatestSummary(tn.tenant_code), ps = ls ? getPreviousSummary(tn.tenant_code, ls.year) : null;
-                const tc = ls ? toNumber(ls.total_credit) : 0, cb = ls ? toNumber(ls.final_balance) : 0, pb = ps ? toNumber(ps.final_balance) : 0, ob = ls ? toNumber(ls.opening_balance) : 0, td = ls ? toNumber(ls.total_debit) : toNumber(tn.annual_rent), ar = toNumber(tn.annual_rent);
-                return { ...tn, latestSummary: ls, latestYear: ls ? Number(ls.year) : null, previousBalance: pb, openingBalance: ob, totalDebit: td, annualRent: ar, totalCredit: tc, currentBalance: cb, lastSeen: tn.last_seen || null };
+                const ls = getLatestSummary(tn.tenant_code);
+                const ps = ls ? getPreviousSummary(tn.tenant_code, ls.year) : null;
+
+                const tc = ls ? toNumber(ls.total_credit) : 0;
+                const cb = ls ? toNumber(ls.final_balance) : 0;
+                const pb = ps ? toNumber(ps.final_balance) : 0;
+                const ob = ls ? toNumber(ls.opening_balance) : 0;
+                const td = ls ? toNumber(ls.total_debit) : toNumber(tn.annual_rent);
+                const ar = toNumber(tn.annual_rent);
+
+                return {
+                    ...tn,
+                    latestSummary: ls,
+                    latestYear: ls ? Number(ls.year) : null,
+                    previousBalance: pb,
+                    openingBalance: ob,
+                    totalDebit: td,
+                    annualRent: ar,
+                    totalCredit: tc,
+                    currentBalance: cb,
+                    lastSeen: tn.last_seen || null
+                };
             });
         }
-        
+
         function updateTenantStatusChip(tenant){
-            const chip = document.getElementById('tenant_status_chip'), seen = document.getElementById('last_seen_chip');
-            chip.classList.remove('paid','partial','credit'); seen.innerText = formatLastSeen(tenant?.lastSeen);
-            if(!tenant){ chip.innerText='جزئي'; return; }
-            const paid = toNumber(tenant.totalCredit), bal = toNumber(tenant.currentBalance);
-            if(bal < 0){ chip.innerText='دائن'; chip.classList.add('credit'); }
-            else if(bal === 0){ chip.innerText='ملتزم'; chip.classList.add('paid'); }
-            else if(paid > 0){ chip.innerText='جزئي'; chip.classList.add('partial'); }
-            else { chip.innerText='متأخر'; }
+            const chip = document.getElementById('tenant_status_chip');
+            const seen = document.getElementById('last_seen_chip');
+
+            chip.classList.remove('paid','partial','credit');
+            seen.innerText = formatLastSeen(tenant?.lastSeen);
+
+            if(!tenant){
+                chip.innerText = 'جزئي';
+                return;
+            }
+
+            const paid = toNumber(tenant.totalCredit);
+            const bal = toNumber(tenant.currentBalance);
+
+            if(bal < 0){
+                chip.innerText = 'دائن';
+                chip.classList.add('credit');
+            } else if(bal === 0){
+                chip.innerText = 'ملتزم';
+                chip.classList.add('paid');
+            } else if(paid > 0){
+                chip.innerText = 'جزئي';
+                chip.classList.add('partial');
+            } else {
+                chip.innerText = 'متأخر';
+            }
         }
-        
+
         function drawCollectionChart(tc, tb){
-            const canvas = document.getElementById('collectionChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(collectionChart) collectionChart.destroy();
-            const paid = Math.max(0, toNumber(tc)), rem = Math.max(0, toNumber(tb)), tot = paid + rem, ratio = tot > 0 ? Math.round((paid/tot)*100) : 0;
-            collectionChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['الدائن','الرصيد'], datasets: [{ data: [paid, rem], backgroundColor: ['#159a6f','#d14d4d'], borderWidth: 0 }] }, options: { cutout: '64%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }, plugins: [{ id: 'centerText', afterDraw(chart){ const point = chart.getDatasetMeta(0).data[0]; if(!point) return; const { x, y } = point, c = chart.ctx; c.save(); c.textAlign='center'; c.textBaseline='middle'; c.fillStyle='#4b3720'; c.font='bold 36px Tajawal'; c.fillText(`${ratio}%`, x, y-10); c.font='bold 16px Tajawal'; c.fillText(`${Math.round(paid)} / ${Math.round(tot)}`, x, y+22); c.restore(); } }] });
-            document.getElementById('pie_paid_value').innerText = roundMoney(paid); document.getElementById('pie_balance_value').innerText = roundMoney(rem);
-            const lbl = document.getElementById('pie_balance_label'); if(toNumber(tb) < 0) lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${roundMoney(Math.abs(tb))}</b>`; else lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${roundMoney(tb)}</b>`;
+            const canvas = document.getElementById('collectionChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if(collectionChart) collectionChart.destroy();
+
+            const paid = Math.max(0, toNumber(tc));
+            const rem = Math.max(0, toNumber(tb));
+            const tot = paid + rem;
+            const ratio = tot > 0 ? Math.round((paid / tot) * 100) : 0;
+
+            collectionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['الدائن','الرصيد'],
+                    datasets: [{
+                        data: [paid, rem],
+                        backgroundColor: ['#159a6f','#d14d4d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '64%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw(chart){
+                        const point = chart.getDatasetMeta(0).data[0];
+                        if(!point) return;
+
+                        const { x, y } = point;
+                        const c = chart.ctx;
+                        c.save();
+                        c.textAlign = 'center';
+                        c.textBaseline = 'middle';
+                        c.fillStyle = '#4b3720';
+                        c.font = 'bold 36px Tajawal';
+                        c.fillText(`${ratio}%`, x, y - 10);
+                        c.font = 'bold 16px Tajawal';
+                        c.fillText(`${Math.round(paid)} / ${Math.round(tot)}`, x, y + 22);
+                        c.restore();
+                    }
+                }]
+            });
+
+            document.getElementById('pie_paid_value').innerText = roundMoney(paid);
+            document.getElementById('pie_balance_value').innerText = roundMoney(rem);
+
+            const lbl = document.getElementById('pie_balance_label');
+            if(toNumber(tb) < 0){
+                lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${roundMoney(Math.abs(tb))}</b>`;
+            } else {
+                lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${roundMoney(tb)}</b>`;
+            }
         }
-        
-        function drawMonthlyChart_AllTenants(){
-            const canvas = document.getElementById('monthlyChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(monthlyChart) monthlyChart.destroy();
-            const labels=[], allCredits=[];
-            for(let i=11; i>=0; i--){
-                const d = new Date(); d.setMonth(d.getMonth()-i);
-                labels.push(d.toLocaleDateString('ar-EG',{month:'short'}));
-                let monthTotal = 0;
-                allTransactions.forEach(tx => {
-                    const td = new Date(tx.date);
-                    if(td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear()){
-                        monthTotal += Math.max(0, toNumber(tx.credit));
+
+        function buildMonthlySummarySeries(rows){
+            const labels = [];
+            const monthlyCredits = [];
+            const monthlyRates = [];
+
+            for(let i = 11; i >= 0; i--){
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+
+                const year = d.getFullYear();
+                const label = d.toLocaleDateString('ar-EG', { month:'short' });
+
+                let debitForMonth = 0;
+                let creditForMonth = 0;
+
+                rows.forEach(row => {
+                    if(Number(row.year) === year){
+                        debitForMonth += toNumber(row.total_debit) / 12;
+                        creditForMonth += toNumber(row.total_credit) / 12;
                     }
                 });
-                allCredits.push(monthTotal);
+
+                labels.push(label);
+                monthlyCredits.push(Math.round(creditForMonth));
+                monthlyRates.push(debitForMonth > 0 ? Math.round((creditForMonth / debitForMonth) * 100) : 0);
             }
-            monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'إجمالي الدائن (كل المستأجرين)', data: allCredits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, rtl: true } }, scales: { y: { beginAtZero: true } } } });
+
+            return { labels, monthlyCredits, monthlyRates };
         }
-        
-        function drawMonthlyChart(tenant){
-            const canvas = document.getElementById('monthlyChart'); if(!canvas) return; const ctx = canvas.getContext('2d'); if(monthlyChart) monthlyChart.destroy(); if(!tenant) return;
-            const labels=[], credits=[];
-            for(let i=11; i>=0; i--){ const d = new Date(); d.setMonth(d.getMonth()-i); labels.push(d.toLocaleDateString('en-GB',{month:'short'})); const monthTx = allTransactions.filter(tx => { const td = new Date(tx.date); return tx.tenant_code === tenant.tenant_code && td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear(); }); credits.push(monthTx.reduce((s,row)=> s + Math.max(0, toNumber(row.credit)), 0)); }
-            monthlyChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'الدائن', data: credits, borderColor: '#159a6f', backgroundColor: 'rgba(21,154,111,0.08)', tension: 0.35, borderWidth: 3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+
+        function drawMonthlyChart_AllTenants(){
+            const canvas = document.getElementById('monthlyChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if(monthlyChart) monthlyChart.destroy();
+
+            const { labels, monthlyCredits } = buildMonthlySummarySeries(allSummaries);
+
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'إجمالي الدائن (مجمع جبري)',
+                        data: monthlyCredits,
+                        borderColor: '#159a6f',
+                        backgroundColor: 'rgba(21,154,111,0.08)',
+                        tension: 0.35,
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, rtl: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
         }
-        
+
+        function drawCollectionRateChart_AllTenants(){
+            const canvas = document.getElementById('collectionRateChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if(collectionRateChart) collectionRateChart.destroy();
+
+            const { labels, monthlyRates } = buildMonthlySummarySeries(allSummaries);
+
+            collectionRateChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'معدل التحصيل %',
+                        data: monthlyRates,
+                        borderColor: '#c9a46b',
+                        backgroundColor: 'rgba(201,164,107,0.10)',
+                        tension: 0.35,
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, rtl: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawPaymentsDistributionChart_AllTenants(){
+            const canvas = document.getElementById('paymentsDistributionChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if(paymentsDistributionChart) paymentsDistributionChart.destroy();
+
+            const latestPerTenant = {};
+
+            allSummaries.forEach(row => {
+                const code = row.tenant_code;
+                if(!latestPerTenant[code] || Number(row.year) > Number(latestPerTenant[code].year)){
+                    latestPerTenant[code] = row;
+                }
+            });
+
+            const rows = Object.values(latestPerTenant)
+                .map(row => {
+                    const tenant = allTenants.find(t => t.tenant_code === row.tenant_code);
+                    return {
+                        label: tenant?.tenant_name || row.tenant_code,
+                        value: Math.max(0, toNumber(row.total_credit))
+                    };
+                })
+                .filter(item => item.value > 0)
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 6);
+
+            if(!rows.length){
+                paymentsDistributionChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['لا توجد دفعات'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['rgba(201,164,107,0.18)'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', rtl: true }
+                        },
+                        cutout: '62%'
+                    }
+                });
+                return;
+            }
+
+            paymentsDistributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: rows.map(x => x.label),
+                    datasets: [{
+                        data: rows.map(x => x.value),
+                        backgroundColor: [
+                            '#159a6f',
+                            '#c9a46b',
+                            '#d7921f',
+                            '#5f7fd6',
+                            '#b78e54',
+                            '#d14d4d'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            rtl: true
+                        }
+                    },
+                    cutout: '62%'
+                }
+            });
+        }
+
         function renderComplexWideView(){
             isComplexWideMode = true;
-            let totalComplexCredit = 0, totalComplexBalance = 0, totalComplexDebit = 0, tenantCount = 0;
+            setComplexChartsVisibility(true);
+
+            let totalComplexCredit = 0;
+            let totalComplexBalance = 0;
+            let totalComplexDebit = 0;
+            let tenantCount = 0;
+
             allTenants.forEach(tenant => {
                 const latest = getLatestSummary(tenant.tenant_code);
                 if(latest){
@@ -295,9 +1308,11 @@
                     tenantCount++;
                 }
             });
+
             const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
             const defProb = 100 - nextProb;
+
             document.getElementById('tenant_status_chip').innerText = `${tenantCount} مستأجر`;
             document.getElementById('last_seen_chip').innerText = '—';
             document.getElementById('ai_badge').innerText = 'نظرة عامة';
@@ -313,118 +1328,296 @@
             document.getElementById('ai_months_without_payment_text').innerText = 'كل المستأجرين';
             document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
             document.getElementById('ai_last3_ratio_text').innerText = `متوسط ${tenantCount} مستأجر`;
+
             const balEl = document.getElementById('kpi_balance');
             balEl.style.color = totalComplexBalance < 0 ? '#159a6f' : (totalComplexBalance > 0 ? '#d14d4d' : '#159a6f');
+
             setMoodClass(document.getElementById('hero_commitment_card'), avgCommitment >= 75 ? 'good' : avgCommitment >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_credit'), 'good');
             setMoodClass(document.getElementById('ai_card_balance'), totalComplexBalance <= 0 ? 'good' : 'warn');
+
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
+            drawCollectionRateChart_AllTenants();
+            drawPaymentsDistributionChart_AllTenants();
+
             const notifType = document.getElementById('notification_type');
             notifType.value = 'general';
             notifType.disabled = true;
             document.getElementById('notification_message').value = '';
             document.getElementById('statementBtn').disabled = true;
         }
-        
+
         function renderAi(tenant){
             if(!tenant) return;
-            const tc = toNumber(tenant.totalCredit), cb = toNumber(tenant.currentBalance), pb = toNumber(tenant.previousBalance), td = toNumber(tenant.totalDebit), ob = toNumber(tenant.openingBalance), ly = tenant.latestYear || '—';
+
+            const tc = toNumber(tenant.totalCredit);
+            const cb = toNumber(tenant.currentBalance);
+            const td = toNumber(tenant.totalDebit);
+            const ly = tenant.latestYear || '—';
+
             const allYears = allSummaries.filter(r => r.tenant_code === tenant.tenant_code);
             const totalDebitAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_debit), 0);
             const totalCreditAllTime = allYears.reduce((sum, r) => sum + toNumber(r.total_credit), 0);
             const covScore = totalDebitAllTime > 0 ? Math.min(100, Math.round((totalCreditAllTime / totalDebitAllTime) * 100)) : 100;
-            const txs = allTransactions.filter(x => x.tenant_code === tenant.tenant_code).sort((a,b) => new Date(a.date) - new Date(b.date));
-            const pays = txs.filter(x => toNumber(x.credit) > 0), lastPay = pays[pays.length-1] || null, mwp = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
-            const monthlyAvg = (() => { if(!pays.length) return 0; const months = new Set(pays.map(r => { const d = new Date(r.date); return `${d.getFullYear()}-${d.getMonth()}`; })); const tot = pays.reduce((s,r) => s + toNumber(r.credit), 0); return months.size ? Math.round(tot / months.size) : 0; })();
-            const nextProb = Math.max(5, Math.min(95, Math.round((covScore*0.55) + ((mwp<=1?90:mwp<=3?55:20)*0.45)))), defProb = 100 - nextProb;
-            document.getElementById('ai_score_value').innerText = `${covScore}/100`; document.getElementById('ai_commitment_ratio').innerText = `${covScore}%`; document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`; document.getElementById('ai_default_probability').innerText = `${defProb}%`; document.getElementById('kpi_total_credit').innerText = roundMoney(Math.max(0,tc));
-            const balEl = document.getElementById('kpi_balance'); if(balEl){ if(cb < 0){ balEl.innerText = roundMoney(Math.abs(cb)); balEl.style.color = '#159a6f'; } else { balEl.innerText = roundMoney(cb); balEl.style.color = cb > 0 ? '#d14d4d' : '#159a6f'; } }
-            const balCardSpan = document.querySelector('#ai_card_balance span'); if(balCardSpan) balCardSpan.innerText = cb < 0 ? 'رصيد دائن' : 'الرصيد الحالي';
+
+            const txs = allTransactions
+                .filter(x => x.tenant_code === tenant.tenant_code)
+                .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            const pays = txs.filter(x => toNumber(x.credit) > 0);
+            const lastPay = pays[pays.length - 1] || null;
+            const mwp = lastPay?.date ? (monthsSince(lastPay.date) ?? 0) : 12;
+
+            const nextProb = Math.max(5, Math.min(95, Math.round((covScore * 0.55) + ((mwp <= 1 ? 90 : mwp <= 3 ? 55 : 20) * 0.45))));
+            const defProb = 100 - nextProb;
+
+            document.getElementById('ai_score_value').innerText = `${covScore}/100`;
+            document.getElementById('ai_commitment_ratio').innerText = `${covScore}%`;
+            document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
+            document.getElementById('ai_default_probability').innerText = `${defProb}%`;
+            document.getElementById('kpi_total_credit').innerText = roundMoney(Math.max(0, tc));
+
+            const balEl = document.getElementById('kpi_balance');
+            if(balEl){
+                if(cb < 0){
+                    balEl.innerText = roundMoney(Math.abs(cb));
+                    balEl.style.color = '#159a6f';
+                } else {
+                    balEl.innerText = roundMoney(cb);
+                    balEl.style.color = cb > 0 ? '#d14d4d' : '#159a6f';
+                }
+            }
+
+            const balCardSpan = document.querySelector('#ai_card_balance span');
+            if(balCardSpan) balCardSpan.innerText = cb < 0 ? 'رصيد دائن' : 'الرصيد الحالي';
+
             const badge = document.getElementById('ai_badge');
-            if(cb < 0){ badge.className='smart-ai-badge badge-credit'; badge.innerText='دائن'; document.getElementById('ai_score_text').innerText = `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`; }
-            else if(cb === 0){ badge.className='smart-ai-badge badge-excellent'; badge.innerText='ملتزم'; document.getElementById('ai_score_text').innerText = 'لا يوجد رصيد مستحق حالياً'; }
-            else if(tc > 0){ badge.className='smart-ai-badge badge-good'; badge.innerText='جزئي'; document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة في سنة ${ly}`; }
-            else { badge.className='smart-ai-badge badge-risk'; badge.innerText='متأخر'; document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل في سنة ${ly}`; }
+            if(cb < 0){
+                badge.className = 'smart-ai-badge badge-credit';
+                badge.innerText = 'دائن';
+                document.getElementById('ai_score_text').innerText = `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`;
+            } else if(cb === 0){
+                badge.className = 'smart-ai-badge badge-excellent';
+                badge.innerText = 'ملتزم';
+                document.getElementById('ai_score_text').innerText = 'لا يوجد رصيد مستحق حالياً';
+            } else if(tc > 0){
+                badge.className = 'smart-ai-badge badge-good';
+                badge.innerText = 'جزئي';
+                document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة في سنة ${ly}`;
+            } else {
+                badge.className = 'smart-ai-badge badge-risk';
+                badge.innerText = 'متأخر';
+                document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل في سنة ${ly}`;
+            }
+
             setMoodClass(document.getElementById('hero_commitment_card'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
-            document.getElementById('ai_months_without_payment').innerText = mwp; document.getElementById('ai_months_without_payment_text').innerText = mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`; setMoodClass(document.getElementById('ai_card_months_without_payment'), mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad');
-            const last3 = allSummaries.filter(r => r.tenant_code === tenant.tenant_code).sort((a,b) => Number(b.year) - Number(a.year)).slice(0,3);
-            const last3Ratio = last3.length ? Math.round(last3.reduce((sum, row) => { const db = Math.max(0, toNumber(row.total_debit)), c = Math.max(0, toNumber(row.total_credit)); return sum + (db > 0 ? Math.min(100, Math.round((c/db)*100)) : 0); }, 0) / last3.length) : 0;
-            document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`; document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+
+            document.getElementById('ai_months_without_payment').innerText = mwp;
+            document.getElementById('ai_months_without_payment_text').innerText = mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`;
+            setMoodClass(document.getElementById('ai_card_months_without_payment'), mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad');
+
+            const last3 = allSummaries
+                .filter(r => r.tenant_code === tenant.tenant_code)
+                .sort((a,b) => Number(b.year) - Number(a.year))
+                .slice(0,3);
+
+            const last3Ratio = last3.length
+                ? Math.round(last3.reduce((sum, row) => {
+                    const db = Math.max(0, toNumber(row.total_debit));
+                    const c = Math.max(0, toNumber(row.total_credit));
+                    return sum + (db > 0 ? Math.min(100, Math.round((c / db) * 100)) : 0);
+                }, 0) / last3.length)
+                : 0;
+
+            document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`;
+            document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+
             setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('ai_card_total_credit'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_balance'), cb <= 0 ? 'good' : cb <= Math.max(1, td*0.25) ? 'warn' : 'bad');
+            setMoodClass(document.getElementById('ai_card_balance'), cb <= 0 ? 'good' : cb <= Math.max(1, td * 0.25) ? 'warn' : 'bad');
         }
-        
+
         async function ensureYearlySummaryExists(tenant, yearNum){
-            let row = getSummaryByYear(tenant.tenant_code, yearNum); if(row) return row;
-            const prev = getPreviousSummary(tenant.tenant_code, yearNum), ob = prev ? toNumber(prev.final_balance) : 0, td = toNumber(tenant.annual_rent), tc = 0, fb = ob + td - tc;
-            const { data, error } = await supabaseClient.from('tenant_yearly_summary').insert([{ tenant_code: tenant.tenant_code, year: yearNum, opening_balance: ob, total_debit: td, total_credit: tc, final_balance: fb }]).select().single();
-            if(error) throw error; return data;
+            let row = getSummaryByYear(tenant.tenant_code, yearNum);
+            if(row) return row;
+
+            const prev = getPreviousSummary(tenant.tenant_code, yearNum);
+            const ob = prev ? toNumber(prev.final_balance) : 0;
+            const td = toNumber(tenant.annual_rent);
+            const tc = 0;
+            const fb = ob + td - tc;
+
+            const { data, error } = await supabaseClient
+                .from('tenant_yearly_summary')
+                .insert([{
+                    tenant_code: tenant.tenant_code,
+                    year: yearNum,
+                    opening_balance: ob,
+                    total_debit: td,
+                    total_credit: tc,
+                    final_balance: fb
+                }])
+                .select()
+                .single();
+
+            if(error) throw error;
+            return data;
         }
-        
+
         async function submitTransaction(){
             if(isSavingTransaction) return;
-            const code = document.getElementById('tenant_select').value, date = document.getElementById('tx_date').value, desc = document.getElementById('tx_desc').value.trim(), amount = Math.max(0, toNumber(document.getElementById('tx_amount').value)), receipt = document.getElementById('tx_receipt').value.trim(), btn = document.getElementById('save_tx_btn');
-            if(!code) return alert('اختر المستأجر'); if(!date) return alert('أدخل التاريخ'); if(!desc) return alert('أدخل البيان'); if(!receipt) return alert('أدخل رقم السند'); if(amount <= 0) return alert('أدخل قيمة دفعة صحيحة');
+
+            const code = document.getElementById('tenant_select').value;
+            const date = document.getElementById('tx_date').value;
+            const desc = document.getElementById('tx_desc').value.trim();
+            const amount = Math.max(0, toNumber(document.getElementById('tx_amount').value));
+            const receipt = document.getElementById('tx_receipt').value.trim();
+            const btn = document.getElementById('save_tx_btn');
+
+            if(!code) return alert('اختر المستأجر');
+            if(!date) return alert('أدخل التاريخ');
+            if(!desc) return alert('أدخل البيان');
+            if(!receipt) return alert('أدخل رقم السند');
+            if(amount <= 0) return alert('أدخل قيمة دفعة صحيحة');
+
             try {
-                isSavingTransaction=true; btn.disabled=true; btn.innerText='جاري الحفظ...'; hideStatus();
-                const { data: exist } = await supabaseClient.from('tenant_transactions').select('id').eq('receipt_no', receipt); if(exist?.length) throw new Error('رقم السند مستخدم مسبقاً');
-                const tenant = allTenants.find(t => t.tenant_code === code); if(!tenant) throw new Error('المستأجر غير موجود');
-                const txYear = new Date(date).getFullYear(); const ls = getLatestSummary(code); let yearNum = ls ? Number(ls.year) : txYear; if(!ls || txYear > yearNum) yearNum = txYear;
-                let row = await ensureYearlySummaryExists(tenant, yearNum);
-                await supabaseClient.from('tenant_transactions').insert([{ tenant_code: code, date, description: desc, debit: 0, credit: amount, receipt_no: receipt, notes: null }]);
-                const curCredit = toNumber(row.total_credit), ob = toNumber(row.opening_balance), td = toNumber(row.total_debit), newCredit = curCredit + amount, newFinal = ob + td - newCredit;
-                await supabaseClient.from('tenant_yearly_summary').update({ total_credit: newCredit, final_balance: newFinal }).eq('id', row.id);
-                await refresh(code); clearTransactionForm(); showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
-            } catch(err){ console.error(err); showStatus(`حدث خطأ: ${err.message}`, 'danger'); }
-            finally { isSavingTransaction=false; btn.disabled=false; btn.innerText='حفظ الدفعة'; }
+                isSavingTransaction = true;
+                btn.disabled = true;
+                btn.innerText = 'جاري الحفظ...';
+                hideStatus();
+
+                const { data: exist } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('id')
+                    .eq('receipt_no', receipt);
+
+                if(exist?.length) throw new Error('رقم السند مستخدم مسبقاً');
+
+                const tenant = allTenants.find(t => t.tenant_code === code);
+                if(!tenant) throw new Error('المستأجر غير موجود');
+
+                const txYear = new Date(date).getFullYear();
+                const ls = getLatestSummary(code);
+                let yearNum = ls ? Number(ls.year) : txYear;
+                if(!ls || txYear > yearNum) yearNum = txYear;
+
+                const row = await ensureYearlySummaryExists(tenant, yearNum);
+
+                await supabaseClient.from('tenant_transactions').insert([{
+                    tenant_code: code,
+                    date,
+                    description: desc,
+                    debit: 0,
+                    credit: amount,
+                    receipt_no: receipt,
+                    notes: null
+                }]);
+
+                const curCredit = toNumber(row.total_credit);
+                const ob = toNumber(row.opening_balance);
+                const td = toNumber(row.total_debit);
+                const newCredit = curCredit + amount;
+                const newFinal = ob + td - newCredit;
+
+                await supabaseClient
+                    .from('tenant_yearly_summary')
+                    .update({
+                        total_credit: newCredit,
+                        final_balance: newFinal
+                    })
+                    .eq('id', row.id);
+
+                await refresh(code);
+                clearTransactionForm();
+                showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
+            } catch(err){
+                console.error(err);
+                showStatus(`حدث خطأ: ${err.message}`, 'danger');
+            } finally {
+                isSavingTransaction = false;
+                btn.disabled = false;
+                btn.innerText = 'حفظ الدفعة';
+            }
         }
-        
-        const getNotificationTitle = t => { if(t==='first') return 'المطالبة الأولى'; if(t==='second') return 'المطالبة الثانية'; if(t==='third') return 'المطالبة الثالثة'; if(t==='legal') return 'إنذار عدلي'; if(t==='lawyer') return 'تحويل للمحامي'; return 'رسالة عامة'; };
-        const getNotificationLifetimeDays = t => { if(t==='first') return 5; if(t==='second') return 5; if(t==='third') return 10; if(t==='legal') return 15; if(t==='lawyer') return 30; return 7; };
-        const shouldHideAfterSeen = t => !(t==='legal' || t==='lawyer');
-        
+
+        const getNotificationTitle = t => {
+            if(t === 'first') return 'المطالبة الأولى';
+            if(t === 'second') return 'المطالبة الثانية';
+            if(t === 'third') return 'المطالبة الثالثة';
+            if(t === 'legal') return 'إنذار عدلي';
+            if(t === 'lawyer') return 'تحويل للمحامي';
+            return 'رسالة عامة';
+        };
+
+        const getNotificationLifetimeDays = t => {
+            if(t === 'first') return 5;
+            if(t === 'second') return 5;
+            if(t === 'third') return 10;
+            if(t === 'legal') return 15;
+            if(t === 'lawyer') return 30;
+            return 7;
+        };
+
+        const shouldHideAfterSeen = t => !(t === 'legal' || t === 'lawyer');
+
         function buildNotificationText(type, tenant){
-            if(!tenant) return ''; const amt = roundMoney(Math.abs(tenant.currentBalance)), isCredit = tenant.currentBalance < 0, due = new Date(); due.setDate(due.getDate()+7); const dueTxt = due.toLocaleDateString('en-GB');
+            if(!tenant) return '';
+
+            const amt = roundMoney(Math.abs(tenant.currentBalance));
+            const isCredit = tenant.currentBalance < 0;
+
             if(isCredit) return `نود إعلامكم بوجود رصيد دائن لصالحكم بقيمة ${amt}.`;
-            if(type==='first') return `نود إشعاركم بوجود رصيد مستحق على حسابكم، نرجو المبادرة بمراجعته وتسويته في أقرب وقت.`;
-            if(type==='second') return `نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم، نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.`;
-            if(type==='third') return `نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل، وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type==='legal') return `نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم، وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type==='lawyer') return `تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم، وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.`;
+            if(type === 'first') return `نود إشعاركم بوجود رصيد مستحق على حسابكم، نرجو المبادرة بمراجعته وتسويته في أقرب وقت.`;
+            if(type === 'second') return `نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم، نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.`;
+            if(type === 'third') return `نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل، وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
+            if(type === 'legal') return `نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم، وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
+            if(type === 'lawyer') return `تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم، وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.`;
             return '';
         }
-        
-        function updateNotificationComposer(){ 
+
+        function updateNotificationComposer(){
             if(isComplexWideMode) return;
-            const t = getSelectedTenant(), type = document.getElementById('notification_type').value, msg = document.getElementById('notification_message'); 
-            if(!type){ msg.value=''; return; } 
-            if(type==='general') return; 
-            if(!t) return; 
-            msg.value = buildNotificationText(type, t); 
+
+            const t = getSelectedTenant();
+            const type = document.getElementById('notification_type').value;
+            const msg = document.getElementById('notification_message');
+
+            if(!type){
+                msg.value = '';
+                return;
+            }
+
+            if(type === 'general') return;
+            if(!t) return;
+
+            msg.value = buildNotificationText(type, t);
         }
-        
+
         async function sendNotification(){
             const t = getSelectedTenant();
             const type = document.getElementById('notification_type').value;
             const msg = document.getElementById('notification_message').value.trim();
-            
+
             if(!type) return alert('اختر موضوع الإشعار');
             if(!msg) return alert('أدخل نص الإشعار');
-            
+
             if(isComplexWideMode || !t){
                 if(type !== 'general'){
                     alert('في وضع المجمع، يمكن فقط إرسال "رسالة عامة" لجميع المستأجرين.');
                     return;
                 }
-                const now = new Date(), exp = new Date(now);
+
+                const now = new Date();
+                const exp = new Date(now);
                 exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
+
                 let successCount = 0;
+
                 for(const tenant of allTenants){
                     const { error } = await supabaseClient.from('tenant_notifications').insert([{
                         tenant_code: tenant.tenant_code,
@@ -438,17 +1631,20 @@
                         created_at: now.toISOString(),
                         expires_at: exp.toISOString()
                     }]);
+
                     if(!error) successCount++;
                 }
+
                 alert(`تم إرسال الرسالة إلى ${successCount} مستأجر بنجاح`);
                 document.getElementById('notification_type').value = 'general';
                 document.getElementById('notification_message').value = '';
                 return;
             }
-            
-            if(!t) return alert('اختر المستأجر أولاً');
-            const now = new Date(), exp = new Date(now);
+
+            const now = new Date();
+            const exp = new Date(now);
             exp.setDate(exp.getDate() + getNotificationLifetimeDays(type));
+
             const { error } = await supabaseClient.from('tenant_notifications').insert([{
                 tenant_code: t.tenant_code,
                 title: getNotificationTitle(type),
@@ -461,75 +1657,98 @@
                 created_at: now.toISOString(),
                 expires_at: exp.toISOString()
             }]);
-            if(error){ console.error(error); alert('حدث خطأ'); return; }
+
+            if(error){
+                console.error(error);
+                alert('حدث خطأ');
+                return;
+            }
+
             alert('تم إرسال الإشعار بنجاح');
             document.getElementById('notification_type').value = '';
             document.getElementById('notification_message').value = '';
         }
-        
+
         async function renderSelectedTenant(code){
             const t = tenantBalances.find(x => x.tenant_code === code) || null;
-            
+
             if(!code || code === ''){
                 isComplexWideMode = true;
                 renderComplexWideView();
                 return;
             }
-            
+
             isComplexWideMode = false;
+            setComplexChartsVisibility(false);
+            destroyComplexCharts();
+
             const notifType = document.getElementById('notification_type');
             notifType.disabled = false;
             notifType.value = '';
-            
+
             updateTenantStatusChip(t);
+
             if(t){
                 renderAi(t);
                 drawCollectionChart(t.totalCredit, t.currentBalance);
-                drawMonthlyChart(t);
                 document.getElementById('statementBtn').disabled = false;
             } else {
                 document.getElementById('statementBtn').disabled = true;
             }
+
             updateNotificationComposer();
         }
-        
+
         async function refresh(code=null){
             document.getElementById('loader').style.display = 'flex';
+
             await loadData();
+
             const sel = document.getElementById('tenant_select');
             const selCode = code || sel.value || '';
-            sel.innerHTML = '<option value="">مجمع جبري</option>' + allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
-            
+
+            sel.innerHTML =
+                '<option value="">مجمع جبري</option>' +
+                allTenants.map(t => `<option value="${t.tenant_code}">${t.tenant_name || t.tenant_code}</option>`).join('');
+
             if(selCode){
                 sel.value = selCode;
                 await renderSelectedTenant(selCode);
             } else {
                 await renderSelectedTenant('');
             }
+
             document.getElementById('loader').style.display = 'none';
         }
-        
+
         function openTenantStatement(){
             if(isComplexWideMode){
                 alert('الرجاء اختيار مستأجر محدد لعرض كشف الحساب.');
                 return;
             }
+
             const code = document.getElementById('tenant_select').value;
             if(!code) return alert('اختر المستأجر أولاً');
+
             localStorage.setItem('jabri_tenant_code', code);
             localStorage.setItem('jabri_admin_session', 'active');
             window.open(`statement.html?tenant=${encodeURIComponent(code)}`, '_blank');
         }
-        
-        function logoutAdmin(){ localStorage.removeItem('jabri_admin_session'); location.reload(); }
-        
+
+        function logoutAdmin(){
+            localStorage.removeItem('jabri_admin_session');
+            location.reload();
+        }
+
         window.onload = async () => {
             document.body.style.opacity = '1';
             clearTransactionForm();
             await refresh();
+
             document.getElementById('tenant_select').addEventListener('change', async e => {
                 await renderSelectedTenant(e.target.value);
             });
+
             document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
             document.body.classList.add('loaded');
         };
