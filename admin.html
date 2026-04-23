@@ -898,14 +898,24 @@
             <div class="notify-builder">
                 <div class="field">
                     <select id="notification_type">
-                        <option value="">اختر موضوع الإشعار</option>
-                        <option value="first">المطالبة الأولى</option>
-                        <option value="second">المطالبة الثانية</option>
-                        <option value="third">المطالبة الثالثة</option>
-                        <option value="legal">إنذار عدلي</option>
-                        <option value="lawyer">تحويل للمحامي</option>
-                        <option value="general">رسالة عامة</option>
-                    </select>
+    <option value="">اختر موضوع الإشعار</option>
+
+    <!-- رسائل تلقائية مقترحة -->
+    <optgroup label="رسائل ودّية">
+        <option value="friendly">تذكير ودي برصيد مستحق</option>
+        <option value="thanks">شكر على السداد</option>
+    </optgroup>
+
+    <!-- إشعارات إدارية -->
+    <optgroup label="إشعارات إدارية">
+        <option value="first">المطالبة الأولى</option>
+        <option value="second">المطالبة الثانية</option>
+        <option value="third">المطالبة الثالثة</option>
+        <option value="legal">إنذار عدلي</option>
+        <option value="lawyer">تحويل للمحامي</option>
+        <option value="general">رسالة عامة</option>
+    </optgroup>
+</select>
                 </div>
                 <textarea id="notification_message" placeholder="نص الإشعار..."></textarea>
                 <button class="btn btn-gold" style="width:100%;" onclick="sendNotification()">إرسال الإشعار</button>
