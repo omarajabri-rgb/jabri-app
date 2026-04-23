@@ -737,11 +737,7 @@
                 <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
 
-                <div class="chip-header" style="margin-top:14px;">
-                    <div class="chip-title">معدل التحصيل الشهري</div>
-                </div>
-                <div class="chart-wrap"><canvas id="collectionRateChart"></canvas></div>
-
+                
                 <div class="chip-header" style="margin-top:14px;">
                     <div class="chip-title">توزيع قيمة الدفعات</div>
                 </div>
@@ -834,9 +830,8 @@
         let tenantBalances = [];
 
         let collectionChart = null;
-        let monthlyChart = null;
-        let collectionRateChart = null;
-        let paymentsDistributionChart = null;
+let monthlyChart = null;
+let paymentsDistributionChart = null;
 
         let isSavingTransaction = false;
         let isComplexWideMode = true;
@@ -959,7 +954,7 @@
                 monthlyChart.destroy();
                 monthlyChart = null;
             }
-            if(collectionRateChart){
+
                 collectionRateChart.destroy();
                 collectionRateChart = null;
             }
@@ -1167,7 +1162,7 @@
             });
         }
 
-        function drawCollectionRateChart_AllTenants(){
+        
             const canvas = document.getElementById('collectionRateChart');
             if(!canvas) return;
 
@@ -1340,7 +1335,7 @@
 
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
-            drawCollectionRateChart_AllTenants();
+            
             drawPaymentsDistributionChart_AllTenants();
 
             const notifType = document.getElementById('notification_type');
