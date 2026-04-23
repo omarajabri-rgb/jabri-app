@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.42</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.43</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -125,6 +125,12 @@
             background:#fff;
             border:1px solid var(--line);
             color:var(--text);
+        }
+
+        .btn-soft.active{
+            background:rgba(201,164,107,0.12);
+            color:#6b4f2b;
+            border-color:rgba(201,164,107,0.24);
         }
 
         .panel{
@@ -498,6 +504,93 @@
             gap:14px;
         }
 
+        .notify-log-toolbar{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-bottom:14px;
+        }
+
+        .notify-log-wrap{
+            background:rgba(255,255,255,0.58);
+            border:1px solid rgba(201,164,107,0.16);
+            border-radius:24px;
+            padding:14px;
+        }
+
+        .notify-log-table-wrap{
+            overflow:auto;
+            border-radius:18px;
+            background:#fff;
+            border:1px solid rgba(201,164,107,0.14);
+        }
+
+        .notify-log-table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:840px;
+        }
+
+        .notify-log-table thead th{
+            background:rgba(201,164,107,0.10);
+            color:#6b4f2b;
+            font-size:12px;
+            font-weight:900;
+            padding:14px 12px;
+            text-align:right;
+            border-bottom:1px solid rgba(201,164,107,0.18);
+            white-space:nowrap;
+        }
+
+        .notify-log-table tbody td{
+            padding:14px 12px;
+            font-size:13px;
+            font-weight:700;
+            color:var(--text);
+            border-bottom:1px solid rgba(91,73,42,0.08);
+            vertical-align:top;
+        }
+
+        .notify-log-table tbody tr:last-child td{
+            border-bottom:none;
+        }
+
+        .notify-short-text{
+            max-width:320px;
+            color:#6b4f2b;
+            line-height:1.7;
+        }
+
+        .notify-status-pill{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            white-space:nowrap;
+        }
+
+        .notify-status-pill.read{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .notify-status-pill.unread{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .notify-empty{
+            padding:24px;
+            text-align:center;
+            color:var(--muted);
+            font-weight:800;
+        }
+
         .form-shell{
             background:rgba(255,255,255,0.58);
             border:1px solid rgba(201,164,107,0.16);
@@ -621,7 +714,8 @@
             .select-with-chip{ align-items:stretch; }
             .tenant-mini-chips{ align-items:flex-start; }
             .tx_actions .btn,
-            .tx-actions .btn{ width:100%; }
+            .tx-actions .btn,
+            .notify-log-toolbar .btn{ width:100%; }
             .quick-ai-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; }
             .quick-ai-card{ min-height:220px; }
             .chart-wrap{ height:220px; }
@@ -764,6 +858,38 @@
         </section>
 
         <section class="panel">
+            <div class="chip-header"><div class="chip-title">📬 سجل الإشعارات المرسلة</div></div>
+
+            <div class="notify-log-toolbar">
+                <button class="btn btn-soft active" id="notif_filter_all" onclick="setNotificationLogFilter('all')">الكل</button>
+                <button class="btn btn-soft" id="notif_filter_read" onclick="setNotificationLogFilter('read')">مقروءة</button>
+                <button class="btn btn-soft" id="notif_filter_unread" onclick="setNotificationLogFilter('unread')">غير مقروءة</button>
+                <button class="btn btn-gold" onclick="refreshNotificationLog()">تحديث</button>
+            </div>
+
+            <div class="notify-log-wrap">
+                <div class="notify-log-table-wrap">
+                    <table class="notify-log-table">
+                        <thead>
+                            <tr>
+                                <th>المستأجر</th>
+                                <th>نوع الإشعار</th>
+                                <th>نص مختصر</th>
+                                <th>تاريخ الإرسال</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notification_log_body">
+                            <tr>
+                                <td colspan="5" class="notify-empty">لا توجد إشعارات بعد</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
             <div class="form-shell">
                 <div class="entry-box">
@@ -806,7 +932,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.42</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.43</div>
     </div>
 
     <script>
@@ -834,6 +960,7 @@
 
         let isSavingTransaction = false;
         let isComplexWideMode = true;
+        let notificationLogFilter = 'all';
 
         const toNumber = v => {
             const c = String(v ?? 0).replace(/,/g, '').trim();
@@ -889,6 +1016,13 @@
             if(hr < 24) return `${hr} س`;
             if(day <= 7) return `${day} ي`;
             return d.toLocaleDateString('en-GB');
+        };
+
+        const formatDateTime = ds => {
+            if(!ds) return '—';
+            const d = new Date(ds);
+            if(isNaN(d.getTime())) return '—';
+            return d.toLocaleDateString('en-GB') + ' - ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
         };
 
         const monthsSince = ds => {
@@ -958,6 +1092,93 @@
                 paymentsDistributionChart.destroy();
                 paymentsDistributionChart = null;
             }
+        }
+
+        function getTenantDisplayName(code){
+            const tenant = allTenants.find(t => t.tenant_code === code);
+            return tenant?.tenant_name || code || '—';
+        }
+
+        function shortenText(text, maxLen = 95){
+            const t = String(text || '').trim();
+            if(!t) return '—';
+            return t.length > maxLen ? `${t.slice(0, maxLen)}...` : t;
+        }
+
+        function getNotificationTypeLabel(type){
+            if(type === 'first') return 'المطالبة الأولى';
+            if(type === 'second') return 'المطالبة الثانية';
+            if(type === 'third') return 'المطالبة الثالثة';
+            if(type === 'legal') return 'إنذار عدلي';
+            if(type === 'lawyer') return 'تحويل للمحامي';
+            if(type === 'general') return 'رسالة عامة';
+            return type || '—';
+        }
+
+        function renderNotificationLog(){
+            const body = document.getElementById('notification_log_body');
+            if(!body) return;
+
+            let rows = [...allNotifications];
+
+            if(notificationLogFilter === 'read'){
+                rows = rows.filter(n => n.is_read === true);
+            } else if(notificationLogFilter === 'unread'){
+                rows = rows.filter(n => !n.is_read);
+            }
+
+            rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+            if(!rows.length){
+                body.innerHTML = `<tr><td colspan="5" class="notify-empty">لا توجد إشعارات مطابقة</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = rows.map(row => {
+                const isRead = row.is_read === true;
+                const statusHtml = isRead
+                    ? `<span class="notify-status-pill read">✓ مقروء</span>`
+                    : `<span class="notify-status-pill unread">○ لم يقرأ</span>`;
+
+                const dateLabel = isRead && row.seen_at
+                    ? `${formatDateTime(row.created_at)}<br><small style="color:#7a7469;font-weight:800;">قرئت: ${formatDateTime(row.seen_at)}</small>`
+                    : formatDateTime(row.created_at);
+
+                return `
+                    <tr>
+                        <td>${getTenantDisplayName(row.tenant_code)}</td>
+                        <td>${getNotificationTypeLabel(row.type)}</td>
+                        <td><div class="notify-short-text">${shortenText(row.message)}</div></td>
+                        <td>${dateLabel}</td>
+                        <td>${statusHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function setNotificationLogFilter(filter){
+            notificationLogFilter = filter;
+
+            document.getElementById('notif_filter_all').classList.toggle('active', filter === 'all');
+            document.getElementById('notif_filter_read').classList.toggle('active', filter === 'read');
+            document.getElementById('notif_filter_unread').classList.toggle('active', filter === 'unread');
+
+            renderNotificationLog();
+        }
+
+        async function refreshNotificationLog(){
+            const { data, error } = await supabaseClient
+                .from('tenant_notifications')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if(error){
+                console.error(error);
+                return;
+            }
+
+            allNotifications = data || [];
+            renderNotificationLog();
         }
 
         async function loadData(){
@@ -1516,11 +1737,36 @@
             const isCredit = tenant.currentBalance < 0;
 
             if(isCredit) return `نود إعلامكم بوجود رصيد دائن لصالحكم بقيمة ${amt}.`;
-            if(type === 'first') return `نود إشعاركم بوجود رصيد مستحق على حسابكم، نرجو المبادرة بمراجعته وتسويته في أقرب وقت.`;
-            if(type === 'second') return `نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم، نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.`;
-            if(type === 'third') return `نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل، وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type === 'legal') return `نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم، وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.`;
-            if(type === 'lawyer') return `تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم، وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.`;
+            if(type === 'first') return `السادة/ ${tenant.tenant_name || ''}،
+
+نود إشعاركم بوجود رصيد مستحق على حسابكم.
+نرجو المبادرة بمراجعته وتسويته في أقرب وقت.
+
+مجمع جبري`;
+            if(type === 'second') return `السادة/ ${tenant.tenant_name || ''}،
+
+نود تذكيركم بضرورة تسوية الرصيد المستحق على حسابكم،
+نرجو المبادرة بالسداد في أقرب وقت، وذلك لتجنب أي إجراءات لاحقة.
+
+مجمع جبري`;
+            if(type === 'third') return `السادة/ ${tenant.tenant_name || ''}،
+
+نود إشعاركم بضرورة تسوية الرصيد المستحق على حسابكم بشكل عاجل،
+وفي حال عدم السداد، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.
+
+مجمع جبري`;
+            if(type === 'legal') return `السادة/ ${tenant.tenant_name || ''}،
+
+نود إعلامكم بأنه تم توجيه إنذار عدلي بخصوص الرصيد المستحق على حسابكم،
+وفي حال عدم التجاوب، سيتم اتخاذ الإجراءات اللازمة وفق الأنظمة المعتمدة.
+
+مجمع جبري`;
+            if(type === 'lawyer') return `السادة/ ${tenant.tenant_name || ''}،
+
+تمت إحالة ملفكم إلى الجهة المختصة لمتابعة موضوع الرصيد المستحق على حسابكم،
+وسيتم استكمال الإجراءات وفق الأنظمة المعتمدة.
+
+مجمع جبري`;
             return '';
         }
 
@@ -1542,7 +1788,48 @@
             msg.value = buildNotificationText(type, t);
         }
 
-        async function sendWhatsAppMessage(phone, message){
+        function getNotificationTemplateConfig(type, tenant){
+            const tenantName = tenant?.tenant_name || tenant?.tenant_code || 'المستأجر';
+
+            if(type === 'first'){
+                return {
+                    templateName: 'reminder_jabri',
+                    params: [tenantName]
+                };
+            }
+
+            if(type === 'second'){
+                return {
+                    templateName: 'second_notice_jabri',
+                    params: [tenantName]
+                };
+            }
+
+            if(type === 'third'){
+                return {
+                    templateName: 'final_notice_jabri',
+                    params: [tenantName]
+                };
+            }
+
+            if(type === 'legal'){
+                return {
+                    templateName: 'legal_notice_jabri',
+                    params: [tenantName]
+                };
+            }
+
+            if(type === 'lawyer'){
+                return {
+                    templateName: 'lawyer_notice_jabri',
+                    params: [tenantName]
+                };
+            }
+
+            return null;
+        }
+
+        async function sendWhatsAppTemplate(phone, templateName, params = []){
             const cleanPhone = sanitizePhone(phone);
             if(!cleanPhone) throw new Error('رقم الهاتف غير صالح');
 
@@ -1560,29 +1847,26 @@
                     messaging_product: 'whatsapp',
                     to: cleanPhone,
                     type: 'template',
-template: {
-  name: 'payment_received_jabri',
-  language: { code: 'ar' },
-  components: [
-    {
-      type: 'body',
-      parameters: [
-        { type: 'text', text: 'احمد' },
-        { type: 'text', text: '200' },
-        { type: 'text', text: '1234' },
-        { type: 'text', text: '12/02/2026' },
-        { type: 'text', text: '1000' }
-      ]
-    }
-  ]
-}
+                    template: {
+                        name: templateName,
+                        language: { code: 'ar' },
+                        components: [
+                            {
+                                type: 'body',
+                                parameters: params.map(val => ({
+                                    type: 'text',
+                                    text: String(val ?? '')
+                                }))
+                            }
+                        ]
+                    }
                 })
             });
 
             const data = await response.json();
 
             if(!response.ok || data.error){
-                throw new Error(data?.error?.message || 'فشل إرسال رسالة WhatsApp');
+                throw new Error(data?.error?.message || 'فشل إرسال قالب WhatsApp');
             }
 
             return data;
@@ -1682,50 +1966,18 @@ template: {
                 }
 
                 let successCount = 0;
-                let whatsappCount = 0;
-                let failedWhatsappCount = 0;
 
                 for(const tenant of allTenants){
                     try {
                         await insertTenantNotificationRow(tenant.tenant_code, 'رسالة عامة', msg, 'general');
                         successCount++;
-
-                        const tenantPhone = sanitizePhone(tenant.phone || '');
-                        if(tenantPhone){
-                            let logId = null;
-
-                            try {
-                                const logRow = await createWhatsAppLog(tenant, {
-                                    notificationId: null,
-                                    sourceType: 'notification',
-                                    sourceId: 'general',
-                                    phone: tenantPhone,
-                                    messageTitle: 'رسالة عامة',
-                                    messageBody: msg,
-                                    remainingBalance: toNumber(tenant.currentBalance)
-                                });
-
-                                logId = logRow.id;
-
-                                const waRes = await sendWhatsAppMessage(tenantPhone, msg);
-                                const waMessageId = waRes?.messages?.[0]?.id || null;
-
-                                await markWhatsAppLogSent(logId, waMessageId);
-                                whatsappCount++;
-                            } catch (waErr){
-                                console.error('WhatsApp general send error:', waErr);
-                                if(logId){
-                                    await markWhatsAppLogFailed(logId, waErr.message || 'Unknown error');
-                                }
-                                failedWhatsappCount++;
-                            }
-                        }
                     } catch(err){
                         console.error('General notification insert error:', err);
                     }
                 }
 
-                alert(`تم إرسال الإشعار إلى ${successCount} مستأجر. واتساب ناجح: ${whatsappCount} | واتساب فشل: ${failedWhatsappCount}`);
+                await refreshNotificationLog();
+                alert(`تم إرسال الرسالة العامة داخل النظام إلى ${successCount} مستأجر`);
                 document.getElementById('notification_type').value = 'general';
                 document.getElementById('notification_message').value = '';
                 return;
@@ -1740,8 +1992,9 @@ template: {
                 );
 
                 const tenantPhone = sanitizePhone(t.phone || '');
+                const templateConfig = getNotificationTemplateConfig(type, t);
 
-                if(tenantPhone){
+                if(tenantPhone && templateConfig){
                     let logId = null;
 
                     try {
@@ -1752,12 +2005,18 @@ template: {
                             phone: tenantPhone,
                             messageTitle: getNotificationTitle(type),
                             messageBody: msg,
+                            templateName: templateConfig.templateName,
                             remainingBalance: toNumber(t.currentBalance)
                         });
 
                         logId = logRow.id;
 
-                        const waRes = await sendWhatsAppMessage(tenantPhone, msg);
+                        const waRes = await sendWhatsAppTemplate(
+                            tenantPhone,
+                            templateConfig.templateName,
+                            templateConfig.params
+                        );
+
                         const waMessageId = waRes?.messages?.[0]?.id || null;
 
                         await markWhatsAppLogSent(logId, waMessageId);
@@ -1769,12 +2028,15 @@ template: {
                         }
                         alert(`تم حفظ الإشعار داخل النظام، لكن فشل واتساب: ${waErr.message}`);
                     }
-                } else {
+                } else if (!tenantPhone) {
                     alert('تم إرسال الإشعار داخل النظام، لكن لا يوجد رقم هاتف للمستأجر');
+                } else {
+                    alert('تم إرسال الإشعار داخل النظام بنجاح');
                 }
 
                 document.getElementById('notification_type').value = '';
                 document.getElementById('notification_message').value = '';
+                await refreshNotificationLog();
             } catch(error){
                 console.error(error);
                 alert(`حدث خطأ: ${error.message}`);
@@ -1830,6 +2092,7 @@ template: {
                 await renderSelectedTenant('');
             }
 
+            renderNotificationLog();
             document.getElementById('loader').style.display = 'none';
         }
 
@@ -1862,6 +2125,7 @@ template: {
             });
 
             document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
+            setNotificationLogFilter('all');
             document.body.classList.add('loaded');
         };
     </script>
