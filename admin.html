@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.40</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v3.41</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -737,7 +737,6 @@
                 <div class="chip-header"><div class="chip-title">الحركة الشهرية</div></div>
                 <div class="chart-wrap"><canvas id="monthlyChart"></canvas></div>
 
-                
                 <div class="chip-header" style="margin-top:14px;">
                     <div class="chip-title">توزيع قيمة الدفعات</div>
                 </div>
@@ -807,22 +806,19 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.40</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.41</div>
     </div>
 
     <script>
-        // --- SECURITY: Authentication Check ---
         const session = localStorage.getItem('jabri_admin_session');
         if (session !== 'active') window.location.href = 'admin-login.html';
 
-        // --- Supabase Client ---
         const { createClient } = supabase;
         const supabaseClient = createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        // --- Global Variables ---
         let allTenants = [];
         let allTransactions = [];
         let allSummaries = [];
@@ -830,13 +826,12 @@
         let tenantBalances = [];
 
         let collectionChart = null;
-let monthlyChart = null;
-let paymentsDistributionChart = null;
+        let monthlyChart = null;
+        let paymentsDistributionChart = null;
 
         let isSavingTransaction = false;
         let isComplexWideMode = true;
 
-        // --- Helper Functions ---
         const toNumber = v => {
             const c = String(v ?? 0).replace(/,/g, '').trim();
             const n = parseFloat(c);
@@ -955,16 +950,12 @@ let paymentsDistributionChart = null;
                 monthlyChart = null;
             }
 
-                collectionRateChart.destroy();
-                collectionRateChart = null;
-            }
             if(paymentsDistributionChart){
                 paymentsDistributionChart.destroy();
                 paymentsDistributionChart = null;
             }
         }
 
-        // --- Data Loading ---
         async function loadData(){
             const [t, tx, sum, notif] = await Promise.all([
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
@@ -1098,7 +1089,6 @@ let paymentsDistributionChart = null;
         function buildMonthlySummarySeries(rows){
             const labels = [];
             const monthlyCredits = [];
-            const monthlyRates = [];
 
             for(let i = 11; i >= 0; i--){
                 const d = new Date();
@@ -1107,22 +1097,19 @@ let paymentsDistributionChart = null;
                 const year = d.getFullYear();
                 const label = d.toLocaleDateString('ar-EG', { month:'short' });
 
-                let debitForMonth = 0;
                 let creditForMonth = 0;
 
                 rows.forEach(row => {
                     if(Number(row.year) === year){
-                        debitForMonth += toNumber(row.total_debit) / 12;
                         creditForMonth += toNumber(row.total_credit) / 12;
                     }
                 });
 
                 labels.push(label);
                 monthlyCredits.push(Math.round(creditForMonth));
-                monthlyRates.push(debitForMonth > 0 ? Math.round((creditForMonth / debitForMonth) * 100) : 0);
             }
 
-            return { labels, monthlyCredits, monthlyRates };
+            return { labels, monthlyCredits };
         }
 
         function drawMonthlyChart_AllTenants(){
@@ -1157,47 +1144,6 @@ let paymentsDistributionChart = null;
                     },
                     scales: {
                         y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        
-            const canvas = document.getElementById('collectionRateChart');
-            if(!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            if(collectionRateChart) collectionRateChart.destroy();
-
-            const { labels, monthlyRates } = buildMonthlySummarySeries(allSummaries);
-
-            collectionRateChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'معدل التحصيل %',
-                        data: monthlyRates,
-                        borderColor: '#c9a46b',
-                        backgroundColor: 'rgba(201,164,107,0.10)',
-                        tension: 0.35,
-                        borderWidth: 3,
-                        pointRadius: 3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, rtl: true }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 100
-                        }
                     }
                 }
             });
@@ -1335,7 +1281,6 @@ let paymentsDistributionChart = null;
 
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
-            
             drawPaymentsDistributionChart_AllTenants();
 
             const notifType = document.getElementById('notification_type');
