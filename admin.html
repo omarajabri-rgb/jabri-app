@@ -1856,7 +1856,36 @@
                         final_balance: newFinal
                     })
                     .eq('id', row.id);
+await supabaseClient
+    .from('tenant_yearly_summary')
+    .update({
+        total_credit: newCredit,
+        final_balance: newFinal
+    })
+    .eq('id', row.id);
 
+// 🔥 إرسال واتساب بعد حفظ الدفعة
+const tenantPhone = sanitizePhone(tenant.phone || '');
+
+if (tenantPhone) {
+    try {
+        await sendWhatsAppTemplate(tenantPhone, 'payment_received_jabri', [
+            tenant.tenant_name || 'عميلنا الكريم',
+            String(amount),
+            receipt,
+            date,
+            String(newFinal)
+        ]);
+
+        console.log('WhatsApp sent successfully');
+    } catch (waErr) {
+        console.error('WhatsApp failed:', waErr.message);
+    }
+}
+
+await refresh(code);
+clearTransactionForm();
+showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
                 await refresh(code);
                 clearTransactionForm();
                 showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
