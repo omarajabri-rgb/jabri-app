@@ -263,7 +263,7 @@
             const labels=[], allCredits=[];
             for(let i=11; i>=0; i--){
                 const d = new Date(); d.setMonth(d.getMonth()-i);
-                labels.push(d.toLocaleDateString('en-GB',{month:'short'}));
+                labels.push(d.toLocaleDateString('ar-EG',{month:'short'}));
                 let monthTotal = 0;
                 allTransactions.forEach(tx => {
                     const td = new Date(tx.date);
