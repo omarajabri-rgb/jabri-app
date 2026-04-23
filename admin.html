@@ -2413,16 +2413,16 @@ function updateNotificationComposer() {
     // 🔥 استبدال اسم المستأجر تلقائياً
     message = message.replace('[اسم المستأجر]', tenantName);
 
-    document.getElementById('messageBox').value = message;
-}
+document.getElementById('notification_message').value = message;}
         window.onload = async () => {
             document.body.style.opacity = '1';
             clearTransactionForm();
             await refresh();
 
-            document.getElementById('tenant_select').addEventListener('change', async e => {
-                await renderSelectedTenant(e.target.value);
-            });
+           document.getElementById('tenant_select').addEventListener('change', async e => {
+    await renderSelectedTenant(e.target.value);
+    updateNotificationComposer(); // 👈 أضف هذا السطر
+});
 
             document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
             setNotificationLogFilter('all');
