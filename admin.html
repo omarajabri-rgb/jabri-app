@@ -1559,10 +1559,23 @@
                 body: JSON.stringify({
                     messaging_product: 'whatsapp',
                     to: cleanPhone,
-                    type: 'text',
-                    text: {
-                        body: message
-                    }
+                    type: 'template',
+template: {
+  name: 'payment_received_jabri',
+  language: { code: 'ar' },
+  components: [
+    {
+      type: 'body',
+      parameters: [
+        { type: 'text', text: 'احمد' },
+        { type: 'text', text: '200' },
+        { type: 'text', text: '1234' },
+        { type: 'text', text: '12/02/2026' },
+        { type: 'text', text: '1000' }
+      ]
+    }
+  ]
+}
                 })
             });
 
