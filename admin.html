@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | لوحة الإدارة الذكية v3.43</title>
+    <title>مجمع جبري | لوحة الإدارة الذكية v5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -270,6 +270,87 @@
             color:#6b4f2b;
             border:1px solid rgba(201,164,107,0.25);
         }
+
+        .notify-status-pill{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            white-space:nowrap;
+        }
+
+        .notify-status-pill.read{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .notify-status-pill.unread{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        /* --- WhatsApp Log Styles --- */
+        .wa-status-pill{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            white-space:nowrap;
+        }
+
+        .wa-status-pill.sent{
+            color:var(--success);
+            background:rgba(21,154,111,0.12);
+            border:1px solid rgba(21,154,111,0.18);
+        }
+
+        .wa-status-pill.failed{
+            color:var(--danger);
+            background:rgba(209,77,77,0.12);
+            border:1px solid rgba(209,77,77,0.18);
+        }
+
+        .wa-status-pill.pending{
+            color:var(--warning);
+            background:rgba(215,146,31,0.12);
+            border:1px solid rgba(215,146,31,0.18);
+        }
+
+        .wa-template-chip{
+            display:inline-flex;
+            align-items:center;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            color:#6b4f2b;
+            background:rgba(201,164,107,0.12);
+            border:1px solid rgba(201,164,107,0.22);
+        }
+
+        .wa-error-text{
+            max-width:260px;
+            color:var(--danger);
+            line-height:1.6;
+            font-size:12px;
+            font-weight:800;
+        }
+
+        .wa-phone-text{
+            direction:ltr;
+            text-align:left;
+            display:inline-block;
+            font-weight:800;
+        }
+        /* --- End WhatsApp Log Styles --- */
 
         .smart-ai-box{
             margin-top:14px;
@@ -561,29 +642,6 @@
             line-height:1.7;
         }
 
-        .notify-status-pill{
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            padding:6px 10px;
-            border-radius:999px;
-            font-size:11px;
-            font-weight:900;
-            white-space:nowrap;
-        }
-
-        .notify-status-pill.read{
-            color:var(--success);
-            background:rgba(21,154,111,0.12);
-            border:1px solid rgba(21,154,111,0.18);
-        }
-
-        .notify-status-pill.unread{
-            color:var(--danger);
-            background:rgba(209,77,77,0.12);
-            border:1px solid rgba(209,77,77,0.18);
-        }
-
         .notify-empty{
             padding:24px;
             text-align:center;
@@ -723,9 +781,6 @@
     </style>
 
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://gzukfvxcpfblzqyjzkoz.supabase.co https://graph.facebook.com; img-src 'self' data:;">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 </head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
@@ -890,7 +945,40 @@
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">إدخال دفعة جديدة</div></div>
+            <div class="chip-header"><div class="chip-title">📱 سجل رسائل واتساب</div></div>
+
+            <div class="notify-log-toolbar">
+                <button class="btn btn-soft active" id="wa_filter_all" onclick="setWhatsAppLogFilter('all')">الكل</button>
+                <button class="btn btn-soft" id="wa_filter_sent" onclick="setWhatsAppLogFilter('sent')">مرسلة</button>
+                <button class="btn btn-soft" id="wa_filter_failed" onclick="setWhatsAppLogFilter('failed')">فاشلة</button>
+                <button class="btn btn-soft" id="wa_filter_pending" onclick="setWhatsAppLogFilter('pending')">قيد الانتظار</button>
+                <button class="btn btn-gold" onclick="refreshWhatsAppLog()">تحديث</button>
+            </div>
+
+            <div class="notify-log-wrap">
+                <div class="notify-log-table-wrap">
+                    <table class="notify-log-table">
+                        <thead>
+                            <tr>
+                                <th>المستأجر</th>
+                                <th>القالب</th>
+                                <th>رقم الهاتف</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الإرسال</th>
+                                <th>الخطأ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="whatsapp_log_body">
+                            <tr>
+                                <td colspan="6" class="notify-empty">لا توجد سجلات واتساب بعد</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="panel">
+            <div class="chip-header"><div class="chip-title">إدخل دفعة جديدة</div></div>
             <div class="form-shell">
                 <div class="entry-box">
                     <div class="sub-section-title">بيانات الدفعة</div>
@@ -932,7 +1020,7 @@
 
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
-        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v3.43</div>
+        <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v5.1</div>
     </div>
 
     <script>
@@ -952,6 +1040,7 @@
         let allTransactions = [];
         let allSummaries = [];
         let allNotifications = [];
+        let allWhatsAppLogs = [];
         let tenantBalances = [];
 
         let collectionChart = null;
@@ -961,6 +1050,7 @@
         let isSavingTransaction = false;
         let isComplexWideMode = true;
         let notificationLogFilter = 'all';
+        let whatsappLogFilter = 'all';
 
         const toNumber = v => {
             const c = String(v ?? 0).replace(/,/g, '').trim();
@@ -1181,18 +1271,88 @@
             renderNotificationLog();
         }
 
+        /* --- WhatsApp Log Functions --- */
+        function getWhatsAppStatusLabel(status){
+            const s = String(status || '').toLowerCase();
+            if(s === 'sent') return '<span class="wa-status-pill sent">✓ مرسلة</span>';
+            if(s === 'failed') return '<span class="wa-status-pill failed">✕ فاشلة</span>';
+            return '<span class="wa-status-pill pending">◌ قيد الانتظار</span>';
+        }
+
+        function renderWhatsAppLog(){
+            const body = document.getElementById('whatsapp_log_body');
+            if(!body) return;
+
+            let rows = [...allWhatsAppLogs];
+
+            if(whatsappLogFilter === 'sent'){
+                rows = rows.filter(r => String(r.whatsapp_status || '').toLowerCase() === 'sent');
+            } else if(whatsappLogFilter === 'failed'){
+                rows = rows.filter(r => String(r.whatsapp_status || '').toLowerCase() === 'failed');
+            } else if(whatsappLogFilter === 'pending'){
+                rows = rows.filter(r => !r.whatsapp_status || String(r.whatsapp_status).toLowerCase() === 'pending');
+            }
+
+            rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+            if(!rows.length){
+                body.innerHTML = `<tr><td colspan="6" class="notify-empty">لا توجد سجلات واتساب مطابقة</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = rows.map(row => `
+                <tr>
+                    <td>${getTenantDisplayName(row.tenant_code)}</td>
+                    <td><span class="wa-template-chip">${row.whatsapp_template_name || '—'}</span></td>
+                    <td><span class="wa-phone-text">${row.phone || '—'}</span></td>
+                    <td>${getWhatsAppStatusLabel(row.whatsapp_status)}</td>
+                    <td>${formatDateTime(row.sent_at || row.created_at)}</td>
+                    <td><div class="wa-error-text">${shortenText(row.error_message || '—', 120)}</div></td>
+                </tr>
+            `).join('');
+        }
+
+        function setWhatsAppLogFilter(filter){
+            whatsappLogFilter = filter;
+
+            document.getElementById('wa_filter_all').classList.toggle('active', filter === 'all');
+            document.getElementById('wa_filter_sent').classList.toggle('active', filter === 'sent');
+            document.getElementById('wa_filter_failed').classList.toggle('active', filter === 'failed');
+            document.getElementById('wa_filter_pending').classList.toggle('active', filter === 'pending');
+
+            renderWhatsAppLog();
+        }
+
+        async function refreshWhatsAppLog(){
+            const { data, error } = await supabaseClient
+                .from('tenant_whatsapp_logs')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if(error){
+                console.error(error);
+                return;
+            }
+
+            allWhatsAppLogs = data || [];
+            renderWhatsAppLog();
+        }
+        /* --- End WhatsApp Log Functions --- */
+
         async function loadData(){
-            const [t, tx, sum, notif] = await Promise.all([
+            const [t, tx, sum, notif, wa] = await Promise.all([
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
                 supabaseClient.from('tenant_transactions').select('*').order('date'),
                 supabaseClient.from('tenant_yearly_summary').select('*').order('year'),
-                supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false })
+                supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('tenant_whatsapp_logs').select('*').order('created_at', { ascending: false })
             ]);
 
             allTenants = t.data || [];
             allTransactions = tx.data || [];
             allSummaries = sum.data || [];
             allNotifications = notif.data || [];
+            allWhatsAppLogs = wa.data || [];
 
             tenantBalances = allTenants.map(tn => {
                 const ls = getLatestSummary(tn.tenant_code);
@@ -1833,10 +1993,6 @@
             const cleanPhone = sanitizePhone(phone);
             if(!cleanPhone) throw new Error('رقم الهاتف غير صالح');
 
-            if(!WHATSAPP_TOKEN || WHATSAPP_TOKEN === 'PUT_YOUR_ACCESS_TOKEN_HERE'){
-                throw new Error('ضع Access Token الخاص بواتساب داخل الكود أولاً');
-            }
-
             const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
                 method: 'POST',
                 headers: {
@@ -2037,6 +2193,7 @@
                 document.getElementById('notification_type').value = '';
                 document.getElementById('notification_message').value = '';
                 await refreshNotificationLog();
+                await refreshWhatsAppLog();
             } catch(error){
                 console.error(error);
                 alert(`حدث خطأ: ${error.message}`);
@@ -2093,6 +2250,7 @@
             }
 
             renderNotificationLog();
+            renderWhatsAppLog();
             document.getElementById('loader').style.display = 'none';
         }
 
@@ -2126,6 +2284,7 @@
 
             document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
             setNotificationLogFilter('all');
+            setWhatsAppLogFilter('all');
             document.body.classList.add('loaded');
         };
     </script>
