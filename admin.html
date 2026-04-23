@@ -2115,29 +2115,66 @@
             if(!type) return alert('اختر موضوع الإشعار');
             if(!msg) return alert('أدخل نص الإشعار');
 
-            if(isComplexWideMode || !t){
-                if(type !== 'general'){
-                    alert('في وضع المجمع، يمكن فقط إرسال "رسالة عامة" لجميع المستأجرين.');
-                    return;
-                }
+           if(isComplexWideMode || !t){
+    if(type !== 'general'){
+        alert('في وضع المجمع، يمكن فقط إرسال "رسالة عامة" لجميع المستأجرين.');
+        return;
+    }
 
-                let successCount = 0;
+    let successCount = 0;
+    let whatsappCount = 0;
+    let failedWhatsappCount = 0;
 
-                for(const tenant of allTenants){
-                    try {
-                        await insertTenantNotificationRow(tenant.tenant_code, 'رسالة عامة', msg, 'general');
-                        successCount++;
-                    } catch(err){
-                        console.error('General notification insert error:', err);
+    for(const tenant of allTenants){
+        try {
+            await insertTenantNotificationRow(tenant.tenant_code, 'رسالة عامة', msg, 'general');
+            successCount++;
+
+            const tenantPhone = sanitizePhone(tenant.phone || '');
+            if(tenantPhone){
+                let logId = null;
+
+                try {
+                    const logRow = await createWhatsAppLog(tenant, {
+                        notificationId: null,
+                        sourceType: 'notification',
+                        sourceId: 'general',
+                        phone: tenantPhone,
+                        messageTitle: 'رسالة عامة',
+                        messageBody: msg,
+                        templateName: null,
+                        remainingBalance: toNumber(tenant.currentBalance)
+                    });
+
+                    logId = logRow.id;
+
+                    const waRes = await sendWhatsAppTextMessage(tenantPhone, msg);
+                    const waMessageId = waRes?.messages?.[0]?.id || null;
+
+                    await markWhatsAppLogSent(logId, waMessageId);
+                    whatsappCount++;
+                } catch (waErr){
+                    console.error('WhatsApp general send error:', waErr);
+                    if(logId){
+                        await markWhatsAppLogFailed(logId, waErr.message || 'Unknown error');
                     }
+                    failedWhatsappCount++;
                 }
-
-                await refreshNotificationLog();
-                alert(`تم إرسال الرسالة العامة داخل النظام إلى ${successCount} مستأجر`);
-                document.getElementById('notification_type').value = 'general';
-                document.getElementById('notification_message').value = '';
-                return;
             }
+        } catch(err){
+            console.error('General notification insert error:', err);
+        }
+    }
+
+    await refreshNotificationLog();
+    await refreshWhatsAppLog();
+
+    alert(`تم إرسال الرسالة العامة إلى ${successCount} مستأجر. واتساب ناجح: ${whatsappCount} | واتساب فشل: ${failedWhatsappCount}`);
+
+    document.getElementById('notification_type').value = 'general';
+    document.getElementById('notification_message').value = '';
+    return;
+}
 
             try {
                 const notifRow = await insertTenantNotificationRow(
