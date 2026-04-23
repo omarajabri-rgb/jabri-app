@@ -1141,8 +1141,7 @@
             const { error } = await supabaseClient
                 .from('tenants')
                 .update({ password: newPass })
-                .eq('tenant_code', tenantCode);
-            
+localStorage.getItem('jabri_tenant_code')            
             if (error) {
                 errorEl.innerText = 'حدث خطأ: ' + error.message;
                 errorEl.style.display = 'block';
