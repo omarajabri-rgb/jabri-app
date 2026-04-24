@@ -332,7 +332,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('tenants')
-                    .select('tenant_code, tenant_name, shop_no, phone, password')
+                    .select('tenant_code, tenant_name, shop_no, phone, password, login_count')
                     .eq('phone', phone)
                     .eq('password', password)
                     .maybeSingle();
@@ -362,11 +362,20 @@
                 }
 
                 localStorage.setItem('jabri_tenant_session', 'active');
-                localStorage.setItem('jabri_tenant_code', data.tenant_code);
-                localStorage.setItem('jabri_tenant_name', data.tenant_name || '');
-                localStorage.setItem('jabri_tenant_unit', data.shop_no || '');
+localStorage.setItem('jabri_tenant_code', data.tenant_code);
+localStorage.setItem('jabri_tenant_name', data.tenant_name || '');
+localStorage.setItem('jabri_tenant_unit', data.shop_no || '');
 
-                window.location.href = 'tenant.html';
+// 🔥 تحديث آخر دخول للمستأجر
+await supabaseClient
+    .from('tenants')
+    .update({
+        last_login: new Date().toISOString(),
+        login_count: (data.login_count || 0) + 1
+    })
+    .eq('tenant_code', data.tenant_code);
+
+window.location.href = 'tenant.html';
             } catch (err) {
                 console.error(err);
                 showError('حدث خطأ في الاتصال:\n' + err.message);
