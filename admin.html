@@ -955,10 +955,6 @@
         </section>
 
         <section class="panel">
-            
-           
-        </section>
-        <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخل دفعة جديدة</div></div>
             <div class="form-shell">
                 <div class="entry-box">
@@ -1191,22 +1187,22 @@
             if(!body) return;
 
             let rows = [
-    ...allNotifications,
-    ...allWhatsAppLogs.map(w => ({
-        tenant_code: w.tenant_code,
-        type: w.whatsapp_template_name || 'واتساب',
-        message: w.error_message || w.whatsapp_template_name || '',
-        created_at: w.sent_at || w.created_at,
-        isWhatsApp: true,
-        status: w.whatsapp_status
-    }))
-];
+                ...allNotifications,
+                ...allWhatsAppLogs.map(w => ({
+                    tenant_code: w.tenant_code,
+                    type: w.whatsapp_template_name || 'واتساب',
+                    message: w.error_message || w.message_body || w.whatsapp_template_name || '',
+                    created_at: w.sent_at || w.created_at,
+                    isWhatsApp: true,
+                    status: w.whatsapp_status
+                }))
+            ];
 
             if(notificationLogFilter === 'read'){
-    rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
-} else if(notificationLogFilter === 'unread'){
-    rows = rows.filter(n => !n.isWhatsApp && !n.is_read);
-}
+                rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
+            } else if(notificationLogFilter === 'unread'){
+                rows = rows.filter(n => !n.isWhatsApp && !n.is_read);
+            }
 
             rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
@@ -1217,9 +1213,11 @@
 
             body.innerHTML = rows.map(row => {
                 const isRead = row.is_read === true;
-                const statusHtml = isRead
-                    ? `<span class="notify-status-pill read">✓ مقروء</span>`
-                    : `<span class="notify-status-pill unread">○ لم يقرأ</span>`;
+                const statusHtml = row.isWhatsApp
+                    ? getWhatsAppStatusLabel(row.status)
+                    : (isRead
+                        ? `<span class="notify-status-pill read">✓ مقروء</span>`
+                        : `<span class="notify-status-pill unread">○ لم يقرأ</span>`);
 
                 const dateLabel = isRead && row.seen_at
                     ? `${formatDateTime(row.created_at)}<br><small style="color:#7a7469;font-weight:800;">قرئت: ${formatDateTime(row.seen_at)}</small>`
@@ -1228,7 +1226,7 @@
                 return `
                     <tr>
                         <td>${getTenantDisplayName(row.tenant_code)}</td>
-                        <td>${row.isWhatsApp ? '📱 ' + (row.type || 'واتساب') : '📬 ' + getNotificationTypeLabel(row.type)}</td>
+                        <td>${row.isWhatsApp ? '📱 واتساب - ' + (row.type || 'رسالة') : '📬 ' + getNotificationTypeLabel(row.type)}</td>
                         <td><div class="notify-short-text">${shortenText(row.message)}</div></td>
                         <td>${dateLabel}</td>
                         <td>${statusHtml}</td>
@@ -1248,17 +1246,29 @@
         }
 
         async function refreshNotificationLog(){
-            const { data, error } = await supabaseClient
-                .from('tenant_notifications')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const [notif, wa] = await Promise.all([
+                supabaseClient
+                    .from('tenant_notifications')
+                    .select('*')
+                    .order('created_at', { ascending: false }),
+                supabaseClient
+                    .from('tenant_whatsapp_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+            ]);
 
-            if(error){
-                console.error(error);
+            if(notif.error){
+                console.error(notif.error);
                 return;
             }
 
-            allNotifications = data || [];
+            if(wa.error){
+                console.error(wa.error);
+                return;
+            }
+
+            allNotifications = notif.data || [];
+            allWhatsAppLogs = wa.data || [];
             renderNotificationLog();
         }
 
@@ -1306,12 +1316,18 @@
         function setWhatsAppLogFilter(filter){
             whatsappLogFilter = filter;
 
-            document.getElementById('wa_filter_all').classList.toggle('active', filter === 'all');
-            document.getElementById('wa_filter_sent').classList.toggle('active', filter === 'sent');
-            document.getElementById('wa_filter_failed').classList.toggle('active', filter === 'failed');
-            document.getElementById('wa_filter_pending').classList.toggle('active', filter === 'pending');
+            const allBtn = document.getElementById('wa_filter_all');
+            const sentBtn = document.getElementById('wa_filter_sent');
+            const failedBtn = document.getElementById('wa_filter_failed');
+            const pendingBtn = document.getElementById('wa_filter_pending');
+
+            if(allBtn) allBtn.classList.toggle('active', filter === 'all');
+            if(sentBtn) sentBtn.classList.toggle('active', filter === 'sent');
+            if(failedBtn) failedBtn.classList.toggle('active', filter === 'failed');
+            if(pendingBtn) pendingBtn.classList.toggle('active', filter === 'pending');
 
             renderWhatsAppLog();
+            renderNotificationLog();
         }
 
         async function refreshWhatsAppLog(){
@@ -1847,36 +1863,47 @@
                         final_balance: newFinal
                     })
                     .eq('id', row.id);
-await supabaseClient
-    .from('tenant_yearly_summary')
-    .update({
-        total_credit: newCredit,
-        final_balance: newFinal
-    })
-    .eq('id', row.id);
 
-// 🔥 إرسال واتساب بعد حفظ الدفعة
-const tenantPhone = sanitizePhone(tenant.phone || '');
+                // TODO 2 — إرسال واتساب تلقائي بعد نجاح حفظ الدفعة وتحديث الملخص
+                const tenantPhone = sanitizePhone(tenant.phone || '');
 
-if (tenantPhone) {
-    try {
-        await sendWhatsAppTemplate(tenantPhone, 'payment_received_jabri', [
-            tenant.tenant_name || 'عميلنا الكريم',
-            String(amount),
-            receipt,
-            date,
-            String(newFinal)
-        ]);
+                if(tenantPhone){
+                    let paymentWaLogId = null;
 
-        console.log('WhatsApp sent successfully');
-    } catch (waErr) {
-        console.error('WhatsApp failed:', waErr.message);
-    }
-}
+                    try {
+                        const paymentWaLog = await createWhatsAppLog(tenant, {
+                            sourceType: 'payment',
+                            sourceId: receipt,
+                            phone: tenantPhone,
+                            messageTitle: 'تم استلام الدفعة',
+                            messageBody: `تم استلام دفعة بقيمة ${roundMoney(amount)} دينار. رقم السند: ${receipt} بتاريخ ${date}. المتبقي على الحساب: ${roundMoney(newFinal)} دينار.`,
+                            templateName: 'payment_rece',
+                            amount: amount,
+                            receiptNo: receipt,
+                            remainingBalance: newFinal
+                        });
 
-await refresh(code);
-clearTransactionForm();
-showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
+                        paymentWaLogId = paymentWaLog.id;
+
+                        const waRes = await sendWhatsAppTemplate(tenantPhone, 'payment_rece', [
+                            tenant.tenant_name || 'عميلنا الكريم',
+                            String(roundMoney(amount)),
+                            receipt,
+                            date,
+                            String(roundMoney(newFinal))
+                        ]);
+
+                        const waMessageId = waRes?.messages?.[0]?.id || null;
+                        await markWhatsAppLogSent(paymentWaLogId, waMessageId);
+                    } catch (waErr){
+                        console.error('Payment WhatsApp failed:', waErr);
+
+                        if(paymentWaLogId){
+                            await markWhatsAppLogFailed(paymentWaLogId, waErr.message || 'Unknown error');
+                        }
+                    }
+                }
+
                 await refresh(code);
                 clearTransactionForm();
                 showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
@@ -2410,7 +2437,8 @@ function updateNotificationComposer() {
     // 🔥 استبدال اسم المستأجر تلقائياً
     message = message.replace('[اسم المستأجر]', tenantName);
 
-document.getElementById('notification_message').value = message;}
+document.getElementById('notification_message').value = message;
+        }
         window.onload = async () => {
             document.body.style.opacity = '1';
             clearTransactionForm();
