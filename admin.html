@@ -1207,7 +1207,7 @@
             rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
             if(!rows.length){
-                body.innerHTML = `<tr><td colspan="5" class="notify-empty">لا توجد إشعارات مطابقة</td></tr>`;
+                body.innerHTML = `<tr><td colspan="5" class="notify-empty">لا توجد </td></tr>`;
                 return;
             }
 
