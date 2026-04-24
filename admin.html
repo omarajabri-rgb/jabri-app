@@ -923,7 +923,7 @@
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">📬 سجل الإشعارات المرسلة</div></div>
+            <div class="chip-header"><div class="chip-title">📬 سجل التواصل والمتابعة</div></div>
 
             <div class="notify-log-toolbar">
                 <button class="btn btn-soft active" id="notif_filter_all" onclick="setNotificationLogFilter('all')">الكل</button>
@@ -938,8 +938,8 @@
                         <thead>
                             <tr>
                                 <th>المستأجر</th>
-                                <th>نوع الإشعار</th>
-                                <th>نص مختصر</th>
+                                <th>القناة / النوع</th>
+                                <th>النص / القالب</th>
                                 <th>تاريخ الإرسال</th>
                                 <th>الحالة</th>
                             </tr>
@@ -955,37 +955,8 @@
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">📱 سجل رسائل واتساب</div></div>
-
-            <div class="notify-log-toolbar">
-                <button class="btn btn-soft active" id="wa_filter_all" onclick="setWhatsAppLogFilter('all')">الكل</button>
-                <button class="btn btn-soft" id="wa_filter_sent" onclick="setWhatsAppLogFilter('sent')">مرسلة</button>
-                <button class="btn btn-soft" id="wa_filter_failed" onclick="setWhatsAppLogFilter('failed')">فاشلة</button>
-                <button class="btn btn-soft" id="wa_filter_pending" onclick="setWhatsAppLogFilter('pending')">قيد الانتظار</button>
-                <button class="btn btn-gold" onclick="refreshWhatsAppLog()">تحديث</button>
-            </div>
-
-            <div class="notify-log-wrap">
-                <div class="notify-log-table-wrap">
-                    <table class="notify-log-table">
-                        <thead>
-                            <tr>
-                                <th>المستأجر</th>
-                                <th>القالب</th>
-                                <th>رقم الهاتف</th>
-                                <th>الحالة</th>
-                                <th>تاريخ الإرسال</th>
-                                <th>الخطأ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="whatsapp_log_body">
-                            <tr>
-                                <td colspan="6" class="notify-empty">لا توجد سجلات واتساب بعد</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            
+           
         </section>
         <section class="panel">
             <div class="chip-header"><div class="chip-title">إدخل دفعة جديدة</div></div>
@@ -1219,13 +1190,23 @@
             const body = document.getElementById('notification_log_body');
             if(!body) return;
 
-            let rows = [...allNotifications];
+            let rows = [
+    ...allNotifications,
+    ...allWhatsAppLogs.map(w => ({
+        tenant_code: w.tenant_code,
+        type: w.whatsapp_template_name || 'واتساب',
+        message: w.error_message || w.whatsapp_template_name || '',
+        created_at: w.sent_at || w.created_at,
+        isWhatsApp: true,
+        status: w.whatsapp_status
+    }))
+];
 
             if(notificationLogFilter === 'read'){
-                rows = rows.filter(n => n.is_read === true);
-            } else if(notificationLogFilter === 'unread'){
-                rows = rows.filter(n => !n.is_read);
-            }
+    rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
+} else if(notificationLogFilter === 'unread'){
+    rows = rows.filter(n => !n.isWhatsApp && !n.is_read);
+}
 
             rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
@@ -1247,7 +1228,7 @@
                 return `
                     <tr>
                         <td>${getTenantDisplayName(row.tenant_code)}</td>
-                        <td>${getNotificationTypeLabel(row.type)}</td>
+                        <td>${row.isWhatsApp ? '📱 ' + (row.type || 'واتساب') : '📬 ' + getNotificationTypeLabel(row.type)}</td>
                         <td><div class="notify-short-text">${shortenText(row.message)}</div></td>
                         <td>${dateLabel}</td>
                         <td>${statusHtml}</td>
@@ -1313,7 +1294,7 @@
             body.innerHTML = rows.map(row => `
                 <tr>
                     <td>${getTenantDisplayName(row.tenant_code)}</td>
-                    <td><span class="wa-template-chip">${row.whatsapp_template_name || '—'}</span></td>
+                    <td><span class="wa-template-chip">📱 ${row.whatsapp_template_name || '—'}</span></td>
                     <td><span class="wa-phone-text">${row.phone || '—'}</span></td>
                     <td>${getWhatsAppStatusLabel(row.whatsapp_status)}</td>
                     <td>${formatDateTime(row.sent_at || row.created_at)}</td>
