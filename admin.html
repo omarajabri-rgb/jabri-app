@@ -994,7 +994,9 @@
                 </div>
             </div>
         </section>
-
+<button class="btn btn-soft" style="width:100%; height:52px; margin-top:10px;" onclick="sendToAllTenants()">
+    إرسال بيانات الدخول لجميع المستأجرين
+</button>
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v5.1</div>
@@ -2438,22 +2440,85 @@ function updateNotificationComposer() {
     message = message.replace('[اسم المستأجر]', tenantName);
 
 document.getElementById('notification_message').value = message;
+}
+
+
+// 🔥 إرسال لجميع المستأجرين
+async function sendToAllTenants(){
+
+    const confirmSend = confirm('⚠️ هل أنت متأكد من إرسال بيانات الدخول لجميع المستأجرين؟');
+    if(!confirmSend) return;
+
+    const { data: tenants, error } = await supabaseClient
+        .from('tenants')
+        .select('tenant_name, phone, password');
+
+    if(error){
+        alert('خطأ في جلب البيانات');
+        console.error(error);
+        return;
+    }
+
+    let success = 0;
+    let failed = 0;
+
+    for(const tenant of tenants){
+
+        console.log('Sending to:', tenant.tenant_name);
+
+        const phone = sanitizePhone(tenant.phone || '');
+        const password = tenant.password;
+
+        if(!phone || !password){
+            failed++;
+            continue;
         }
-        window.onload = async () => {
-            document.body.style.opacity = '1';
-            clearTransactionForm();
-            await refresh();
 
-           document.getElementById('tenant_select').addEventListener('change', async e => {
-    await renderSelectedTenant(e.target.value);
-    updateNotificationComposer(); // 👈 أضف هذا السطر
-});
+        try{
 
-            document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
-            setNotificationLogFilter('all');
-            setWhatsAppLogFilter('all');
-            document.body.classList.add('loaded');
-        };
+            // إرسال الرابط
+            await sendWhatsAppTemplate('tenant_access_link', [
+                tenant.tenant_name,
+                phone,
+                'https://app.jabricomplex.com'
+            ]);
+
+            // إرسال الكود
+            await sendWhatsAppTemplate('tenant_login_code', [
+                password
+            ]);
+
+            success++;
+
+        }catch(err){
+            console.error('Failed:', tenant.tenant_name, err);
+            failed++;
+        }
+
+        // delay مهم
+        await new Promise(r => setTimeout(r, 1500));
+    }
+
+    alert(`تم الإرسال ✅\nنجح: ${success}\nفشل: ${failed}`);
+}
+
+
+// 👇 هذا يبقى مرة واحدة فقط
+window.onload = async () => {
+    document.body.style.opacity = '1';
+    clearTransactionForm();
+    await refresh();
+
+    document.getElementById('tenant_select').addEventListener('change', async e => {
+        await renderSelectedTenant(e.target.value);
+        updateNotificationComposer();
+    });
+
+    document.getElementById('notification_type').addEventListener('change', updateNotificationComposer);
+    setNotificationLogFilter('all');
+    setWhatsAppLogFilter('all');
+    document.body.classList.add('loaded');
+};
         
     </script>
     
