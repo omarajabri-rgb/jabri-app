@@ -1855,7 +1855,7 @@
                 const ob = toNumber(row.opening_balance);
                 const td = toNumber(row.total_debit);
                 const newCredit = curCredit + amount;
-                const newFinal = td - newCredit;
+                const newFinal = ob + td - newCredit;
 
                 await supabaseClient
                     .from('tenant_yearly_summary')
