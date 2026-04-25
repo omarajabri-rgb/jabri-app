@@ -1432,7 +1432,7 @@
             collectionChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['الدائن','الرصيد'],
+                    labels: ['المدفوع','المتبقي'],
                     datasets: [{
                         data: [paid, rem],
                         backgroundColor: ['#159a6f','#d14d4d'],
@@ -1462,7 +1462,7 @@
                         c.font = 'bold 36px Tajawal';
                         c.fillText(`${ratio}%`, x, y - 10);
                         c.font = 'bold 16px Tajawal';
-                        c.fillText(`${Math.round(paid)} / ${Math.round(tot)}`, x, y + 22);
+                        // c.fillText(`${Math.round(paid)} / ${Math.round(tot)}`, x, y + 22);  // تم إخفاء النص
                         c.restore();
                     }
                 }]
