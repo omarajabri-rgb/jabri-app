@@ -1886,13 +1886,13 @@
 
                         paymentWaLogId = paymentWaLog.id;
 
-                        const waRes = await sendWhatsAppTemplate(tenantPhone, 'payment_rece', [
-                            tenant.tenant_name || 'عميلنا الكريم',
-                            String(roundMoney(amount)),
-                            receipt,
-                            date,
-                            String(roundMoney(newFinal))
-                        ]);
+                        const waRes = await sendWhatsAppTemplate(tenantPhone, 'payment_received_jabri', [
+    tenant.tenant_name || 'عميلنا الكريم',
+    String(roundMoney(amount)),
+    receipt,
+    date,
+    String(roundMoney(newFinal))
+]);
 
                         const waMessageId = waRes?.messages?.[0]?.id || null;
                         await markWhatsAppLogSent(paymentWaLogId, waMessageId);
