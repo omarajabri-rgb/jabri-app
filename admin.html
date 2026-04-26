@@ -1010,10 +1010,7 @@
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
-
-        const WHATSAPP_PHONE_ID = '1111439995384780';
-        const WHATSAPP_TOKEN = 'EAAWfRBFxZBy0BRe6IkqNf25emKP4DaobHu3gYQ3t8ltUAoq7F0gbEzv2TZBZB8oo5ZBZBXC4CnIfyMCAnXqm7lhQWZBZANOiSVnVDCgFxLoZACZBhfdKb3evgEG4S204ZBRQkEkdZBRNeFlEwZB36NUS934L9VdWhwEjXiNqcSjQb4GuV3NB0IMzJlf7wGWW5U88xXkMNQZDZD';
-        let allTenants = [];
+let allTenants = [];
         let allTransactions = [];
         let allSummaries = [];
         let allNotifications = [];
@@ -1039,13 +1036,12 @@
         const sanitizePhone = v => String(v || '').replace(/\D/g, '').trim();
 
 
+
+
 async function sendWhatsAppTemplate(phone, templateName, params = []) {
     const cleanPhone = sanitizePhone(phone);
     if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
     if (!templateName) throw new Error('اسم قالب واتساب غير موجود');
-
-async function sendWhatsAppTemplate(phone, templateName, params = []) {
-    const cleanPhone = sanitizePhone(phone);
 
     const res = await fetch('/api/send-whatsapp', {
         method: 'POST',
@@ -1058,78 +1054,39 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
         })
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.ok === false) {
         throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
     }
 
     return data.meta;
-}        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            messaging_product: "whatsapp",
-            to: cleanPhone,
-            type: "template",
-            template: {
-                name: templateName,
-                language: { code: "ar" },
-                components: [
-                    {
-                        type: "body",
-                        parameters: params.map(p => ({
-                            type: "text",
-                            text: String(p ?? '')
-                        }))
-                    }
-                ]
-            }
-        })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-        console.log("META TEMPLATE ERROR:", data);
-        throw new Error(data?.error?.message || 'فشل إرسال قالب واتساب');
-    }
-
-    return data;
 }
 
 async function sendWhatsAppTextMessage(phone, message) {
     const cleanPhone = sanitizePhone(phone);
     if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
 
-    const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
+    const res = await fetch('/api/send-whatsapp', {
         method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            messaging_product: "whatsapp",
-            to: cleanPhone,
-            type: "text",
-            text: {
-                preview_url: false,
-                body: String(message || '')
-            }
+            phone: cleanPhone,
+            mode: 'text',
+            message
         })
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({}));
 
-    if (!response.ok) {
-        console.log("META TEXT ERROR:", data);
-        throw new Error(data?.error?.message || 'فشل إرسال رسالة واتساب');
+    if (!res.ok || data.ok === false) {
+        throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
     }
 
-    return data;
+    return data.meta;
 }
+
+        
 
         
 
