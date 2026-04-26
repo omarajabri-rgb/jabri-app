@@ -1944,42 +1944,38 @@ async function sendWhatsAppTextMessage(phone, message) {
                 const tenantPhone = sanitizePhone(tenant.phone || '');
 
                 if(tenantPhone){
-    console.log("📱 WhatsApp starting...", tenantPhone);
-                    let paymentWaLogId = null;
+    let paymentWaLogId = null;
 
-                    try {
-                        const paymentWaLog = await createWhatsAppLog(tenant, {
-                            sourceType: 'payment',
-                            sourceId: receipt,
-                            phone: tenantPhone,
-                            messageTitle: 'تم استلام الدفعة',
-                            messageBody: `تم استلام دفعة بقيمة ${roundMoney(amount)} دينار. رقم السند: ${receipt} بتاريخ ${date}. المتبقي على الحساب: ${roundMoney(newFinal)} دينار.`,
-                            templateName: 'payment_received_jabri',
-                            amount: amount,
-                            receiptNo: receipt,
-                            remainingBalance: newFinal
-                        });
+    try {
+        const paymentWaLog = await createWhatsAppLog(tenant, {
+            sourceType: 'payment',
+            sourceId: receipt,
+            phone: tenantPhone,
+            messageTitle: 'تم استلام الدفعة',
+            messageBody: `تم استلام دفعة بقيمة ${roundMoney(amount)} دينار. رقم السند: ${receipt} بتاريخ ${date}. المتبقي: ${roundMoney(newFinal)} دينار.`,
+            templateName: 'payment_received_jabri',
+            amount: amount,
+            receiptNo: receipt,
+            remainingBalance: newFinal
+        });
 
-                        paymentWaLogId = paymentWaLog.id;
+        paymentWaLogId = paymentWaLog.id;
 
-                        let waMessageId = null;
+        try {
+            const waRes = await sendWhatsAppTemplate(tenantPhone, 'payment_received_jabri', [
+                tenant.tenant_name || 'عميلنا الكريم',
+                String(roundMoney(amount)),
+                receipt,
+                date,
+                String(roundMoney(newFinal))
+            ]);
 
-                        try {
-                            console.log("📤 Sending template...");
-                            const waRes = await sendWhatsAppTemplate(tenantPhone, 'payment_received_jabri', [
-                                tenant.tenant_name || 'عميلنا الكريم',
-                                String(roundMoney(amount)),
-                                receipt,
-                                date,
-                                String(roundMoney(newFinal))
-                            ]);
+            const waMessageId = waRes?.messages?.[0]?.id || null;
+            await markWhatsAppLogSent(paymentWaLogId, waMessageId);
 
-                            waMessageId = waRes?.messages?.[0]?.id || null;
-                            await markWhatsAppLogSent(paymentWaLogId, waMessageId);
-                        } catch(templateErr) {
-                            console.warn('Payment WhatsApp template failed, trying text fallback:', templateErr);
+        } catch(templateErr) {
 
-                            const fallbackMessage = `مرحباً ${tenant.tenant_name || 'عميلنا الكريم'}
+            const fallbackMessage = `مرحباً ${tenant.tenant_name || 'عميلنا الكريم'}
 
 تم استلام دفعة بقيمة ${roundMoney(amount)} دينار ✅
 رقم السند: ${receipt}
@@ -1989,21 +1985,19 @@ async function sendWhatsAppTextMessage(phone, message) {
 
 مجمع جبري`;
 
-                            const textRes = await sendWhatsAppTextMessage(tenantPhone, fallbackMessage);
-                            waMessageId = textRes?.messages?.[0]?.id || 'TEXT_FALLBACK_SENT';
-                            await markWhatsAppLogSent(paymentWaLogId, waMessageId);
-                        }
-                    catch (waErr){
-    alert("WA ERROR: " + waErr.message);
-    console.error('Payment WhatsApp failed:', waErr);
+            const textRes = await sendWhatsAppTextMessage(tenantPhone, fallbackMessage);
+            const waMessageId = textRes?.messages?.[0]?.id || 'TEXT_FALLBACK';
+            await markWhatsAppLogSent(paymentWaLogId, waMessageId);
+        }
+
+    } catch (waErr){
+        console.error('WhatsApp failed:', waErr);
+
+        if(paymentWaLogId){
+            await markWhatsAppLogFailed(paymentWaLogId, waErr.message || 'Unknown error');
+        }
+    }
 }
-
-                        if(paymentWaLogId){
-                            await markWhatsAppLogFailed(paymentWaLogId, waErr.message || 'Unknown error');
-                        }
-                    }
-                }
-
                 await refresh(code);
                 clearTransactionForm();
                 showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
