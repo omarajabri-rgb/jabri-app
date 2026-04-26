@@ -1040,8 +1040,6 @@ let allTenants = [];
 
 async function sendWhatsAppTemplate(phone, templateName, params = []) {
     const cleanPhone = sanitizePhone(phone);
-    if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
-    if (!templateName) throw new Error('اسم قالب واتساب غير موجود');
 
     const res = await fetch('/api/send-whatsapp', {
         method: 'POST',
@@ -1054,7 +1052,7 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
         })
     });
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json();
 
     if (!res.ok || data.ok === false) {
         throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
@@ -1063,34 +1061,7 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
     return data.meta;
 }
 
-async function sendWhatsAppTextMessage(phone, message) {
-    const cleanPhone = sanitizePhone(phone);
-    if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
-
-    const res = await fetch('/api/send-whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            phone: cleanPhone,
-            mode: 'text',
-            message
-        })
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || data.ok === false) {
-        throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
-    }
-
-    return data.meta;
-}
-
-        
-
-        
-
-
+   
         const getLatestSummary = tc =>
             allSummaries
                 .filter(r => r.tenant_code === tc)
