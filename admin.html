@@ -1054,9 +1054,17 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
 
 const text = await res.text();
 const data = text ? JSON.parse(text) : {};
-    if (!res.ok || data.ok === false) {
-        throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
-    }
+   if (!res.ok || data.ok === false) {
+    console.log("WHATSAPP API RESPONSE:", data);
+
+    throw new Error(
+        data?.meta?.error?.message ||
+        data?.error?.message ||
+        data?.error ||
+        JSON.stringify(data) ||
+        `WhatsApp failed ${res.status}`
+    );
+}
 
     return data.meta;
 }
