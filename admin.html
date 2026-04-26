@@ -1035,7 +1035,48 @@ const WHATSAPP_TOKEN = 'EAAWfRBFxZBy0BRe6IkqNf25emKP4DaobHu3gYQ3t8ltUAoq7F0gbEzv
 
         const roundMoney = v => Math.round(toNumber(v));
         const sanitizePhone = v => String(v || '').replace(/\D/g, '').trim();
+async function sendWhatsAppTemplate(phone, templateName, params = []) {
+    const cleanPhone = sanitizePhone(phone);
+    if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
 
+    const response = await fetch(
+        `https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`,
+        {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                messaging_product: "whatsapp",
+                to: cleanPhone,
+                type: "template",
+                template: {
+                    name: templateName,
+                    language: { code: "ar" },
+                    components: [
+                        {
+                            type: "body",
+                            parameters: params.map(p => ({
+                                type: "text",
+                                text: String(p ?? '')
+                            }))
+                        }
+                    ]
+                }
+            })
+        }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        console.log("META TEMPLATE ERROR:", data);
+        throw new Error(data?.error?.message || 'فشل إرسال واتساب');
+    }
+
+    return data;
+}
         const getLatestSummary = tc =>
             allSummaries
                 .filter(r => r.tenant_code === tc)
