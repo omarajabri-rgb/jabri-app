@@ -2043,43 +2043,59 @@ function getNotificationTemplateConfig(type, tenant, msg){
         }
 
         async function sendWhatsAppTemplate(phone, templateName, params = []){
-            const cleanPhone = sanitizePhone(phone);
-            if(!cleanPhone) throw new Error('رقم الهاتف غير صالح');
+    console.log("✅ 1. تم استدعاء sendWhatsAppTemplate");
+    console.log("📞 2. رقم الهاتف الخام:", phone);
+    
+    const cleanPhone = sanitizePhone(phone);
+    console.log("📞 3. رقم الهاتف بعد التنظيف:", cleanPhone);
+    
+    if(!cleanPhone) throw new Error('رقم الهاتف غير صالح');
 
-            const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    messaging_product: 'whatsapp',
-                    to: cleanPhone,
-                    type: 'template',
-                    template: {
-                        name: templateName,
-                        language: { code: 'ar' },
-                        components: [
-                            {
-                                type: 'body',
-                                parameters: params.map(val => ({
-                                    type: 'text',
-                                    text: String(val ?? '')
-                                }))
-                            }
-                        ]
+    console.log("📦 4. اسم القالب:", templateName);
+    console.log("📋 5. المعاملات (params):", params);
+    console.log("🆔 6. WHATSAPP_PHONE_ID:", WHATSAPP_PHONE_ID);
+    console.log("🔑 7. WHATSAPP_TOKEN موجود؟:", !!WHATSAPP_TOKEN);
+    console.log("🚀 8. جاري الإرسال إلى واتساب API...");
+
+    const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: cleanPhone,
+            type: 'template',
+            template: {
+                name: templateName,
+                language: { code: 'ar' },
+                components: [
+                    {
+                        type: 'body',
+                        parameters: params.map(val => ({
+                            type: 'text',
+                            text: String(val ?? '')
+                        }))
                     }
-                })
-            });
-
-            const data = await response.json();
-
-            if(!response.ok || data.error){
-                throw new Error(data?.error?.message || 'فشل إرسال قالب WhatsApp');
+                ]
             }
+        })
+    });
 
-            return data;
-        }
+    console.log("📥 9. تم استلام رد من واتساب، الحالة:", response.status);
+
+    const data = await response.json();
+    console.log("📥 10. بيانات الرد:", data);
+
+    if(!response.ok || data.error){
+        console.error("❌ 11. فشل الإرسال:", data?.error?.message);
+        throw new Error(data?.error?.message || 'فشل إرسال قالب WhatsApp');
+    }
+
+    console.log("✅ 12. تم الإرسال بنجاح!");
+    return data;
+}
 
         async function createWhatsAppLog(tenant, options = {}){
             const payload = {
