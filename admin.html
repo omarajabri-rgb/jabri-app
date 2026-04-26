@@ -1045,7 +1045,10 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
 
     const res = await fetch(SUPABASE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + supabaseClient.supabaseKey
+},
         body: JSON.stringify({
             phone: cleanPhone,
             mode: 'template',
