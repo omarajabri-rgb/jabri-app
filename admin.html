@@ -1044,8 +1044,28 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
     if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
     if (!templateName) throw new Error('اسم قالب واتساب غير موجود');
 
-    const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
+async function sendWhatsAppTemplate(phone, templateName, params = []) {
+    const cleanPhone = sanitizePhone(phone);
+
+    const res = await fetch('/api/send-whatsapp', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone: cleanPhone,
+            mode: 'template',
+            templateName,
+            params
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.ok === false) {
+        throw new Error(data?.meta?.error?.message || data?.error || 'WhatsApp failed');
+    }
+
+    return data.meta;
+}        method: 'POST',
         headers: {
             'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
             'Content-Type': 'application/json'
