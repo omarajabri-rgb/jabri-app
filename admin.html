@@ -2041,41 +2041,33 @@ function getNotificationTemplateConfig(type, tenant, msg){
             return null;
         }
 
-        async function sendWhatsAppTemplate(phone, templateName, params = []) {
-    console.log("✅ 1. تم استدعاء sendWhatsAppTemplate");
-    console.log("📞 2. رقم الهاتف الخام:", phone);
+        async function sendWhatsAppTextMessage(phone, message) {
     const cleanPhone = sanitizePhone(phone);
-    console.log("📞 3. رقم الهاتف بعد التنظيف:", cleanPhone);
     if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
-    console.log("📦 4. اسم القالب:", templateName);
-    console.log("📋 5. params:", params);
 
-    // استدعاء الـ Edge Function بدلاً من فيسبوك مباشرة
-    const response = await fetch(
-        `https://gzukfvxcpfblzqyjzkoz.supabase.co/functions/v1/send-whatsapp`,
-        {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${supabaseClient.supabaseKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                phone: cleanPhone,
-                templateName: templateName,
-                params: params
-            })
-        }
-    );
+    const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: cleanPhone,
+            type: 'text',
+            text: {
+                preview_url: false,
+                body: message
+            }
+        })
+    });
 
-    console.log("📥 9. رد من Edge Function، الحالة:", response.status);
-    const data = await response.json();
-    console.log("📥 10. بيانات الرد:", data);
+    const data = await response.json().catch(() => ({}));
 
-    if (!response.ok || !data.success) {
-        throw new Error(data?.error || 'فشل إرسال عبر الـ Edge Function');
+    if (!response.ok) {
+        throw new Error(data?.error?.message || 'فشل إرسال واتساب');
     }
 
-    console.log("✅ 12. تم الإرسال بنجاح عبر الـ Edge Function!");
     return data;
 }
 
