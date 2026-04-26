@@ -780,7 +780,6 @@
         }
     </style>
 
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://esm.sh https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src *; img-src * data:;"></head>
 <body>
     <div id="loader"><div class="spinner"></div></div>
 
@@ -2056,7 +2055,7 @@ function getNotificationTemplateConfig(type, tenant, msg){
             type: "text",
             text: {
                 preview_url: false,
-                body: message
+                body: String(message || '')
             }
         })
     });
@@ -2064,13 +2063,52 @@ function getNotificationTemplateConfig(type, tenant, msg){
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        console.log("META ERROR:", data);
+        console.log("META TEXT ERROR:", data);
         throw new Error(data?.error?.message || 'فشل إرسال واتساب');
     }
 
     return data;
 }
+async function sendWhatsAppTemplate(phone, templateName, params = []) {
+    const cleanPhone = sanitizePhone(phone);
+    if (!cleanPhone) throw new Error('رقم الهاتف غير صالح');
+    if (!templateName) throw new Error('اسم قالب واتساب غير موجود');
 
+    const response = await fetch(`https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: cleanPhone,
+            type: "template",
+            template: {
+                name: templateName,
+                language: { code: "ar" },
+                components: [
+                    {
+                        type: "body",
+                        parameters: params.map(p => ({
+                            type: "text",
+                            text: String(p ?? '')
+                        }))
+                    }
+                ]
+            }
+        })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        console.log("META TEMPLATE ERROR:", data);
+        throw new Error(data?.error?.message || 'فشل إرسال قالب واتساب');
+    }
+
+    return data;
+}
         async function createWhatsAppLog(tenant, options = {}){
             const payload = {
                 tenant_code: tenant?.tenant_code || null,
