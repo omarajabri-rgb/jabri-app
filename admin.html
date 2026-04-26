@@ -1996,7 +1996,7 @@
             msg.value = buildNotificationText(type, t);
         }
 
-        function getNotificationTemplateConfig(type, tenant){
+function getNotificationTemplateConfig(type, tenant, msg){
             const tenantName = tenant?.tenant_name || tenant?.tenant_code || 'المستأجر';
 
             if(type === 'first'){
@@ -2033,7 +2033,12 @@
                     params: [tenantName]
                 };
             }
-
+ if(type === 'general'){
+        return {
+            templateName: 'general_message',
+            params: [msg]
+        };
+    }
             return null;
         }
 
@@ -2233,7 +2238,8 @@
                 );
 
                 const tenantPhone = sanitizePhone(t.phone || '');
-                const templateConfig = getNotificationTemplateConfig(type, t);
+const templateConfig = getNotificationTemplateConfig(type, t, msg);
+
 
                 if(tenantPhone && templateConfig){
                     let logId = null;
