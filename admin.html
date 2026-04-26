@@ -1944,6 +1944,7 @@ async function sendWhatsAppTextMessage(phone, message) {
                 const tenantPhone = sanitizePhone(tenant.phone || '');
 
                 if(tenantPhone){
+    console.log("📱 WhatsApp starting...", tenantPhone);
                     let paymentWaLogId = null;
 
                     try {
