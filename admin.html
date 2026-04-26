@@ -1047,7 +1047,8 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
         method: 'POST',
         headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + supabaseClient.supabaseKey
+    'apikey': supabaseClient.supabaseKey,
+'Authorization': 'Bearer ' + supabaseClient.supabaseKey
 },
         body: JSON.stringify({
             phone: cleanPhone,
