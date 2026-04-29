@@ -1205,6 +1205,8 @@
         });
 
         async function init() {
+            document.getElementById('loader').style.display = 'flex';
+document.body.classList.remove('loaded');
             try {
                 const { data: tenant, error: tenantError } = await supabaseClient
                     .from('tenants')
