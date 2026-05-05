@@ -1670,16 +1670,20 @@ const data = text ? JSON.parse(text) : {};
     let totalComplexDebit = 0;
     let tenantCount = 0;
 
-    // FIX: Use only 2026 data for General Complex page
+    // CHANGE HERE: Force use only 2026 data
+    const targetYear = 2026;
+    
     allTenants.forEach(tenant => {
-        const summary2026 = allSummaries.find(s => s.tenant_code === tenant.tenant_code && s.year == 2026);
-        if(summary2026){
-            totalComplexCredit += toNumber(summary2026.total_credit);
-            totalComplexBalance += toNumber(summary2026.final_balance);
-            totalComplexDebit += toNumber(summary2026.total_debit);
+        const yearData = allSummaries.find(s => s.tenant_code === tenant.tenant_code && s.year == targetYear);
+        if(yearData){
+            totalComplexCredit += toNumber(yearData.total_credit);
+            totalComplexBalance += toNumber(yearData.final_balance);
+            totalComplexDebit += toNumber(yearData.total_debit);
             tenantCount++;
         }
     });
+    
+    // Rest of the function continues as is...
 
             const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
