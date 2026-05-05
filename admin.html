@@ -1662,23 +1662,24 @@ const data = text ? JSON.parse(text) : {};
         }
 
         function renderComplexWideView(){
-            isComplexWideMode = true;
-            setComplexChartsVisibility(true);
+    isComplexWideMode = true;
+    setComplexChartsVisibility(true);
 
-            let totalComplexCredit = 0;
-            let totalComplexBalance = 0;
-            let totalComplexDebit = 0;
-            let tenantCount = 0;
+    let totalComplexCredit = 0;
+    let totalComplexBalance = 0;
+    let totalComplexDebit = 0;
+    let tenantCount = 0;
 
-            allTenants.forEach(tenant => {
-                const latest = getLatestSummary(tenant.tenant_code);
-                if(latest){
-                    totalComplexCredit += toNumber(latest.total_credit);
-                    totalComplexBalance += toNumber(latest.final_balance);
-                    totalComplexDebit += toNumber(latest.total_debit);
-                    tenantCount++;
-                }
-            });
+    // FIX: Use only 2026 data for General Complex page
+    allTenants.forEach(tenant => {
+        const summary2026 = allSummaries.find(s => s.tenant_code === tenant.tenant_code && s.year == 2026);
+        if(summary2026){
+            totalComplexCredit += toNumber(summary2026.total_credit);
+            totalComplexBalance += toNumber(summary2026.final_balance);
+            totalComplexDebit += toNumber(summary2026.total_debit);
+            tenantCount++;
+        }
+    });
 
             const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
