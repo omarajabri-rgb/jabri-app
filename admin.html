@@ -1226,61 +1226,66 @@ const data = text ? JSON.parse(text) : {};
         }
 
         function renderNotificationLog(){
-            const body = document.getElementById('notification_log_body');
-            if(!body) return;
-            
-            const selectedTenantCode = document.getElementById('tenant_select')?.value || '';
-            let rows = [
-                ...allNotifications,
-                ...allWhatsAppLogs.map(w => ({
-                    tenant_code: w.tenant_code,
-                    type: w.whatsapp_template_name || 'واتساب',
-                    message: w.error_message || w.message_body || w.whatsapp_template_name || '',
-                    created_at: w.sent_at || w.created_at,
-                    isWhatsApp: true,
-                    status: w.whatsapp_status
-                }))
-            ];
-            if (selectedTenantCode) {
-               rows = rows.filter(row => row.tenant_code === selectedTenantCode);
-            }
+    const body = document.getElementById('notification_log_body');
+    if(!body) return;
 
-            if(notificationLogFilter === 'read'){
-                rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
-            } else if(notificationLogFilter === 'unread'){
-                rows = rows.filter(n => !n.isWhatsApp && !n.is_read);
-            }
+    const selectedTenantCode = String(document.getElementById('tenant_select')?.value || '').trim();
 
-            rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    let rows = [
+        ...allNotifications,
+        ...allWhatsAppLogs.map(w => ({
+            tenant_code: w.tenant_code,
+            type: w.whatsapp_template_name || 'واتساب',
+            message: w.error_message || w.message_body || w.whatsapp_template_name || '',
+            created_at: w.sent_at || w.created_at,
+            isWhatsApp: true,
+            status: w.whatsapp_status
+        }))
+    ];
 
-            if(!rows.length){
-                body.innerHTML = `<tr><td colspan="5" class="notify-empty">لا توجد </td></tr>`;
-                return;
-            }
+    // ✅ إذا اخترت مستأجر، اعرض إشعاراته فقط
+    if(selectedTenantCode){
+        rows = rows.filter(row =>
+            String(row.tenant_code || '').trim() === selectedTenantCode
+        );
+    }
 
-            body.innerHTML = rows.map(row => {
-                const isRead = row.is_read === true;
-                const statusHtml = row.isWhatsApp
-                    ? getWhatsAppStatusLabel(row.status)
-                    : (isRead
-                        ? `<span class="notify-status-pill read">✓ مقروء</span>`
-                        : `<span class="notify-status-pill unread">○ لم يقرأ</span>`);
+    if(notificationLogFilter === 'read'){
+        rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
+    } else if(notificationLogFilter === 'unread'){
+        rows = rows.filter(n => !n.isWhatsApp && !n.is_read);
+    }
 
-                const dateLabel = isRead && row.seen_at
-                    ? `${formatDateTime(row.created_at)}<br><small style="color:#7a7469;font-weight:800;">قرئت: ${formatDateTime(row.seen_at)}</small>`
-                    : formatDateTime(row.created_at);
+    rows.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
-                return `
-                    <tr>
-                        <td>${getTenantDisplayName(row.tenant_code)}</td>
-                        <td>${row.isWhatsApp ? '📱 واتساب - ' + (row.type || 'رسالة') : '📬 ' + getNotificationTypeLabel(row.type)}</td>
-                        <td><div class="notify-short-text">${shortenText(row.message)}</div></td>
-                        <td>${dateLabel}</td>
-                        <td>${statusHtml}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
+    if(!rows.length){
+        body.innerHTML = `<tr><td colspan="5" class="notify-empty">لا توجد إشعارات لهذا المستأجر</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(row => {
+        const isRead = row.is_read === true;
+        const statusHtml = row.isWhatsApp
+            ? getWhatsAppStatusLabel(row.status)
+            : (isRead
+                ? `<span class="notify-status-pill read">✓ مقروء</span>`
+                : `<span class="notify-status-pill unread">○ لم يقرأ</span>`);
+
+        const dateLabel = isRead && row.seen_at
+            ? `${formatDateTime(row.created_at)}<br><small style="color:#7a7469;font-weight:800;">قرئت: ${formatDateTime(row.seen_at)}</small>`
+            : formatDateTime(row.created_at);
+
+        return `
+            <tr>
+                <td>${getTenantDisplayName(row.tenant_code)}</td>
+                <td>${row.isWhatsApp ? '📱 واتساب - ' + (row.type || 'رسالة') : '📬 ' + getNotificationTypeLabel(row.type)}</td>
+                <td><div class="notify-short-text">${shortenText(row.message)}</div></td>
+                <td>${dateLabel}</td>
+                <td>${statusHtml}</td>
+            </tr>
+        `;
+    }).join('');
+}
 
         function setNotificationLogFilter(filter){
             notificationLogFilter = filter;
@@ -2348,6 +2353,7 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
             }
 
             updateNotificationComposer();
+            renderNotificationLog();
         }
 
         async function refresh(code=null){
