@@ -2052,23 +2052,22 @@ const data = text ? JSON.parse(text) : {};
             return '';
         }
 
-        function updateNotificationComposer(){
-            if(isComplexWideMode) return;
+        function updateNotificationComposer() {
+    const type = document.getElementById('notification_type').value;
+    const tenantName = document.getElementById('tenant_select').selectedOptions[0]?.text || '';
 
-            const t = getSelectedTenant();
-            const type = document.getElementById('notification_type').value;
-            const msg = document.getElementById('notification_message');
+    let message = templates[type] || '';
 
-            if(!type){
-                msg.value = '';
-                return;
-            }
+    message = message.replace('[اسم المستأجر]', tenantName);
 
-            if(type === 'general') return;
-            if(!t) return;
+    if(type === 'cheque_notice'){
+        message = message
+            .replace('[تفاصيل الشيكات]', 'شيك رقم 1021 - 1500 دينار - 2026-06-01')
+            .replace('[إجمالي الشيكات]', '1500');
+    }
 
-            msg.value = buildNotificationText(type, t);
-        }
+    document.getElementById('notification_message').value = message;
+}
 
 function getNotificationTemplateConfig(type, tenant, msg){
             const tenantName = tenant?.tenant_name || tenant?.tenant_code || 'المستأجر';
