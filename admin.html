@@ -1223,7 +1223,8 @@ const data = text ? JSON.parse(text) : {};
         function renderNotificationLog(){
             const body = document.getElementById('notification_log_body');
             if(!body) return;
-
+            
+            const selectedTenantCode = document.getElementById('tenant_select')?.value || '';
             let rows = [
                 ...allNotifications,
                 ...allWhatsAppLogs.map(w => ({
@@ -1235,6 +1236,9 @@ const data = text ? JSON.parse(text) : {};
                     status: w.whatsapp_status
                 }))
             ];
+            if (selectedTenantCode) {
+               rows = rows.filter(row => row.tenant_code === selectedTenantCode);
+            }
 
             if(notificationLogFilter === 'read'){
                 rows = rows.filter(n => n.isWhatsApp || n.is_read === true);
