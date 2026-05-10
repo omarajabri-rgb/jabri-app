@@ -2477,27 +2477,23 @@ function updateNotificationComposer() {
     let message = templates[type] || '';
 
     // استبدال اسم المستأجر تلقائياً
-message = message.replace('[اسم المستأجر]', tenantName);
+    message = message.replace('[اسم المستأجر]', tenantName);
 
-// استبدال اسم المستأجر تلقائياً
-message = message.replace('[اسم المستأجر]', tenantName);
+    // ✅ إذا كان إشعار شيكات
+    if(type === 'cheque_notice'){
+        message = message
+            .replace(
+                '[تفاصيل الشيكات]',
+                'شيك رقم 1021 - 1500 دينار - 2026-06-01'
+            )
+            .replace(
+                '[إجمالي الشيكات]',
+                '1500'
+            );
+    }
 
-// ✅ إذا كان إشعار شيكات
-if(type === 'cheque_notice'){
-    message = message
-        .replace(
-            '[تفاصيل الشيكات]',
-            'شيك رقم 1021 - 1500 دينار - 2026-06-01'
-        )
-        .replace(
-            '[إجمالي الشيكات]',
-            '1500'
-        );
+    document.getElementById('notification_message').value = message;
 }
-
-document.getElementById('notification_message').value = message;
-}
-
 
 
 window.onload = async () => {
