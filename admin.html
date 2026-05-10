@@ -1000,7 +1000,6 @@
             </div>
         </section>
 
-</button>
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v5.1</div>
@@ -1908,10 +1907,10 @@ const data = text ? JSON.parse(text) : {};
                 }]);
 
                 const curCredit = toNumber(row.total_credit);
-                const ob = toNumber(row.opening_balance);
                 const td = toNumber(row.total_debit);
                 const newCredit = curCredit + amount;
-                const newFinal = ob + td - newCredit;
+                // ✅ CORRECT: final_balance = total_debit - total_credit (without opening_balance)
+                const newFinal = td - newCredit;
 
                 await supabaseClient
                     .from('tenant_yearly_summary')
