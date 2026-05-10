@@ -909,6 +909,7 @@
     <optgroup label="رسائل ودّية">
         <option value="friendly">تذكير ودي برصيد مستحق</option>
         <option value="thanks">شكر على السداد</option>
+        <option value="cheque_notice">إشعار شيكات</option>
     </optgroup>
 
     <!-- إشعارات إدارية -->
@@ -2475,8 +2476,24 @@ function updateNotificationComposer() {
 
     let message = templates[type] || '';
 
-    // 🔥 استبدال اسم المستأجر تلقائياً
-    message = message.replace('[اسم المستأجر]', tenantName);
+    // استبدال اسم المستأجر تلقائياً
+message = message.replace('[اسم المستأجر]', tenantName);
+
+// استبدال اسم المستأجر تلقائياً
+message = message.replace('[اسم المستأجر]', tenantName);
+
+// ✅ إذا كان إشعار شيكات
+if(type === 'cheque_notice'){
+    message = message
+        .replace(
+            '[تفاصيل الشيكات]',
+            'شيك رقم 1021 - 1500 دينار - 2026-06-01'
+        )
+        .replace(
+            '[إجمالي الشيكات]',
+            '1500'
+        );
+}
 
 document.getElementById('notification_message').value = message;
 }
