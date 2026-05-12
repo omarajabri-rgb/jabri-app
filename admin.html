@@ -1723,7 +1723,7 @@ const monthlyCollectionRate = currentMonthNumber > 0
     : 0;
 
 document.getElementById('ai_commitment_ratio').innerText =
-    `${roundMoney(monthlyCollectionRate)} د.أ`;
+    `${roundMoney(monthlyCollectionRate)}`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
