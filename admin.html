@@ -851,7 +851,7 @@
 
                 <div class="quick-ai-grid">
                     <div class="quick-ai-card" id="ai_card_months_without_payment">
-                        <span>أشهر بلا دفع</span>
+                        <span>آخر رقم سند</span>
                         <b id="ai_months_without_payment">0</b>
                         <small id="ai_months_without_payment_text">—</small>
                     </div>
@@ -1686,6 +1686,11 @@ const data = text ? JSON.parse(text) : {};
 
     // CHANGE HERE: Force use only 2026 data
     const targetYear = 2026;
+            const latestReceiptTx = [...allTransactions]
+    .filter(tx => tx.receipt_no)
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
+
+const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
     
     allTenants.forEach(tenant => {
         const yearData = allSummaries.find(s => s.tenant_code === tenant.tenant_code && s.year == targetYear);
@@ -1714,8 +1719,8 @@ const data = text ? JSON.parse(text) : {};
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
             document.getElementById('kpi_balance').innerText = roundMoney(totalComplexBalance);
-            document.getElementById('ai_months_without_payment').innerText = '—';
-            document.getElementById('ai_months_without_payment_text').innerText = 'كل المستأجرين';
+            document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
+            document.getElementById('ai_months_without_payment_text').innerText = 'آخر سند مستخدم';
             document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
             document.getElementById('ai_last3_ratio_text').innerText = `متوسط ${tenantCount} مستأجر`;
 
