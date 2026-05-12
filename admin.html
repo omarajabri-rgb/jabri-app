@@ -843,7 +843,7 @@
                             <b id="ai_default_probability">0%</b>
                         </div>
                         <div class="hero-mini" id="hero_commitment_card">
-                            <span>نسبة الالتزام</span>
+                            <span>معدل التحصيل الشهري</span>
                             <b id="ai_commitment_ratio">0%</b>
                         </div>
                     </div>
@@ -857,7 +857,7 @@
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_last3_ratio">
-                        <span>التزام 3 سنوات</span>
+                        <span>التحصيل السنوي 2026</span>
                         <b id="ai_last3_ratio">0%</b>
                         <small id="ai_last3_ratio_text">—</small>
                     </div>
@@ -1714,7 +1714,16 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             document.getElementById('ai_badge').className = 'smart-ai-badge badge-good';
             document.getElementById('ai_score_value').innerText = `${avgCommitment}/100`;
             document.getElementById('ai_score_text').innerText = `إجمالي ${tenantCount} مستأجر نشط`;
-            document.getElementById('ai_commitment_ratio').innerText = `${avgCommitment}%`;
+            const currentMonthNumber = new Date().getFullYear() === targetYear
+    ? new Date().getMonth() + 1
+    : 12;
+
+const monthlyCollectionRate = currentMonthNumber > 0
+    ? Math.round(totalComplexCredit / currentMonthNumber)
+    : 0;
+
+document.getElementById('ai_commitment_ratio').innerText =
+    `${roundMoney(monthlyCollectionRate)} د.أ`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
@@ -1723,7 +1732,7 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
             document.getElementById('ai_months_without_payment_text').innerText = 'آخر سند مستخدم';
             document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = `متوسط ${tenantCount} مستأجر`;
+            document.getElementById('ai_last3_ratio_text').innerText = 'نسبة التحصيل لسنة 2026';
 
             const balEl = document.getElementById('kpi_balance');
             balEl.style.color = totalComplexBalance < 0 ? '#159a6f' : (totalComplexBalance > 0 ? '#d14d4d' : '#159a6f');
