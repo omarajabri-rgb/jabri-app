@@ -1732,7 +1732,7 @@ document.getElementById('ai_commitment_ratio').innerText =
             document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
             document.getElementById('ai_months_without_payment_text').innerText = 'آخر سند مستخدم';
             document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = 'نسبة التحصيل لسنة 2026';
+            document.getElementById('ai_last3_ratio_text').innerText = '';
 
             const balEl = document.getElementById('kpi_balance');
             balEl.style.color = totalComplexBalance < 0 ? '#159a6f' : (totalComplexBalance > 0 ? '#d14d4d' : '#159a6f');
