@@ -835,7 +835,7 @@
 
                     <div class="hero-ai-side">
                         <div class="hero-mini" id="hero_next_payment_card">
-                            <span>احتمال السداد</span>
+                            <span>أداء المجمع</span>
                             <b id="ai_next_payment_probability">0%</b>
                         </div>
                         <div class="hero-mini" id="hero_default_card">
@@ -1724,7 +1724,20 @@ const monthlyCollectionRate = currentMonthNumber > 0
 
 document.getElementById('ai_commitment_ratio').innerText =
     `${roundMoney(monthlyCollectionRate)}`;
-            document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
+            let complexPerformance = 'ضعيف';
+
+if(avgCommitment >= 80){
+    complexPerformance = 'ممتاز';
+}
+else if(avgCommitment >= 60){
+    complexPerformance = 'جيد';
+}
+else if(avgCommitment >= 40){
+    complexPerformance = 'متوسط';
+}
+
+document.getElementById('ai_next_payment_probability').innerText =
+    complexPerformance;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
             document.getElementById('kpi_balance').innerText = roundMoney(totalComplexBalance);
