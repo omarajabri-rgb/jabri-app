@@ -1688,7 +1688,7 @@ const data = text ? JSON.parse(text) : {};
     const targetYear = 2026;
             const latestReceiptTx = [...allTransactions]
     .filter(tx => tx.receipt_no)
-    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
 
 const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
     
