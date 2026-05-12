@@ -1043,6 +1043,14 @@ let allTenants = [];
         const formatMoney = v => roundMoney(v).toLocaleString('en-US');
         const sanitizePhone = v => String(v || '').replace(/\D/g, '').trim();
 
+        const $id = id => document.getElementById(id);
+const $q = q => document.querySelector(q);
+
+function setText(id, value){
+    const el = $id(id);
+    if(el) el.innerText = value;
+}
+
 
 
 
@@ -1709,14 +1717,17 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
             const defProb = 100 - nextProb;
 
-            document.getElementById('tenant_status_chip').innerText = `${tenantCount} مستأجر`;
-            document.getElementById('last_seen_chip').innerText = '—';
-            document.getElementById('ai_badge').innerText = 'نظرة عامة';
-            document.getElementById('ai_badge').className = 'smart-ai-badge badge-good';
-            document.getElementById('ai_score_value').innerText = `${avgCommitment}/100`;
-            document.getElementById('ai_score_text').innerText = `إجمالي ${tenantCount} مستأجر نشط`;
-            document.querySelector('#hero_next_payment_card span').innerText = 'أداء المجمع';
-document.querySelector('#hero_commitment_card span').innerText = 'معدل التحصيل الشهري';
+            setText('tenant_status_chip', `${tenantCount} مستأجر`);
+setText('last_seen_chip', '—');
+setText('ai_badge', 'نظرة عامة');
+
+$id('ai_badge').className = 'smart-ai-badge badge-good';
+
+setText('ai_score_value', `${avgCommitment}/100`);
+setText('ai_score_text', `إجمالي ${tenantCount} مستأجر نشط`);
+
+$q('#hero_next_payment_card span').innerText = 'أداء المجمع';
+$q('#hero_commitment_card span').innerText = 'معدل التحصيل الشهري';
             const currentMonthNumber = new Date().getFullYear() === targetYear
     ? new Date().getMonth() + 1
     : 12;
@@ -1725,8 +1736,7 @@ const monthlyCollectionRate = currentMonthNumber > 0
     ? Math.round(totalComplexCredit / currentMonthNumber)
     : 0;
 
-document.getElementById('ai_commitment_ratio').innerText =
-    `${formatMoney(monthlyCollectionRate)}`;
+setText('ai_commitment_ratio', formatMoney(monthlyCollectionRate));
             let complexPerformance = 'ضعيف';
 
 if(avgCommitment >= 80){
@@ -1739,25 +1749,28 @@ else if(avgCommitment >= 40){
     complexPerformance = 'متوسط';
 }
 
-document.getElementById('ai_next_payment_probability').innerText =
-    complexPerformance;
-            document.getElementById('ai_default_probability').innerText = `${defProb}%`;
-            document.getElementById('kpi_total_credit').innerText = formatMoney(totalComplexCredit);
-            document.getElementById('kpi_balance').innerText = formatMoney(totalComplexBalance);
-            document.querySelector('#ai_card_months_without_payment span').innerText = 'آخر رقم سند';
-            document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
-            document.getElementById('ai_months_without_payment_text').innerText = '';
-            document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = '';
+            setText('ai_next_payment_probability', complexPerformance);
+            setText('ai_default_probability', `${defProb}%`);
+            setText('kpi_total_credit', formatMoney(totalComplexCredit));
+            setText('kpi_balance', formatMoney(totalComplexBalance));
+            $q('#ai_card_months_without_payment span').innerText = 'آخر رقم سند';
+            setText('ai_months_without_payment', latestReceiptNo);
+            setText('ai_months_without_payment_text', '');
+            setText('ai_last3_ratio', `${avgCommitment}%`);
+            setText('ai_last3_ratio_text', '');
 
-            const balEl = document.getElementById('kpi_balance');
+            const balEl = $id('kpi_balance');
             balEl.style.color = totalComplexBalance < 0 ? '#159a6f' : (totalComplexBalance > 0 ? '#d14d4d' : '#159a6f');
 
-            setMoodClass(document.getElementById('hero_commitment_card'), avgCommitment >= 75 ? 'good' : avgCommitment >= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_credit'), 'good');
-            setMoodClass(document.getElementById('ai_card_balance'), totalComplexBalance <= 0 ? 'good' : 'warn');
+            setMoodClass($id('hero_commitment_card'), avgCommitment >= 75 ? 'good' : avgCommitment >= 50 ? 'warn' : 'bad');
+
+            setMoodClass($id('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
+
+            setMoodClass($id('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
+
+            setMoodClass($id('ai_card_total_credit'), 'good');
+
+            setMoodClass($id('ai_card_balance'), totalComplexBalance <= 0 ? 'good' : 'warn');
 
             drawCollectionChart(totalComplexCredit, totalComplexBalance);
             drawMonthlyChart_AllTenants();
@@ -1794,55 +1807,77 @@ document.getElementById('ai_next_payment_probability').innerText =
             const nextProb = Math.max(5, Math.min(95, Math.round((covScore * 0.55) + ((mwp <= 1 ? 90 : mwp <= 3 ? 55 : 20) * 0.45))));
             const defProb = 100 - nextProb;
 
-            document.getElementById('ai_score_value').innerText = `${covScore}/100`;
-            document.querySelector('#hero_next_payment_card span').innerText = 'احتمال السداد';
-            document.querySelector('#hero_commitment_card span').innerText = 'نسبة الالتزام';
-            document.getElementById('ai_commitment_ratio').innerText = `${covScore}%`;
-            document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
-            document.getElementById('ai_default_probability').innerText = `${defProb}%`;
-            document.getElementById('kpi_total_credit').innerText = roundMoney(Math.max(0, tc));
+            setText('ai_score_value', `${covScore}/100`);
 
-            const balEl = document.getElementById('kpi_balance');
+            $q('#hero_next_payment_card span').innerText = 'احتمال السداد';
+            $q('#hero_commitment_card span').innerText = 'نسبة الالتزام';
+
+            setText('ai_commitment_ratio', `${covScore}%`);
+            setText('ai_next_payment_probability', `${nextProb}%`);
+            setText('ai_default_probability', `${defProb}%`);
+
+            setText('kpi_total_credit', formatMoney(Math.max(0, tc)));
+
+            const balEl = $id('kpi_balance');
             if(balEl){
                 if(cb < 0){
-                    balEl.innerText = roundMoney(Math.abs(cb));
+                    balEl.innerText = formatMoney(Math.abs(cb));
                     balEl.style.color = '#159a6f';
                 } else {
-                    balEl.innerText = roundMoney(cb);
+                    balEl.innerText = formatMoney(cb);
                     balEl.style.color = cb > 0 ? '#d14d4d' : '#159a6f';
                 }
             }
 
-            const balCardSpan = document.querySelector('#ai_card_balance span');
+            const balCardSpan = $q('#ai_card_balance span');
             if(balCardSpan) balCardSpan.innerText = cb < 0 ? 'رصيد دائن' : 'الرصيد الحالي';
 
-            const badge = document.getElementById('ai_badge');
+            const badge = $id('ai_badge');
             if(cb < 0){
                 badge.className = 'smart-ai-badge badge-credit';
                 badge.innerText = 'دائن';
-                document.getElementById('ai_score_text').innerText = `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`;
-            } else if(cb === 0){
-                badge.className = 'smart-ai-badge badge-excellent';
-                badge.innerText = 'ملتزم';
-                document.getElementById('ai_score_text').innerText = 'لا يوجد رصيد مستحق حالياً';
-            } else if(tc > 0){
-                badge.className = 'smart-ai-badge badge-good';
-                badge.innerText = 'جزئي';
-                document.getElementById('ai_score_text').innerText = `يوجد دفعات مسجلة في سنة ${ly}`;
-            } else {
-                badge.className = 'smart-ai-badge badge-risk';
-                badge.innerText = 'متأخر';
-                document.getElementById('ai_score_text').innerText = `لا يوجد دائن مسجل في سنة ${ly}`;
-            }
+                setText('ai_score_text', `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`);
 
-            setMoodClass(document.getElementById('hero_commitment_card'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
+} else if(cb === 0){
 
-            document.querySelector('#ai_card_months_without_payment span').innerText = 'آخر دفعة';
-            document.getElementById('ai_months_without_payment').innerText = mwp;
-            document.getElementById('ai_months_without_payment_text').innerText = mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`;
-            setMoodClass(document.getElementById('ai_card_months_without_payment'), mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad');
+    badge.className = 'smart-ai-badge badge-excellent';
+    badge.innerText = 'ملتزم';
+
+    setText('ai_score_text', 'لا يوجد رصيد مستحق حالياً');
+
+} else if(tc > 0){
+
+    badge.className = 'smart-ai-badge badge-good';
+    badge.innerText = 'جزئي';
+
+    setText('ai_score_text', `يوجد دفعات مسجلة في سنة ${ly}`);
+
+} else {
+
+    badge.className = 'smart-ai-badge badge-risk';
+    badge.innerText = 'متأخر';
+
+    setText('ai_score_text', `لا يوجد دائن مسجل في سنة ${ly}`);
+}
+            setMoodClass($id('hero_commitment_card'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
+
+setMoodClass($id('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
+
+setMoodClass($id('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
+
+$q('#ai_card_months_without_payment span').innerText = 'آخر دفعة';
+
+setText('ai_months_without_payment', mwp);
+
+setText(
+    'ai_months_without_payment_text',
+    mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`
+);
+
+setMoodClass(
+    $id('ai_card_months_without_payment'),
+    mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad'
+);
 
             const last3 = allSummaries
                 .filter(r => r.tenant_code === tenant.tenant_code)
@@ -1857,12 +1892,33 @@ document.getElementById('ai_next_payment_probability').innerText =
                 }, 0) / last3.length)
                 : 0;
 
-            document.getElementById('ai_last3_ratio').innerText = `${last3Ratio}%`;
-            document.getElementById('ai_last3_ratio_text').innerText = last3.length ? `بناءً على آخر ${last3.length} سنوات` : 'لا توجد بيانات كافية';
+            setText('ai_last3_ratio', `${last3Ratio}%`);
 
-            setMoodClass(document.getElementById('ai_card_last3_ratio'), last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_total_credit'), cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad');
-            setMoodClass(document.getElementById('ai_card_balance'), cb <= 0 ? 'good' : cb <= Math.max(1, td * 0.25) ? 'warn' : 'bad');
+setText(
+    'ai_last3_ratio_text',
+    last3.length
+        ? `بناءً على آخر ${last3.length} سنوات`
+        : 'لا توجد بيانات كافية'
+);
+
+setMoodClass(
+    $id('ai_card_last3_ratio'),
+    last3Ratio >= 80 ? 'good' : last3Ratio >= 55 ? 'warn' : 'bad'
+);
+
+setMoodClass(
+    $id('ai_card_total_credit'),
+    cb <= 0 ? 'good' : tc > 0 ? 'warn' : 'bad'
+);
+
+setMoodClass(
+    $id('ai_card_balance'),
+    cb <= 0
+        ? 'good'
+        : cb <= Math.max(1, td * 0.25)
+            ? 'warn'
+            : 'bad'
+);
         }
 
         async function ensureYearlySummaryExists(tenant, yearNum){
