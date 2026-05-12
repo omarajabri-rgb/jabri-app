@@ -1719,6 +1719,7 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
             document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
             document.getElementById('kpi_balance').innerText = roundMoney(totalComplexBalance);
+            document.querySelector('#ai_card_months_without_payment span').innerText = 'آخر رقم سند';
             document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
             document.getElementById('ai_months_without_payment_text').innerText = 'آخر سند مستخدم';
             document.getElementById('ai_last3_ratio').innerText = `${avgCommitment}%`;
@@ -1811,6 +1812,7 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             setMoodClass(document.getElementById('hero_next_payment_card'), nextProb >= 75 ? 'good' : nextProb >= 50 ? 'warn' : 'bad');
             setMoodClass(document.getElementById('hero_default_card'), defProb <= 30 ? 'good' : defProb <= 50 ? 'warn' : 'bad');
 
+            document.querySelector('#ai_card_months_without_payment span').innerText = 'آخر دفعة';
             document.getElementById('ai_months_without_payment').innerText = mwp;
             document.getElementById('ai_months_without_payment_text').innerText = mwp === 0 ? 'يوجد دفع حديث' : `منذ ${mwp} شهر`;
             setMoodClass(document.getElementById('ai_card_months_without_payment'), mwp <= 1 ? 'good' : mwp <= 3 ? 'warn' : 'bad');
