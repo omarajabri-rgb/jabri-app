@@ -1040,6 +1040,7 @@ let allTenants = [];
         };
 
         const roundMoney = v => Math.round(toNumber(v));
+        const formatMoney = v => roundMoney(v).toLocaleString('en-US');
         const sanitizePhone = v => String(v || '').replace(/\D/g, '').trim();
 
 
@@ -1519,14 +1520,14 @@ const data = text ? JSON.parse(text) : {};
                 }]
             });
 
-            document.getElementById('pie_paid_value').innerText = roundMoney(paid);
-            document.getElementById('pie_balance_value').innerText = roundMoney(rem);
+            document.getElementById('pie_paid_value').innerText = formatMoney(paid);
+            document.getElementById('pie_balance_value').innerText = formatMoney(rem);
 
             const lbl = document.getElementById('pie_balance_label');
             if(toNumber(tb) < 0){
-                lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${roundMoney(Math.abs(tb))}</b>`;
+                lbl.innerHTML = `رصيد دائن: <b id="pie_balance_value">${formatMoney(Math.abs(tb))}</b>`;
             } else {
-                lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${roundMoney(tb)}</b>`;
+                lbl.innerHTML = `الرصيد: <b id="pie_balance_value">${formatMoney(tb)}</b>`;
             }
         }
 
@@ -1714,6 +1715,8 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             document.getElementById('ai_badge').className = 'smart-ai-badge badge-good';
             document.getElementById('ai_score_value').innerText = `${avgCommitment}/100`;
             document.getElementById('ai_score_text').innerText = `إجمالي ${tenantCount} مستأجر نشط`;
+            document.querySelector('#hero_next_payment_card span').innerText = 'أداء المجمع';
+document.querySelector('#hero_commitment_card span').innerText = 'معدل التحصيل الشهري';
             const currentMonthNumber = new Date().getFullYear() === targetYear
     ? new Date().getMonth() + 1
     : 12;
@@ -1723,7 +1726,7 @@ const monthlyCollectionRate = currentMonthNumber > 0
     : 0;
 
 document.getElementById('ai_commitment_ratio').innerText =
-    `${roundMoney(monthlyCollectionRate)}`;
+    `${formatMoney(monthlyCollectionRate)}`;
             let complexPerformance = 'ضعيف';
 
 if(avgCommitment >= 80){
@@ -1739,8 +1742,8 @@ else if(avgCommitment >= 40){
 document.getElementById('ai_next_payment_probability').innerText =
     complexPerformance;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
-            document.getElementById('kpi_total_credit').innerText = roundMoney(totalComplexCredit);
-            document.getElementById('kpi_balance').innerText = roundMoney(totalComplexBalance);
+            document.getElementById('kpi_total_credit').innerText = formatMoney(totalComplexCredit);
+            document.getElementById('kpi_balance').innerText = formatMoney(totalComplexBalance);
             document.querySelector('#ai_card_months_without_payment span').innerText = 'آخر رقم سند';
             document.getElementById('ai_months_without_payment').innerText = latestReceiptNo;
             document.getElementById('ai_months_without_payment_text').innerText = '';
@@ -1792,6 +1795,8 @@ document.getElementById('ai_next_payment_probability').innerText =
             const defProb = 100 - nextProb;
 
             document.getElementById('ai_score_value').innerText = `${covScore}/100`;
+            document.querySelector('#hero_next_payment_card span').innerText = 'احتمال السداد';
+            document.querySelector('#hero_commitment_card span').innerText = 'نسبة الالتزام';
             document.getElementById('ai_commitment_ratio').innerText = `${covScore}%`;
             document.getElementById('ai_next_payment_probability').innerText = `${nextProb}%`;
             document.getElementById('ai_default_probability').innerText = `${defProb}%`;
