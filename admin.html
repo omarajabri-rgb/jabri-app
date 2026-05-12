@@ -857,7 +857,7 @@
                     </div>
 
                     <div class="quick-ai-card" id="ai_card_last3_ratio">
-                        <span>التحصيل السنوي 2026</span>
+                        <span id="yearly_collection_title">التحصيل السنوي</span>
                         <b id="ai_last3_ratio">0%</b>
                         <small id="ai_last3_ratio_text">—</small>
                     </div>
@@ -1045,6 +1045,8 @@ let allTenants = [];
 
         const $id = id => document.getElementById(id);
 const $q = q => document.querySelector(q);
+        
+const DASHBOARD_YEAR = new Date().getFullYear();
 
 function setText(id, value){
     const el = $id(id);
@@ -1055,8 +1057,10 @@ function setText(id, value){
 
 
 async function sendWhatsAppTemplate(phone, templateName, params = []) {
-    const cleanPhone = sanitizePhone(phone);
-
+    const cleanPhone = sanitizePhone(phone).replace(/^0/, '962');
+if(!cleanPhone.startsWith('962')){
+    throw new Error('رقم الهاتف الأردني غير صالح');
+}
     const res = await fetch(SUPABASE_FUNCTION_URL, {
         method: 'POST',
         headers: {
@@ -1071,9 +1075,18 @@ async function sendWhatsAppTemplate(phone, templateName, params = []) {
             params
         })
     });
-
+    
 const text = await res.text();
-const data = text ? JSON.parse(text) : {};
+
+let data = {};
+
+try{
+    data = text ? JSON.parse(text) : {};
+}catch(err){
+    console.error('WhatsApp JSON Parse Error:', text);
+    throw new Error('استجابة واتساب غير صالحة');
+}
+    console.log("WHATSAPP TEMPLATE RESPONSE:", data);
    if (!res.ok || data.ok === false) {
     console.log("WHATSAPP API RESPONSE:", data);
 
@@ -1089,7 +1102,51 @@ const data = text ? JSON.parse(text) : {};
     return data.meta;
 }
 
-   
+async function sendWhatsAppTextMessage(phone, message) {
+
+    const cleanPhone = sanitizePhone(phone).replace(/^0/, '962');
+if(!cleanPhone.startsWith('962')){
+    throw new Error('رقم الهاتف الأردني غير صالح');
+}
+    const res = await fetch(SUPABASE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseClient.supabaseKey,
+            'Authorization': 'Bearer ' + supabaseClient.supabaseKey
+        },
+        body: JSON.stringify({
+            phone: cleanPhone,
+            mode: 'text',
+            message
+        })
+    });
+
+    const text = await res.text();
+
+let data = {};
+
+try{
+    data = text ? JSON.parse(text) : {};
+}catch(err){
+    console.error('WhatsApp JSON Parse Error:', text);
+    throw new Error('استجابة واتساب غير صالحة');
+}
+
+    if (!res.ok || data.ok === false) {
+
+        throw new Error(
+            data?.meta?.error?.message ||
+            data?.error?.message ||
+            data?.error ||
+            JSON.stringify(data) ||
+            `WhatsApp text failed ${res.status}`
+        );
+    }
+
+    return data.meta || data;
+}
+ 
         const getLatestSummary = tc =>
             allSummaries
                 .filter(r => r.tenant_code === tc)
@@ -1105,7 +1162,9 @@ const data = text ? JSON.parse(text) : {};
 
         const setMoodClass = (el, mood) => {
             if(!el) return;
-            el.classList.remove('good','warn','bad','ai-good','ai-warn','ai-bad','ai-neutral');
+            el.className = el.className
+    .replace(/\bgood\b|\bwarn\b|\bbad\b|\bai-good\b|\bai-warn\b|\bai-bad\b|\bai-neutral\b/g, '')
+    .trim();
 
             if(el.classList.contains('hero-mini')){
                 if(mood === 'good') el.classList.add('good');
@@ -1693,11 +1752,17 @@ const data = text ? JSON.parse(text) : {};
     let totalComplexDebit = 0;
     let tenantCount = 0;
 
-    // CHANGE HERE: Force use only 2026 data
-    const targetYear = 2026;
+    // Use latest financial year available, minimum current year
+    const targetYear = Math.max(
+    DASHBOARD_YEAR,
+    ...allSummaries.map(s => Number(s.year) || 0)
+);
             const latestReceiptTx = [...allTransactions]
     .filter(tx => tx.receipt_no)
-    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+    .sort((a, b) =>
+    new Date(b.date || b.created_at || 0) -
+    new Date(a.date || a.created_at || 0)
+)[0];
 
 const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
     
@@ -1716,7 +1781,11 @@ const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
             const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
             const defProb = 100 - nextProb;
-
+setText(
+    'yearly_collection_title',
+    `التحصيل السنوي ${targetYear}`
+);
+            
             setText('tenant_status_chip', `${tenantCount} مستأجر`);
 setText('last_seen_chip', '—');
 setText('ai_badge', 'نظرة عامة');
@@ -1836,7 +1905,10 @@ else if(avgCommitment >= 40){
             if(cb < 0){
                 badge.className = 'smart-ai-badge badge-credit';
                 badge.innerText = 'دائن';
-                setText('ai_score_text', `لدى المستأجر رصيد دائن ${roundMoney(Math.abs(cb))}`);
+                setText(
+    'ai_score_text',
+    `لدى المستأجر رصيد دائن ${formatMoney(Math.abs(cb))}`
+);
 
 } else if(cb === 0){
 
@@ -1929,8 +2001,7 @@ setMoodClass(
             const ob = prev ? toNumber(prev.final_balance) : 0;
             const td = toNumber(tenant.annual_rent);
             const tc = 0;
-            const fb = ob + td - tc;
-
+const fb = td - tc;
             const { data, error } = await supabaseClient
                 .from('tenant_yearly_summary')
                 .insert([{
