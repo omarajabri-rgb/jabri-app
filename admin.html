@@ -1045,7 +1045,7 @@ let allTenants = [];
 
         const $id = id => document.getElementById(id);
 const $q = q => document.querySelector(q);
-        
+
 const DASHBOARD_YEAR = new Date().getFullYear();
 
 function setText(id, value){
@@ -1250,8 +1250,10 @@ try{
             const d = document.getElementById('tx_date');
             if(d) d.valueAsDate = new Date();
             document.getElementById('tx_receipt').value = '';
-            document.getElementById('tx_desc').value = 'دفعة من الايجار';
-            document.getElementById('tx_amount').value = '';
+            generateNextReceiptNumber();
+
+           document.getElementById('tx_desc').value = 'دفعة من الايجار';
+           document.getElementById('tx_amount').value = '';
         };
 
         function setComplexChartsVisibility(show){
@@ -1469,7 +1471,10 @@ try{
         async function loadData(){
             const [t, tx, sum, notif, wa] = await Promise.all([
                 supabaseClient.from('tenants').select('*').order('tenant_name'),
-                supabaseClient.from('tenant_transactions').select('*').order('date'),
+                supabaseClient
+                .from('tenant_transactions')
+                .select('*')
+                .order('date', { ascending: false }),
                 supabaseClient.from('tenant_yearly_summary').select('*').order('year'),
                 supabaseClient.from('tenant_notifications').select('*').order('created_at', { ascending: false }),
                 supabaseClient.from('tenant_whatsapp_logs').select('*').order('created_at', { ascending: false })
@@ -1997,6 +2002,8 @@ setMoodClass(
             const ob = prev ? toNumber(prev.final_balance) : 0;
             const td = toNumber(tenant.annual_rent);
             const tc = 0;
+            // GOLDEN FORMULA
+// final_balance = total_debit - total_credit
 const fb = td - tc;
             const { data, error } = await supabaseClient
                 .from('tenant_yearly_summary')
@@ -2021,8 +2028,8 @@ const fb = td - tc;
             const code = document.getElementById('tenant_select').value;
             const date = document.getElementById('tx_date').value;
             const desc = document.getElementById('tx_desc').value.trim();
-            const amount = Math.max(0, toNumber(document.getElementById('tx_amount').value));
-            const receipt = document.getElementById('tx_receipt').value.trim();
+            const amount = toNumber(document.getElementById('tx_amount').value);
+            const receipt = String(document.getElementById('tx_receipt').value || '').trim();
             const btn = document.getElementById('save_tx_btn');
 
             if(!code) return alert('اختر المستأجر');
@@ -2040,7 +2047,7 @@ const fb = td - tc;
                 const { data: exist } = await supabaseClient
                     .from('tenant_transactions')
                     .select('id')
-                    .eq('receipt_no', receipt);
+                    .eq('receipt_no', String(receipt).trim());
 
                 if(exist?.length) throw new Error('رقم السند مستخدم مسبقاً');
 
@@ -2139,6 +2146,9 @@ const fb = td - tc;
                 await refresh(code);
                 clearTransactionForm();
                 showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
+                
+                clearTransactionForm();
+               ();
             } catch(err){
                 console.error(err);
                 showStatus(`حدث خطأ: ${err.message}`, 'danger');
