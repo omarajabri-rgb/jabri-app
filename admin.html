@@ -1757,14 +1757,10 @@ try{
     DASHBOARD_YEAR,
     ...allSummaries.map(s => Number(s.year) || 0)
 );
-            const latestReceiptTx = [...allTransactions]
-    .filter(tx => tx.receipt_no)
-    .sort((a, b) =>
-    new Date(b.date || b.created_at || 0) -
-    new Date(a.date || a.created_at || 0)
-)[0];
-
-const latestReceiptNo = latestReceiptTx?.receipt_no || '—';
+            const latestReceiptNo = allTransactions
+    .map(tx => parseInt(String(tx.receipt_no || '').replace(/\D/g, '')))
+    .filter(n => !isNaN(n))
+    .sort((a, b) => b - a)[0] || '—';
     
     allTenants.forEach(tenant => {
         const yearData = allSummaries.find(s => s.tenant_code === tenant.tenant_code && s.year == targetYear);
