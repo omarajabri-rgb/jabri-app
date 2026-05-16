@@ -1044,7 +1044,7 @@ let allTenants = [];
         const sanitizePhone = v => String(v || '').replace(/\D/g, '').trim();
 
         const $id = id => document.getElementById(id);
-const $q = q => document.querySelector(q);
+        const $q = q => document.querySelector(q);
 
 const DASHBOARD_YEAR = new Date().getFullYear();
 
@@ -1246,10 +1246,25 @@ try{
             document.getElementById('tx_desc').value = t;
         };
 
+        function generateNextReceiptNumber() {
+    const numericReceipts = allTransactions
+        .map(tx => parseInt(String(tx.receipt_no || '').replace(/\D/g, '')))
+        .filter(n => !isNaN(n));
+
+    const highestNo = numericReceipts.length > 0
+        ? Math.max(...numericReceipts)
+        : 1000;
+
+    const nextNo = highestNo + 1;
+    const inputEl = document.getElementById('tx_receipt');
+
+    if (inputEl) {
+        inputEl.value = String(nextNo);
+    }
+}
         const clearTransactionForm = () => {
             const d = document.getElementById('tx_date');
             if(d) d.valueAsDate = new Date();
-            document.getElementById('tx_receipt').value = '';
             generateNextReceiptNumber();
 
            document.getElementById('tx_desc').value = 'دفعة من الايجار';
@@ -1510,6 +1525,7 @@ try{
                     lastSeen: tn.last_seen || null
                 };
             });
+            generateNextReceiptNumber();
         }
 
         function updateTenantStatusChip(tenant){
@@ -2144,19 +2160,19 @@ const fb = td - tc;
     }
 }
                 await refresh(code);
-                clearTransactionForm();
-                showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
-                
-                clearTransactionForm();
-               ();
-            } catch(err){
-                console.error(err);
-                showStatus(`حدث خطأ: ${err.message}`, 'danger');
-            } finally {
-                isSavingTransaction = false;
-                btn.disabled = false;
-                btn.innerText = 'حفظ الدفعة';
-            }
+
+clearTransactionForm();
+
+showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
+
+} catch(err){
+    console.error(err);
+    showStatus(`حدث خطأ: ${err.message}`, 'danger');
+} finally {
+    isSavingTransaction = false;
+    btn.disabled = false;
+    btn.innerText = 'حفظ الدفعة';
+}
         }
 
         const getNotificationTitle = t => {
