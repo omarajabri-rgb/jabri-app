@@ -1253,7 +1253,7 @@
 
         async function loadSummaries() {
             const { data, error } = await supabase
-                .from('tenant_statement')
+                .from('tenant_yearly_summary')
                 .select('*')
                 .eq('tenant_code', tenantCode)
                 .order('year', { ascending: true });
