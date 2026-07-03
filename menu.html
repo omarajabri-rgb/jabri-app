@@ -1,247 +1,322 @@
-```html
 <!DOCTYPE html>
+<!--
+  ============================================================
+  BURGER MENU — مجمع جبري الصناعي التجاري
+  ============================================================
+  طريقة الدمج داخل admin.html:
+    1) انسخ محتوى <style> أدناه (بين START/END CSS) والصقه داخل
+       وسم <style> الموجود في admin.html (بعد المتغيرات :root).
+    2) انسخ كتلة الـ HTML (بين START/END HTML) والصقها مباشرة
+       بعد وسم <body> (أو بعد .topbar) — أي في أعلى الصفحة.
+    3) انسخ كتلة الـ JS (بين START/END JS) والصقها داخل وسم
+       <script> الرئيسي في admin.html (مثلاً قبل window.onload).
+       ملاحظة: logoutAdmin() معرّفة أصلاً في admin.html، لذلك
+       تم وضع حارس (guard) هنا كي لا يتم استبدالها.
+  هذا الملف صالح للعرض المباشر لتجربة القائمة فقط.
+  ============================================================
+-->
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>مجمع جبري | القائمة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet" />
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Tajawal', sans-serif;
-        }
-        body {
-            background: #f7f4ec;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Burger Menu — مجمع جبري</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===================== START CSS ===================== */
+:root{
+    --bg:#f7f4ec;
+    --card:rgba(255,255,255,0.72);
+    --text:#1f2937;
+    --muted:#7a7469;
+    --gold:#c9a46b;
+    --gold-deep:#b78e54;
+    --line:rgba(91,73,42,0.10);
+    --danger:#d14d4d;
+    --shadow:0 18px 45px rgba(87,68,37,0.10);
+}
+*{ box-sizing:border-box; font-family:'Tajawal',sans-serif; -webkit-tap-highlight-color:transparent; }
+body{
+    margin:0;
+    min-height:100vh;
+    color:var(--text);
+    background:
+        radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+        linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+}
 
-        /* ===== زر القائمة ===== */
-        #burgerToggle {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 9999;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background: #c9a46b;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        #burgerToggle:hover {
-            background: #b78e54;
-        }
+/* زر القائمة (البرغر) — أعلى الزاوية اليمنى */
+.burger-btn{
+    position:fixed;
+    top:18px;
+    right:18px;
+    width:46px;
+    height:46px;
+    border-radius:15px;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    box-shadow:0 12px 24px rgba(201,164,107,0.28);
+    z-index:9999;
+    transition:transform .2s ease;
+}
+.burger-btn:hover{ transform:translateY(-1px); }
+.burger-btn span{
+    font-size:20px;
+    color:#fff;
+    line-height:1;
+    transition:transform .25s ease;
+}
+.burger-btn.active span{ transform:rotate(90deg); }
 
-        /* ===== القائمة الجانبية ===== */
-        #burgerMenu {
-            position: fixed;
-            top: 0;
-            right: -320px;
-            width: 300px;
-            height: 100%;
-            background: #fff;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
-            transition: right 0.3s ease;
-            z-index: 99999;
-            padding: 24px 20px;
-            overflow-y: auto;
-            direction: rtl;
-        }
-        #burgerMenu.open {
-            right: 0;
-        }
+/* الطبقة المعتمة خلف القائمة */
+.menu-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(31,41,55,0.35);
+    backdrop-filter:blur(2px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+    z-index:9998;
+}
+.menu-overlay.open{ opacity:1; pointer-events:auto; }
 
-        /* ===== رأس القائمة ===== */
-        .menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 14px;
-        }
-        .menu-header h3 {
-            color: #b78e54;
-            font-size: 20px;
-            font-weight: 900;
-        }
-        .menu-close {
-            background: none;
-            border: none;
-            font-size: 22px;
-            cursor: pointer;
-            color: #7a7469;
-        }
+/* القائمة الجانبية المنزلقة من اليمين */
+.side-menu{
+    position:fixed;
+    top:0;
+    right:0;
+    height:100vh;
+    width:300px;
+    max-width:86vw;
+    background:rgba(255,255,255,0.86);
+    backdrop-filter:blur(18px);
+    border-left:1px solid rgba(255,255,255,0.6);
+    box-shadow:-18px 0 45px rgba(87,68,37,0.18);
+    border-top-left-radius:28px;
+    border-bottom-left-radius:28px;
+    transform:translateX(100%);
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+    z-index:9999;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+}
+.side-menu.open{ transform:translateX(0); }
 
-        /* ===== أقسام القائمة ===== */
-        .menu-section {
-            margin-top: 22px;
-        }
-        .menu-section h4 {
-            color: #b78e54;
-            font-size: 15px;
-            font-weight: 900;
-            margin-bottom: 8px;
-        }
-        .menu-section ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .menu-section ul li {
-            padding: 10px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 700;
-            color: #1f2937;
-            border-bottom: 1px solid #f0ede8;
-        }
-        .menu-section ul li:hover {
-            background: #f5f0e8;
-            padding-right: 16px;
-        }
-        .menu-section ul li:last-child {
-            border-bottom: none;
-        }
+.side-menu-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px;
+    border-bottom:1px solid var(--line);
+    font-weight:900;
+    font-size:15px;
+    color:#544128;
+}
+.side-menu-close{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    border:1px solid rgba(201,164,107,0.22);
+    background:rgba(201,164,107,0.12);
+    color:var(--gold-deep);
+    font-weight:900;
+    cursor:pointer;
+}
 
-        /* ===== خروج ===== */
-        .menu-logout {
-            margin-top: 22px;
-            border-top: 1px solid #eee;
-            padding-top: 14px;
-        }
-        .menu-logout ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .menu-logout ul li {
-            padding: 10px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 900;
-            color: #d14d4d;
-            transition: 0.2s;
-        }
-        .menu-logout ul li:hover {
-            background: #fde8e8;
-            padding-right: 16px;
-        }
+.side-menu-body{ padding:10px 0 20px; }
 
-        /* ===== تذييل ===== */
-        .menu-footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 11px;
-            color: #aaa;
-        }
+.menu-category{ border-bottom:1px solid rgba(91,73,42,0.06); }
+.menu-category-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:transparent;
+    border:none;
+    padding:15px 18px;
+    font-size:14px;
+    font-weight:800;
+    color:var(--text);
+    cursor:pointer;
+    text-align:right;
+}
+.menu-category-header:hover{ background:rgba(201,164,107,0.08); }
+.menu-category-header .chevron{
+    font-size:14px;
+    color:var(--muted);
+    transition:transform .25s ease;
+}
+.menu-category.open .menu-category-header .chevron{ transform:rotate(-90deg); }
+.menu-category.open .menu-category-header{ color:#6b4f2b; }
 
-        /* ===== المحتوى الرئيسي ===== */
-        .main-content {
-            padding: 80px 20px 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .main-content h1 {
-            color: #544128;
-            font-size: 28px;
-            font-weight: 900;
-        }
-        .main-content p {
-            color: #7a7469;
-            font-size: 16px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
-    </style>
+.submenu{
+    max-height:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:max-height .3s ease;
+}
+.menu-category.open .submenu{ max-height:260px; }
+
+.menu-item{
+    width:calc(100% - 28px);
+    margin:5px 14px;
+    padding:11px 16px;
+    border-radius:14px;
+    border:1px solid rgba(201,164,107,0.14);
+    background:rgba(255,255,255,0.6);
+    color:#6b4f2b;
+    font-size:13px;
+    font-weight:800;
+    text-align:right;
+    cursor:pointer;
+    transition:.2s ease;
+}
+.menu-item:hover{
+    background:rgba(201,164,107,0.14);
+    border-color:rgba(201,164,107,0.28);
+}
+
+.menu-leaf-btn{
+    width:calc(100% - 28px);
+    margin:16px 14px 20px;
+    padding:14px;
+    border-radius:16px;
+    border:1px solid rgba(209,77,77,0.18);
+    background:rgba(209,77,77,0.12);
+    color:var(--danger);
+    font-size:14px;
+    font-weight:900;
+    cursor:pointer;
+    text-align:center;
+}
+.menu-leaf-btn:hover{ background:rgba(209,77,77,0.18); }
+
+@media (max-width:480px){
+    .side-menu{ width:88vw; }
+}
+/* ===================== END CSS ===================== */
+</style>
 </head>
 <body>
 
-    <!-- ===== زر القائمة ===== -->
-    <button id="burgerToggle" onclick="toggleMenu()">☰</button>
+<!-- ===================== START HTML ===================== -->
 
-    <!-- ===== القائمة الجانبية ===== -->
-    <div id="burgerMenu">
-        <!-- رأس القائمة -->
-        <div class="menu-header">
-            <h3>☰ القائمة</h3>
-            <button class="menu-close" onclick="toggleMenu()">✕</button>
-        </div>
+<!-- زر القائمة -->
+<button class="burger-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="القائمة الرئيسية">
+    <span id="burgerIcon">☰</span>
+</button>
 
-        <!-- إدارة المستأجرين -->
-        <div class="menu-section">
-            <h4>🏢 إدارة المستأجرين</h4>
-            <ul>
-                <li>➕ إضافة مستأجر جديد</li>
-            </ul>
-        </div>
+<!-- الطبقة المعتمة -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-        <!-- القضايا -->
-        <div class="menu-section">
-            <h4>⚖️ القضايا</h4>
-            <ul>
-                <li>📋 قائمة القضايا</li>
-                <li>➕ إضافة قضية جديدة</li>
-            </ul>
-        </div>
-
-        <!-- مصروفات المجمع -->
-        <div class="menu-section">
-            <h4>💸 مصروفات المجمع</h4>
-            <ul>
-                <li>➕ إضافة مصروف</li>
-                <li>📋 قائمة المصروفات</li>
-            </ul>
-        </div>
-
-        <!-- الإعدادات -->
-        <div class="menu-section">
-            <h4>⚙️ الإعدادات</h4>
-            <ul>
-                <li>🔑 تغيير كلمة المرور</li>
-                <li>🌐 إعدادات واتساب</li>
-            </ul>
-        </div>
-
-        <!-- خروج -->
-        <div class="menu-logout">
-            <ul>
-                <li>🚪 خروج</li>
-            </ul>
-        </div>
-
-        <!-- تذييل -->
-        <div class="menu-footer">© 2026 JABRI INDUSTRIAL COMPLEX</div>
+<!-- القائمة الجانبية -->
+<aside class="side-menu" id="sideMenu">
+    <div class="side-menu-header">
+        <span>☰ القائمة الرئيسية</span>
+        <button class="side-menu-close" onclick="closeMenu()">✕</button>
     </div>
 
-    <!-- ===== المحتوى الرئيسي ===== -->
-    <div class="main-content">
-        <h1>📊 لوحة الإدارة</h1>
-        <p>مرحباً! استخدم القائمة ☰ للوصول إلى جميع الأقسام.</p>
-    </div>
+    <nav class="side-menu-body">
 
-    <script>
-        function toggleMenu() {
-            const menu = document.getElementById('burgerMenu');
-            menu.classList.toggle('open');
-        }
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>🏢 إدارة المستأجرين</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="menuAction('إضافة مستأجر جديد')">➕ إضافة مستأجر جديد</button>
+            </div>
+        </div>
 
-        // إغلاق القائمة عند الضغط خارجها
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('burgerMenu');
-            const toggle = document.getElementById('burgerToggle');
-            if (menu.classList.contains('open') && !menu.contains(e.target) && !toggle.contains(e.target)) {
-                menu.classList.remove('open');
-            }
-        });
-    </script>
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>⚖️ القضايا</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="menuAction('قائمة القضايا')">📋 قائمة القضايا</button>
+                <button class="menu-item" onclick="menuAction('إضافة قضية جديدة')">➕ إضافة قضية جديدة</button>
+            </div>
+        </div>
+
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>💸 مصروفات المجمع</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="menuAction('إضافة مصروف')">➕ إضافة مصروف</button>
+                <button class="menu-item" onclick="menuAction('قائمة المصروفات')">📋 قائمة المصروفات</button>
+            </div>
+        </div>
+
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>⚙️ الإعدادات</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="menuAction('تغيير كلمة المرور')">🔑 تغيير كلمة المرور</button>
+                <button class="menu-item" onclick="menuAction('إعدادات واتساب')">🌐 إعدادات واتساب</button>
+            </div>
+        </div>
+
+        <button class="menu-leaf-btn" onclick="logoutAdmin()">🚪 خروج</button>
+
+    </nav>
+</aside>
+
+<!-- ===================== END HTML ===================== -->
+
+<script>
+/* ===================== START JS ===================== */
+function toggleMenu(){
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('menuOverlay');
+    const btn = document.getElementById('burgerBtn');
+    const isOpen = menu.classList.toggle('open');
+    overlay.classList.toggle('open', isOpen);
+    btn.classList.toggle('active', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+function closeMenu(){
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('burgerBtn').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function toggleCategory(headerBtn){
+    const category = headerBtn.parentElement;
+    const wasOpen = category.classList.contains('open');
+    document.querySelectorAll('.menu-category.open').forEach(c => c.classList.remove('open'));
+    if(!wasOpen) category.classList.add('open');
+}
+
+function menuAction(name){
+    alert(name);
+    closeMenu();
+}
+
+document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeMenu();
+});
+
+/* logoutAdmin موجودة أصلاً في admin.html — هذا حارس فقط كي يعمل
+   الملف بشكل مستقل عند تجربته بمعزل عن admin.html */
+window.logoutAdmin = window.logoutAdmin || function(){
+    localStorage.removeItem('jabri_admin_session');
+    location.reload();
+};
+/* ===================== END JS ===================== */
+</script>
 
 </body>
 </html>
-```
