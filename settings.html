@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | الإعدادات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #f7f4ec;
+            --card: rgba(255,255,255,0.72);
+            --text: #1f2937;
+            --muted: #7a7469;
+            --gold: #c9a46b;
+            --gold-deep: #b78e54;
+            --line: rgba(91,73,42,0.10);
+            --success: #159a6f;
+            --danger: #d14d4d;
+            --shadow: 0 18px 45px rgba(87,68,37,0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .shell {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .chip-title {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #8b6a3a;
+            padding-right: 4px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        }
+
+        .field small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.25s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 2px solid var(--line);
+            margin: 24px 0;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--gold-deep);
+        }
+
+        @media (max-width: 600px) {
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shell">
+
+        <!-- ===== تغيير كلمة المرور ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">🔑 تغيير كلمة المرور</div>
+            </div>
+
+            <div id="password_status" class="status-msg"></div>
+
+            <form id="passwordForm" onsubmit="return false;">
+                <div class="field">
+                    <label>كلمة المرور الحالية</label>
+                    <input type="password" id="current_password" placeholder="أدخل كلمة المرور الحالية" maxlength="4" inputmode="numeric" />
+                </div>
+
+                <div class="field">
+                    <label>كلمة المرور الجديدة</label>
+                    <input type="password" id="new_password" placeholder="أدخل كلمة المرور الجديدة (4 أرقام)" maxlength="4" inputmode="numeric" />
+                </div>
+
+                <div class="field">
+                    <label>تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" id="confirm_password" placeholder="أعد إدخال كلمة المرور الجديدة" maxlength="4" inputmode="numeric" />
+                </div>
+
+                <button class="btn btn-gold" onclick="changePassword()">💾 حفظ كلمة المرور</button>
+            </form>
+        </div>
+
+        <hr class="section-divider" />
+
+        <!-- ===== إعدادات واتساب ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">🌐 إعدادات واتساب</div>
+            </div>
+
+            <div id="whatsapp_status" class="status-msg"></div>
+
+            <form id="whatsappForm" onsubmit="return false;">
+                <div class="field">
+                    <label>رقم الجوال (واتساب)</label>
+                    <input type="tel" id="whatsapp_phone" placeholder="مثال: 962791234567" />
+                    <small>رقم الجوال الذي سيرسل منه الإشعارات</small>
+                </div>
+
+                <div class="field">
+                    <label>اسم القالب (Template Name)</label>
+                    <input type="text" id="template_name" placeholder="مثال: payment_received_jabri" />
+                    <small>اسم القالب المسجل في منصة واتساب</small>
+                </div>
+
+                <button class="btn btn-gold" onclick="saveWhatsAppSettings()">💾 حفظ الإعدادات</button>
+            </form>
+        </div>
+
+        <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
+
+    </div>
+
+    <script>
+        const supabase = supabase.createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        // التحقق من الجلسة
+        const session = localStorage.getItem('jabri_admin_session');
+        if (session !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // ===== تغيير كلمة المرور =====
+        function changePassword() {
+            const current = document.getElementById('current_password').value.trim();
+            const newPass = document.getElementById('new_password').value.trim();
+            const confirm = document.getElementById('confirm_password').value.trim();
+            const statusEl = document.getElementById('password_status');
+
+            if (!current || !newPass || !confirm) {
+                showStatus(statusEl, 'الرجاء ملء جميع الحقول', 'error');
+                return;
+            }
+
+            if (newPass.length !== 4 || !/^\d+$/.test(newPass)) {
+                showStatus(statusEl, 'كلمة المرور الجديدة يجب أن تكون 4 أرقام', 'error');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                showStatus(statusEl, 'كلمة المرور الجديدة غير متطابقة', 'error');
+                return;
+            }
+
+            const adminUser = localStorage.getItem('jabri_admin_user') || 'admin';
+            const storedPass = localStorage.getItem(`jabri_admin_pass_${adminUser}`) || '1234';
+
+            if (current !== storedPass) {
+                showStatus(statusEl, 'كلمة المرور الحالية غير صحيحة', 'error');
+                return;
+            }
+
+            localStorage.setItem(`jabri_admin_pass_${adminUser}`, newPass);
+            localStorage.setItem('jabri_admin_pass', newPass);
+
+            showStatus(statusEl, '✅ تم تغيير كلمة المرور بنجاح!', 'success');
+
+            document.getElementById('current_password').value = '';
+            document.getElementById('new_password').value = '';
+            document.getElementById('confirm_password').value = '';
+        }
+
+        // ===== إعدادات واتساب =====
+        function saveWhatsAppSettings() {
+            const phone = document.getElementById('whatsapp_phone').value.trim();
+            const template = document.getElementById('template_name').value.trim();
+            const statusEl = document.getElementById('whatsapp_status');
+
+            if (!phone || !template) {
+                showStatus(statusEl, 'الرجاء ملء جميع الحقول', 'error');
+                return;
+            }
+
+            let cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = cleanPhone.substring(1);
+            }
+            if (!cleanPhone.startsWith('962')) {
+                cleanPhone = '962' + cleanPhone;
+            }
+
+            localStorage.setItem('jabri_whatsapp_phone', cleanPhone);
+            localStorage.setItem('jabri_whatsapp_template', template);
+
+            showStatus(statusEl, '✅ تم حفظ إعدادات واتساب بنجاح!', 'success');
+        }
+
+        // ===== تحميل الإعدادات المحفوظة =====
+        function loadSettings() {
+            const phone = localStorage.getItem('jabri_whatsapp_phone') || '';
+            const template = localStorage.getItem('jabri_whatsapp_template') || '';
+
+            document.getElementById('whatsapp_phone').value = phone;
+            document.getElementById('template_name').value = template;
+        }
+
+        // ===== عرض رسالة =====
+        function showStatus(el, msg, type) {
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        // ===== العودة =====
+        function goBack() {
+            window.location.href = 'admin.html';
+        }
+
+        // ===== تحميل الصفحة =====
+        window.onload = function() {
+            loadSettings();
+        };
+    </script>
+
+</body>
+</html>
