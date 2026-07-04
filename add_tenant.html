@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | إضافة مستأجر جديد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #f7f4ec;
+            --card: rgba(255,255,255,0.72);
+            --text: #1f2937;
+            --muted: #7a7469;
+            --gold: #c9a46b;
+            --gold-deep: #b78e54;
+            --line: rgba(91,73,42,0.10);
+            --success: #159a6f;
+            --danger: #d14d4d;
+            --shadow: 0 18px 45px rgba(87,68,37,0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .shell {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .chip-title {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #8b6a3a;
+            padding-right: 4px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        }
+
+        .field small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.25s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--gold-deep);
+        }
+
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shell">
+
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">🏢 إضافة مستأجر جديد</div>
+            </div>
+
+            <div id="status_msg" class="status-msg"></div>
+
+            <form id="tenantForm" onsubmit="return false;">
+
+                <div class="field">
+                    <label>كود المستأجر</label>
+                    <input type="text" id="tenant_code" readonly placeholder="سيتولد تلقائياً" />
+                    <small>سيتولد تلقائياً عند الحفظ</small>
+                </div>
+
+                <div class="field">
+                    <label>اسم المستأجر <span style="color:var(--danger);">*</span></label>
+                    <input type="text" id="tenant_name" placeholder="مثال: محمد أحمد" required />
+                </div>
+
+                <div class="field">
+                    <label>رقم المحل</label>
+                    <input type="text" id="shop_no" placeholder="مثال: 25" />
+                </div>
+
+                <div class="field">
+                    <label>رقم الجوال</label>
+                    <input type="tel" id="phone" placeholder="مثال: 0791234567" />
+                    <small>سيتحول تلقائياً إلى 962...</small>
+                </div>
+
+                <div class="field">
+                    <label>الإيجار السنوي <span style="color:var(--danger);">*</span></label>
+                    <input type="number" id="annual_rent" placeholder="مثال: 1836" required />
+                </div>
+
+                <div class="field">
+                    <label>تاريخ العقد</label>
+                    <input type="date" id="contract_date" />
+                </div>
+
+                <div class="field">
+                    <label>كلمة المرور <span style="color:var(--danger);">*</span></label>
+                    <input type="password" id="password" placeholder="4 أرقام" maxlength="4" inputmode="numeric" required />
+                    <small>أدخل 4 أرقام</small>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-gold" onclick="saveTenant()">💾 حفظ المستأجر</button>
+                    <button class="btn btn-soft" type="button" onclick="clearForm()">🔄 تفريغ</button>
+                </div>
+
+            </form>
+        </div>
+
+        <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
+
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // التحقق من الجلسة
+        const session = localStorage.getItem('jabri_admin_session');
+        if (session !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // دالة لتوليد كود المستأجر التالي
+        async function generateTenantCode() {
+            const { data, error } = await supabase
+                .from('tenants')
+                .select('tenant_code')
+                .order('tenant_code', { ascending: false })
+                .limit(1);
+
+            if (error || !data || data.length === 0) {
+                return 'jc-01';
+            }
+
+            const lastCode = data[0].tenant_code;
+            const num = parseInt(lastCode.replace('jc-', ''));
+            const nextNum = num + 1;
+            return `jc-${String(nextNum).padStart(2, '0')}`;
+        }
+
+        // تحميل الكود عند فتح الصفحة
+        window.onload = async function() {
+            const code = await generateTenantCode();
+            document.getElementById('tenant_code').value = code;
+        };
+
+        // تنسيق رقم الجوال
+        document.getElementById('phone').addEventListener('input', function() {
+            let val = this.value.replace(/\D/g, '');
+            if (val.startsWith('0')) {
+                val = val.substring(1);
+            }
+            this.value = val;
+        });
+
+        // حفظ المستأجر
+        async function saveTenant() {
+            const name = document.getElementById('tenant_name').value.trim();
+            const shop = document.getElementById('shop_no').value.trim();
+            let phone = document.getElementById('phone').value.trim();
+            const rent = document.getElementById('annual_rent').value.trim();
+            const contract = document.getElementById('contract_date').value;
+            const password = document.getElementById('password').value.trim();
+
+            // التحقق من الحقول الإلزامية
+            if (!name) {
+                showStatus('الرجاء إدخال اسم المستأجر', 'error');
+                return;
+            }
+            if (!rent || parseFloat(rent) <= 0) {
+                showStatus('الرجاء إدخال إيجار سنوي صحيح', 'error');
+                return;
+            }
+            if (!password || password.length !== 4 || !/^\d+$/.test(password)) {
+                showStatus('كلمة المرور يجب أن تكون 4 أرقام', 'error');
+                return;
+            }
+
+            // تنسيق رقم الجوال
+            if (phone) {
+                phone = phone.replace(/\D/g, '');
+                if (phone.startsWith('0')) {
+                    phone = phone.substring(1);
+                }
+                phone = '962' + phone;
+            }
+
+            const code = document.getElementById('tenant_code').value;
+
+            try {
+                // 1. إضافة المستأجر
+                const { data: tenantData, error: tenantError } = await supabase
+                    .from('tenants')
+                    .insert([{
+                        tenant_code: code,
+                        tenant_name: name,
+                        shop_no: shop || null,
+                        phone: phone || null,
+                        annual_rent: parseFloat(rent),
+                        contract_date: contract || null,
+                        password: password,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (tenantError) throw tenantError;
+
+                // 2. إنشاء الملخص السنوي للسنة الحالية
+                const year = new Date().getFullYear();
+                const { error: summaryError } = await supabase
+                    .from('tenant_yearly_summary')
+                    .insert([{
+                        tenant_code: code,
+                        year: year,
+                        opening_balance: 0,
+                        total_debit: parseFloat(rent),
+                        total_credit: 0,
+                        final_balance: parseFloat(rent)
+                    }]);
+
+                if (summaryError) throw summaryError;
+
+                showStatus(`✅ تم إضافة المستأجر ${name} بنجاح!`, 'success');
+                clearForm();
+
+                // إعادة توليد الكود
+                const newCode = await generateTenantCode();
+                document.getElementById('tenant_code').value = newCode;
+
+            } catch (err) {
+                console.error(err);
+                showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('tenant_name').value = '';
+            document.getElementById('shop_no').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('annual_rent').value = '';
+            document.getElementById('contract_date').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('status_msg').className = 'status-msg';
+            document.getElementById('status_msg').style.display = 'none';
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('status_msg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        function goBack() {
+            window.location.href = 'admin.html';
+        }
+    </script>
+
+</body>
+</html>
