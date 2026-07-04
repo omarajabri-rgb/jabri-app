@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | مصروفات المجمع</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #f7f4ec;
+            --card: rgba(255,255,255,0.72);
+            --text: #1f2937;
+            --muted: #7a7469;
+            --gold: #c9a46b;
+            --gold-deep: #b78e54;
+            --line: rgba(91,73,42,0.10);
+            --success: #159a6f;
+            --danger: #d14d4d;
+            --shadow: 0 18px 45px rgba(87,68,37,0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .shell {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .chip-title {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #8b6a3a;
+            padding-right: 4px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        }
+
+        .field textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: 12px;
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid rgba(201, 164, 107, 0.14);
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        thead th {
+            background: rgba(201, 164, 107, 0.10);
+            color: #6b4f2b;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 14px 12px;
+            text-align: right;
+            border-bottom: 1px solid rgba(201, 164, 107, 0.18);
+        }
+
+        tbody td {
+            padding: 14px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid rgba(91, 73, 42, 0.08);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .total-row {
+            background: rgba(201, 164, 107, 0.10);
+            font-weight: 900;
+            font-size: 15px;
+        }
+
+        .total-row td {
+            padding: 16px 12px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--gold-deep);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid .field:last-child {
+            grid-column: span 2;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .filter-bar .field {
+            flex: 1;
+            min-width: 150px;
+            margin-bottom: 0;
+        }
+
+        .filter-bar .btn {
+            flex: 0 0 auto;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid .field:last-child {
+                grid-column: span 1;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+            .filter-bar {
+                flex-direction: column;
+            }
+            .filter-bar .field {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shell">
+
+        <!-- ===== نموذج إضافة مصروف ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">💸 إضافة مصروف جديد</div>
+            </div>
+
+            <div id="status_msg" class="status-msg"></div>
+
+            <form id="expenseForm" onsubmit="return false;">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>التاريخ <span style="color:var(--danger);">*</span></label>
+                        <input type="date" id="expense_date" required />
+                    </div>
+
+                    <div class="field">
+                        <label>الفئة <span style="color:var(--danger);">*</span></label>
+                        <select id="category" required>
+                            <option value="">-- اختر فئة --</option>
+                            <option value="كهرباء">⚡ كهرباء</option>
+                            <option value="ماء">💧 ماء</option>
+                            <option value="صيانة">🔧 صيانة</option>
+                            <option value="رواتب">👨‍💼 رواتب</option>
+                            <option value="أخرى">📦 أخرى</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>البيان <span style="color:var(--danger);">*</span></label>
+                        <input type="text" id="description" placeholder="وصف المصروف" required />
+                    </div>
+
+                    <div class="field">
+                        <label>المبلغ <span style="color:var(--danger);">*</span></label>
+                        <input type="number" id="amount" placeholder="مثال: 150" required />
+                    </div>
+
+                    <div class="field">
+                        <label>رقم السند</label>
+                        <input type="text" id="receipt_no" placeholder="رقم الإيصال أو الفاتورة" />
+                    </div>
+
+                    <div class="field">
+                        <label>ملاحظات</label>
+                        <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-gold" onclick="saveExpense()">💾 حفظ المصروف</button>
+                    <button class="btn btn-soft" type="button" onclick="clearExpenseForm()">🔄 تفريغ</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== قائمة المصروفات ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">📋 قائمة المصروفات</div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="field">
+                    <label>فلتر حسب الفئة</label>
+                    <select id="filter_category" onchange="loadExpenses()">
+                        <option value="">الكل</option>
+                        <option value="كهرباء">⚡ كهرباء</option>
+                        <option value="ماء">💧 ماء</option>
+                        <option value="صيانة">🔧 صيانة</option>
+                        <option value="رواتب">👨‍💼 رواتب</option>
+                        <option value="أخرى">📦 أخرى</option>
+                    </select>
+                </div>
+                <button class="btn btn-soft" onclick="loadExpenses()" style="flex:0 0 auto;">🔄 تحديث</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الفئة</th>
+                            <th>البيان</th>
+                            <th>المبلغ</th>
+                            <th>رقم السند</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">لا توجد مصروفات مسجلة</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
+
+    </div>
+
+    <script>
+        const supabase = supabase.createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        // التحقق من الجلسة
+        const session = localStorage.getItem('jabri_admin_session');
+        if (session !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // ===== تحميل المصروفات =====
+        async function loadExpenses() {
+            const category = document.getElementById('filter_category').value;
+
+            let query = supabase
+                .from('complex_expenses')
+                .select('*')
+                .order('expense_date', { ascending: false });
+
+            if (category) {
+                query = query.eq('category', category);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('خطأ في تحميل المصروفات:', error);
+                return;
+            }
+
+            const tbody = document.getElementById('expensesTableBody');
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد مصروفات مسجلة</td></tr>`;
+                return;
+            }
+
+            let total = 0;
+
+            tbody.innerHTML = data.map(e => {
+                total += Number(e.amount);
+                return `
+                    <tr>
+                        <td>${new Date(e.expense_date).toLocaleDateString('en-GB')}</td>
+                        <td>${e.category || '—'}</td>
+                        <td>${e.description}</td>
+                        <td><strong>${Number(e.amount).toLocaleString('en-US')}</strong></td>
+                        <td>${e.receipt_no || '—'}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // إضافة صف المجموع
+            tbody.innerHTML += `
+                <tr class="total-row">
+                    <td colspan="3" style="text-align:center;">المجموع الكلي</td>
+                    <td><strong>${total.toLocaleString('en-US')}</strong></td>
+                    <td colspan="2"></td>
+                </tr>
+            `;
+        }
+
+        // ===== حفظ مصروف جديد =====
+        async function saveExpense() {
+            const expenseDate = document.getElementById('expense_date').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            const receiptNo = document.getElementById('receipt_no').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!expenseDate) {
+                showStatus('الرجاء اختيار التاريخ', 'error');
+                return;
+            }
+            if (!category) {
+                showStatus('الرجاء اختيار الفئة', 'error');
+                return;
+            }
+            if (!description) {
+                showStatus('الرجاء إدخال البيان', 'error');
+                return;
+            }
+            if (!amount || parseFloat(amount) <= 0) {
+                showStatus('الرجاء إدخال مبلغ صحيح', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('complex_expenses')
+                    .insert([{
+                        expense_date: expenseDate,
+                        category: category,
+                        description: description,
+                        amount: parseFloat(amount),
+                        receipt_no: receiptNo || null,
+                        notes: notes || null
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                showStatus(`✅ تم إضافة المصروف بنجاح!`, 'success');
+                clearExpenseForm();
+                loadExpenses();
+
+            } catch (err) {
+                console.error(err);
+                showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        // ===== حذف مصروف =====
+        async function deleteExpense(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('complex_expenses')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                loadExpenses();
+            } catch (err) {
+                console.error(err);
+                alert('❌ حدث خطأ أثناء الحذف');
+            }
+        }
+
+        // ===== تفريغ النموذج =====
+        function clearExpenseForm() {
+            document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('category').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('receipt_no').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('status_msg').className = 'status-msg';
+            document.getElementById('status_msg').style.display = 'none';
+        }
+
+        // ===== عرض رسالة =====
+        function showStatus(msg, type) {
+            const el = document.getElementById('status_msg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        // ===== العودة =====
+        function goBack() {
+            window.location.href = 'admin.html';
+        }
+
+        // ===== تحميل الصفحة =====
+        window.onload = async function() {
+            document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
+            await loadExpenses();
+        };
+    </script>
+
+</body>
+</html>
