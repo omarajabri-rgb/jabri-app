@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | القضايا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #f7f4ec;
+            --card: rgba(255,255,255,0.72);
+            --text: #1f2937;
+            --muted: #7a7469;
+            --gold: #c9a46b;
+            --gold-deep: #b78e54;
+            --line: rgba(91,73,42,0.10);
+            --success: #159a6f;
+            --danger: #d14d4d;
+            --shadow: 0 18px 45px rgba(87,68,37,0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .shell {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .chip-title {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #8b6a3a;
+            padding-right: 4px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        }
+
+        .field textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: 12px;
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid rgba(201, 164, 107, 0.14);
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        thead th {
+            background: rgba(201, 164, 107, 0.10);
+            color: #6b4f2b;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 14px 12px;
+            text-align: right;
+            border-bottom: 1px solid rgba(201, 164, 107, 0.18);
+        }
+
+        tbody td {
+            padding: 14px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid rgba(91, 73, 42, 0.08);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--gold-deep);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid .field:last-child {
+            grid-column: span 2;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid .field:last-child {
+                grid-column: span 1;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shell">
+
+        <!-- ===== نموذج إضافة قضية ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">➕ إضافة قضية جديدة</div>
+            </div>
+
+            <div id="status_msg" class="status-msg"></div>
+
+            <form id="caseForm" onsubmit="return false;">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>المستأجر <span style="color:var(--danger);">*</span></label>
+                        <select id="tenant_code">
+                            <option value="">-- اختر مستأجر --</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>رقم القضية <span style="color:var(--danger);">*</span></label>
+                        <input type="text" id="case_number" placeholder="مثال: 2025/1234" required />
+                    </div>
+
+                    <div class="field">
+                        <label>تاريخ القضية</label>
+                        <input type="date" id="case_date" />
+                    </div>
+
+                    <div class="field">
+                        <label>المبلغ المحكوم</label>
+                        <input type="number" id="amount" placeholder="مثال: 5000" />
+                    </div>
+
+                    <div class="field">
+                        <label>ملاحظات</label>
+                        <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-gold" onclick="saveCase()">💾 حفظ القضية</button>
+                    <button class="btn btn-soft" type="button" onclick="clearCaseForm()">🔄 تفريغ</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== قائمة القضايا ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">📋 قائمة القضايا</div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المستأجر</th>
+                            <th>رقم القضية</th>
+                            <th>التاريخ</th>
+                            <th>المبلغ</th>
+                            <th>ملاحظات</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="casesTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
+
+    </div>
+
+    <script>
+        const supabase = supabase.createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        // التحقق من الجلسة
+        const session = localStorage.getItem('jabri_admin_session');
+        if (session !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // ===== تحميل المستأجرين =====
+        async function loadTenants() {
+            const { data, error } = await supabase
+                .from('tenants')
+                .select('tenant_code, tenant_name')
+                .order('tenant_name');
+
+            if (error) {
+                console.error('خطأ في تحميل المستأجرين:', error);
+                return;
+            }
+
+            const select = document.getElementById('tenant_code');
+            select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
+            data.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.tenant_code;
+                opt.textContent = `${t.tenant_name} (${t.tenant_code})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // ===== تحميل القضايا =====
+        async function loadCases() {
+            const { data, error } = await supabase
+                .from('court_cases')
+                .select('*, tenants(tenant_name)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('خطأ في تحميل القضايا:', error);
+                return;
+            }
+
+            const tbody = document.getElementById('casesTableBody');
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(c => `
+                <tr>
+                    <td>${c.tenants?.tenant_name || c.tenant_code}</td>
+                    <td><strong>${c.case_number}</strong></td>
+                    <td>${c.case_date ? new Date(c.case_date).toLocaleDateString('en-GB') : '—'}</td>
+                    <td>${c.amount ? Number(c.amount).toLocaleString('en-US') : '—'}</td>
+                    <td>${c.notes || '—'}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCase('${c.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ===== حفظ قضية جديدة =====
+        async function saveCase() {
+            const tenantCode = document.getElementById('tenant_code').value;
+            const caseNumber = document.getElementById('case_number').value.trim();
+            const caseDate = document.getElementById('case_date').value;
+            const amount = document.getElementById('amount').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!tenantCode) {
+                showStatus('الرجاء اختيار المستأجر', 'error');
+                return;
+            }
+            if (!caseNumber) {
+                showStatus('الرجاء إدخال رقم القضية', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('court_cases')
+                    .insert([{
+                        tenant_code: tenantCode,
+                        case_number: caseNumber,
+                        case_date: caseDate || null,
+                        amount: amount ? parseFloat(amount) : null,
+                        notes: notes || null
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                showStatus(`✅ تم إضافة القضية ${caseNumber} بنجاح!`, 'success');
+                clearCaseForm();
+                loadCases();
+
+            } catch (err) {
+                console.error(err);
+                showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        // ===== حذف قضية =====
+        async function deleteCase(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه القضية؟')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('court_cases')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                loadCases();
+            } catch (err) {
+                console.error(err);
+                alert('❌ حدث خطأ أثناء الحذف');
+            }
+        }
+
+        // ===== تفريغ النموذج =====
+        function clearCaseForm() {
+            document.getElementById('tenant_code').value = '';
+            document.getElementById('case_number').value = '';
+            document.getElementById('case_date').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('status_msg').className = 'status-msg';
+            document.getElementById('status_msg').style.display = 'none';
+        }
+
+        // ===== عرض رسالة =====
+        function showStatus(msg, type) {
+            const el = document.getElementById('status_msg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        // ===== العودة =====
+        function goBack() {
+            window.location.href = 'admin.html';
+        }
+
+        // ===== تحميل الصفحة =====
+        window.onload = async function() {
+            await loadTenants();
+            await loadCases();
+        };
+    </script>
+
+</body>
+</html>
