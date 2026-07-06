@@ -360,11 +360,10 @@
             window.location.href = 'admin-login.html';
         }
 
-        // ===== FORCE DROPDOWN - WORKS EVERY TIME =====
-        async function forceDropdown() {
-            console.log('🔍 Force loading dropdown...');
+        // ===== TEST: Load tenants directly (FIX) =====
+        async function loadTenantsDirect() {
+            console.log('🔍 Loading tenants directly...');
             try {
-                // Direct query to tenants table
                 const { data, error } = await supabase
                     .from('tenants')
                     .select('tenant_code, tenant_name')
@@ -372,52 +371,36 @@
 
                 if (error) {
                     console.error('❌ Error:', error);
-                    // Show error in dropdown
-                    const select = document.getElementById('tenant_code');
-                    select.innerHTML = '<option value="">❗ خطأ في التحميل</option>';
                     return;
                 }
 
                 console.log('✅ Found', data?.length || 0, 'tenants');
-
+                
                 const select = document.getElementById('tenant_code');
                 if (!select) {
-                    console.error('❌ Dropdown element not found!');
+                    console.error('❌ Dropdown not found!');
                     return;
                 }
 
-                // Clear and populate dropdown
                 select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
                 
                 if (data && data.length > 0) {
                     data.forEach(t => {
                         const opt = document.createElement('option');
                         opt.value = t.tenant_code;
-                        opt.textContent = `${t.tenant_name} (${t.tenant_code})`;
+                        opt.textContent = t.tenant_name + ' (' + t.tenant_code + ')';
                         select.appendChild(opt);
                     });
                     console.log('✅ Dropdown populated with', data.length, 'tenants');
-                    
-                    // Log first few tenants for verification
-                    data.slice(0, 3).forEach(t => {
-                        console.log(`   - ${t.tenant_name} (${t.tenant_code})`);
-                    });
-                    if (data.length > 3) {
-                        console.log(`   ... and ${data.length - 3} more`);
-                    }
                 } else {
-                    console.log('⚠️ No tenants found in database');
+                    console.log('⚠️ No tenants found');
                     const opt = document.createElement('option');
                     opt.value = '';
-                    opt.textContent = '❗ لا يوجد مستأجرين - أضف مستأجر أولاً';
+                    opt.textContent = '❗ لا يوجد مستأجرين';
                     select.appendChild(opt);
                 }
             } catch (err) {
-                console.error('❌ Error in forceDropdown:', err);
-                const select = document.getElementById('tenant_code');
-                if (select) {
-                    select.innerHTML = '<option value="">❗ خطأ في الاتصال</option>';
-                }
+                console.error('❌ Error:', err);
             }
         }
 
@@ -432,7 +415,6 @@
 
                 if (error) {
                     console.error('❌ خطأ في تحميل القضايا:', error);
-                    // If table doesn't exist, show empty state
                     const tbody = document.getElementById('casesTableBody');
                     tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
@@ -554,16 +536,12 @@
             document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ===== Load Page =====
-        window.onload = async function() {
+        // ===== LOAD PAGE =====
+        // This runs when the page loads
+        window.onload = function() {
             console.log('🚀 Page loaded - starting...');
-            
-            // FORCE LOAD DROPDOWN FIRST
-            await forceDropdown();
-            
-            // Then load cases
-            await loadCases();
-            
+            loadTenantsDirect();
+            loadCases();
             console.log('✅ Page load complete');
         };
     </script>
