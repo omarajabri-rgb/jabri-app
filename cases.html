@@ -349,7 +349,7 @@
 
     <script>
         // ============================================================
-        // ONE SUPABASE CLIENT - NO DUPLICATES
+        // 🔥 SUPABASE CLIENT - ONLY ONE DECLARATION
         // ============================================================
         const supabase = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
@@ -357,16 +357,16 @@
         );
 
         // ============================================================
-        // SESSION CHECK
+        // 🔐 SESSION CHECK
         // ============================================================
         if (localStorage.getItem('jabri_admin_session') !== 'active') {
             window.location.href = 'admin-login.html';
         }
 
         // ============================================================
-        // LOAD TENANTS
+        // 📋 LOAD TENANTS INTO DROPDOWN
         // ============================================================
-        async function loadTenantsDirect() {
+        async function loadTenants() {
             const select = document.getElementById('tenant_code');
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
@@ -377,7 +377,7 @@
                     .order('tenant_name');
 
                 if (error) {
-                    console.error('Error:', error);
+                    console.error('❌ Error loading tenants:', error);
                     select.innerHTML = '<option value="">❗ خطأ في التحميل</option>';
                     return;
                 }
@@ -385,27 +385,27 @@
                 select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
                 
                 if (data && data.length > 0) {
-                    data.forEach(t => {
-                        const opt = document.createElement('option');
-                        opt.value = t.tenant_code;
-                        opt.textContent = t.tenant_name + ' (' + t.tenant_code + ')';
-                        select.appendChild(opt);
+                    data.forEach(tenant => {
+                        const option = document.createElement('option');
+                        option.value = tenant.tenant_code;
+                        option.textContent = tenant.tenant_name + ' (' + tenant.tenant_code + ')';
+                        select.appendChild(option);
                     });
                     console.log('✅ Loaded', data.length, 'tenants');
                 } else {
-                    const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.textContent = '❗ لا يوجد مستأجرين';
-                    select.appendChild(opt);
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '❗ لا يوجد مستأجرين';
+                    select.appendChild(option);
                 }
             } catch (err) {
-                console.error('Error:', err);
+                console.error('❌ Error:', err);
                 select.innerHTML = '<option value="">❗ خطأ</option>';
             }
         }
 
         // ============================================================
-        // LOAD CASES
+        // 📋 LOAD CASES
         // ============================================================
         async function loadCases() {
             try {
@@ -416,30 +416,39 @@
 
                 const tbody = document.getElementById('casesTableBody');
 
-                if (error || !data || data.length === 0) {
+                if (error) {
+                    console.error('❌ Error loading cases:', error);
                     tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
-                tbody.innerHTML = data.map(c => `
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(caseItem => `
                     <tr>
-                        <td>${c.tenants?.tenant_name || c.tenant_code}</td>
-                        <td><strong>${c.case_number}</strong></td>
-                        <td>${c.case_date ? new Date(c.case_date).toLocaleDateString('en-GB') : '—'}</td>
-                        <td>${c.amount ? Number(c.amount).toLocaleString('en-US') : '—'}</td>
-                        <td>${c.notes || '—'}</td>
+                        <td>${caseItem.tenants?.tenant_name || caseItem.tenant_code}</td>
+                        <td><strong>${caseItem.case_number}</strong></td>
+                        <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
+                        <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
+                        <td>${caseItem.notes || '—'}</td>
                         <td>
-                            <button class="btn btn-danger btn-sm" onclick="deleteCase('${c.id}')">🗑️</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
                         </td>
                     </tr>
                 `).join('');
+
             } catch (err) {
-                console.error('Error:', err);
+                console.error('❌ Error in loadCases:', err);
+                const tbody = document.getElementById('casesTableBody');
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
             }
         }
 
         // ============================================================
-        // SAVE CASE
+        // 💾 SAVE CASE
         // ============================================================
         async function saveCase() {
             const tenantCode = document.getElementById('tenant_code').value;
@@ -473,20 +482,24 @@
                 if (error) throw error;
 
                 showStatus(`✅ تم إضافة القضية ${caseNumber} بنجاح!`, 'success');
+                
+                // Clear form
                 document.getElementById('case_number').value = '';
                 document.getElementById('case_date').value = '';
                 document.getElementById('amount').value = '';
                 document.getElementById('notes').value = '';
+                
+                // Reload cases
                 loadCases();
 
             } catch (err) {
-                console.error(err);
+                console.error('❌ Error saving case:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
             }
         }
 
         // ============================================================
-        // DELETE CASE
+        // 🗑️ DELETE CASE
         // ============================================================
         async function deleteCase(id) {
             if (!confirm('هل أنت متأكد من حذف هذه القضية؟')) return;
@@ -498,15 +511,16 @@
                     .eq('id', id);
 
                 if (error) throw error;
+
                 loadCases();
             } catch (err) {
-                console.error(err);
+                console.error('❌ Error deleting case:', err);
                 alert('❌ حدث خطأ أثناء الحذف');
             }
         }
 
         // ============================================================
-        // CLEAR FORM
+        // 🧹 CLEAR FORM
         // ============================================================
         function clearCaseForm() {
             document.getElementById('tenant_code').value = '';
@@ -519,36 +533,37 @@
         }
 
         // ============================================================
-        // SHOW STATUS
+        // 📢 SHOW STATUS
         // ============================================================
-        function showStatus(msg, type) {
+        function showStatus(message, type) {
             const el = document.getElementById('status_msg');
-            el.textContent = msg;
+            el.textContent = message;
             el.className = `status-msg ${type}`;
             el.style.display = 'block';
         }
 
         // ============================================================
-        // GO BACK
+        // 🔙 GO BACK
         // ============================================================
         function goBack() {
             window.location.href = 'admin.html';
         }
 
         // ============================================================
-        // SCROLL TO FORM
+        // 📜 SCROLL TO FORM
         // ============================================================
         function scrollToCaseForm() {
             document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ============================================================
-        // LOAD PAGE
+        // 🚀 LOAD PAGE
         // ============================================================
         window.onload = function() {
             console.log('🚀 Page loaded');
-            loadTenantsDirect();
+            loadTenants();
             loadCases();
+            console.log('✅ Page load complete');
         };
     </script>
 
