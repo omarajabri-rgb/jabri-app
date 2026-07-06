@@ -36,7 +36,7 @@
         }
 
         .shell {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -107,6 +107,11 @@
             resize: vertical;
         }
 
+        .field input[type="number"] {
+            direction: ltr;
+            text-align: right;
+        }
+
         .btn {
             border: none;
             cursor: pointer;
@@ -149,6 +154,11 @@
             border-radius: 12px;
         }
 
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
         .status-msg {
             display: none;
             margin-top: 14px;
@@ -179,12 +189,14 @@
             background: #fff;
             border: 1px solid rgba(201, 164, 107, 0.14);
             margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 800px;
         }
 
         thead th {
@@ -195,6 +207,9 @@
             padding: 14px 12px;
             text-align: right;
             border-bottom: 1px solid rgba(201, 164, 107, 0.18);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         tbody td {
@@ -233,12 +248,12 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 14px;
         }
 
         .form-grid .field:last-child {
-            grid-column: span 2;
+            grid-column: span 3;
         }
 
         .form-actions {
@@ -251,6 +266,39 @@
             flex: 1;
         }
 
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .status-badge.active {
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-badge.ended {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .payment-row.debit {
+            color: var(--danger);
+        }
+
+        .payment-row.credit {
+            color: var(--success);
+        }
+
+        .total-row {
+            background: rgba(201, 164, 107, 0.10);
+            font-weight: 900;
+        }
+
         @media (max-width: 700px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -260,9 +308,6 @@
             }
             .form-actions {
                 flex-direction: column;
-            }
-            .table-wrap {
-                overflow-x: auto;
             }
         }
     </style>
@@ -302,14 +347,26 @@
 
                     <div class="field">
                         <label for="amount">المبلغ المحكوم</label>
-                        <input type="number" id="amount" placeholder="مثال: 5000" />
+                        <input type="number" id="amount" placeholder="مثال: 5000" step="0.01" />
                     </div>
 
-                    <!-- ===== NEW FIELD: قضية مرتطة ===== -->
+                    <div class="field">
+                        <label for="case_status">حالة القضية</label>
+                        <select id="case_status">
+                            <option value="active">فعالة</option>
+                            <option value="ended">منتهية</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="end_date">تاريخ الانتهاء</label>
+                        <input type="date" id="end_date" />
+                        <small>إذا كانت القضية منتهية</small>
+                    </div>
+
                     <div class="field">
                         <label for="related_case">قضية مرتطة</label>
                         <input type="text" id="related_case" placeholder="رقم القضية المرتبطة" />
-                        <small>أدخل رقم القضية المرتبطة بهذه القضية (اختياري)</small>
                     </div>
 
                     <div class="field">
@@ -340,14 +397,15 @@
                             <th>رقم القضية</th>
                             <th>التاريخ</th>
                             <th>المبلغ</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الانتهاء</th>
                             <th>قضية مرتطة</th>
-                            <th>ملاحظات</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody id="casesTableBody">
                         <tr>
-                            <td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td>
+                            <td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td>
                         </tr>
                     </tbody>
                 </table>
@@ -360,7 +418,7 @@
 
     <script>
         // ============================================================
-        // 🔥 SUPABASE CLIENT - RENAMED TO AVOID COLLISION
+        // 🔥 SUPABASE CLIENT
         // ============================================================
         const supabaseCases = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
@@ -431,12 +489,12 @@
 
                 if (error) {
                     console.error('❌ Error loading cases:', error);
-                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
@@ -446,8 +504,9 @@
                         <td><strong>${caseItem.case_number}</strong></td>
                         <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
                         <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
+                        <td><span class="status-badge ${caseItem.case_status === 'ended' ? 'ended' : 'active'}">${caseItem.case_status === 'ended' ? 'منتهية' : 'فعالة'}</span></td>
+                        <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
                         <td>${caseItem.related_case || '—'}</td>
-                        <td>${caseItem.notes || '—'}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
                         </td>
@@ -457,7 +516,7 @@
             } catch (err) {
                 console.error('❌ Error in loadCases:', err);
                 const tbody = document.getElementById('casesTableBody');
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
             }
         }
 
@@ -469,6 +528,8 @@
             const caseNumber = document.getElementById('case_number').value.trim();
             const caseDate = document.getElementById('case_date').value;
             const amount = document.getElementById('amount').value.trim();
+            const caseStatus = document.getElementById('case_status').value;
+            const endDate = document.getElementById('end_date').value;
             const relatedCase = document.getElementById('related_case').value.trim();
             const notes = document.getElementById('notes').value.trim();
 
@@ -489,6 +550,8 @@
                         case_number: caseNumber,
                         case_date: caseDate || null,
                         amount: amount ? parseFloat(amount) : null,
+                        case_status: caseStatus,
+                        end_date: endDate || null,
                         related_case: relatedCase || null,
                         notes: notes || null
                     }])
@@ -503,6 +566,8 @@
                 document.getElementById('case_number').value = '';
                 document.getElementById('case_date').value = '';
                 document.getElementById('amount').value = '';
+                document.getElementById('case_status').value = 'active';
+                document.getElementById('end_date').value = '';
                 document.getElementById('related_case').value = '';
                 document.getElementById('notes').value = '';
                 
@@ -544,6 +609,8 @@
             document.getElementById('case_number').value = '';
             document.getElementById('case_date').value = '';
             document.getElementById('amount').value = '';
+            document.getElementById('case_status').value = 'active';
+            document.getElementById('end_date').value = '';
             document.getElementById('related_case').value = '';
             document.getElementById('notes').value = '';
             document.getElementById('status_msg').className = 'status-msg';
