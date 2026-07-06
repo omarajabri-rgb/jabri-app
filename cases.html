@@ -366,10 +366,8 @@
         // ============================================================
         // 📋 LOAD TENANTS INTO DROPDOWN
         // ============================================================
-        async function loadTenants() {
+        async function loadTenantsDirect() {
             const select = document.getElementById('tenant_code');
-            if (!select) return;
-            
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
             try {
@@ -563,7 +561,7 @@
         // ============================================================
         window.onload = function() {
             console.log('🚀 Page loaded');
-            loadTenants();
+            loadTenantsDirect();
             loadCases();
             console.log('✅ Page load complete');
         };
