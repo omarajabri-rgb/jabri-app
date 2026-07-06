@@ -36,7 +36,7 @@
         }
 
         .shell {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -107,11 +107,6 @@
             resize: vertical;
         }
 
-        .field input[type="number"] {
-            direction: ltr;
-            text-align: right;
-        }
-
         .btn {
             border: none;
             cursor: pointer;
@@ -157,6 +152,13 @@
         .btn-success {
             background: var(--success);
             color: #fff;
+            border: none;
+        }
+
+        .btn-warning {
+            background: rgba(215, 146, 31, 0.15);
+            color: #b78a2e;
+            border: 1px solid rgba(215, 146, 31, 0.2);
         }
 
         .status-msg {
@@ -189,35 +191,37 @@
             background: #fff;
             border: 1px solid rgba(201, 164, 107, 0.14);
             margin-top: 16px;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 900px;
         }
 
         thead th {
             background: rgba(201, 164, 107, 0.10);
             color: #6b4f2b;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 900;
-            padding: 14px 12px;
+            padding: 12px 10px;
             text-align: right;
             border-bottom: 1px solid rgba(201, 164, 107, 0.18);
             position: sticky;
             top: 0;
             z-index: 10;
+            white-space: nowrap;
         }
 
         tbody td {
-            padding: 14px 12px;
+            padding: 12px 10px;
             font-size: 13px;
             font-weight: 700;
             color: var(--text);
             border-bottom: 1px solid rgba(91, 73, 42, 0.08);
+            vertical-align: middle;
         }
 
         tbody tr:last-child td {
@@ -286,6 +290,82 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .action-btns .btn-sm {
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 28px;
+            max-width: 700px;
+            width: 100%;
+            padding: 28px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 14px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--gold-deep);
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal .form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .modal .form-grid .field:last-child {
+            grid-column: span 2;
+        }
+
         .payment-row.debit {
             color: var(--danger);
         }
@@ -299,6 +379,22 @@
             font-weight: 900;
         }
 
+        .payment-table-wrap {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .payment-table-wrap table {
+            min-width: 500px;
+        }
+
+        .payment-table-wrap thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
         @media (max-width: 700px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -308,6 +404,15 @@
             }
             .form-actions {
                 flex-direction: column;
+            }
+            .modal .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal .form-grid .field:last-child {
+                grid-column: span 1;
+            }
+            .modal-content {
+                padding: 18px;
             }
         }
     </style>
@@ -400,7 +505,7 @@
                             <th>الحالة</th>
                             <th>تاريخ الانتهاء</th>
                             <th>قضية مرتطة</th>
-                            <th></th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="casesTableBody">
@@ -414,6 +519,130 @@
 
         <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
 
+    </div>
+
+    <!-- ===== MODAL: Edit Case ===== -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ تعديل القضية</h2>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+            <div id="edit_status_msg" class="status-msg"></div>
+            <form id="editForm" onsubmit="return false;">
+                <input type="hidden" id="edit_id" />
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="edit_tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
+                        <select id="edit_tenant_code">
+                            <option value="">-- اختر مستأجر --</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="edit_case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
+                        <input type="text" id="edit_case_number" required />
+                    </div>
+                    <div class="field">
+                        <label for="edit_case_date">تاريخ القضية</label>
+                        <input type="date" id="edit_case_date" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_amount">المبلغ المحكوم</label>
+                        <input type="number" id="edit_amount" step="0.01" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_case_status">حالة القضية</label>
+                        <select id="edit_case_status">
+                            <option value="active">فعالة</option>
+                            <option value="ended">منتهية</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="edit_end_date">تاريخ الانتهاء</label>
+                        <input type="date" id="edit_end_date" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_related_case">قضية مرتطة</label>
+                        <input type="text" id="edit_related_case" placeholder="رقم القضية المرتبطة" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_notes">ملاحظات</label>
+                        <textarea id="edit_notes" placeholder="أي تفاصيل إضافية..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-gold" onclick="updateCase()">💾 حفظ التعديلات</button>
+                    <button class="btn btn-soft" type="button" onclick="closeEditModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Payments ===== -->
+    <div class="modal" id="paymentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 دفعات القضية</h2>
+                <button class="modal-close" onclick="closePaymentsModal()">✕</button>
+            </div>
+            <div id="payments_status_msg" class="status-msg"></div>
+            <input type="hidden" id="payments_case_id" />
+            
+            <div style="margin-bottom:16px;padding:12px;background:rgba(201,164,107,0.08);border-radius:16px;">
+                <strong>رقم القضية:</strong> <span id="payments_case_number_display">—</span>
+                <span style="margin-right:20px;"><strong>المبلغ المحكوم:</strong> <span id="payments_amount_display">—</span></span>
+                <span style="margin-right:20px;"><strong>المدفوع:</strong> <span id="payments_total_paid_display">0</span></span>
+                <span style="margin-right:20px;"><strong>المتبقي:</strong> <span id="payments_remaining_display">0</span></span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div class="field" style="margin-bottom:0;">
+                    <label for="payment_date">التاريخ</label>
+                    <input type="date" id="payment_date" />
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label for="payment_amount">المبلغ</label>
+                    <input type="number" id="payment_amount" placeholder="0" step="0.01" />
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label for="payment_type">النوع</label>
+                    <select id="payment_type">
+                        <option value="credit">دفع (دائن)</option>
+                        <option value="debit">خصم (مدين)</option>
+                    </select>
+                </div>
+                <div class="field" style="margin-bottom:0;grid-column:span 2;">
+                    <label for="payment_description">البيان</label>
+                    <input type="text" id="payment_description" placeholder="وصف الدفعة" />
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label for="payment_receipt">رقم السند</label>
+                    <input type="text" id="payment_receipt" placeholder="رقم السند" />
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="addPayment()" style="width:100%;margin-bottom:16px;">➕ إضافة دفعة</button>
+
+            <div class="payment-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>مدين</th>
+                            <th>دائن</th>
+                            <th>الرصيد</th>
+                            <th>البيان</th>
+                            <th>رقم السند</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">لا توجد دفعات</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -432,11 +661,13 @@
             window.location.href = 'admin-login.html';
         }
 
+        let currentCaseId = null;
+
         // ============================================================
         // 📋 LOAD TENANTS INTO DROPDOWN
         // ============================================================
-        async function loadTenantsDirect() {
-            const select = document.getElementById('tenant_code');
+        async function loadTenantsIntoDropdown(selectId) {
+            const select = document.getElementById(selectId);
             if (!select) return;
             
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
@@ -462,12 +693,6 @@
                         option.textContent = tenant.tenant_name + ' (' + tenant.tenant_code + ')';
                         select.appendChild(option);
                     });
-                    console.log('✅ Loaded', data.length, 'tenants');
-                } else {
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = '❗ لا يوجد مستأجرين';
-                    select.appendChild(option);
                 }
             } catch (err) {
                 console.error('❌ Error:', err);
@@ -508,7 +733,11 @@
                         <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
                         <td>${caseItem.related_case || '—'}</td>
                         <td>
-                            <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
+                            <div class="action-btns">
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${caseItem.id}')">✏️</button>
+                                <button class="btn btn-success btn-sm" onclick="openPaymentsModal('${caseItem.id}')">💰</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
@@ -561,23 +790,291 @@
                 if (error) throw error;
 
                 showStatus(`✅ تم إضافة القضية ${caseNumber} بنجاح!`, 'success');
-                
-                // Clear form fields
-                document.getElementById('case_number').value = '';
-                document.getElementById('case_date').value = '';
-                document.getElementById('amount').value = '';
-                document.getElementById('case_status').value = 'active';
-                document.getElementById('end_date').value = '';
-                document.getElementById('related_case').value = '';
-                document.getElementById('notes').value = '';
-                
-                // Reload cases
+                clearCaseForm();
                 loadCases();
 
             } catch (err) {
                 console.error('❌ Error saving case:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
             }
+        }
+
+        // ============================================================
+        // ✏️ EDIT CASE
+        // ============================================================
+        async function openEditModal(id) {
+            try {
+                const { data, error } = await supabaseCases
+                    .from('court_cases')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('edit_id').value = data.id;
+                document.getElementById('edit_tenant_code').value = data.tenant_code || '';
+                document.getElementById('edit_case_number').value = data.case_number || '';
+                document.getElementById('edit_case_date').value = data.case_date || '';
+                document.getElementById('edit_amount').value = data.amount || '';
+                document.getElementById('edit_case_status').value = data.case_status || 'active';
+                document.getElementById('edit_end_date').value = data.end_date || '';
+                document.getElementById('edit_related_case').value = data.related_case || '';
+                document.getElementById('edit_notes').value = data.notes || '';
+
+                // Load tenants into edit dropdown
+                await loadTenantsIntoDropdown('edit_tenant_code');
+                document.getElementById('edit_tenant_code').value = data.tenant_code || '';
+
+                document.getElementById('editModal').classList.add('active');
+
+            } catch (err) {
+                console.error('❌ Error loading case for edit:', err);
+                alert('حدث خطأ في تحميل بيانات القضية');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        async function updateCase() {
+            const id = document.getElementById('edit_id').value;
+            const tenantCode = document.getElementById('edit_tenant_code').value;
+            const caseNumber = document.getElementById('edit_case_number').value.trim();
+            const caseDate = document.getElementById('edit_case_date').value;
+            const amount = document.getElementById('edit_amount').value.trim();
+            const caseStatus = document.getElementById('edit_case_status').value;
+            const endDate = document.getElementById('edit_end_date').value;
+            const relatedCase = document.getElementById('edit_related_case').value.trim();
+            const notes = document.getElementById('edit_notes').value.trim();
+
+            if (!tenantCode) {
+                showEditStatus('الرجاء اختيار المستأجر', 'error');
+                return;
+            }
+            if (!caseNumber) {
+                showEditStatus('الرجاء إدخال رقم القضية', 'error');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseCases
+                    .from('court_cases')
+                    .update({
+                        tenant_code: tenantCode,
+                        case_number: caseNumber,
+                        case_date: caseDate || null,
+                        amount: amount ? parseFloat(amount) : null,
+                        case_status: caseStatus,
+                        end_date: endDate || null,
+                        related_case: relatedCase || null,
+                        notes: notes || null
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showEditStatus('✅ تم تحديث القضية بنجاح!', 'success');
+                closeEditModal();
+                loadCases();
+
+            } catch (err) {
+                console.error('❌ Error updating case:', err);
+                showEditStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        function showEditStatus(message, type) {
+            const el = document.getElementById('edit_status_msg');
+            el.textContent = message;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        // ============================================================
+        // 💰 PAYMENTS
+        // ============================================================
+        async function openPaymentsModal(caseId) {
+            currentCaseId = caseId;
+            document.getElementById('payments_case_id').value = caseId;
+            document.getElementById('paymentsModal').classList.add('active');
+
+            // Set default date
+            document.getElementById('payment_date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('payment_amount').value = '';
+            document.getElementById('payment_description').value = '';
+            document.getElementById('payment_receipt').value = '';
+            document.getElementById('payment_type').value = 'credit';
+
+            await loadPayments(caseId);
+            await loadCaseInfo(caseId);
+        }
+
+        function closePaymentsModal() {
+            document.getElementById('paymentsModal').classList.remove('active');
+        }
+
+        async function loadCaseInfo(caseId) {
+            try {
+                const { data, error } = await supabaseCases
+                    .from('court_cases')
+                    .select('case_number, amount')
+                    .eq('id', caseId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('payments_case_number_display').textContent = data.case_number || '—';
+                document.getElementById('payments_amount_display').textContent = data.amount ? Number(data.amount).toLocaleString('en-US') : '—';
+
+                // Calculate total paid
+                const { data: payments, error: pError } = await supabaseCases
+                    .from('case_payments')
+                    .select('credit, debit')
+                    .eq('case_id', caseId);
+
+                if (!pError && payments) {
+                    let totalCredit = 0;
+                    let totalDebit = 0;
+                    payments.forEach(p => {
+                        totalCredit += Number(p.credit) || 0;
+                        totalDebit += Number(p.debit) || 0;
+                    });
+                    const totalPaid = totalCredit - totalDebit;
+                    const remaining = (Number(data.amount) || 0) - totalPaid;
+                    document.getElementById('payments_total_paid_display').textContent = totalPaid.toLocaleString('en-US');
+                    document.getElementById('payments_remaining_display').textContent = remaining.toLocaleString('en-US');
+                }
+            } catch (err) {
+                console.error('Error loading case info:', err);
+            }
+        }
+
+        async function loadPayments(caseId) {
+            try {
+                const { data, error } = await supabaseCases
+                    .from('case_payments')
+                    .select('*')
+                    .eq('case_id', caseId)
+                    .order('payment_date', { ascending: true });
+
+                const tbody = document.getElementById('paymentsTableBody');
+
+                if (error) {
+                    console.error('Error loading payments:', error);
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد دفعات</td></tr>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد دفعات</td></tr>`;
+                    return;
+                }
+
+                let runningBalance = 0;
+
+                tbody.innerHTML = data.map(p => {
+                    const debit = Number(p.debit) || 0;
+                    const credit = Number(p.credit) || 0;
+                    runningBalance += credit - debit;
+
+                    return `
+                        <tr class="${credit > 0 ? 'payment-row credit' : debit > 0 ? 'payment-row debit' : ''}">
+                            <td>${p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-GB') : '—'}</td>
+                            <td>${debit > 0 ? debit.toLocaleString('en-US') : '—'}</td>
+                            <td>${credit > 0 ? credit.toLocaleString('en-US') : '—'}</td>
+                            <td><strong>${runningBalance.toLocaleString('en-US')}</strong></td>
+                            <td>${p.description || '—'}</td>
+                            <td>${p.receipt_no || '—'}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Error loading payments:', err);
+            }
+        }
+
+        async function addPayment() {
+            const caseId = document.getElementById('payments_case_id').value;
+            const paymentDate = document.getElementById('payment_date').value;
+            const amount = parseFloat(document.getElementById('payment_amount').value) || 0;
+            const type = document.getElementById('payment_type').value;
+            const description = document.getElementById('payment_description').value.trim();
+            const receiptNo = document.getElementById('payment_receipt').value.trim();
+
+            if (!paymentDate) {
+                showPaymentStatus('الرجاء إدخال التاريخ', 'error');
+                return;
+            }
+            if (amount <= 0) {
+                showPaymentStatus('الرجاء إدخال مبلغ صحيح', 'error');
+                return;
+            }
+
+            const payload = {
+                case_id: caseId,
+                payment_date: paymentDate,
+                description: description || null,
+                receipt_no: receiptNo || null
+            };
+
+            if (type === 'credit') {
+                payload.credit = amount;
+                payload.debit = 0;
+            } else {
+                payload.debit = amount;
+                payload.credit = 0;
+            }
+
+            try {
+                const { error } = await supabaseCases
+                    .from('case_payments')
+                    .insert([payload]);
+
+                if (error) throw error;
+
+                showPaymentStatus('✅ تم إضافة الدفعة بنجاح!', 'success');
+                document.getElementById('payment_amount').value = '';
+                document.getElementById('payment_description').value = '';
+                document.getElementById('payment_receipt').value = '';
+
+                await loadPayments(caseId);
+                await loadCaseInfo(caseId);
+
+            } catch (err) {
+                console.error('Error adding payment:', err);
+                showPaymentStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        async function deletePayment(paymentId) {
+            if (!confirm('هل أنت متأكد من حذف هذه الدفعة؟')) return;
+
+            try {
+                const { error } = await supabaseCases
+                    .from('case_payments')
+                    .delete()
+                    .eq('id', paymentId);
+
+                if (error) throw error;
+
+                await loadPayments(currentCaseId);
+                await loadCaseInfo(currentCaseId);
+
+            } catch (err) {
+                console.error('Error deleting payment:', err);
+                alert('❌ حدث خطأ أثناء الحذف');
+            }
+        }
+
+        function showPaymentStatus(message, type) {
+            const el = document.getElementById('payments_status_msg');
+            el.textContent = message;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
         }
 
         // ============================================================
@@ -646,7 +1143,8 @@
         // ============================================================
         window.onload = function() {
             console.log('🚀 Page loaded');
-            loadTenantsDirect();
+            loadTenantsIntoDropdown('tenant_code');
+            loadTenantsIntoDropdown('edit_tenant_code');
             loadCases();
             console.log('✅ Page load complete');
         };
