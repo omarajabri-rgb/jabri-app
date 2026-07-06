@@ -184,7 +184,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 700px;
         }
 
         thead th {
@@ -261,6 +261,9 @@
             .form-actions {
                 flex-direction: column;
             }
+            .table-wrap {
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
@@ -302,6 +305,13 @@
                         <input type="number" id="amount" placeholder="مثال: 5000" />
                     </div>
 
+                    <!-- ===== NEW FIELD: قضية مرتطة ===== -->
+                    <div class="field">
+                        <label for="related_case">قضية مرتطة</label>
+                        <input type="text" id="related_case" placeholder="رقم القضية المرتبطة" />
+                        <small>أدخل رقم القضية المرتبطة بهذه القضية (اختياري)</small>
+                    </div>
+
                     <div class="field">
                         <label for="notes">ملاحظات</label>
                         <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
@@ -330,13 +340,14 @@
                             <th>رقم القضية</th>
                             <th>التاريخ</th>
                             <th>المبلغ</th>
+                            <th>قضية مرتطة</th>
                             <th>ملاحظات</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody id="casesTableBody">
                         <tr>
-                            <td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td>
+                            <td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td>
                         </tr>
                     </tbody>
                 </table>
@@ -420,12 +431,12 @@
 
                 if (error) {
                     console.error('❌ Error loading cases:', error);
-                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
@@ -435,6 +446,7 @@
                         <td><strong>${caseItem.case_number}</strong></td>
                         <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
                         <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
+                        <td>${caseItem.related_case || '—'}</td>
                         <td>${caseItem.notes || '—'}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
@@ -445,7 +457,7 @@
             } catch (err) {
                 console.error('❌ Error in loadCases:', err);
                 const tbody = document.getElementById('casesTableBody');
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
             }
         }
 
@@ -457,6 +469,7 @@
             const caseNumber = document.getElementById('case_number').value.trim();
             const caseDate = document.getElementById('case_date').value;
             const amount = document.getElementById('amount').value.trim();
+            const relatedCase = document.getElementById('related_case').value.trim();
             const notes = document.getElementById('notes').value.trim();
 
             if (!tenantCode) {
@@ -476,6 +489,7 @@
                         case_number: caseNumber,
                         case_date: caseDate || null,
                         amount: amount ? parseFloat(amount) : null,
+                        related_case: relatedCase || null,
                         notes: notes || null
                     }])
                     .select()
@@ -489,6 +503,7 @@
                 document.getElementById('case_number').value = '';
                 document.getElementById('case_date').value = '';
                 document.getElementById('amount').value = '';
+                document.getElementById('related_case').value = '';
                 document.getElementById('notes').value = '';
                 
                 // Reload cases
@@ -529,6 +544,7 @@
             document.getElementById('case_number').value = '';
             document.getElementById('case_date').value = '';
             document.getElementById('amount').value = '';
+            document.getElementById('related_case').value = '';
             document.getElementById('notes').value = '';
             document.getElementById('status_msg').className = 'status-msg';
             document.getElementById('status_msg').style.display = 'none';
