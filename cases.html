@@ -349,9 +349,9 @@
 
     <script>
         // ============================================================
-        // 🔥 SUPABASE CLIENT - ONLY ONE DECLARATION
+        // 🔥 SUPABASE CLIENT - RENAMED TO AVOID COLLISION
         // ============================================================
-        const supabase = window.supabase.createClient(
+        const supabaseCases = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
@@ -368,10 +368,12 @@
         // ============================================================
         async function loadTenantsDirect() {
             const select = document.getElementById('tenant_code');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseCases
                     .from('tenants')
                     .select('tenant_code, tenant_name')
                     .order('tenant_name');
@@ -409,7 +411,7 @@
         // ============================================================
         async function loadCases() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseCases
                     .from('court_cases')
                     .select('*, tenants(tenant_name)')
                     .order('created_at', { ascending: false });
@@ -467,7 +469,7 @@
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseCases
                     .from('court_cases')
                     .insert([{
                         tenant_code: tenantCode,
@@ -505,7 +507,7 @@
             if (!confirm('هل أنت متأكد من حذف هذه القضية؟')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseCases
                     .from('court_cases')
                     .delete()
                     .eq('id', id);
