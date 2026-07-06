@@ -797,8 +797,15 @@
     </div>
 
     <script>
+        const tenantSession = localStorage.getItem('jabri_tenant_session');
+        const adminSession = localStorage.getItem('jabri_admin_session');
+
+        if (tenantSession !== 'active' && adminSession !== 'active') {
+            window.location.href = 'index.html';
+        }
+
         const sanitizeInput = (input) => String(input ?? '').replace(/[<>'"]/g, '');
-        
+
         const { createClient } = supabase;
 
         const supabaseClient = createClient(
@@ -1301,6 +1308,7 @@ document.body.classList.remove('loaded');
 
         function logout() {
             localStorage.removeItem('jabri_tenant_code');
+            localStorage.removeItem('jabri_tenant_session');
             window.location.href = 'index.html';
         }
 
