@@ -268,8 +268,10 @@
 
     <div class="shell">
 
+        <a class="back-link" onclick="goBack()" style="margin-bottom:8px;">🏠 العودة</a>
+
         <!-- ===== نموذج إضافة قضية ===== -->
-        <div class="panel">
+        <div class="panel" id="case_form_panel">
             <div class="chip-header">
                 <div class="chip-title">➕ إضافة قضية جديدة</div>
             </div>
@@ -315,8 +317,9 @@
 
         <!-- ===== قائمة القضايا ===== -->
         <div class="panel">
-            <div class="chip-header">
+            <div class="chip-header" style="justify-content:space-between; align-items:center;">
                 <div class="chip-title">📋 قائمة القضايا</div>
+                <button class="btn btn-soft btn-sm" type="button" onclick="scrollToCaseForm()">➕ إضافة قضية</button>
             </div>
 
             <div class="table-wrap">
@@ -345,7 +348,7 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient(
+        const supabase = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
@@ -494,6 +497,11 @@
         // ===== العودة =====
         function goBack() {
             window.location.href = 'admin.html';
+        }
+
+        // ===== التمرير إلى نموذج الإضافة =====
+        function scrollToCaseForm() {
+            document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ===== تحميل الصفحة =====
