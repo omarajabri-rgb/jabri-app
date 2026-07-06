@@ -360,23 +360,55 @@
             window.location.href = 'admin-login.html';
         }
 
+        // ===== DEBUG: Check tenants table =====
+        async function debugTenants() {
+            console.log('🔍 Checking tenants table...');
+            try {
+                const { data, error } = await supabase
+                    .from('tenants')
+                    .select('tenant_code, tenant_name, phone, shop_no');
+
+                if (error) {
+                    console.error('❌ Error loading tenants:', error);
+                    return;
+                }
+
+                console.log('✅ Found', data?.length || 0, 'tenants:');
+                if (data && data.length > 0) {
+                    console.table(data);
+                } else {
+                    console.log('⚠️ No tenants found in database!');
+                    console.log('👉 Please add tenants using add_tenant.html or SQL');
+                }
+                return data;
+            } catch (err) {
+                console.error('❌ Error:', err);
+                return [];
+            }
+        }
+
         // ===== Load Tenants =====
         async function loadTenants() {
             try {
-                console.log('Loading tenants...');
+                console.log('📋 Loading tenants for dropdown...');
                 const { data, error } = await supabase
                     .from('tenants')
                     .select('tenant_code, tenant_name')
                     .order('tenant_name');
 
                 if (error) {
-                    console.error('خطأ في تحميل المستأجرين:', error);
+                    console.error('❌ خطأ في تحميل المستأجرين:', error);
                     return;
                 }
 
-                console.log('Tenants loaded:', data.length);
+                console.log('✅ Tenants loaded:', data?.length || 0);
 
                 const select = document.getElementById('tenant_code');
+                if (!select) {
+                    console.error('❌ Dropdown element not found!');
+                    return;
+                }
+
                 select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
                 
                 if (data && data.length > 0) {
@@ -386,26 +418,34 @@
                         opt.textContent = `${t.tenant_name} (${t.tenant_code})`;
                         select.appendChild(opt);
                     });
+                    console.log('✅ Dropdown populated with', data.length, 'tenants');
                 } else {
-                    console.log('No tenants found in database');
+                    console.log('⚠️ No tenants found in database');
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = '❗ لا يوجد مستأجرين - أضف مستأجر أولاً';
+                    select.appendChild(opt);
                 }
             } catch (err) {
-                console.error('Error in loadTenants:', err);
+                console.error('❌ Error in loadTenants:', err);
             }
         }
 
         // ===== Load Cases =====
         async function loadCases() {
             try {
+                console.log('📋 Loading cases...');
                 const { data, error } = await supabase
                     .from('court_cases')
                     .select('*, tenants(tenant_name)')
                     .order('created_at', { ascending: false });
 
                 if (error) {
-                    console.error('خطأ في تحميل القضايا:', error);
+                    console.error('❌ خطأ في تحميل القضايا:', error);
                     return;
                 }
+
+                console.log('✅ Cases loaded:', data?.length || 0);
 
                 const tbody = document.getElementById('casesTableBody');
 
@@ -427,7 +467,7 @@
                     </tr>
                 `).join('');
             } catch (err) {
-                console.error('Error in loadCases:', err);
+                console.error('❌ Error in loadCases:', err);
             }
         }
 
@@ -523,10 +563,18 @@
 
         // ===== Load Page =====
         window.onload = async function() {
-            console.log('Page loaded - starting...');
+            console.log('🚀 Page loaded - starting...');
+            
+            // First, debug tenants
+            await debugTenants();
+            
+            // Then load tenants for dropdown
             await loadTenants();
+            
+            // Then load cases
             await loadCases();
-            console.log('Page load complete');
+            
+            console.log('✅ Page load complete');
         };
     </script>
 
