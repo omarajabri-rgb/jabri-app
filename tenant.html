@@ -691,10 +691,28 @@
             </div>
             
             <div id="burger_menu" class="burger-menu">
-                <div class="menu-item" onclick="openChangePasswordModal()">
-                    <i data-lucide="key"></i> تغيير كلمة المرور
-                </div>
-            </div>
+    <!-- Tenant Name -->
+    <div class="menu-item" style="border-bottom:1px solid rgba(201,164,107,0.18); margin-bottom:4px; cursor:default; color:var(--gold-deep); font-weight:900;">
+        <i data-lucide="user"></i>
+        <span id="burger_tenant_name">المستأجر</span>
+    </div>
+    
+    <!-- Shop/Unit -->
+    <div class="menu-item" style="border-bottom:1px solid rgba(201,164,107,0.18); margin-bottom:4px; cursor:default; font-size:12px; color:var(--muted);">
+        <i data-lucide="home"></i>
+        <span id="burger_tenant_unit">المحل: —</span>
+    </div>
+    
+    <!-- Change Password -->
+    <div class="menu-item" onclick="openChangePasswordModal()">
+        <i data-lucide="key"></i> تغيير كلمة المرور
+    </div>
+    
+    <!-- View Statement -->
+    <div class="menu-item" onclick="goToStatement()" style="border-top:1px solid rgba(201,164,107,0.18); margin-top:4px;">
+        <i data-lucide="file-text"></i> كشف الحساب
+    </div>
+</div>
         </div>
 
         <div id="passwordModal" class="modal">
@@ -1211,65 +1229,117 @@
             }
         });
 
-        async function init() {
-            document.getElementById('loader').style.display = 'flex';
-document.body.classList.remove('loaded');
-            try {
-                const { data: tenant, error: tenantError } = await supabaseClient
-                    .from('tenants')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .maybeSingle();
+async function init() {
+    document.getElementById('loader').style.display = 'flex';
+    document.body.classList.remove('loaded');
+    try {
+        const { data: tenant, error: tenantError } = await supabaseClient
+            .from('tenants')
+            .select('*')
+            .eq('tenant_code', tenantCode)
+            .maybeSingle();
 
-                if (tenantError) throw tenantError;
-                
-                if (tenant) {
-                    currentTenantPassword = tenant.password || '';
-                }
+        if (tenantError) throw tenantError;
+        
+        if (tenant) {
+            currentTenantPassword = tenant.password || '';
+        }
 
-                const { data: summaryData, error: summaryError } = await supabaseClient
-                    .from('tenant_yearly_summary')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .order('year', { ascending: true });
+        const { data: summaryData, error: summaryError } = await supabaseClient
+            .from('tenant_yearly_summary')
+            .select('*')
+            .eq('tenant_code', tenantCode)
+            .order('year', { ascending: true });
 
-                if (summaryError) throw summaryError;
+        if (summaryError) throw summaryError;
 
-                const nowIso = new Date().toISOString();
+        const nowIso = new Date().toISOString();
 
-                const { data: notificationsData, error: notifError } = await supabaseClient
-                    .from('tenant_notifications')
-                    .select('*')
-                    .eq('tenant_code', tenantCode)
-                    .eq('is_active', true)
-                    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-                    .order('created_at', { ascending: false });
+        const { data: notificationsData, error: notifError } = await supabaseClient
+            .from('tenant_notifications')
+            .select('*')
+            .eq('tenant_code', tenantCode)
+            .eq('is_active', true)
+            .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+            .order('created_at', { ascending: false });
 
-                if (notifError) {
-                    console.warn('NOTIFICATIONS WARNING:', notifError);
-                }
+        if (notifError) {
+            console.warn('NOTIFICATIONS WARNING:', notifError);
+        }
 
-                if (tenant) {
-                    await supabaseClient
-                        .from('tenants')
-                        .update({ last_seen: new Date().toISOString() })
-                        .eq('tenant_code', tenantCode);
-                }
+        if (tenant) {
+            await supabaseClient
+                .from('tenants')
+                .update({ last_seen: new Date().toISOString() })
+                .eq('tenant_code', tenantCode);
+        }
 
-                const { currentSummary, previousSummary } = getLatestAndPreviousSummaries(summaryData || []);
+        const { currentSummary, previousSummary } = getLatestAndPreviousSummaries(summaryData || []);
 
-                const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
-                const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
+        const currentBalance = currentSummary ? toNumber(currentSummary.final_balance) : 0;
+        const currentCredit = currentSummary ? toNumber(currentSummary.total_credit) : 0;
 
-                const realLastUpdate =
-                    currentSummary?.updated_at ||
-                    currentSummary?.created_at ||
-                    tenant?.updated_at ||
-                    null;
+        const realLastUpdate =
+            currentSummary?.updated_at ||
+            currentSummary?.created_at ||
+            tenant?.updated_at ||
+            null;
 
-                document.getElementById('t_name').innerText = sanitizeInput(tenant?.tenant_name) || tenantCode;
-                document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
+        // Display tenant name
+        document.getElementById('t_name').innerText = sanitizeInput(tenant?.tenant_name) || tenantCode;
 
+        // ✅ Update burger menu with tenant info
+        const tenantName = tenant?.tenant_name || tenantCode;
+        const shopNo = tenant?.shop_no || '—';
+        document.getElementById('burger_tenant_name').innerText = tenantName;
+        document.getElementById('burger_tenant_unit').innerText = `المحل: ${shopNo}`;
+
+        // Last update
+        document.getElementById('last_update').innerText = formatRealLastUpdate(realLastUpdate);
+
+        // Status chip
+        const status = getTenantStatus(currentBalance, currentCredit);
+        const chip = document.getElementById('account_status_chip');
+        chip.innerText = status.text;
+        chip.className = `hero-status ${status.cls}`;
+
+        // Animate numbers
+        animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit)));
+        animateNumber(document.getElementById('val_balance'), Math.round(Math.abs(currentBalance)));
+
+        // Smart text
+        document.getElementById('balance_smart_text').innerText = getBalanceSmartText(currentBalance);
+        document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
+
+        // Progress bar
+        updateProgressBar(currentCredit, currentBalance);
+        updateTrafficLight(currentBalance);
+
+        // Trend
+        const trend = getBalanceTrend({ final_balance: currentBalance }, previousSummary);
+        const trendEl = document.getElementById('balance_trend_text');
+        trendEl.className = `chart-caption ${trend.type}`;
+        trendEl.innerText = trend.text;
+
+        // Notifications
+        renderNotifications(notificationsData || []);
+
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
+        document.body.classList.add('loaded');
+
+        // Animations
+        document.querySelectorAll('.reveal').forEach((el, i) => {
+            setTimeout(() => el.classList.add('active'), i * 80);
+        });
+
+        if (window.lucide) lucide.createIcons();
+    } catch (e) {
+        console.error(e);
+        document.getElementById('loader').style.display = 'none';
+        document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>خطأ في تحميل البيانات</h2></div>';
+    }
+}
                 const status = getTenantStatus(currentBalance, currentCredit);
                 const chip = document.getElementById('account_status_chip');
                 chip.innerText = status.text;
