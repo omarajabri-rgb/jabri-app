@@ -360,9 +360,9 @@
             window.location.href = 'admin-login.html';
         }
 
-        // ===== TEST: Load tenants directly (FIX) =====
+        // ===== Load Tenants for Dropdown =====
         async function loadTenantsDirect() {
-            console.log('🔍 Loading tenants directly...');
+            console.log('🔍 Loading tenants...');
             try {
                 const { data, error } = await supabase
                     .from('tenants')
@@ -537,7 +537,6 @@
         }
 
         // ===== LOAD PAGE =====
-        // This runs when the page loads
         window.onload = function() {
             console.log('🚀 Page loaded - starting...');
             loadTenantsDirect();
