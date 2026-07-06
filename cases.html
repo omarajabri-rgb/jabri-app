@@ -349,21 +349,23 @@
 
     <script>
         // ============================================================
-        // SIMPLE FIX - NO DUPLICATE CODE
+        // ONE SUPABASE CLIENT - NO DUPLICATES
         // ============================================================
-
-        // 1. Supabase Client (ONLY ONCE)
         const supabase = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
 
-        // 2. Session Check
+        // ============================================================
+        // SESSION CHECK
+        // ============================================================
         if (localStorage.getItem('jabri_admin_session') !== 'active') {
             window.location.href = 'admin-login.html';
         }
 
-        // 3. Load Tenants
+        // ============================================================
+        // LOAD TENANTS
+        // ============================================================
         async function loadTenantsDirect() {
             const select = document.getElementById('tenant_code');
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
@@ -402,7 +404,9 @@
             }
         }
 
-        // 4. Load Cases
+        // ============================================================
+        // LOAD CASES
+        // ============================================================
         async function loadCases() {
             try {
                 const { data, error } = await supabase
@@ -434,7 +438,9 @@
             }
         }
 
-        // 5. Save Case
+        // ============================================================
+        // SAVE CASE
+        // ============================================================
         async function saveCase() {
             const tenantCode = document.getElementById('tenant_code').value;
             const caseNumber = document.getElementById('case_number').value.trim();
@@ -479,7 +485,9 @@
             }
         }
 
-        // 6. Delete Case
+        // ============================================================
+        // DELETE CASE
+        // ============================================================
         async function deleteCase(id) {
             if (!confirm('هل أنت متأكد من حذف هذه القضية؟')) return;
 
@@ -497,7 +505,9 @@
             }
         }
 
-        // 7. Clear Form
+        // ============================================================
+        // CLEAR FORM
+        // ============================================================
         function clearCaseForm() {
             document.getElementById('tenant_code').value = '';
             document.getElementById('case_number').value = '';
@@ -508,7 +518,9 @@
             document.getElementById('status_msg').style.display = 'none';
         }
 
-        // 8. Show Status
+        // ============================================================
+        // SHOW STATUS
+        // ============================================================
         function showStatus(msg, type) {
             const el = document.getElementById('status_msg');
             el.textContent = msg;
@@ -516,17 +528,23 @@
             el.style.display = 'block';
         }
 
-        // 9. Go Back
+        // ============================================================
+        // GO BACK
+        // ============================================================
         function goBack() {
             window.location.href = 'admin.html';
         }
 
-        // 10. Scroll to Form
+        // ============================================================
+        // SCROLL TO FORM
+        // ============================================================
         function scrollToCaseForm() {
             document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // 11. LOAD PAGE
+        // ============================================================
+        // LOAD PAGE
+        // ============================================================
         window.onload = function() {
             console.log('🚀 Page loaded');
             loadTenantsDirect();
