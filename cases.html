@@ -281,29 +281,29 @@
             <form id="caseForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="field">
-                        <label>المستأجر <span style="color:var(--danger);">*</span></label>
+                        <label for="tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
                         <select id="tenant_code">
                             <option value="">-- اختر مستأجر --</option>
                         </select>
                     </div>
 
                     <div class="field">
-                        <label>رقم القضية <span style="color:var(--danger);">*</span></label>
+                        <label for="case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
                         <input type="text" id="case_number" placeholder="مثال: 2025/1234" required />
                     </div>
 
                     <div class="field">
-                        <label>تاريخ القضية</label>
+                        <label for="case_date">تاريخ القضية</label>
                         <input type="date" id="case_date" />
                     </div>
 
                     <div class="field">
-                        <label>المبلغ المحكوم</label>
+                        <label for="amount">المبلغ المحكوم</label>
                         <input type="number" id="amount" placeholder="مثال: 5000" />
                     </div>
 
                     <div class="field">
-                        <label>ملاحظات</label>
+                        <label for="notes">ملاحظات</label>
                         <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
                     </div>
                 </div>
@@ -366,7 +366,7 @@
         // ============================================================
         // 📋 LOAD TENANTS INTO DROPDOWN
         // ============================================================
-        async function loadTenants() {
+        async function loadTenantsDirect() {
             const select = document.getElementById('tenant_code');
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
@@ -483,7 +483,7 @@
 
                 showStatus(`✅ تم إضافة القضية ${caseNumber} بنجاح!`, 'success');
                 
-                // Clear form
+                // Clear form fields
                 document.getElementById('case_number').value = '';
                 document.getElementById('case_date').value = '';
                 document.getElementById('amount').value = '';
@@ -561,7 +561,7 @@
         // ============================================================
         window.onload = function() {
             console.log('🚀 Page loaded');
-            loadTenants();
+            loadTenantsDirect();
             loadCases();
             console.log('✅ Page load complete');
         };
