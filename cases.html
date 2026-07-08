@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | القضايا</title>
+    <title>مجمع جبري | إدارة القضايا</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -198,7 +199,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 900px;
+            min-width: 1000px;
         }
 
         thead th {
@@ -306,7 +307,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             z-index: 9999;
             align-items: center;
@@ -322,12 +323,12 @@
         .modal-content {
             background: #fff;
             border-radius: 28px;
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
             padding: 28px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
         }
 
         .modal-header {
@@ -386,7 +387,7 @@
         }
 
         .payment-table-wrap table {
-            min-width: 500px;
+            min-width: 600px;
         }
 
         .payment-table-wrap thead th {
@@ -421,7 +422,7 @@
 
     <div class="shell">
 
-        <a class="back-link" onclick="goBack()" style="margin-bottom:8px;">🏠 العودة</a>
+        <a class="back-link" onclick="goBack()" style="margin-bottom:8px;">🏠 العودة إلى لوحة الإدارة</a>
 
         <!-- ===== نموذج إضافة قضية ===== -->
         <div class="panel" id="case_form_panel">
@@ -456,17 +457,9 @@
                     </div>
 
                     <div class="field">
-                        <label for="case_status">حالة القضية</label>
-                        <select id="case_status">
-                            <option value="active">فعالة</option>
-                            <option value="ended">منتهية</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="end_date">تاريخ الانتهاء</label>
+                        <label for="end_date">📌 تاريخ الانتهاء</label>
                         <input type="date" id="end_date" />
-                        <small>إذا كانت القضية منتهية</small>
+                        <small style="color:var(--muted);font-size:11px;">📌 إذا تم إدخال تاريخ الانتهاء، تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً</small>
                     </div>
 
                     <div class="field">
@@ -551,15 +544,9 @@
                         <input type="number" id="edit_amount" step="0.01" />
                     </div>
                     <div class="field">
-                        <label for="edit_case_status">حالة القضية</label>
-                        <select id="edit_case_status">
-                            <option value="active">فعالة</option>
-                            <option value="ended">منتهية</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="edit_end_date">تاريخ الانتهاء</label>
+                        <label for="edit_end_date">📌 تاريخ الانتهاء</label>
                         <input type="date" id="edit_end_date" />
+                        <small style="color:var(--muted);font-size:11px;">📌 إذا تم إدخال تاريخ الانتهاء، تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً</small>
                     </div>
                     <div class="field">
                         <label for="edit_related_case">قضية مرتطة</label>
@@ -575,73 +562,6 @@
                     <button class="btn btn-soft" type="button" onclick="closeEditModal()">إلغاء</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- ===== MODAL: Payments ===== -->
-    <div class="modal" id="paymentsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>💰 دفعات القضية</h2>
-                <button class="modal-close" onclick="closePaymentsModal()">✕</button>
-            </div>
-            <div id="payments_status_msg" class="status-msg"></div>
-            <input type="hidden" id="payments_case_id" />
-            
-            <div style="margin-bottom:16px;padding:12px;background:rgba(201,164,107,0.08);border-radius:16px;">
-                <strong>رقم القضية:</strong> <span id="payments_case_number_display">—</span>
-                <span style="margin-right:20px;"><strong>المبلغ المحكوم:</strong> <span id="payments_amount_display">—</span></span>
-                <span style="margin-right:20px;"><strong>المدفوع:</strong> <span id="payments_total_paid_display">0</span></span>
-                <span style="margin-right:20px;"><strong>المتبقي:</strong> <span id="payments_remaining_display">0</span></span>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
-                <div class="field" style="margin-bottom:0;">
-                    <label for="payment_date">التاريخ</label>
-                    <input type="date" id="payment_date" />
-                </div>
-                <div class="field" style="margin-bottom:0;">
-                    <label for="payment_amount">المبلغ</label>
-                    <input type="number" id="payment_amount" placeholder="0" step="0.01" />
-                </div>
-                <div class="field" style="margin-bottom:0;">
-                    <label for="payment_type">النوع</label>
-                    <select id="payment_type">
-                        <option value="credit">دفع (دائن)</option>
-                        <option value="debit">خصم (مدين)</option>
-                    </select>
-                </div>
-                <div class="field" style="margin-bottom:0;grid-column:span 2;">
-                    <label for="payment_description">البيان</label>
-                    <input type="text" id="payment_description" placeholder="وصف الدفعة" />
-                </div>
-                <div class="field" style="margin-bottom:0;">
-                    <label for="payment_receipt">رقم السند</label>
-                    <input type="text" id="payment_receipt" placeholder="رقم السند" />
-                </div>
-            </div>
-            <button class="btn btn-success" onclick="addPayment()" style="width:100%;margin-bottom:16px;">➕ إضافة دفعة</button>
-
-            <div class="payment-table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>مدين</th>
-                            <th>دائن</th>
-                            <th>الرصيد</th>
-                            <th>البيان</th>
-                            <th>رقم السند</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="paymentsTableBody">
-                        <tr>
-                            <td colspan="7" class="empty-state">لا توجد دفعات</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 
@@ -661,15 +581,13 @@
             window.location.href = 'admin-login.html';
         }
 
-        let currentCaseId = null;
-
         // ============================================================
         // 📋 LOAD TENANTS INTO DROPDOWN
         // ============================================================
         async function loadTenantsIntoDropdown(selectId) {
             const select = document.getElementById(selectId);
             if (!select) return;
-            
+
             select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
             try {
@@ -685,7 +603,7 @@
                 }
 
                 select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
-                
+
                 if (data && data.length > 0) {
                     data.forEach(tenant => {
                         const option = document.createElement('option');
@@ -723,24 +641,30 @@
                     return;
                 }
 
-                tbody.innerHTML = data.map(caseItem => `
-                    <tr>
-                        <td>${caseItem.tenants?.tenant_name || caseItem.tenant_code}</td>
-                        <td><strong>${caseItem.case_number}</strong></td>
-                        <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
-                        <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
-                        <td><span class="status-badge ${caseItem.case_status === 'ended' ? 'ended' : 'active'}">${caseItem.case_status === 'ended' ? 'منتهية' : 'فعالة'}</span></td>
-                        <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
-                        <td>${caseItem.related_case || '—'}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${caseItem.id}')">✏️</button>
-                                <button class="btn btn-success btn-sm" onclick="openPaymentsModal('${caseItem.id}')">💰</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = data.map(caseItem => {
+                    // ✅ الحالة تتحدد تلقائياً بناءً على تاريخ الانتهاء
+                    const status = caseItem.end_date ? 'ended' : 'active';
+                    const statusText = caseItem.end_date ? 'منتهية' : 'فعالة';
+                    const statusClass = caseItem.end_date ? 'ended' : 'active';
+
+                    return `
+                        <tr>
+                            <td>${caseItem.tenants?.tenant_name || caseItem.tenant_code}</td>
+                            <td><strong>${caseItem.case_number}</strong></td>
+                            <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
+                            <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
+                            <td>${caseItem.related_case || '—'}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-warning btn-sm" onclick="openEditModal('${caseItem.id}')">✏️</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteCase('${caseItem.id}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
 
             } catch (err) {
                 console.error('❌ Error in loadCases:', err);
@@ -757,10 +681,12 @@
             const caseNumber = document.getElementById('case_number').value.trim();
             const caseDate = document.getElementById('case_date').value;
             const amount = document.getElementById('amount').value.trim();
-            const caseStatus = document.getElementById('case_status').value;
             const endDate = document.getElementById('end_date').value;
             const relatedCase = document.getElementById('related_case').value.trim();
             const notes = document.getElementById('notes').value.trim();
+
+            // ✅ الحالة تتحدد تلقائياً بناءً على تاريخ الانتهاء
+            const caseStatus = endDate ? 'ended' : 'active';
 
             if (!tenantCode) {
                 showStatus('الرجاء اختيار المستأجر', 'error');
@@ -817,7 +743,6 @@
                 document.getElementById('edit_case_number').value = data.case_number || '';
                 document.getElementById('edit_case_date').value = data.case_date || '';
                 document.getElementById('edit_amount').value = data.amount || '';
-                document.getElementById('edit_case_status').value = data.case_status || 'active';
                 document.getElementById('edit_end_date').value = data.end_date || '';
                 document.getElementById('edit_related_case').value = data.related_case || '';
                 document.getElementById('edit_notes').value = data.notes || '';
@@ -844,10 +769,12 @@
             const caseNumber = document.getElementById('edit_case_number').value.trim();
             const caseDate = document.getElementById('edit_case_date').value;
             const amount = document.getElementById('edit_amount').value.trim();
-            const caseStatus = document.getElementById('edit_case_status').value;
             const endDate = document.getElementById('edit_end_date').value;
             const relatedCase = document.getElementById('edit_related_case').value.trim();
             const notes = document.getElementById('edit_notes').value.trim();
+
+            // ✅ الحالة تتحدد تلقائياً بناءً على تاريخ الانتهاء
+            const caseStatus = endDate ? 'ended' : 'active';
 
             if (!tenantCode) {
                 showEditStatus('الرجاء اختيار المستأجر', 'error');
@@ -893,191 +820,6 @@
         }
 
         // ============================================================
-        // 💰 PAYMENTS
-        // ============================================================
-        async function openPaymentsModal(caseId) {
-            currentCaseId = caseId;
-            document.getElementById('payments_case_id').value = caseId;
-            document.getElementById('paymentsModal').classList.add('active');
-
-            // Set default date
-            document.getElementById('payment_date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('payment_amount').value = '';
-            document.getElementById('payment_description').value = '';
-            document.getElementById('payment_receipt').value = '';
-            document.getElementById('payment_type').value = 'credit';
-
-            await loadPayments(caseId);
-            await loadCaseInfo(caseId);
-        }
-
-        function closePaymentsModal() {
-            document.getElementById('paymentsModal').classList.remove('active');
-        }
-
-        async function loadCaseInfo(caseId) {
-            try {
-                const { data, error } = await supabaseCases
-                    .from('court_cases')
-                    .select('case_number, amount')
-                    .eq('id', caseId)
-                    .single();
-
-                if (error) throw error;
-
-                document.getElementById('payments_case_number_display').textContent = data.case_number || '—';
-                document.getElementById('payments_amount_display').textContent = data.amount ? Number(data.amount).toLocaleString('en-US') : '—';
-
-                // Calculate total paid
-                const { data: payments, error: pError } = await supabaseCases
-                    .from('case_payments')
-                    .select('credit, debit')
-                    .eq('case_id', caseId);
-
-                if (!pError && payments) {
-                    let totalCredit = 0;
-                    let totalDebit = 0;
-                    payments.forEach(p => {
-                        totalCredit += Number(p.credit) || 0;
-                        totalDebit += Number(p.debit) || 0;
-                    });
-                    const totalPaid = totalCredit - totalDebit;
-                    const remaining = (Number(data.amount) || 0) - totalPaid;
-                    document.getElementById('payments_total_paid_display').textContent = totalPaid.toLocaleString('en-US');
-                    document.getElementById('payments_remaining_display').textContent = remaining.toLocaleString('en-US');
-                }
-            } catch (err) {
-                console.error('Error loading case info:', err);
-            }
-        }
-
-        async function loadPayments(caseId) {
-            try {
-                const { data, error } = await supabaseCases
-                    .from('case_payments')
-                    .select('*')
-                    .eq('case_id', caseId)
-                    .order('payment_date', { ascending: true });
-
-                const tbody = document.getElementById('paymentsTableBody');
-
-                if (error) {
-                    console.error('Error loading payments:', error);
-                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد دفعات</td></tr>`;
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">لا توجد دفعات</td></tr>`;
-                    return;
-                }
-
-                let runningBalance = 0;
-
-                tbody.innerHTML = data.map(p => {
-                    const debit = Number(p.debit) || 0;
-                    const credit = Number(p.credit) || 0;
-                    runningBalance += credit - debit;
-
-                    return `
-                        <tr class="${credit > 0 ? 'payment-row credit' : debit > 0 ? 'payment-row debit' : ''}">
-                            <td>${p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-GB') : '—'}</td>
-                            <td>${debit > 0 ? debit.toLocaleString('en-US') : '—'}</td>
-                            <td>${credit > 0 ? credit.toLocaleString('en-US') : '—'}</td>
-                            <td><strong>${runningBalance.toLocaleString('en-US')}</strong></td>
-                            <td>${p.description || '—'}</td>
-                            <td>${p.receipt_no || '—'}</td>
-                            <td><button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td>
-                        </tr>
-                    `;
-                }).join('');
-
-            } catch (err) {
-                console.error('Error loading payments:', err);
-            }
-        }
-
-        async function addPayment() {
-            const caseId = document.getElementById('payments_case_id').value;
-            const paymentDate = document.getElementById('payment_date').value;
-            const amount = parseFloat(document.getElementById('payment_amount').value) || 0;
-            const type = document.getElementById('payment_type').value;
-            const description = document.getElementById('payment_description').value.trim();
-            const receiptNo = document.getElementById('payment_receipt').value.trim();
-
-            if (!paymentDate) {
-                showPaymentStatus('الرجاء إدخال التاريخ', 'error');
-                return;
-            }
-            if (amount <= 0) {
-                showPaymentStatus('الرجاء إدخال مبلغ صحيح', 'error');
-                return;
-            }
-
-            const payload = {
-                case_id: caseId,
-                payment_date: paymentDate,
-                description: description || null,
-                receipt_no: receiptNo || null
-            };
-
-            if (type === 'credit') {
-                payload.credit = amount;
-                payload.debit = 0;
-            } else {
-                payload.debit = amount;
-                payload.credit = 0;
-            }
-
-            try {
-                const { error } = await supabaseCases
-                    .from('case_payments')
-                    .insert([payload]);
-
-                if (error) throw error;
-
-                showPaymentStatus('✅ تم إضافة الدفعة بنجاح!', 'success');
-                document.getElementById('payment_amount').value = '';
-                document.getElementById('payment_description').value = '';
-                document.getElementById('payment_receipt').value = '';
-
-                await loadPayments(caseId);
-                await loadCaseInfo(caseId);
-
-            } catch (err) {
-                console.error('Error adding payment:', err);
-                showPaymentStatus(`❌ حدث خطأ: ${err.message}`, 'error');
-            }
-        }
-
-        async function deletePayment(paymentId) {
-            if (!confirm('هل أنت متأكد من حذف هذه الدفعة؟')) return;
-
-            try {
-                const { error } = await supabaseCases
-                    .from('case_payments')
-                    .delete()
-                    .eq('id', paymentId);
-
-                if (error) throw error;
-
-                await loadPayments(currentCaseId);
-                await loadCaseInfo(currentCaseId);
-
-            } catch (err) {
-                console.error('Error deleting payment:', err);
-                alert('❌ حدث خطأ أثناء الحذف');
-            }
-        }
-
-        function showPaymentStatus(message, type) {
-            const el = document.getElementById('payments_status_msg');
-            el.textContent = message;
-            el.className = `status-msg ${type}`;
-            el.style.display = 'block';
-        }
-
-        // ============================================================
         // 🗑️ DELETE CASE
         // ============================================================
         async function deleteCase(id) {
@@ -1106,7 +848,6 @@
             document.getElementById('case_number').value = '';
             document.getElementById('case_date').value = '';
             document.getElementById('amount').value = '';
-            document.getElementById('case_status').value = 'active';
             document.getElementById('end_date').value = '';
             document.getElementById('related_case').value = '';
             document.getElementById('notes').value = '';
@@ -1152,3 +893,4 @@
 
 </body>
 </html>
+```
