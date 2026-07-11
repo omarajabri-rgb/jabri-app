@@ -2304,22 +2304,21 @@ const fb = td - tc;
                     notes: null
                 }]);
 
-                const curCredit = toNumber(row.total_credit);
-                const td = toNumber(row.total_debit);
-                const newCredit = curCredit + amount;
-                // ✅ CORRECT: final_balance = total_debit - total_credit (without opening_balance)
-                const newFinal = td - newCredit;
+               // ✅ استخدم RPC الآمن — يقوم بإدخال الحركة وتحديث الملخص معاً
+               const { data, error } = await supabaseClient.rpc('apply_payment', {
+                  p_tenant_code: code,
+                  p_date: date,
+                  p_description: desc,
+                  p_amount: amount,
+                  p_receipt: receipt
+               });
+               if (error) throw error;
 
-                await supabaseClient
-                    .from('tenant_yearly_summary')
-                    .update({
-                        total_credit: newCredit,
-                        final_balance: newFinal
-                    })
-                    .eq('id', row.id);
+               const newFinal = toNumber(data.final_balance);
+               const newCredit = toNumber(data.total_credit);
 
-                // TODO 2 — إرسال واتساب تلقائي بعد نجاح حفظ الدفعة وتحديث الملخص
-                const tenantPhone = sanitizePhone(tenant.phone || '');
+               // TODO 2 — إرسال واتساب تلقائي بعد نجاح حفظ الدفعة وتحديث الملخص
+               const tenantPhone = sanitizePhone(tenant.phone || '');
 
                 if(tenantPhone){
     let paymentWaLogId = null;
