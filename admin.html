@@ -2294,15 +2294,7 @@ const fb = td - tc;
 
                 const row = await ensureYearlySummaryExists(tenant, yearNum);
 
-                await supabaseClient.from('tenant_transactions').insert([{
-                    tenant_code: code,
-                    date,
-                    description: desc,
-                    debit: 0,
-                    credit: amount,
-                    receipt_no: receipt,
-                    notes: null
-                }]);
+                
 
                // ✅ استخدم RPC الآمن — يقوم بإدخال الحركة وتحديث الملخص معاً
                const { data, error } = await supabaseClient.rpc('apply_payment', {
