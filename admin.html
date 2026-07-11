@@ -2232,7 +2232,7 @@ setMoodClass(
             if(row) return row;
 
             const prev = getPreviousSummary(tenant.tenant_code, yearNum);
-            const ob = prev ? toNumber(prev.final_balance) : 0;
+            const ob = prev ? toNumber(prev.total_debit) - toNumber(prev.total_credit) : 0;
             const td = toNumber(tenant.annual_rent);
             const tc = 0;
             // GOLDEN FORMULA
