@@ -2231,6 +2231,8 @@ setMoodClass(
             let row = getSummaryByYear(tenant.tenant_code, yearNum);
             if(row) return row;
 
+            const prev = getPreviousSummary(tenant.tenant_code, yearNum);
+            // CUMULATIVE: opening_balance = previous year's final_balance
             const ob = prev ? toNumber(prev.final_balance) : 0;
             const td = toNumber(tenant.annual_rent);
             const tc = 0;
