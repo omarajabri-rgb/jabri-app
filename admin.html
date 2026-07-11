@@ -2231,13 +2231,11 @@ setMoodClass(
             let row = getSummaryByYear(tenant.tenant_code, yearNum);
             if(row) return row;
 
-            const prev = getPreviousSummary(tenant.tenant_code, yearNum);
-            const ob = prev ? toNumber(prev.total_debit) - toNumber(prev.total_credit) : 0;
+            const ob = prev ? toNumber(prev.final_balance) : 0;
             const td = toNumber(tenant.annual_rent);
             const tc = 0;
-            // GOLDEN FORMULA
-// final_balance = total_debit - total_credit
-const fb = td - tc;
+            // CUMULATIVE: final_balance = opening_balance + total_debit - total_credit
+            const fb = ob + td - tc;
             const { data, error } = await supabaseClient
                 .from('tenant_yearly_summary')
                 .insert([{
