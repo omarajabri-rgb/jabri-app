@@ -1340,41 +1340,6 @@ async function init() {
         document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>خطأ في تحميل البيانات</h2></div>';
     }
 }
-                const status = getTenantStatus(currentBalance, currentCredit);
-                const chip = document.getElementById('account_status_chip');
-                chip.innerText = status.text;
-                chip.className = `hero-status ${status.cls}`;
-
-                animateNumber(document.getElementById('val_credit'), Math.round(Math.max(0, currentCredit)));
-                animateNumber(document.getElementById('val_balance'), Math.round(Math.abs(currentBalance)));
-
-                document.getElementById('balance_smart_text').innerText = getBalanceSmartText(currentBalance);
-                document.getElementById('smart_message').innerText = getSmartFinancialAdvice(currentBalance);
-
-                updateProgressBar(currentCredit, currentBalance);
-                updateTrafficLight(currentBalance);
-
-                const trend = getBalanceTrend({ final_balance: currentBalance }, previousSummary);
-                const trendEl = document.getElementById('balance_trend_text');
-                trendEl.className = `chart-caption ${trend.type}`;
-                trendEl.innerText = trend.text;
-
-                renderNotifications(notificationsData || []);
-
-                document.getElementById('loader').style.display = 'none';
-                document.body.classList.add('loaded');
-
-                document.querySelectorAll('.reveal').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('active'), i * 80);
-                });
-
-                if (window.lucide) lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loader').style.display = 'none';
-                document.body.innerHTML = '<div style="text-align:center;padding:40px;"><h2>خطأ في تحميل البيانات</h2></div>';
-            }
-        }
 
         function logout() {
             localStorage.removeItem('jabri_tenant_code');
