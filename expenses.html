@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | مصروفات المجمع</title>
+    <title>مجمع جبري | إدارة وتحليل مصروفات المجمع</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #f7f4ec;
@@ -125,6 +126,12 @@
             transform: translateY(-1px);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-gold {
             background: linear-gradient(135deg, var(--gold), var(--gold-deep));
             color: #fff;
@@ -175,6 +182,8 @@
 
         .table-wrap {
             overflow-x: auto;
+            overflow-y: auto;
+            max-height: 520px;
             border-radius: 18px;
             background: #fff;
             border: 1px solid rgba(201, 164, 107, 0.14);
@@ -184,17 +193,20 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 760px;
         }
 
         thead th {
-            background: rgba(201, 164, 107, 0.10);
+            background: rgba(247, 240, 228, 1);
             color: #6b4f2b;
             font-size: 13px;
             font-weight: 900;
             padding: 14px 12px;
             text-align: right;
             border-bottom: 1px solid rgba(201, 164, 107, 0.18);
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
         tbody td {
@@ -214,16 +226,6 @@
             padding: 30px;
             color: var(--muted);
             font-weight: 800;
-        }
-
-        .total-row {
-            background: rgba(201, 164, 107, 0.10);
-            font-weight: 900;
-            font-size: 15px;
-        }
-
-        .total-row td {
-            padding: 16px 12px;
         }
 
         .back-link {
@@ -261,22 +263,219 @@
             flex: 1;
         }
 
-        .filter-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 16px;
+        /* ===== بطاقات الملخص ===== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
         }
 
-        .filter-bar .field {
-            flex: 1;
-            min-width: 150px;
+        .summary-card {
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid rgba(201, 164, 107, 0.18);
+            border-radius: 18px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 20px rgba(87, 68, 37, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .summary-card .summary-label {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #8b6a3a;
+        }
+
+        .summary-card b {
+            font-size: 18px;
+            font-weight: 900;
+            color: #544128;
+            word-break: break-word;
+        }
+
+        .summary-card .summary-sub {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .summary-card b.compare-value {
+            font-size: 14px;
+        }
+
+        /* ===== الرسوم البيانية ===== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 18px;
+        }
+
+        .charts-grid .panel {
+            margin-bottom: 18px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 320px;
+        }
+
+        .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        /* ===== الفلاتر ===== */
+        .filters-box {
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(201, 164, 107, 0.16);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .filters-grid .field {
             margin-bottom: 0;
         }
 
-        .filter-bar .btn {
-            flex: 0 0 auto;
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-pill {
+            border: 1px solid rgba(201, 164, 107, 0.28);
+            background: rgba(201, 164, 107, 0.08);
+            color: #6b4f2b;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: inherit;
+            padding: 8px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .quick-pill:hover {
+            background: rgba(201, 164, 107, 0.18);
+        }
+
+        .quick-pill.active {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .results-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: rgba(201, 164, 107, 0.10);
+            border: 1px solid rgba(201, 164, 107, 0.18);
+            font-size: 13px;
+            font-weight: 900;
+            color: #6b4f2b;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        td.notes-cell {
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== نافذة التعديل ===== */
+        .edit-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 16px;
+        }
+
+        .edit-overlay.active {
+            display: flex;
+        }
+
+        .edit-modal {
+            background: #fffdf8;
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .edit-modal h3 {
+            margin: 0 0 14px;
+            font-size: 17px;
+            font-weight: 900;
+            color: #544128;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .edit-actions .btn {
+            flex: 1;
+        }
+
+        /* إخفاء حقول الجهة/المستفيد إذا كان العمود غير موجود في قاعدة البيانات */
+        body.no-payee .payee-only {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 700px) {
@@ -289,11 +488,26 @@
             .form-actions {
                 flex-direction: column;
             }
-            .filter-bar {
-                flex-direction: column;
+            .filters-grid {
+                grid-template-columns: 1fr 1fr;
             }
-            .filter-bar .field {
-                width: 100%;
+            .chart-wrap {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-actions .btn {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -303,6 +517,62 @@
     <div class="shell">
 
         <a class="back-link" onclick="goBack()" style="margin-bottom:8px;">🏠 العودة</a>
+
+        <!-- ===== بطاقات الملخص ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">📊 إدارة وتحليل مصروفات مجمع جبري</div>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span class="summary-label">مصروفات هذا الشهر</span>
+                    <b id="sum_month">—</b>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">مصروفات هذه السنة</span>
+                    <b id="sum_year">—</b>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">عدد المصروفات</span>
+                    <b id="sum_count">—</b>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">متوسط المصروف الشهري</span>
+                    <b id="sum_avg">—</b>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">أعلى فئة مصروف</span>
+                    <b id="sum_top">—</b>
+                    <span class="summary-sub" id="sum_top_amount"></span>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">مقارنة بالشهر الماضي</span>
+                    <b class="compare-value" id="sum_compare">—</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== الرسوم البيانية ===== -->
+        <div class="charts-grid">
+            <div class="panel">
+                <div class="chip-header">
+                    <div class="chip-title">🥧 توزيع المصروفات حسب الفئة</div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="categoryChart"></canvas>
+                    <div id="categoryChartEmpty" class="chart-empty" style="display:none;">لا توجد بيانات كافية لعرض توزيع المصروفات.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="chip-header">
+                    <div class="chip-title">📈 المصروفات الشهرية</div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="monthlyChart"></canvas>
+                    <div id="monthlyChartEmpty" class="chart-empty" style="display:none;">لا توجد بيانات كافية لعرض المصروفات الشهرية.</div>
+                </div>
+            </div>
+        </div>
 
         <!-- ===== نموذج إضافة مصروف ===== -->
         <div class="panel" id="expense_form_panel">
@@ -315,45 +585,38 @@
             <form id="expenseForm" onsubmit="return false;">
                 <div class="form-grid">
                     <div class="field">
-                        <label>التاريخ <span style="color:var(--danger);">*</span></label>
+                        <label for="expense_date">التاريخ <span style="color:var(--danger);">*</span></label>
                         <input type="date" id="expense_date" required />
                     </div>
 
                     <div class="field">
-                        <label>الفئة <span style="color:var(--danger);">*</span></label>
-                        <select id="category" required>
-                            <option value="">-- اختر فئة --</option>
-                            <option value="كهرباء">⚡ كهرباء</option>
-                            <option value="ماء">💧 ماء</option>
-                            <option value="صيانة">🔧 صيانة</option>
-                            <option value="رواتب">👨‍💼 رواتب</option>
-                            <option value="أخرى">📦 أخرى</option>
-                        </select>
+                        <label for="category">الفئة <span style="color:var(--danger);">*</span></label>
+                        <select id="category" required></select>
                     </div>
 
                     <div class="field">
-                        <label>البيان <span style="color:var(--danger);">*</span></label>
+                        <label for="description">البيان <span style="color:var(--danger);">*</span></label>
                         <input type="text" id="description" placeholder="وصف المصروف" required />
                     </div>
 
                     <div class="field">
-                        <label>المبلغ <span style="color:var(--danger);">*</span></label>
-                        <input type="number" id="amount" placeholder="مثال: 150" required />
+                        <label for="amount">المبلغ (د.أ) <span style="color:var(--danger);">*</span></label>
+                        <input type="number" id="amount" placeholder="مثال: 150" step="0.01" min="0" />
+                    </div>
+
+                    <div class="field payee-only">
+                        <label for="expense_payee">اسم الجهة أو المستفيد</label>
+                        <input type="text" id="expense_payee" placeholder="اختياري" />
                     </div>
 
                     <div class="field">
-                        <label>رقم السند</label>
-                        <input type="text" id="receipt_no" placeholder="رقم الإيصال أو الفاتورة" />
-                    </div>
-
-                    <div class="field">
-                        <label>ملاحظات</label>
-                        <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
+                        <label for="notes">ملاحظات</label>
+                        <textarea id="notes" placeholder="أي تفاصيل إضافية... (اختياري)"></textarea>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button class="btn btn-gold" onclick="saveExpense()">💾 حفظ المصروف</button>
+                    <button class="btn btn-gold" id="save_expense_btn" onclick="saveExpense()">💾 حفظ المصروف</button>
                     <button class="btn btn-soft" type="button" onclick="clearExpenseForm()">🔄 تفريغ</button>
                 </div>
             </form>
@@ -366,20 +629,57 @@
                 <button class="btn btn-soft btn-sm" type="button" onclick="scrollToExpenseForm()">➕ إضافة مصروف</button>
             </div>
 
-            <div class="filter-bar">
-                <div class="field">
-                    <label>فلتر حسب الفئة</label>
-                    <select id="filter_category" onchange="loadExpenses()">
-                        <option value="">الكل</option>
-                        <option value="كهرباء">⚡ كهرباء</option>
-                        <option value="ماء">💧 ماء</option>
-                        <option value="صيانة">🔧 صيانة</option>
-                        <option value="رواتب">👨‍💼 رواتب</option>
-                        <option value="أخرى">📦 أخرى</option>
-                    </select>
+            <div class="filters-box">
+                <div class="filters-grid">
+                    <div class="field">
+                        <label for="filter_from">من تاريخ</label>
+                        <input type="date" id="filter_from" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_to">إلى تاريخ</label>
+                        <input type="date" id="filter_to" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_category">الفئة</label>
+                        <select id="filter_category">
+                            <option value="">الكل</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="filter_search">البحث</label>
+                        <input type="text" id="filter_search" placeholder="البيان، الجهة، الملاحظات..." />
+                    </div>
+                    <div class="field">
+                        <label for="filter_min">الحد الأدنى للمبلغ</label>
+                        <input type="number" id="filter_min" placeholder="0" step="0.01" min="0" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_max">الحد الأعلى للمبلغ</label>
+                        <input type="number" id="filter_max" placeholder="بدون حد" step="0.01" min="0" />
+                    </div>
                 </div>
-                <button class="btn btn-soft" onclick="loadExpenses()" style="flex:0 0 auto;">🔄 تحديث</button>
+
+                <div class="quick-filters" id="quick_filters">
+                    <button type="button" class="quick-pill" data-quick="today" onclick="applyQuickFilter('today', this)">اليوم</button>
+                    <button type="button" class="quick-pill" data-quick="week" onclick="applyQuickFilter('week', this)">هذا الأسبوع</button>
+                    <button type="button" class="quick-pill" data-quick="month" onclick="applyQuickFilter('month', this)">هذا الشهر</button>
+                    <button type="button" class="quick-pill" data-quick="last_month" onclick="applyQuickFilter('last_month', this)">الشهر الماضي</button>
+                    <button type="button" class="quick-pill" data-quick="year" onclick="applyQuickFilter('year', this)">هذه السنة</button>
+                    <button type="button" class="quick-pill" data-quick="all" onclick="applyQuickFilter('all', this)">الكل</button>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-gold btn-sm" onclick="applyFilters()">تطبيق الفلاتر</button>
+                    <button type="button" class="btn btn-soft btn-sm" onclick="clearFilters()">مسح الفلاتر</button>
+                </div>
             </div>
+
+            <div class="results-bar">
+                <span id="results_count">عدد النتائج: 0</span>
+                <span id="results_total">إجمالي المصروفات: 0.00 د.أ</span>
+            </div>
+
+            <div id="table_status_msg" class="status-msg"></div>
 
             <div class="table-wrap">
                 <table>
@@ -388,14 +688,15 @@
                             <th>التاريخ</th>
                             <th>الفئة</th>
                             <th>البيان</th>
+                            <th class="payee-only">الجهة أو المستفيد</th>
                             <th>المبلغ</th>
-                            <th>رقم السند</th>
-                            <th></th>
+                            <th>ملاحظات</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="expensesTableBody">
                         <tr>
-                            <td colspan="6" class="empty-state">لا توجد مصروفات مسجلة</td>
+                            <td colspan="7" class="empty-state">لا توجد مصروفات مسجلة</td>
                         </tr>
                     </tbody>
                 </table>
@@ -404,6 +705,43 @@
 
         <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
 
+    </div>
+
+    <!-- ===== نافذة تعديل المصروف ===== -->
+    <div class="edit-overlay" id="edit_expense_overlay" onclick="if(event.target === this) closeEditExpenseModal()">
+        <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit_modal_title">
+            <h3 id="edit_modal_title">تعديل المصروف</h3>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="edit_expense_date">التاريخ <span style="color:var(--danger);">*</span></label>
+                    <input type="date" id="edit_expense_date" />
+                </div>
+                <div class="field">
+                    <label for="edit_expense_category">الفئة <span style="color:var(--danger);">*</span></label>
+                    <select id="edit_expense_category"></select>
+                </div>
+                <div class="field">
+                    <label for="edit_expense_description">البيان <span style="color:var(--danger);">*</span></label>
+                    <input type="text" id="edit_expense_description" />
+                </div>
+                <div class="field">
+                    <label for="edit_expense_amount">المبلغ (د.أ) <span style="color:var(--danger);">*</span></label>
+                    <input type="number" id="edit_expense_amount" step="0.01" min="0" />
+                </div>
+                <div class="field payee-only">
+                    <label for="edit_expense_payee">اسم الجهة أو المستفيد</label>
+                    <input type="text" id="edit_expense_payee" />
+                </div>
+                <div class="field">
+                    <label for="edit_expense_notes">ملاحظات</label>
+                    <textarea id="edit_expense_notes"></textarea>
+                </div>
+            </div>
+            <div class="edit-actions">
+                <button class="btn btn-gold" id="edit_expense_save_btn" onclick="saveExpenseEdit()">حفظ التعديل</button>
+                <button class="btn btn-soft" type="button" onclick="closeEditExpenseModal()">إلغاء</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -418,116 +756,664 @@
             window.location.href = 'admin-login.html';
         }
 
-        // ===== تحميل المصروفات =====
-        async function loadExpenses() {
-            const category = document.getElementById('filter_category').value;
+        // ===== الفئات المعتمدة =====
+        const EXPENSE_CATEGORIES = [
+            'كهرباء',
+            'ماء',
+            'صيانة عامة',
+            'صيانة كهرباء',
+            'صيانة مياه',
+            'صيانة مبانٍ',
+            'رواتب وأجور',
+            'حراسة',
+            'نظافة',
+            'ضرائب',
+            'رسوم حكومية',
+            'اتصالات وإنترنت',
+            'محاماة',
+            'مصاريف قضايا',
+            'مشتريات للمجمع',
+            'وقود ومحروقات',
+            'أخرى'
+        ];
 
-            let query = supabase
+        const MONTH_NAMES_AR = [
+            'كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران',
+            'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'
+        ];
+
+        // ===== الحالة العامة — مجموعة بيانات واحدة معتمدة =====
+        let allExpenses = [];
+        let PAYEE_SUPPORTED = true;
+        let categoryChart = null;
+        let monthlyChartInstance = null;
+        let isSavingExpense = false;
+        let isSavingEdit = false;
+        let editingExpenseId = null;
+        let searchDebounceTimer = null;
+
+        // ===== أدوات مساعدة =====
+        const toAmount = v => {
+            const n = parseFloat(v);
+            return Number.isFinite(n) ? n : 0;
+        };
+
+        const fmtJOD = v => `${toAmount(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} د.أ`;
+
+        const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        // تحليل التاريخ محلياً لتجنب انزياح اليوم بسبب UTC
+        function parseLocalDate(raw) {
+            const m = String(raw || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+            const d = new Date(raw);
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+
+        function toLocalDateStr(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        const todayLocalStr = () => toLocalDateStr(new Date());
+
+        const fmtDateDisplay = raw => {
+            const d = parseLocalDate(raw);
+            return d ? d.toLocaleDateString('en-GB') : '—';
+        };
+
+        // ===== بناء قوائم الفئات =====
+        function legacyCategoriesInData() {
+            const known = new Set(EXPENSE_CATEGORIES);
+            const legacy = new Set();
+            allExpenses.forEach(e => {
+                const c = String(e.category || '').trim();
+                if (c && !known.has(c)) legacy.add(c);
+            });
+            return [...legacy];
+        }
+
+        function buildCategoryOptions() {
+            const catSel = document.getElementById('category');
+            const editSel = document.getElementById('edit_expense_category');
+            const filterSel = document.getElementById('filter_category');
+            const legacy = legacyCategoriesInData();
+
+            const mainOpts = '<option value="">-- اختر فئة --</option>' +
+                EXPENSE_CATEGORIES.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+
+            const prevCat = catSel.value;
+            catSel.innerHTML = mainOpts;
+            if (prevCat) catSel.value = prevCat;
+
+            // نافذة التعديل تشمل الفئات القديمة حتى تظهر السجلات القديمة بشكل صحيح
+            editSel.innerHTML = mainOpts +
+                legacy.map(c => `<option value="${escHtml(c)}">${escHtml(c)} (فئة قديمة)</option>`).join('');
+
+            const prevFilter = filterSel.value;
+            filterSel.innerHTML = '<option value="">الكل</option>' +
+                EXPENSE_CATEGORIES.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('') +
+                legacy.map(c => `<option value="${escHtml(c)}">${escHtml(c)} (فئة قديمة)</option>`).join('');
+            if (prevFilter) filterSel.value = prevFilter;
+        }
+
+        // ===== فحص دعم عمود الجهة/المستفيد =====
+        async function detectPayeeSupport() {
+            const { error } = await supabase.from('complex_expenses').select('payee').limit(1);
+            PAYEE_SUPPORTED = !error;
+            document.body.classList.toggle('no-payee', !PAYEE_SUPPORTED);
+            if (!PAYEE_SUPPORTED) console.warn('عمود payee غير موجود — راجع sql/expenses_payee_migration.sql لإضافته.');
+        }
+
+        // ===== تحميل البيانات (استعلام واحد لكل تحديث) =====
+        async function loadAllExpenses() {
+            const { data, error } = await supabase
                 .from('complex_expenses')
                 .select('*')
                 .order('expense_date', { ascending: false });
 
-            if (category) {
-                query = query.eq('category', category);
-            }
-
-            const { data, error } = await query;
-
             if (error) {
                 console.error('خطأ في تحميل المصروفات:', error);
+                showTableStatus(`حدث خطأ في تحميل المصروفات: ${error.message}`, 'error');
                 return;
             }
+            allExpenses = data || [];
+        }
 
+        // ===== الحسابات (دوال قابلة لإعادة الاستخدام) =====
+        function calculateExpenseSummary(list) {
+            const now = new Date();
+            const cy = now.getFullYear();
+            const cm = now.getMonth();
+            const pm = cm === 0 ? 11 : cm - 1;
+            const pmy = cm === 0 ? cy - 1 : cy;
+
+            let monthTotal = 0, yearTotal = 0, prevMonthTotal = 0;
+            const monthsWithData = new Set();
+
+            list.forEach(e => {
+                const d = parseLocalDate(e.expense_date);
+                if (!d) return;
+                const amt = toAmount(e.amount);
+                if (d.getFullYear() === cy && d.getMonth() === cm) monthTotal += amt;
+                if (d.getFullYear() === cy) {
+                    yearTotal += amt;
+                    monthsWithData.add(d.getMonth());
+                }
+                if (d.getFullYear() === pmy && d.getMonth() === pm) prevMonthTotal += amt;
+            });
+
+            // متوسط الشهور التي تحتوي بيانات فقط — بدون قسمة على صفر
+            const monthlyAvg = monthsWithData.size > 0 ? yearTotal / monthsWithData.size : 0;
+
+            const byCategory = groupExpensesByCategory(list);
+            let topCategory = null, topAmount = 0;
+            Object.entries(byCategory).forEach(([c, v]) => {
+                if (v > topAmount) { topAmount = v; topCategory = c; }
+            });
+
+            return { monthTotal, yearTotal, count: list.length, monthlyAvg, topCategory, topAmount, prevMonthTotal };
+        }
+
+        function groupExpensesByCategory(list) {
+            const map = {};
+            list.forEach(e => {
+                const c = String(e.category || '').trim() || 'أخرى';
+                map[c] = (map[c] || 0) + toAmount(e.amount);
+            });
+            return map;
+        }
+
+        function groupExpensesByMonth(list) {
+            const now = new Date();
+            const buckets = [];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                buckets.push({
+                    y: d.getFullYear(),
+                    m: d.getMonth(),
+                    label: `${MONTH_NAMES_AR[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`,
+                    total: 0
+                });
+            }
+            list.forEach(e => {
+                const d = parseLocalDate(e.expense_date);
+                if (!d) return;
+                const b = buckets.find(b => b.y === d.getFullYear() && b.m === d.getMonth());
+                if (b) b.total += toAmount(e.amount);
+            });
+            return buckets;
+        }
+
+        // ===== بطاقات الملخص =====
+        function renderExpenseSummaryCards() {
+            const s = calculateExpenseSummary(allExpenses);
+
+            document.getElementById('sum_month').innerText = fmtJOD(s.monthTotal);
+            document.getElementById('sum_year').innerText = fmtJOD(s.yearTotal);
+            document.getElementById('sum_count').innerText = s.count.toLocaleString('en-US');
+            document.getElementById('sum_avg').innerText = fmtJOD(s.monthlyAvg);
+
+            if (s.topCategory) {
+                document.getElementById('sum_top').innerText = s.topCategory;
+                document.getElementById('sum_top_amount').innerText = fmtJOD(s.topAmount);
+            } else {
+                document.getElementById('sum_top').innerText = 'لا توجد بيانات';
+                document.getElementById('sum_top_amount').innerText = '';
+            }
+
+            const cmpEl = document.getElementById('sum_compare');
+            if (s.prevMonthTotal <= 0) {
+                cmpEl.innerText = 'لا توجد بيانات للشهر الماضي';
+            } else {
+                const pct = Math.round(((s.monthTotal - s.prevMonthTotal) / s.prevMonthTotal) * 100);
+                if (!Number.isFinite(pct)) {
+                    cmpEl.innerText = 'لا توجد بيانات للشهر الماضي';
+                } else if (pct === 0) {
+                    cmpEl.innerText = 'لا تغيير عن الشهر الماضي';
+                } else if (pct > 0) {
+                    cmpEl.innerText = `↑ ${pct}% عن الشهر الماضي`;
+                } else {
+                    cmpEl.innerText = `↓ ${Math.abs(pct)}% عن الشهر الماضي`;
+                }
+            }
+        }
+
+        // ===== رسم توزيع الفئات (Doughnut) =====
+        const CHART_COLORS = ['#c9a46b', '#159a6f', '#b78e54', '#8b6a3a', '#d9c39a', '#7a7469', '#c98d7a'];
+
+        function renderCategoryChart() {
+            const canvas = document.getElementById('categoryChart');
+            const emptyEl = document.getElementById('categoryChartEmpty');
+
+            if (categoryChart) { categoryChart.destroy(); categoryChart = null; }
+
+            const totals = Object.entries(groupExpensesByCategory(allExpenses))
+                .filter(([, v]) => v > 0)
+                .sort((a, b) => b[1] - a[1]);
+
+            if (!totals.length) {
+                canvas.style.display = 'none';
+                emptyEl.style.display = 'flex';
+                return;
+            }
+            canvas.style.display = '';
+            emptyEl.style.display = 'none';
+
+            // بحد أقصى 6 شرائح رئيسية + "أخرى" للفئات الصغيرة
+            const MAX_SLICES = 6;
+            const main = [];
+            let otherTotal = 0;
+            totals.forEach(([name, val], i) => {
+                if (name === 'أخرى' || i >= MAX_SLICES) {
+                    otherTotal += val;
+                } else {
+                    main.push([name, val]);
+                }
+            });
+            const sliced = main.slice(0, MAX_SLICES);
+            main.slice(MAX_SLICES).forEach(([, v]) => { otherTotal += v; });
+            if (otherTotal > 0) sliced.push(['أخرى', otherTotal]);
+
+            const grandTotal = sliced.reduce((s, [, v]) => s + v, 0);
+
+            categoryChart = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: sliced.map(([n]) => n),
+                    datasets: [{
+                        data: sliced.map(([, v]) => v),
+                        backgroundColor: CHART_COLORS.slice(0, sliced.length),
+                        borderWidth: 2,
+                        borderColor: '#fffdf8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            rtl: true,
+                            labels: {
+                                font: { family: 'Tajawal', weight: '800', size: 11 },
+                                color: '#6b4f2b',
+                                boxWidth: 14,
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            callbacks: {
+                                label(ctx) {
+                                    const v = ctx.parsed;
+                                    const pct = grandTotal > 0 ? Math.round((v / grandTotal) * 100) : 0;
+                                    return ` ${ctx.label}: ${fmtJOD(v)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== رسم المصروفات الشهرية (Bar) =====
+        function renderMonthlyChart() {
+            const canvas = document.getElementById('monthlyChart');
+            const emptyEl = document.getElementById('monthlyChartEmpty');
+
+            if (monthlyChartInstance) { monthlyChartInstance.destroy(); monthlyChartInstance = null; }
+
+            const buckets = groupExpensesByMonth(allExpenses);
+            const hasData = buckets.some(b => b.total > 0);
+
+            if (!hasData) {
+                canvas.style.display = 'none';
+                emptyEl.style.display = 'flex';
+                return;
+            }
+            canvas.style.display = '';
+            emptyEl.style.display = 'none';
+
+            monthlyChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: buckets.map(b => b.label),
+                    datasets: [{
+                        label: 'المصروفات (د.أ)',
+                        data: buckets.map(b => Math.round(b.total * 100) / 100),
+                        backgroundColor: 'rgba(201,164,107,0.72)',
+                        hoverBackgroundColor: 'rgba(183,142,84,0.9)',
+                        borderColor: '#b78e54',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        maxBarThickness: 34
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            callbacks: {
+                                label(ctx) { return ` ${fmtJOD(ctx.parsed.y)}`; }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Tajawal', weight: '700', size: 10 },
+                                color: '#7a7469',
+                                maxRotation: 60,
+                                minRotation: 30
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(91,73,42,0.07)' },
+                            ticks: {
+                                font: { family: 'Tajawal', weight: '700', size: 10 },
+                                color: '#7a7469',
+                                callback: v => Number(v).toLocaleString('en-US')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== الفلاتر (تُطبَّق على الجدول فقط — البطاقات والرسوم تبقى تحليلات عامة) =====
+        function getFilterState() {
+            return {
+                from: document.getElementById('filter_from').value,
+                to: document.getElementById('filter_to').value,
+                category: document.getElementById('filter_category').value,
+                search: document.getElementById('filter_search').value.trim().toLowerCase(),
+                min: document.getElementById('filter_min').value,
+                max: document.getElementById('filter_max').value
+            };
+        }
+
+        function filterExpenses(list, f) {
+            const fromD = f.from ? parseLocalDate(f.from) : null;
+            const toD = f.to ? parseLocalDate(f.to) : null;
+            const minA = f.min !== '' ? toAmount(f.min) : null;
+            const maxA = f.max !== '' ? toAmount(f.max) : null;
+
+            return list.filter(e => {
+                const d = parseLocalDate(e.expense_date);
+                if (fromD && (!d || d < fromD)) return false;
+                if (toD && (!d || d > toD)) return false;
+                if (f.category && String(e.category || '').trim() !== f.category) return false;
+
+                const amt = toAmount(e.amount);
+                if (minA !== null && amt < minA) return false;
+                if (maxA !== null && amt > maxA) return false;
+
+                if (f.search) {
+                    const haystack = [e.description, e.payee, e.notes]
+                        .map(v => String(v || '').toLowerCase())
+                        .join(' ');
+                    if (!haystack.includes(f.search)) return false;
+                }
+                return true;
+            });
+        }
+
+        function applyFilters() {
+            const filtered = filterExpenses(allExpenses, getFilterState())
+                .slice()
+                .sort((a, b) => (parseLocalDate(b.expense_date) || 0) - (parseLocalDate(a.expense_date) || 0));
+
+            renderExpenseTable(filtered);
+        }
+
+        function clearFilters() {
+            ['filter_from', 'filter_to', 'filter_category', 'filter_search', 'filter_min', 'filter_max']
+                .forEach(id => { document.getElementById(id).value = ''; });
+            setActiveQuickPill(null);
+            applyFilters();
+        }
+
+        function setActiveQuickPill(btn) {
+            document.querySelectorAll('#quick_filters .quick-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function applyQuickFilter(type, btn) {
+            const now = new Date();
+            const fromEl = document.getElementById('filter_from');
+            const toEl = document.getElementById('filter_to');
+
+            if (type === 'today') {
+                fromEl.value = todayLocalStr();
+                toEl.value = todayLocalStr();
+            } else if (type === 'week') {
+                // الأسبوع يبدأ من الأحد
+                const start = new Date(now);
+                start.setDate(now.getDate() - now.getDay());
+                fromEl.value = toLocalDateStr(start);
+                toEl.value = todayLocalStr();
+            } else if (type === 'month') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+                toEl.value = todayLocalStr();
+            } else if (type === 'last_month') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+                toEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth(), 0));
+            } else if (type === 'year') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), 0, 1));
+                toEl.value = todayLocalStr();
+            } else if (type === 'all') {
+                fromEl.value = '';
+                toEl.value = '';
+            }
+
+            setActiveQuickPill(btn);
+            applyFilters();
+        }
+
+        // ===== جدول المصروفات =====
+        function renderExpenseTable(rows) {
             const tbody = document.getElementById('expensesTableBody');
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد مصروفات مسجلة</td></tr>`;
-                return;
-            }
+            const colCount = PAYEE_SUPPORTED ? 7 : 6;
 
             let total = 0;
+            rows.forEach(e => { total += toAmount(e.amount); });
 
-            tbody.innerHTML = data.map(e => {
-                total += Number(e.amount);
-                return `
-                    <tr>
-                        <td>${new Date(e.expense_date).toLocaleDateString('en-GB')}</td>
-                        <td>${e.category || '—'}</td>
-                        <td>${e.description}</td>
-                        <td><strong>${Number(e.amount).toLocaleString('en-US')}</strong></td>
-                        <td>${e.receipt_no || '—'}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            document.getElementById('results_count').innerText = `عدد النتائج: ${rows.length.toLocaleString('en-US')}`;
+            document.getElementById('results_total').innerText = `إجمالي المصروفات: ${fmtJOD(total)}`;
 
-            // إضافة صف المجموع
-            tbody.innerHTML += `
-                <tr class="total-row">
-                    <td colspan="3" style="text-align:center;">المجموع الكلي</td>
-                    <td><strong>${total.toLocaleString('en-US')}</strong></td>
-                    <td colspan="2"></td>
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="${colCount}" class="empty-state">لا توجد مصروفات مطابقة</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(e => `
+                <tr>
+                    <td>${fmtDateDisplay(e.expense_date)}</td>
+                    <td>${escHtml(e.category || '—')}</td>
+                    <td>${escHtml(e.description || '—')}</td>
+                    <td class="payee-only">${escHtml(e.payee || '—')}</td>
+                    <td><strong>${fmtJOD(e.amount)}</strong></td>
+                    <td class="notes-cell" title="${escHtml(e.notes || '')}">${escHtml(e.notes || '—')}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn btn-soft btn-sm" onclick="openEditExpense('${e.id}')" aria-label="تعديل المصروف">✏️ تعديل</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')" aria-label="حذف المصروف">🗑️ حذف</button>
+                        </div>
+                    </td>
                 </tr>
-            `;
+            `).join('');
+        }
+
+        // ===== تحديث لوحة التحليل كاملة من نفس مجموعة البيانات =====
+        function refreshExpenseDashboard() {
+            buildCategoryOptions();
+            renderExpenseSummaryCards();
+            renderCategoryChart();
+            renderMonthlyChart();
+            applyFilters();
+        }
+
+        async function refreshAll() {
+            await loadAllExpenses();
+            refreshExpenseDashboard();
         }
 
         // ===== حفظ مصروف جديد =====
         async function saveExpense() {
+            if (isSavingExpense) return;
+
             const expenseDate = document.getElementById('expense_date').value;
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value.trim();
-            const amount = document.getElementById('amount').value.trim();
-            const receiptNo = document.getElementById('receipt_no').value.trim();
+            const amountRaw = document.getElementById('amount').value.trim();
+            const amount = parseFloat(amountRaw);
+            const payee = document.getElementById('expense_payee').value.trim();
             const notes = document.getElementById('notes').value.trim();
+            const btn = document.getElementById('save_expense_btn');
 
-            if (!expenseDate) {
-                showStatus('الرجاء اختيار التاريخ', 'error');
-                return;
-            }
-            if (!category) {
-                showStatus('الرجاء اختيار الفئة', 'error');
-                return;
-            }
-            if (!description) {
-                showStatus('الرجاء إدخال البيان', 'error');
-                return;
-            }
-            if (!amount || parseFloat(amount) <= 0) {
-                showStatus('الرجاء إدخال مبلغ صحيح', 'error');
-                return;
+            if (!expenseDate) return showStatus('الرجاء اختيار التاريخ', 'error');
+            if (!category) return showStatus('يرجى اختيار فئة المصروف.', 'error');
+            if (!description) return showStatus('يرجى إدخال بيان المصروف.', 'error');
+            if (!amountRaw || !Number.isFinite(amount) || amount <= 0) {
+                return showStatus('يرجى إدخال مبلغ صحيح أكبر من صفر.', 'error');
             }
 
             try {
-                const { data, error } = await supabase
+                isSavingExpense = true;
+                btn.disabled = true;
+                btn.innerText = 'جاري الحفظ...';
+
+                const payload = {
+                    expense_date: expenseDate,
+                    category: category,
+                    description: description,
+                    amount: amount,
+                    notes: notes || null
+                };
+                if (PAYEE_SUPPORTED) payload.payee = payee || null;
+
+                const { error } = await supabase
                     .from('complex_expenses')
-                    .insert([{
-                        expense_date: expenseDate,
-                        category: category,
-                        description: description,
-                        amount: parseFloat(amount),
-                        receipt_no: receiptNo || null,
-                        notes: notes || null
-                    }])
+                    .insert([payload])
                     .select()
                     .single();
 
                 if (error) throw error;
 
-                showStatus(`✅ تم إضافة المصروف بنجاح!`, 'success');
                 clearExpenseForm();
-                loadExpenses();
+                showStatus('تم حفظ المصروف بنجاح.', 'success');
+                await refreshAll();
 
             } catch (err) {
                 console.error(err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            } finally {
+                isSavingExpense = false;
+                btn.disabled = false;
+                btn.innerText = '💾 حفظ المصروف';
             }
         }
 
-        // ===== حذف مصروف =====
+        // ===== تعديل مصروف =====
+        function openEditExpense(id) {
+            const e = allExpenses.find(x => String(x.id) === String(id));
+            if (!e) return alert('المصروف غير موجود');
+
+            editingExpenseId = e.id;
+
+            document.getElementById('edit_expense_date').value = String(e.expense_date || '').slice(0, 10);
+            document.getElementById('edit_expense_description').value = e.description || '';
+            document.getElementById('edit_expense_amount').value = toAmount(e.amount);
+            document.getElementById('edit_expense_payee').value = e.payee || '';
+            document.getElementById('edit_expense_notes').value = e.notes || '';
+
+            const catSel = document.getElementById('edit_expense_category');
+            catSel.value = String(e.category || '').trim();
+            if (catSel.value === '' && e.category) {
+                // فئة قديمة غير موجودة في القائمة — أضفها حتى لا تُفقد
+                const opt = document.createElement('option');
+                opt.value = e.category;
+                opt.textContent = `${e.category} (فئة قديمة)`;
+                catSel.appendChild(opt);
+                catSel.value = e.category;
+            }
+
+            document.getElementById('edit_expense_overlay').classList.add('active');
+        }
+
+        function closeEditExpenseModal() {
+            editingExpenseId = null;
+            document.getElementById('edit_expense_overlay').classList.remove('active');
+        }
+
+        async function saveExpenseEdit() {
+            if (!editingExpenseId || isSavingEdit) return;
+
+            const btn = document.getElementById('edit_expense_save_btn');
+            const expenseDate = document.getElementById('edit_expense_date').value;
+            const category = document.getElementById('edit_expense_category').value;
+            const description = document.getElementById('edit_expense_description').value.trim();
+            const amountRaw = document.getElementById('edit_expense_amount').value.trim();
+            const amount = parseFloat(amountRaw);
+            const payee = document.getElementById('edit_expense_payee').value.trim();
+            const notes = document.getElementById('edit_expense_notes').value.trim();
+
+            if (!expenseDate) return alert('الرجاء اختيار التاريخ');
+            if (!category) return alert('يرجى اختيار فئة المصروف.');
+            if (!description) return alert('يرجى إدخال بيان المصروف.');
+            if (!amountRaw || !Number.isFinite(amount) || amount <= 0) {
+                return alert('يرجى إدخال مبلغ صحيح أكبر من صفر.');
+            }
+
+            if (!confirm('هل أنت متأكد من حفظ التعديلات على هذا المصروف؟')) return;
+
+            try {
+                isSavingEdit = true;
+                btn.disabled = true;
+                btn.innerText = 'جاري الحفظ...';
+
+                const payload = {
+                    expense_date: expenseDate,
+                    category: category,
+                    description: description,
+                    amount: amount,
+                    notes: notes || null
+                };
+                if (PAYEE_SUPPORTED) payload.payee = payee || null;
+
+                // ✅ تحديث الصف نفسه بمعرّفه الفريد — لا يتم إنشاء مصروف جديد
+                const { data, error } = await supabase
+                    .from('complex_expenses')
+                    .update(payload)
+                    .eq('id', editingExpenseId)
+                    .select();
+
+                if (error) throw error;
+                if (!data?.length) throw new Error('لم يتم تعديل المصروف — تحقق من الصلاحيات');
+
+                closeEditExpenseModal();
+                showTableStatus('تم تعديل المصروف بنجاح.', 'success');
+                await refreshAll(); // الفلاتر النشطة تبقى كما هي
+
+            } catch (err) {
+                console.error(err);
+                alert(`❌ حدث خطأ: ${err.message}`);
+            } finally {
+                isSavingEdit = false;
+                btn.disabled = false;
+                btn.innerText = 'حفظ التعديل';
+            }
+        }
+
+        // ===== حذف مصروف (بالمعرّف الفريد فقط) =====
         async function deleteExpense(id) {
-            if (!confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
+            if (!confirm('هل أنت متأكد من حذف هذا المصروف؟ لا يمكن التراجع عن هذا الإجراء.')) return;
 
             try {
                 const { error } = await supabase
@@ -537,7 +1423,8 @@
 
                 if (error) throw error;
 
-                loadExpenses();
+                showTableStatus('تم حذف المصروف بنجاح.', 'success');
+                await refreshAll(); // الفلاتر النشطة تبقى كما هي
             } catch (err) {
                 console.error(err);
                 alert('❌ حدث خطأ أثناء الحذف');
@@ -546,22 +1433,34 @@
 
         // ===== تفريغ النموذج =====
         function clearExpenseForm() {
-            document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expense_date').value = todayLocalStr();
             document.getElementById('category').value = '';
             document.getElementById('description').value = '';
             document.getElementById('amount').value = '';
-            document.getElementById('receipt_no').value = '';
+            document.getElementById('expense_payee').value = '';
             document.getElementById('notes').value = '';
             document.getElementById('status_msg').className = 'status-msg';
             document.getElementById('status_msg').style.display = 'none';
         }
 
-        // ===== عرض رسالة =====
+        // ===== الرسائل =====
         function showStatus(msg, type) {
             const el = document.getElementById('status_msg');
             el.textContent = msg;
             el.className = `status-msg ${type}`;
             el.style.display = 'block';
+        }
+
+        function showTableStatus(msg, type) {
+            const el = document.getElementById('table_status_msg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+            clearTimeout(showTableStatus._t);
+            showTableStatus._t = setTimeout(() => {
+                el.className = 'status-msg';
+                el.style.display = 'none';
+            }, 4000);
         }
 
         // ===== العودة =====
@@ -575,9 +1474,22 @@
         }
 
         // ===== تحميل الصفحة =====
-        window.onload = async function() {
-            document.getElementById('expense_date').value = new Date().toISOString().split('T')[0];
-            await loadExpenses();
+        window.onload = async function () {
+            document.getElementById('expense_date').value = todayLocalStr();
+
+            // بحث فوري مع تأخير بسيط (debounce)
+            document.getElementById('filter_search').addEventListener('input', () => {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(applyFilters, 250);
+            });
+
+            // إغلاق نافذة التعديل بزر Escape
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeEditExpenseModal();
+            });
+
+            await detectPayeeSupport();
+            await refreshAll();
         };
     </script>
 
