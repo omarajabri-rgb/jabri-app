@@ -2411,32 +2411,90 @@ setMoodClass(
         }
 
         async function ensureYearlySummaryExists(tenant, yearNum){
-            let row = getSummaryByYear(tenant.tenant_code, yearNum);
-            if(row) return row;
 
-            const prev = getPreviousSummary(tenant.tenant_code, yearNum);
-            // CUMULATIVE: opening_balance = previous year's final_balance
-            const ob = prev ? toNumber(prev.final_balance) : 0;
-            const td = toNumber(tenant.annual_rent);
-            const tc = 0;
-            // CUMULATIVE: final_balance = opening_balance + total_debit - total_credit
-            const fb = ob + td - tc;
-            const { data, error } = await supabaseClient
+    // 1) Database is the source of truth
+    const { data: existingRow, error: checkError } = await supabaseClient
+        .from('tenant_yearly_summary')
+        .select('*')
+        .eq('tenant_code', tenant.tenant_code)
+        .eq('year', yearNum)
+        .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    // If it already exists, update the cache and return it
+    if (existingRow) {
+
+        const idx = allSummaries.findIndex(r =>
+            r.tenant_code === tenant.tenant_code &&
+            Number(r.year) === Number(yearNum)
+        );
+
+        if (idx >= 0) {
+            allSummaries[idx] = existingRow;
+        } else {
+            allSummaries.push(existingRow);
+        }
+
+        return existingRow;
+    }
+
+    // 2) Create new yearly summary only if it truly doesn't exist
+    const prev = getPreviousSummary(tenant.tenant_code, yearNum);
+
+    const openingBalance = prev ? toNumber(prev.final_balance) : 0;
+    const annualRent = toNumber(tenant.annual_rent);
+    const totalCredit = 0;
+    const finalBalance = openingBalance + annualRent;
+
+    const { data, error } = await supabaseClient
+        .from('tenant_yearly_summary')
+        .insert([{
+            tenant_code: tenant.tenant_code,
+            year: yearNum,
+            opening_balance: openingBalance,
+            total_debit: annualRent,
+            total_credit: totalCredit,
+            final_balance: finalBalance
+        }])
+        .select()
+        .single();
+
+    // 3) Another tab/browser may have created it first
+    if (error) {
+
+        if (error.code === '23505') {
+
+            const { data: row, error: rowError } = await supabaseClient
                 .from('tenant_yearly_summary')
-                .insert([{
-                    tenant_code: tenant.tenant_code,
-                    year: yearNum,
-                    opening_balance: ob,
-                    total_debit: td,
-                    total_credit: tc,
-                    final_balance: fb
-                }])
-                .select()
+                .select('*')
+                .eq('tenant_code', tenant.tenant_code)
+                .eq('year', yearNum)
                 .single();
 
-            if(error) throw error;
-            return data;
+            if (rowError) throw rowError;
+
+            const idx = allSummaries.findIndex(r =>
+                r.tenant_code === tenant.tenant_code &&
+                Number(r.year) === Number(yearNum)
+            );
+
+            if (idx >= 0) {
+                allSummaries[idx] = row;
+            } else {
+                allSummaries.push(row);
+            }
+
+            return row;
         }
+
+        throw error;
+    }
+
+    allSummaries.push(data);
+
+    return data;
+}
 
         async function submitTransaction(){
             if(isSavingTransaction) return;
