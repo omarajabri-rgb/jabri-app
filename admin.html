@@ -56,20 +56,13 @@
             gap:12px;
             margin-bottom:18px;
             flex-wrap:wrap;
+            padding-right:56px; /* مساحة لزر القائمة الثابت */
         }
 
         .brand{
             display:flex;
             align-items:center;
             gap:12px;
-        }
-
-        .brand-badge{
-            width:46px;
-            height:46px;
-            border-radius:15px;
-            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow:0 12px 24px rgba(201,164,107,0.22);
         }
 
         .brand h1{
@@ -784,6 +777,96 @@
             .chart-wrap{ height:220px; }
         }
 
+        /* ===================== DISCOUNT TOGGLE + TX EDIT ===================== */
+        .receipt-label-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+        }
+        .discount-toggle{
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            cursor:pointer;
+            font-size:11px;
+            font-weight:800;
+            color:#8b6a3a;
+            padding-left:4px;
+        }
+        .discount-toggle input[type="checkbox"]{
+            width:15px;
+            height:15px;
+            margin:0;
+            accent-color:var(--gold-deep, #b78e54);
+            cursor:pointer;
+        }
+        input#tx_receipt[readonly], input#edit_tx_receipt[readonly]{
+            background:rgba(201,164,107,0.12);
+            color:#6b4f2b;
+            font-weight:900;
+        }
+
+        .tx-history-table-wrap{ max-height:340px; overflow:auto; border-radius:14px; }
+        .tx-edit-btn{
+            border:none;
+            cursor:pointer;
+            border-radius:10px;
+            padding:6px 10px;
+            font-size:12px;
+            font-weight:800;
+            font-family:inherit;
+            background:rgba(201,164,107,0.14);
+            color:#6b4f2b;
+            transition:transform .15s ease;
+        }
+        .tx-edit-btn:hover{ transform:translateY(-1px); background:rgba(201,164,107,0.24); }
+        .tx-type-pill{
+            display:inline-block;
+            padding:3px 8px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:800;
+            background:rgba(21,154,111,0.12);
+            color:#159a6f;
+        }
+        .tx-type-pill.discount{ background:rgba(201,164,107,0.16); color:#8b6a3a; }
+
+        .edit-tx-overlay{
+            position:fixed;
+            inset:0;
+            background:rgba(31,41,55,0.4);
+            backdrop-filter:blur(3px);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:10000;
+            padding:16px;
+        }
+        .edit-tx-overlay.active{ display:flex; }
+        .edit-tx-modal{
+            background:#fffdf8;
+            border-radius:20px;
+            box-shadow:0 24px 60px rgba(0,0,0,0.22);
+            width:100%;
+            max-width:460px;
+            max-height:90vh;
+            overflow:auto;
+            padding:20px;
+        }
+        .edit-tx-modal h3{
+            margin:0 0 14px;
+            font-size:17px;
+            font-weight:900;
+            color:#544128;
+        }
+        .edit-tx-actions{
+            display:flex;
+            gap:10px;
+            margin-top:16px;
+        }
+        .edit-tx-actions .btn{ flex:1; }
+
         /* ===================== BURGER MENU (ADMIN ONLY) ===================== */
         .burger-btn{
             position:fixed;
@@ -1010,7 +1093,6 @@
     <div class="shell">
         <div class="topbar">
             <div class="brand">
-                <div class="brand-badge"></div>
                 <div>
                     <h1>مجمع جبري الصناعي التجاري</h1>
                     <p>لوحة الإدارة لإدارة المستأجرين والحسابات</p>
@@ -1189,7 +1271,13 @@
                             <input type="date" id="tx_date">
                         </div>
                         <div class="field">
-                            <label>رقم السند</label>
+                            <div class="receipt-label-row">
+                                <label>رقم السند</label>
+                                <label class="discount-toggle" for="tx_discount">
+                                    <input type="checkbox" id="tx_discount" onchange="toggleDiscountMode(this.checked)">
+                                    <span>خصم</span>
+                                </label>
+                            </div>
                             <input type="text" id="tx_receipt" placeholder="رقم السند">
                         </div>
                     </div>
@@ -1218,9 +1306,67 @@
             </div>
         </section>
 
+        <section class="panel" id="tx_history_panel" style="display:none;">
+            <div class="chip-header"><div class="chip-title">💳 دفعات وخصومات المستأجر</div></div>
+            <div class="notify-log-wrap">
+                <div class="notify-log-table-wrap tx-history-table-wrap">
+                    <table class="notify-log-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>رقم السند</th>
+                                <th>البيان</th>
+                                <th>المبلغ</th>
+                                <th>النوع</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tx_history_body">
+                            <tr><td colspan="6" class="notify-empty">لا توجد حركات</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <button id="statementBtn" class="btn btn-gold" style="width:100%; height:52px; margin-top:10px;" onclick="openTenantStatement()" disabled>كشف حساب المستأجر</button>
 
         <div class="footer-note">© 2026 JABRI INDUSTRIAL COMPLEX — v5.1</div>
+    </div>
+
+    <!-- ✏️ EDIT TRANSACTION MODAL -->
+    <div class="edit-tx-overlay" id="edit_tx_overlay" onclick="if(event.target === this) closeEditTxModal()">
+        <div class="edit-tx-modal">
+            <h3>تعديل الحركة</h3>
+            <div class="form-grid">
+                <div class="field">
+                    <label>التاريخ</label>
+                    <input type="date" id="edit_tx_date">
+                </div>
+                <div class="field">
+                    <div class="receipt-label-row">
+                        <label>رقم السند</label>
+                        <label class="discount-toggle" for="edit_tx_discount">
+                            <input type="checkbox" id="edit_tx_discount" onchange="toggleEditDiscountMode(this.checked)">
+                            <span>خصم</span>
+                        </label>
+                    </div>
+                    <input type="text" id="edit_tx_receipt" placeholder="رقم السند">
+                </div>
+            </div>
+            <div class="field" style="margin-top:10px;">
+                <label>البيان</label>
+                <input type="text" id="edit_tx_desc" placeholder="البيان">
+            </div>
+            <div class="field" style="margin-top:10px;">
+                <label>المبلغ</label>
+                <input type="number" id="edit_tx_amount" placeholder="0">
+            </div>
+            <div class="edit-tx-actions">
+                <button class="btn btn-gold" id="edit_tx_save_btn" onclick="saveTxEdit()">حفظ التعديل</button>
+                <button class="btn btn-soft" onclick="closeEditTxModal()">إلغاء</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1463,7 +1609,12 @@ try{
             document.getElementById('tx_desc').value = t;
         };
 
+        const DISCOUNT_RECEIPT_VALUE = 'خصم';
+
         function generateNextReceiptNumber() {
+    // 🛡️ لا تلمس حقل رقم السند أثناء وضع الخصم
+    if (document.getElementById('tx_discount')?.checked) return;
+
     const numericReceipts = allTransactions
         .map(tx => parseInt(String(tx.receipt_no || '').replace(/\D/g, '')))
         .filter(n => !isNaN(n));
@@ -1479,9 +1630,41 @@ try{
         inputEl.value = String(nextNo);
     }
 }
+
+        // ===================== 🏷️ DISCOUNT MODE (خصم) =====================
+        let savedReceiptBeforeDiscount = '';
+
+        function toggleDiscountMode(checked){
+            const receiptEl = document.getElementById('tx_receipt');
+            if(!receiptEl) return;
+
+            if(checked){
+                // احفظ الرقم التلقائي الحالي لاستعادته عند إلغاء الخصم
+                savedReceiptBeforeDiscount = receiptEl.value;
+                receiptEl.value = DISCOUNT_RECEIPT_VALUE;
+                receiptEl.readOnly = true;
+            } else {
+                receiptEl.readOnly = false;
+                receiptEl.value = savedReceiptBeforeDiscount || '';
+                if(!receiptEl.value) generateNextReceiptNumber();
+            }
+        }
+
+        function isDiscountTransaction(tx){
+            return String(tx?.receipt_no || '').trim() === DISCOUNT_RECEIPT_VALUE;
+        }
+
         const clearTransactionForm = () => {
             const d = document.getElementById('tx_date');
             if(d) d.valueAsDate = new Date();
+
+            // إعادة ضبط وضع الخصم إلى الوضع الطبيعي
+            const discountEl = document.getElementById('tx_discount');
+            if(discountEl) discountEl.checked = false;
+            const receiptEl = document.getElementById('tx_receipt');
+            if(receiptEl) receiptEl.readOnly = false;
+            savedReceiptBeforeDiscount = '';
+
             generateNextReceiptNumber();
 
            document.getElementById('tx_desc').value = 'دفعة من الايجار';
@@ -2262,7 +2445,10 @@ setMoodClass(
             const date = document.getElementById('tx_date').value;
             const desc = document.getElementById('tx_desc').value.trim();
             const amount = toNumber(document.getElementById('tx_amount').value);
-            const receipt = String(document.getElementById('tx_receipt').value || '').trim();
+            const isDiscount = !!document.getElementById('tx_discount')?.checked;
+            const receipt = isDiscount
+                ? DISCOUNT_RECEIPT_VALUE
+                : String(document.getElementById('tx_receipt').value || '').trim();
             const btn = document.getElementById('save_tx_btn');
 
             if(!code) return alert('اختر المستأجر');
@@ -2277,12 +2463,15 @@ setMoodClass(
                 btn.innerText = 'جاري الحفظ...';
                 hideStatus();
 
-                const { data: exist } = await supabaseClient
-                    .from('tenant_transactions')
-                    .select('id')
-                    .eq('receipt_no', String(receipt).trim());
+                // ✅ فحص تكرار رقم السند — يُتجاوز فقط لحركات الخصم
+                if(!isDiscount){
+                    const { data: exist } = await supabaseClient
+                        .from('tenant_transactions')
+                        .select('id')
+                        .eq('receipt_no', String(receipt).trim());
 
-                if(exist?.length) throw new Error('رقم السند مستخدم مسبقاً');
+                    if(exist?.length) throw new Error('رقم السند مستخدم مسبقاً');
+                }
 
                 const tenant = allTenants.find(t => t.tenant_code === code);
                 if(!tenant) throw new Error('المستأجر غير موجود');
@@ -2312,7 +2501,35 @@ setMoodClass(
                // TODO 2 — إرسال واتساب تلقائي بعد نجاح حفظ الدفعة وتحديث الملخص
                const tenantPhone = sanitizePhone(tenant.phone || '');
 
-                if(tenantPhone){
+                if(tenantPhone && isDiscount){
+    // 🏷️ إشعار خصم مخصص — لا نصف الخصم كدفعة مستلمة
+    let discountWaLogId = null;
+    try {
+        const discountMessage = `تم إضافة خصم بقيمة ${roundMoney(amount)} دينار إلى حسابكم لدى مجمع جبري الصناعي التجاري. الرصيد المتبقي: ${roundMoney(newFinal)} دينار.`;
+
+        const discountWaLog = await createWhatsAppLog(tenant, {
+            sourceType: 'discount',
+            sourceId: DISCOUNT_RECEIPT_VALUE,
+            phone: tenantPhone,
+            messageTitle: 'تم إضافة خصم',
+            messageBody: discountMessage,
+            templateName: null,
+            amount: amount,
+            receiptNo: DISCOUNT_RECEIPT_VALUE,
+            remainingBalance: newFinal
+        });
+        discountWaLogId = discountWaLog.id;
+
+        const textRes = await sendWhatsAppTextMessage(tenantPhone, discountMessage);
+        const waMessageId = textRes?.messages?.[0]?.id || 'TEXT_DISCOUNT';
+        await markWhatsAppLogSent(discountWaLogId, waMessageId);
+    } catch (waErr){
+        console.error('WhatsApp (discount) failed:', waErr);
+        if(discountWaLogId){
+            await markWhatsAppLogFailed(discountWaLogId, waErr.message || 'Unknown error');
+        }
+    }
+} else if(tenantPhone){
     let paymentWaLogId = null;
 
     try {
@@ -2371,7 +2588,7 @@ setMoodClass(
 
 clearTransactionForm();
 
-showStatus(`تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
+showStatus(isDiscount ? `تم حفظ الخصم على سنة ${yearNum} بنجاح` : `تم حفظ الدفعة على سنة ${yearNum} بنجاح`, 'success');
 
 } catch(err){
     console.error(err);
@@ -2720,6 +2937,7 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
 
             if(!code || code === ''){
                 isComplexWideMode = true;
+                renderTenantTransactions('');
                 renderComplexWideView();
                 return;
             }
@@ -2741,6 +2959,8 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
             } else {
                 document.getElementById('statementBtn').disabled = true;
             }
+
+            renderTenantTransactions(code);
 
             updateNotificationComposer();
             renderNotificationLog();
@@ -2768,6 +2988,272 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
             renderNotificationLog();
             renderWhatsAppLog();
             document.getElementById('loader').style.display = 'none';
+        }
+
+        /* ===================== ✏️ EDIT TRANSACTION (دفعات وخصومات) ===================== */
+        let editingTx = null;
+        let savedEditReceiptBeforeDiscount = '';
+
+        const txEscapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+        function renderTenantTransactions(code){
+            const panel = document.getElementById('tx_history_panel');
+            const body = document.getElementById('tx_history_body');
+            if(!panel || !body) return;
+
+            if(!code){
+                panel.style.display = 'none';
+                return;
+            }
+
+            // الدفعات والخصومات المدخلة يدوياً فقط (دائن > 0) — لا تشمل قيود الإيجار أو الرسوم
+            const rows = allTransactions
+                .filter(t => t.tenant_code === code && toNumber(t.credit) > 0)
+                .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            panel.style.display = '';
+
+            if(!rows.length){
+                body.innerHTML = '<tr><td colspan="6" class="notify-empty">لا توجد دفعات أو خصومات لهذا المستأجر</td></tr>';
+                return;
+            }
+
+            body.innerHTML = rows.map(t => {
+                const disc = isDiscountTransaction(t);
+                return `
+                    <tr>
+                        <td>${t.date ? new Date(t.date).toLocaleDateString('en-GB') : '—'}</td>
+                        <td>${txEscapeHtml(t.receipt_no || '—')}</td>
+                        <td>${txEscapeHtml(t.description || '—')}</td>
+                        <td>${formatMoney(toNumber(t.credit))}</td>
+                        <td><span class="tx-type-pill ${disc ? 'discount' : ''}">${disc ? 'خصم' : 'دفعة'}</span></td>
+                        <td><button class="tx-edit-btn" onclick="openEditTxModal('${t.id}')">✏️ تعديل</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openEditTxModal(txId){
+            const tx = allTransactions.find(t => String(t.id) === String(txId));
+            if(!tx) return alert('الحركة غير موجودة');
+
+            const selectedCode = document.getElementById('tenant_select').value;
+            if(tx.tenant_code !== selectedCode) return alert('هذه الحركة لا تخص المستأجر المحدد');
+
+            editingTx = tx;
+            savedEditReceiptBeforeDiscount = '';
+
+            const disc = isDiscountTransaction(tx);
+            document.getElementById('edit_tx_date').value = String(tx.date || '').slice(0, 10);
+            document.getElementById('edit_tx_desc').value = tx.description || '';
+            document.getElementById('edit_tx_amount').value = toNumber(tx.credit);
+            document.getElementById('edit_tx_discount').checked = disc;
+
+            const rEl = document.getElementById('edit_tx_receipt');
+            rEl.value = tx.receipt_no || '';
+            rEl.readOnly = disc;
+
+            document.getElementById('edit_tx_overlay').classList.add('active');
+        }
+
+        function closeEditTxModal(){
+            editingTx = null;
+            savedEditReceiptBeforeDiscount = '';
+            document.getElementById('edit_tx_overlay').classList.remove('active');
+        }
+
+        function toggleEditDiscountMode(checked){
+            const el = document.getElementById('edit_tx_receipt');
+            if(!el) return;
+
+            if(checked){
+                if(el.value !== DISCOUNT_RECEIPT_VALUE) savedEditReceiptBeforeDiscount = el.value;
+                el.value = DISCOUNT_RECEIPT_VALUE;
+                el.readOnly = true;
+            } else {
+                el.readOnly = false;
+                el.value = (savedEditReceiptBeforeDiscount && savedEditReceiptBeforeDiscount !== DISCOUNT_RECEIPT_VALUE)
+                    ? savedEditReceiptBeforeDiscount
+                    : '';
+                // ⚠️ لا نستهلك رقم سند تلقائياً هنا — على الإدارة إدخال رقم سند صالح
+            }
+        }
+
+        // إعادة احتساب ملخصات السنوات المتأثرة بعد تعديل حركة
+        // creditDeltasByYear: { 2025: -100, 2026: +70 }
+        async function recalcSummariesAfterEdit(tenant, creditDeltasByYear){
+            const affectedYears = Object.keys(creditDeltasByYear).map(Number);
+            if(!affectedYears.length) return;
+            const startYear = Math.min(...affectedYears);
+
+            const { data: rows, error } = await supabaseClient
+                .from('tenant_yearly_summary')
+                .select('*')
+                .eq('tenant_code', tenant.tenant_code)
+                .order('year');
+            if(error) throw error;
+
+            let prevFinal = null;
+            for(const row of (rows || [])){
+                const y = Number(row.year);
+                if(y < startYear){
+                    prevFinal = toNumber(row.final_balance);
+                    continue;
+                }
+
+                const delta = toNumber(creditDeltasByYear[y] || 0);
+                // نفس معادلة النظام: final_balance = opening_balance + total_debit - total_credit
+                const ob = (prevFinal === null) ? toNumber(row.opening_balance) : roundMoney(prevFinal);
+                const tc = roundMoney(toNumber(row.total_credit) + delta);
+                const td = toNumber(row.total_debit);
+                const fb = roundMoney(ob + td - tc);
+                prevFinal = fb;
+
+                if(ob !== toNumber(row.opening_balance) || tc !== toNumber(row.total_credit) || fb !== toNumber(row.final_balance)){
+                    const { error: upErr } = await supabaseClient
+                        .from('tenant_yearly_summary')
+                        .update({ opening_balance: ob, total_credit: tc, final_balance: fb })
+                        .eq('tenant_code', tenant.tenant_code)
+                        .eq('year', y);
+                    if(upErr) throw upErr;
+                }
+            }
+        }
+
+        // سجل تدقيق اختياري — لا يمنع التعديل إذا كان الجدول غير موجود
+        async function writeTxEditAudit(oldTx, newTx){
+            try {
+                const { error } = await supabaseClient
+                    .from('transaction_edit_audit')
+                    .insert([{
+                        transaction_id: oldTx.id,
+                        tenant_code: oldTx.tenant_code,
+                        old_data: oldTx,
+                        new_data: newTx,
+                        edited_by: null
+                    }]);
+                if(error) console.warn('Audit log skipped:', error.message);
+            } catch(e){
+                console.warn('Audit log skipped:', e?.message);
+            }
+        }
+
+        async function updateTransactionInDb(tenant, oldTx, next){
+            // 1) جرّب دالة قاعدة البيانات الآمنة إن كانت مثبتة (تحديث ذري)
+            const { data: rpcData, error: rpcError } = await supabaseClient.rpc('update_tenant_payment', {
+                p_transaction_id: String(oldTx.id),
+                p_tenant_code: oldTx.tenant_code,
+                p_date: next.date,
+                p_description: next.description,
+                p_amount: next.amount,
+                p_receipt: next.receipt
+            });
+
+            if(!rpcError) return rpcData || { ...oldTx, date: next.date, description: next.description, credit: next.amount, receipt_no: next.receipt };
+
+            const missingFn = rpcError.code === 'PGRST202' || /could not find the function/i.test(rpcError.message || '');
+            if(!missingFn) throw rpcError;
+
+            // 2) المسار الاحتياطي — تحديث مباشر للصف نفسه (لا إدخال جديد) ثم إعادة احتساب الملخصات
+            const updatePayload = {
+                date: next.date,
+                description: next.description,
+                credit: next.amount,
+                receipt_no: next.receipt
+            };
+            // حدّث فقط الأعمدة الموجودة فعلاً في الجدول
+            Object.keys(updatePayload).forEach(k => { if(!(k in oldTx)) delete updatePayload[k]; });
+            if('year' in oldTx) updatePayload.year = new Date(next.date).getFullYear();
+
+            const { data: updRows, error: updErr } = await supabaseClient
+                .from('tenant_transactions')
+                .update(updatePayload)
+                .eq('id', oldTx.id)
+                .eq('tenant_code', oldTx.tenant_code)
+                .select();
+            if(updErr) throw updErr;
+            if(!updRows?.length) throw new Error('لم يتم تعديل الحركة — تحقق من الصلاحيات');
+
+            const oldYear = new Date(oldTx.date).getFullYear();
+            const newYear = new Date(next.date).getFullYear();
+            const deltas = {};
+            deltas[oldYear] = roundMoney((deltas[oldYear] || 0) - toNumber(oldTx.credit));
+            deltas[newYear] = roundMoney((deltas[newYear] || 0) + toNumber(next.amount));
+
+            await ensureYearlySummaryExists(tenant, newYear);
+            await recalcSummariesAfterEdit(tenant, deltas);
+
+            return updRows[0];
+        }
+
+        async function saveTxEdit(){
+            if(!editingTx) return;
+
+            const btn = document.getElementById('edit_tx_save_btn');
+            const date = document.getElementById('edit_tx_date').value;
+            const desc = document.getElementById('edit_tx_desc').value.trim();
+            const amount = toNumber(document.getElementById('edit_tx_amount').value);
+            const isDiscount = document.getElementById('edit_tx_discount').checked;
+            const receipt = isDiscount
+                ? DISCOUNT_RECEIPT_VALUE
+                : String(document.getElementById('edit_tx_receipt').value || '').trim();
+
+            if(!date) return alert('أدخل التاريخ');
+            if(!desc) return alert('أدخل البيان');
+            if(!receipt) return alert('أدخل رقم السند');
+            if(!(amount > 0)) return alert('يرجى إدخال مبلغ صحيح أكبر من صفر.');
+
+            if(!confirm('هل أنت متأكد من تعديل هذه الحركة؟')) return;
+
+            try {
+                btn.disabled = true;
+                btn.innerText = 'جاري الحفظ...';
+
+                // ✅ تحقق من قاعدة البيانات مباشرة أن الحركة موجودة وتخص المستأجر المحدد
+                const { data: freshTx, error: freshErr } = await supabaseClient
+                    .from('tenant_transactions')
+                    .select('*')
+                    .eq('id', editingTx.id)
+                    .single();
+                if(freshErr || !freshTx) throw new Error('تعذر العثور على الحركة');
+
+                const selectedCode = document.getElementById('tenant_select').value;
+                if(freshTx.tenant_code !== selectedCode) throw new Error('هذه الحركة لا تخص المستأجر المحدد');
+                if(!(toNumber(freshTx.credit) > 0)) throw new Error('هذه الحركة غير قابلة للتعديل');
+
+                // ✅ فحص تكرار رقم السند مع استثناء الحركة الحالية — للدفعات العادية فقط
+                if(!isDiscount){
+                    const { data: exist, error: dupErr } = await supabaseClient
+                        .from('tenant_transactions')
+                        .select('id')
+                        .eq('receipt_no', receipt)
+                        .neq('id', editingTx.id);
+                    if(dupErr) throw dupErr;
+                    if(exist?.length) throw new Error('رقم السند مستخدم في حركة أخرى.');
+                }
+
+                const tenant = allTenants.find(t => t.tenant_code === freshTx.tenant_code);
+                if(!tenant) throw new Error('المستأجر غير موجود');
+
+                const updated = await updateTransactionInDb(tenant, freshTx, {
+                    date,
+                    description: desc,
+                    amount,
+                    receipt
+                });
+
+                await writeTxEditAudit(freshTx, updated);
+
+                closeEditTxModal();
+                await refresh(freshTx.tenant_code);
+                showStatus('تم تعديل الحركة وتحديث كشف الحساب بنجاح.', 'success');
+            } catch(err){
+                console.error(err);
+                alert(`حدث خطأ: ${err.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'حفظ التعديل';
+            }
         }
 
         function openTenantStatement(){
