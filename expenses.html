@@ -591,7 +591,26 @@
 
                     <div class="field">
                         <label for="category">الفئة <span style="color:var(--danger);">*</span></label>
-                        <select id="category" required></select>
+                        <select id="category" required>
+                            <option value="">-- اختر فئة --</option>
+                            <option value="كهرباء">كهرباء</option>
+                            <option value="ماء">ماء</option>
+                            <option value="صيانة عامة">صيانة عامة</option>
+                            <option value="صيانة كهرباء">صيانة كهرباء</option>
+                            <option value="صيانة مياه">صيانة مياه</option>
+                            <option value="صيانة مبانٍ">صيانة مبانٍ</option>
+                            <option value="رواتب وأجور">رواتب وأجور</option>
+                            <option value="حراسة">حراسة</option>
+                            <option value="نظافة">نظافة</option>
+                            <option value="ضرائب">ضرائب</option>
+                            <option value="رسوم حكومية">رسوم حكومية</option>
+                            <option value="اتصالات وإنترنت">اتصالات وإنترنت</option>
+                            <option value="محاماة">محاماة</option>
+                            <option value="مصاريف قضايا">مصاريف قضايا</option>
+                            <option value="مشتريات للمجمع">مشتريات للمجمع</option>
+                            <option value="وقود ومحروقات">وقود ومحروقات</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
                     </div>
 
                     <div class="field">
@@ -623,7 +642,7 @@
         </div>
 
         <!-- ===== قائمة المصروفات ===== -->
-        <div class="panel">
+        <div class="panel" id="expenses_list_panel">
             <div class="chip-header" style="justify-content:space-between; align-items:center;">
                 <div class="chip-title">📋 قائمة المصروفات</div>
                 <button class="btn btn-soft btn-sm" type="button" onclick="scrollToExpenseForm()">➕ إضافة مصروف</button>
@@ -643,6 +662,23 @@
                         <label for="filter_category">الفئة</label>
                         <select id="filter_category">
                             <option value="">الكل</option>
+                            <option value="كهرباء">كهرباء</option>
+                            <option value="ماء">ماء</option>
+                            <option value="صيانة عامة">صيانة عامة</option>
+                            <option value="صيانة كهرباء">صيانة كهرباء</option>
+                            <option value="صيانة مياه">صيانة مياه</option>
+                            <option value="صيانة مبانٍ">صيانة مبانٍ</option>
+                            <option value="رواتب وأجور">رواتب وأجور</option>
+                            <option value="حراسة">حراسة</option>
+                            <option value="نظافة">نظافة</option>
+                            <option value="ضرائب">ضرائب</option>
+                            <option value="رسوم حكومية">رسوم حكومية</option>
+                            <option value="اتصالات وإنترنت">اتصالات وإنترنت</option>
+                            <option value="محاماة">محاماة</option>
+                            <option value="مصاريف قضايا">مصاريف قضايا</option>
+                            <option value="مشتريات للمجمع">مشتريات للمجمع</option>
+                            <option value="وقود ومحروقات">وقود ومحروقات</option>
+                            <option value="أخرى">أخرى</option>
                         </select>
                     </div>
                     <div class="field">
@@ -718,7 +754,26 @@
                 </div>
                 <div class="field">
                     <label for="edit_expense_category">الفئة <span style="color:var(--danger);">*</span></label>
-                    <select id="edit_expense_category"></select>
+                    <select id="edit_expense_category">
+                        <option value="">-- اختر فئة --</option>
+                        <option value="كهرباء">كهرباء</option>
+                        <option value="ماء">ماء</option>
+                        <option value="صيانة عامة">صيانة عامة</option>
+                        <option value="صيانة كهرباء">صيانة كهرباء</option>
+                        <option value="صيانة مياه">صيانة مياه</option>
+                        <option value="صيانة مبانٍ">صيانة مبانٍ</option>
+                        <option value="رواتب وأجور">رواتب وأجور</option>
+                        <option value="حراسة">حراسة</option>
+                        <option value="نظافة">نظافة</option>
+                        <option value="ضرائب">ضرائب</option>
+                        <option value="رسوم حكومية">رسوم حكومية</option>
+                        <option value="اتصالات وإنترنت">اتصالات وإنترنت</option>
+                        <option value="محاماة">محاماة</option>
+                        <option value="مصاريف قضايا">مصاريف قضايا</option>
+                        <option value="مشتريات للمجمع">مشتريات للمجمع</option>
+                        <option value="وقود ومحروقات">وقود ومحروقات</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
                 </div>
                 <div class="field">
                     <label for="edit_expense_description">البيان <span style="color:var(--danger);">*</span></label>
@@ -743,6 +798,35 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // سكربت مستقل: يعمل حتى لو فشل السكربت الرئيسي لأي سبب
+        (function () {
+            // 1) تعيين تاريخ اليوم المحلي تلقائياً (بدون UTC)
+            function localToday() {
+                var d = new Date();
+                return d.getFullYear() + '-' +
+                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(d.getDate()).padStart(2, '0');
+            }
+            var dateEl = document.getElementById('expense_date');
+            if (dateEl && !dateEl.value) dateEl.value = localToday();
+
+            // 2) التمرير السلس إلى القسم المطلوب حسب رابط الصفحة (#hash)
+            function scrollToHashPanel() {
+                var id = (window.location.hash || '').replace('#', '');
+                if (id !== 'expense_form_panel' && id !== 'expenses_list_panel') return;
+                var target = document.getElementById(id);
+                if (target) {
+                    setTimeout(function () {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+            scrollToHashPanel();
+            window.addEventListener('hashchange', scrollToHashPanel);
+        })();
+    </script>
 
     <script>
         const supabase = window.supabase.createClient(
