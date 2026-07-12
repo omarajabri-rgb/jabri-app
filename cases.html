@@ -291,71 +291,6 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
-        /* ===== Case ledger (drop-down payments table) ===== */
-        .case-row { cursor: pointer; }
-        .case-row:hover td { background: rgba(201,164,107,0.06); }
-
-        .case-ledger-cell {
-            padding: 14px !important;
-            background: rgba(201,164,107,0.05);
-        }
-
-        .case-ledger-title {
-            font-size: 13px;
-            font-weight: 900;
-            color: var(--gold-deep, #b78e54);
-            margin-bottom: 10px;
-        }
-
-        .case-ledger-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .case-ledger-table thead th {
-            background: rgba(201,164,107,0.12);
-            font-size: 12px;
-            font-weight: 900;
-            padding: 10px 8px;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .case-ledger-table tbody td {
-            font-size: 13px;
-            font-weight: 700;
-            padding: 9px 8px;
-            text-align: center;
-            border-bottom: 1px solid rgba(201,164,107,0.10);
-            white-space: nowrap;
-        }
-
-        .case-ledger-table td.ledger-desc {
-            text-align: right;
-            white-space: normal;
-            min-width: 140px;
-        }
-
-        .case-ledger-table .ledger-debit { color: var(--danger); }
-        .case-ledger-table .ledger-credit { color: var(--success); }
-
-        .case-ledger-table tr.ledger-total-row td {
-            font-weight: 900;
-            font-size: 13px;
-            background: rgba(201,164,107,0.12);
-            border-top: 2px solid rgba(201,164,107,0.3);
-        }
-
-        .case-ledger-empty {
-            padding: 12px;
-            text-align: center;
-            font-weight: 800;
-            color: var(--muted, #7a7469);
-            font-size: 12px;
-        }
 
         .action-btns {
             display: flex;
@@ -698,138 +633,6 @@
         }
 
         // ============================================================
-        // 📊 CASE LEDGER — دفعات المستأجر منذ تاريخ القضية
-        // ============================================================
-        let casesById = {};
-
-        function parseAnyDate(raw) {
-            const text = String(raw || '').trim();
-            if (!text) return null;
-            const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (iso) return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00`);
-            const slash = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (slash) return new Date(`${slash[3]}-${String(Number(slash[2])).padStart(2,'0')}-${String(Number(slash[1])).padStart(2,'0')}T00:00:00`);
-            const d = new Date(text);
-            return Number.isNaN(d.getTime()) ? null : d;
-        }
-
-        function fmtDate(raw) {
-            const d = parseAnyDate(raw);
-            return d ? d.toLocaleDateString('en-GB') : '—';
-        }
-
-        function fmtNum(v) {
-            return Number(v || 0).toLocaleString('en-US');
-        }
-
-        async function toggleCaseLedger(caseId) {
-            // إذا كان الجدول مفتوحاً، أغلقه
-            const existing = document.getElementById(`case_ledger_${caseId}`);
-            if (existing) { existing.remove(); return; }
-
-            const caseItem = casesById[caseId];
-            if (!caseItem) return;
-
-            const row = document.getElementById(`case_row_${caseId}`);
-            if (!row) return;
-
-            // صف التحميل
-            const detailRow = document.createElement('tr');
-            detailRow.id = `case_ledger_${caseId}`;
-            detailRow.innerHTML = `<td colspan="8" class="case-ledger-cell">⏳ جاري تحميل الدفعات...</td>`;
-            row.after(detailRow);
-
-            try {
-                const { data: txs, error } = await supabaseCases
-                    .from('tenant_transactions')
-                    .select('*')
-                    .eq('tenant_code', caseItem.tenant_code);
-
-                if (error) throw error;
-
-                const caseStart = parseAnyDate(caseItem.case_date);
-
-                // كل الحركات (دفعات وخصومات ورسوم) من تاريخ القضية حتى اليوم
-                const movements = (txs || [])
-                    .filter(t => {
-                        const d = parseAnyDate(t.date);
-                        if (!d) return false;
-                        if (caseStart && d < caseStart) return false;
-                        return Number(t.credit || 0) > 0 || Number(t.debit || 0) > 0;
-                    })
-                    .sort((a, b) => (parseAnyDate(a.date) || 0) - (parseAnyDate(b.date) || 0));
-
-                const caseAmount = Number(caseItem.amount || 0);
-                let running = caseAmount;
-
-                const openingRow = `
-                    <tr>
-                        <td>${fmtDate(caseItem.case_date)}</td>
-                        <td class="ledger-debit">${fmtNum(caseAmount)}</td>
-                        <td></td>
-                        <td>${fmtNum(running)}</td>
-                        <td class="ledger-desc">قيمة القضية ${caseItem.case_number}</td>
-                        <td></td>
-                    </tr>
-                `;
-
-                const paymentRows = movements.map(t => {
-                    const c = Number(t.credit || 0);
-                    const db = Number(t.debit || 0);
-                    running = running + db - c;
-                    return `
-                        <tr>
-                            <td>${fmtDate(t.date)}</td>
-                            <td class="ledger-debit">${db > 0 ? fmtNum(db) : ''}</td>
-                            <td class="ledger-credit">${c > 0 ? fmtNum(c) : ''}</td>
-                            <td>${fmtNum(running)}</td>
-                            <td class="ledger-desc">${t.description || '—'}</td>
-                            <td>${t.receipt_no || ''}</td>
-                        </tr>
-                    `;
-                }).join('');
-
-                const totalPaid = movements.reduce((s, t) => s + Number(t.credit || 0), 0);
-                const totalExtraDebit = movements.reduce((s, t) => s + Number(t.debit || 0), 0);
-                const remaining = caseAmount + totalExtraDebit - totalPaid;
-
-                detailRow.innerHTML = `
-                    <td colspan="8" class="case-ledger-cell">
-                        <div class="case-ledger-title">📊 دفعات المستأجر منذ تاريخ القضية ${caseItem.case_number}</div>
-                        <table class="case-ledger-table">
-                            <thead>
-                                <tr>
-                                    <th>التاريخ</th>
-                                    <th>مدين</th>
-                                    <th>دائن</th>
-                                    <th>الرصيد</th>
-                                    <th>البيان</th>
-                                    <th>رقم السند</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${openingRow}
-                                ${paymentRows || ''}
-                                <tr class="ledger-total-row">
-                                    <td>الإجمالي</td>
-                                    <td class="ledger-debit">${fmtNum(caseAmount + totalExtraDebit)}</td>
-                                    <td class="ledger-credit">${fmtNum(totalPaid)}</td>
-                                    <td>${fmtNum(remaining)}</td>
-                                    <td class="ledger-desc">${remaining <= 0 ? '✅ تم السداد بالكامل' : 'المتبقي من قيمة القضية'}</td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        ${movements.length === 0 ? '<div class="case-ledger-empty">لا توجد دفعات مسجلة منذ تاريخ القضية</div>' : ''}
-                    </td>
-                `;
-            } catch (err) {
-                console.error('❌ Case ledger error:', err);
-                detailRow.innerHTML = `<td colspan="8" class="case-ledger-cell">❗ تعذر تحميل الدفعات: ${err.message}</td>`;
-            }
-        }
-
-        // ============================================================
         // 📋 LOAD CASES
         // ============================================================
         async function loadCases() {
@@ -852,9 +655,6 @@
                     return;
                 }
 
-                casesById = {};
-                data.forEach(c => { casesById[c.id] = c; });
-
                 tbody.innerHTML = data.map(caseItem => {
                     // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
                     const isEnded = isCaseEnded(caseItem.end_date);
@@ -862,7 +662,7 @@
                     const statusClass = isEnded ? 'ended' : 'active';
 
                     return `
-                        <tr id="case_row_${caseItem.id}" class="case-row" onclick="toggleCaseLedger('${caseItem.id}')" title="اضغط لعرض دفعات المستأجر منذ تاريخ القضية">
+                        <tr id="case_row_${caseItem.id}">
                             <td>${caseItem.tenants?.tenant_name || caseItem.tenant_code}</td>
                             <td><strong>${caseItem.case_number}</strong></td>
                             <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
