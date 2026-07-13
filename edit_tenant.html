@@ -1,228 +1,542 @@
-// ============================================================
-// 🔥 SUPABASE CLIENT
-// ============================================================
-const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-// ============================================================
-// 🔐 SESSION CHECK
-// ============================================================
-if (localStorage.getItem('jabri_admin_session') !== 'active') {
-    window.location.href = 'admin-login.html';
-}
-
-// ============================================================
-// 📋 GLOBAL VARIABLES
-// ============================================================
-let allTenants = [];
-let currentTenant = null;
-
-// ============================================================
-// 📋 LOAD TENANTS LIST
-// ============================================================
-async function loadTenantsList() {
-    const select = document.getElementById('tenant_select');
-    if (!select) return;
-
-    select.disabled = true;
-    select.innerHTML = '<option value="">⏳ جاري تحميل المستأجرين...</option>';
-
-    try {
-        const { data, error } = await supabase
-            .from('tenants')
-            .select('*')
-            .order('tenant_code');
-
-        if (error) throw error;
-
-        allTenants = data || [];
-
-        // Sort by numeric code (jc-01, jc-02, etc.)
-        allTenants.sort((a, b) => {
-            const numA = parseInt(String(a.tenant_code || '').replace(/\D/g, ''), 10) || 0;
-            const numB = parseInt(String(b.tenant_code || '').replace(/\D/g, ''), 10) || 0;
-            return numA - numB;
-        });
-
-        select.disabled = false;
-
-        if (allTenants.length === 0) {
-            select.innerHTML = '<option value="">❌ لا يوجد مستأجرون مسجلون</option>';
-            return;
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>مجمع جبري | تعديل مستأجر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #f7f4ec;
+            --card: rgba(255,255,255,0.72);
+            --text: #1f2937;
+            --muted: #7a7469;
+            --gold: #c9a46b;
+            --gold-deep: #b78e54;
+            --line: rgba(91,73,42,0.10);
+            --success: #159a6f;
+            --danger: #d14d4d;
+            --shadow: 0 18px 45px rgba(87,68,37,0.10);
         }
 
-        // ✅ Build dropdown options
-        let options = '<option value="">-- اختر مستأجر --</option>';
-        allTenants.forEach(t => {
-            const code = t.tenant_code || '';
-            const name = t.tenant_name || '';
-            options += `<option value="${code}">${code.toUpperCase()} — ${name}</option>`;
-        });
-        select.innerHTML = options;
+        * {
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
 
-    } catch (err) {
-        console.error('❌ Error loading tenants:', err);
-        select.disabled = false;
-        select.innerHTML = '<option value="">❌ حدث خطأ في تحميل المستأجرين</option>';
-    }
-}
+        body {
+            margin: 0;
+            color: var(--text);
+            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
+                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
 
-// ============================================================
-// 📋 LOAD SELECTED TENANT
-// ============================================================
-function loadTenant() {
-    const code = document.getElementById('tenant_select').value;
-    const panel = document.getElementById('edit_panel');
-    clearStatus();
+        .shell {
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-    if (!code) {
-        panel.style.display = 'none';
-        currentTenant = null;
-        return;
-    }
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 18px;
+        }
 
-    currentTenant = allTenants.find(t => t.tenant_code === code);
-    if (!currentTenant) {
-        panel.style.display = 'none';
-        return;
-    }
+        .chip-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+        }
 
-    fillForm(currentTenant);
-    panel.style.display = 'block';
-}
+        .chip-title {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            background: rgba(201,164,107,0.12);
+            border: 1px solid rgba(201,164,107,0.22);
+        }
 
-// ============================================================
-// 📝 FILL FORM
-// ============================================================
-function fillForm(t) {
-    document.getElementById('tenant_code').value = (t.tenant_code || '').toUpperCase();
-    document.getElementById('created_at').value = t.created_at
-        ? new Date(t.created_at).toLocaleDateString('en-GB')
-        : '—';
-    document.getElementById('tenant_name').value = t.tenant_name || '';
-    document.getElementById('shop_no').value = t.shop_no || '';
-    document.getElementById('phone').value = t.phone || '';
-    document.getElementById('annual_rent').value = t.annual_rent != null ? t.annual_rent : '';
-    document.getElementById('contract_date').value = t.contract_date || '';
-    document.getElementById('password').value = '';
-}
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
 
-// ============================================================
-// 🔄 RESET FORM
-// ============================================================
-function resetForm() {
-    if (currentTenant) {
-        fillForm(currentTenant);
-        clearStatus();
-    }
-}
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #8b6a3a;
+            padding-right: 4px;
+        }
 
-// ============================================================
-// 💾 UPDATE TENANT
-// ============================================================
-async function updateTenant() {
-    if (!currentTenant) {
-        showStatus('الرجاء اختيار مستأجر أولاً', 'error');
-        return;
-    }
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
 
-    const name = document.getElementById('tenant_name').value.trim();
-    const shop = document.getElementById('shop_no').value.trim();
-    let phone = document.getElementById('phone').value.trim();
-    const rent = document.getElementById('annual_rent').value.trim();
-    const contract = document.getElementById('contract_date').value;
-    const password = document.getElementById('password').value.trim();
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        }
 
-    if (!name) {
-        showStatus('الرجاء إدخال اسم المستأجر', 'error');
-        return;
-    }
-    if (!rent || parseFloat(rent) <= 0) {
-        showStatus('الرجاء إدخال إيجار سنوي صحيح', 'error');
-        return;
-    }
-    if (password && (password.length !== 4 || !/^\d+$/.test(password))) {
-        showStatus('كلمة المرور يجب أن تكون 4 أرقام', 'error');
-        return;
-    }
+        .field input[readonly] {
+            background: rgba(201,164,107,0.08);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
 
-    // Format phone number
-    if (phone) {
-        phone = phone.replace(/\D/g, '');
-        if (!phone.startsWith('962')) {
-            if (phone.startsWith('0')) {
-                phone = phone.substring(1);
+        .field small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.25s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+        }
+
+        .btn-soft {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: rgba(21, 154, 111, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(21, 154, 111, 0.18);
+        }
+
+        .status-msg.error {
+            display: block;
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
+        }
+
+        .back-home-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.22);
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--shadow);
+            color: var(--gold-deep);
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .back-home-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(201,164,107,0.12);
+        }
+
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
             }
-            phone = '962' + phone;
         }
-    }
 
-    const confirmed = confirm(`هل أنت متأكد من حفظ التعديلات على المستأجر ${currentTenant.tenant_code.toUpperCase()} — ${name}؟`);
-    if (!confirmed) return;
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
 
-    const updateData = {
-        tenant_name: name,
-        shop_no: shop || null,
-        phone: phone || null,
-        annual_rent: parseFloat(rent),
-        contract_date: contract || null
-    };
+    <div class="shell">
 
-    if (password) {
-        updateData.password = password;
-    }
+        <!-- ===== اختيار المستأجر ===== -->
+        <div class="panel">
+            <div class="chip-header">
+                <div class="chip-title">✏️ تعديل مستأجر</div>
+            </div>
 
-    try {
-        const { error } = await supabase
-            .from('tenants')
-            .update(updateData)
-            .eq('tenant_code', currentTenant.tenant_code);
+            <div class="field">
+                <label>اختر المستأجر</label>
+                <select id="tenant_select" onchange="loadTenant()">
+                    <option value="">-- اختر مستأجر --</option>
+                </select>
+            </div>
+        </div>
 
-        if (error) throw error;
+        <!-- ===== نموذج التعديل ===== -->
+        <div class="panel hidden" id="edit_panel">
+            <div class="chip-header">
+                <div class="chip-title">📝 بيانات المستأجر</div>
+            </div>
 
-        showStatus(`✅ تم تحديث بيانات المستأجر ${name} بنجاح!`, 'success');
+            <div id="status_msg" class="status-msg"></div>
 
-        // Update local copy
-        Object.assign(currentTenant, updateData);
-        
-        // Refresh dropdown
-        await loadTenantsList();
-        document.getElementById('tenant_select').value = currentTenant.tenant_code;
-        document.getElementById('password').value = '';
+            <form id="tenantForm" onsubmit="return false;">
 
-    } catch (err) {
-        console.error(err);
-        showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
-    }
-}
+                <div class="field">
+                    <label>كود المستأجر</label>
+                    <input type="text" id="tenant_code" readonly />
+                    <small>لا يمكن تعديل الكود</small>
+                </div>
 
-// ============================================================
-// 📢 SHOW STATUS
-// ============================================================
-function showStatus(msg, type) {
-    const el = document.getElementById('status_msg');
-    el.textContent = msg;
-    el.className = `status-msg ${type}`;
-    el.style.display = 'block';
-}
+                <div class="field">
+                    <label>تاريخ الإنشاء</label>
+                    <input type="text" id="created_at" readonly />
+                    <small>لا يمكن تعديل تاريخ الإنشاء</small>
+                </div>
 
-function clearStatus() {
-    const el = document.getElementById('status_msg');
-    el.className = 'status-msg';
-    el.style.display = 'none';
-}
+                <div class="field">
+                    <label>اسم المستأجر <span style="color:var(--danger);">*</span></label>
+                    <input type="text" id="tenant_name" placeholder="مثال: محمد أحمد" required />
+                </div>
 
-// ============================================================
-// 🔙 GO BACK
-// ============================================================
-function goBack() {
-    window.location.href = 'admin.html';
-}
+                <div class="field">
+                    <label>رقم المحل</label>
+                    <input type="text" id="shop_no" placeholder="مثال: 25" />
+                </div>
 
-// ============================================================
-// 🚀 LOAD PAGE
-// ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-    loadTenantsList();
-});
+                <div class="field">
+                    <label>رقم الجوال</label>
+                    <input type="tel" id="phone" placeholder="مثال: 0791234567" />
+                    <small>سيتحول تلقائياً إلى 962...</small>
+                </div>
+
+                <div class="field">
+                    <label>الإيجار السنوي <span style="color:var(--danger);">*</span></label>
+                    <input type="number" id="annual_rent" placeholder="مثال: 1836" required />
+                </div>
+
+                <div class="field">
+                    <label>تاريخ العقد</label>
+                    <input type="date" id="contract_date" />
+                    <small>تعديل تاريخ العقد لا يعيد احتساب السنوات السابقة</small>
+                </div>
+
+                <div class="field">
+                    <label>كلمة المرور (اختياري)</label>
+                    <input type="password" id="password" placeholder="اتركها فارغة للإبقاء على الحالية" maxlength="4" inputmode="numeric" />
+                    <small>4 أرقام — اتركها فارغة إذا لم ترغب بتغييرها</small>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-gold" onclick="updateTenant()">💾 حفظ التعديلات</button>
+                    <button class="btn btn-soft" type="button" onclick="resetForm()">🔄 استعادة البيانات</button>
+                </div>
+
+            </form>
+        </div>
+
+        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // 🔥 SUPABASE CLIENT
+        // ============================================================
+        const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // ============================================================
+        // 🔐 SESSION CHECK
+        // ============================================================
+        if (localStorage.getItem('jabri_admin_session') !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        // ============================================================
+        // 📋 GLOBAL VARIABLES
+        // ============================================================
+        let allTenants = [];
+        let currentTenant = null;
+
+        // ============================================================
+        // 📋 LOAD TENANTS LIST
+        // ============================================================
+        async function loadTenantsList() {
+            const select = document.getElementById('tenant_select');
+            if (!select) return;
+
+            select.disabled = true;
+            select.innerHTML = '<option value="">⏳ جاري تحميل المستأجرين...</option>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('tenants')
+                    .select('*')
+                    .order('tenant_code');
+
+                if (error) throw error;
+
+                allTenants = data || [];
+
+                // Sort by numeric code (jc-01, jc-02, etc.)
+                allTenants.sort((a, b) => {
+                    const numA = parseInt(String(a.tenant_code || '').replace(/\D/g, ''), 10) || 0;
+                    const numB = parseInt(String(b.tenant_code || '').replace(/\D/g, ''), 10) || 0;
+                    return numA - numB;
+                });
+
+                select.disabled = false;
+
+                if (allTenants.length === 0) {
+                    select.innerHTML = '<option value="">❌ لا يوجد مستأجرون مسجلون</option>';
+                    return;
+                }
+
+                // ✅ Build dropdown options with proper <option> tags
+                let options = '<option value="">-- اختر مستأجر --</option>';
+                allTenants.forEach(t => {
+                    const code = t.tenant_code || '';
+                    const name = t.tenant_name || '';
+                    options += `<option value="${code}">${code.toUpperCase()} — ${name}</option>`;
+                });
+                select.innerHTML = options;
+
+            } catch (err) {
+                console.error('❌ Error loading tenants:', err);
+                select.disabled = false;
+                select.innerHTML = '<option value="">❌ حدث خطأ في تحميل المستأجرين</option>';
+            }
+        }
+
+        // ============================================================
+        // 📋 LOAD SELECTED TENANT
+        // ============================================================
+        function loadTenant() {
+            const code = document.getElementById('tenant_select').value;
+            const panel = document.getElementById('edit_panel');
+            clearStatus();
+
+            if (!code) {
+                panel.classList.add('hidden');
+                currentTenant = null;
+                return;
+            }
+
+            currentTenant = allTenants.find(t => t.tenant_code === code);
+            if (!currentTenant) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            fillForm(currentTenant);
+            panel.classList.remove('hidden');
+        }
+
+        // ============================================================
+        // 📝 FILL FORM
+        // ============================================================
+        function fillForm(t) {
+            document.getElementById('tenant_code').value = (t.tenant_code || '').toUpperCase();
+            document.getElementById('created_at').value = t.created_at
+                ? new Date(t.created_at).toLocaleDateString('en-GB')
+                : '—';
+            document.getElementById('tenant_name').value = t.tenant_name || '';
+            document.getElementById('shop_no').value = t.shop_no || '';
+            document.getElementById('phone').value = t.phone || '';
+            document.getElementById('annual_rent').value = t.annual_rent != null ? t.annual_rent : '';
+            document.getElementById('contract_date').value = t.contract_date || '';
+            document.getElementById('password').value = '';
+        }
+
+        // ============================================================
+        // 🔄 RESET FORM
+        // ============================================================
+        function resetForm() {
+            if (currentTenant) {
+                fillForm(currentTenant);
+                clearStatus();
+            }
+        }
+
+        // ============================================================
+        // 💾 UPDATE TENANT
+        // ============================================================
+        async function updateTenant() {
+            if (!currentTenant) {
+                showStatus('الرجاء اختيار مستأجر أولاً', 'error');
+                return;
+            }
+
+            const name = document.getElementById('tenant_name').value.trim();
+            const shop = document.getElementById('shop_no').value.trim();
+            let phone = document.getElementById('phone').value.trim();
+            const rent = document.getElementById('annual_rent').value.trim();
+            const contract = document.getElementById('contract_date').value;
+            const password = document.getElementById('password').value.trim();
+
+            // Validation
+            if (!name) {
+                showStatus('الرجاء إدخال اسم المستأجر', 'error');
+                return;
+            }
+            if (!rent || parseFloat(rent) <= 0) {
+                showStatus('الرجاء إدخال إيجار سنوي صحيح', 'error');
+                return;
+            }
+            if (password && (password.length !== 4 || !/^\d+$/.test(password))) {
+                showStatus('كلمة المرور يجب أن تكون 4 أرقام', 'error');
+                return;
+            }
+
+            // Format phone number
+            if (phone) {
+                phone = phone.replace(/\D/g, '');
+                if (!phone.startsWith('962')) {
+                    if (phone.startsWith('0')) {
+                        phone = phone.substring(1);
+                    }
+                    phone = '962' + phone;
+                }
+            }
+
+            // Confirm before saving
+            const confirmed = confirm(`هل أنت متأكد من حفظ التعديلات على المستأجر ${currentTenant.tenant_code.toUpperCase()} — ${name}؟`);
+            if (!confirmed) return;
+
+            const updateData = {
+                tenant_name: name,
+                shop_no: shop || null,
+                phone: phone || null,
+                annual_rent: parseFloat(rent),
+                contract_date: contract || null
+            };
+
+            if (password) {
+                updateData.password = password;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('tenants')
+                    .update(updateData)
+                    .eq('tenant_code', currentTenant.tenant_code);
+
+                if (error) throw error;
+
+                showStatus(`✅ تم تحديث بيانات المستأجر ${name} بنجاح!`, 'success');
+
+                // Update local copy
+                Object.assign(currentTenant, updateData);
+
+                // Refresh dropdown to reflect changes
+                await loadTenantsList();
+                document.getElementById('tenant_select').value = currentTenant.tenant_code;
+                document.getElementById('password').value = '';
+
+            } catch (err) {
+                console.error('❌ Update error:', err);
+                showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // 📢 SHOW STATUS
+        // ============================================================
+        function showStatus(msg, type) {
+            const el = document.getElementById('status_msg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
+        function clearStatus() {
+            const el = document.getElementById('status_msg');
+            el.className = 'status-msg';
+            el.style.display = 'none';
+        }
+
+        // ============================================================
+        // 🔙 GO BACK
+        // ============================================================
+        function goBack() {
+            window.location.href = 'admin.html';
+        }
+
+        // ============================================================
+        // 🚀 LOAD PAGE
+        // ============================================================
+        window.addEventListener('DOMContentLoaded', function() {
+            loadTenantsList();
+        });
+    </script>
+
+</body>
+</html>
