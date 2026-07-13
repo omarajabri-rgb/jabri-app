@@ -794,6 +794,11 @@
             color:#8b6a3a;
             padding-left:4px;
         }
+        .toggle-group{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+        }
         .discount-toggle input[type="checkbox"]{
             width:15px;
             height:15px;
@@ -1050,6 +1055,7 @@
                 </button>
                 <div class="submenu">
                     <button class="menu-item" onclick="location.href='add_tenant.html'">➕ إضافة مستأجر جديد</button>
+                    <button class="menu-item" onclick="location.href='edit_tenant.html'">✏️ تعديل مستأجر</button>
                 </div>
             </div>
 
@@ -1273,10 +1279,16 @@
                         <div class="field">
                             <div class="receipt-label-row">
                                 <label>رقم السند</label>
-                                <label class="discount-toggle" for="tx_discount">
-                                    <input type="checkbox" id="tx_discount" onchange="toggleDiscountMode(this.checked)">
-                                    <span>خصم</span>
-                                </label>
+                                <div class="toggle-group">
+                                    <label class="discount-toggle" for="tx_discount">
+                                        <input type="checkbox" id="tx_discount" onchange="toggleDiscountMode(this.checked)">
+                                        <span>خصم</span>
+                                    </label>
+                                    <label class="discount-toggle" for="tx_settlement">
+                                        <input type="checkbox" id="tx_settlement" onchange="toggleSettlementMode(this.checked)">
+                                        <span>تسوية حساب</span>
+                                    </label>
+                                </div>
                             </div>
                             <input type="text" id="tx_receipt" placeholder="رقم السند">
                         </div>
@@ -1346,10 +1358,16 @@
                 <div class="field">
                     <div class="receipt-label-row">
                         <label>رقم السند</label>
-                        <label class="discount-toggle" for="edit_tx_discount">
-                            <input type="checkbox" id="edit_tx_discount" onchange="toggleEditDiscountMode(this.checked)">
-                            <span>خصم</span>
-                        </label>
+                        <div class="toggle-group">
+                            <label class="discount-toggle" for="edit_tx_discount">
+                                <input type="checkbox" id="edit_tx_discount" onchange="toggleEditDiscountMode(this.checked)">
+                                <span>خصم</span>
+                            </label>
+                            <label class="discount-toggle" for="edit_tx_settlement">
+                                <input type="checkbox" id="edit_tx_settlement" onchange="toggleEditSettlementMode(this.checked)">
+                                <span>تسوية حساب</span>
+                            </label>
+                        </div>
                     </div>
                     <input type="text" id="edit_tx_receipt" placeholder="رقم السند">
                 </div>
@@ -1610,10 +1628,12 @@ try{
         };
 
         const DISCOUNT_RECEIPT_VALUE = 'خصم';
+        const SETTLEMENT_RECEIPT_VALUE = 'تسوية حساب';
 
         function generateNextReceiptNumber() {
-    // 🛡️ لا تلمس حقل رقم السند أثناء وضع الخصم
+    // 🛡️ لا تلمس حقل رقم السند أثناء وضع الخصم أو تسوية الحساب
     if (document.getElementById('tx_discount')?.checked) return;
+    if (document.getElementById('tx_settlement')?.checked) return;
 
     const numericReceipts = allTransactions
         .map(tx => parseInt(String(tx.receipt_no || '').replace(/\D/g, '')))
@@ -1633,12 +1653,20 @@ try{
 
         // ===================== 🏷️ DISCOUNT MODE (خصم) =====================
         let savedReceiptBeforeDiscount = '';
+        let savedReceiptBeforeSettlement = '';
+        let savedDescBeforeSettlement = '';
 
         function toggleDiscountMode(checked){
             const receiptEl = document.getElementById('tx_receipt');
             if(!receiptEl) return;
 
             if(checked){
+                // ⚠️ لا يجوز تفعيل الخصم وتسوية الحساب معاً
+                const settlementEl = document.getElementById('tx_settlement');
+                if(settlementEl?.checked){
+                    settlementEl.checked = false;
+                    toggleSettlementMode(false);
+                }
                 // احفظ الرقم التلقائي الحالي لاستعادته عند إلغاء الخصم
                 savedReceiptBeforeDiscount = receiptEl.value;
                 receiptEl.value = DISCOUNT_RECEIPT_VALUE;
@@ -1650,20 +1678,60 @@ try{
             }
         }
 
+        // ===================== 🧾 SETTLEMENT MODE (تسوية حساب) =====================
+        // يعيد استخدام نفس آلية الخصم — نفس التفعيل/التعطيل لحقل رقم السند
+        function toggleSettlementMode(checked){
+            const receiptEl = document.getElementById('tx_receipt');
+            const descEl = document.getElementById('tx_desc');
+            if(!receiptEl) return;
+
+            if(checked){
+                // ⚠️ لا يجوز تفعيل الخصم وتسوية الحساب معاً
+                const discountEl = document.getElementById('tx_discount');
+                if(discountEl?.checked){
+                    discountEl.checked = false;
+                    toggleDiscountMode(false);
+                }
+                // احفظ القيم الحالية لاستعادتها عند إلغاء التسوية
+                savedReceiptBeforeSettlement = receiptEl.value;
+                savedDescBeforeSettlement = descEl ? descEl.value : '';
+                receiptEl.value = SETTLEMENT_RECEIPT_VALUE;
+                receiptEl.readOnly = true;
+                if(descEl) descEl.value = SETTLEMENT_RECEIPT_VALUE; // قابل للتعديل
+            } else {
+                receiptEl.readOnly = false;
+                receiptEl.value = savedReceiptBeforeSettlement || '';
+                if(!receiptEl.value) generateNextReceiptNumber();
+                if(descEl && descEl.value === SETTLEMENT_RECEIPT_VALUE){
+                    descEl.value = savedDescBeforeSettlement || 'دفعة من الايجار';
+                }
+                savedReceiptBeforeSettlement = '';
+                savedDescBeforeSettlement = '';
+            }
+        }
+
         function isDiscountTransaction(tx){
             return String(tx?.receipt_no || '').trim() === DISCOUNT_RECEIPT_VALUE;
+        }
+
+        function isSettlementTransaction(tx){
+            return String(tx?.receipt_no || '').trim() === SETTLEMENT_RECEIPT_VALUE;
         }
 
         const clearTransactionForm = () => {
             const d = document.getElementById('tx_date');
             if(d) d.valueAsDate = new Date();
 
-            // إعادة ضبط وضع الخصم إلى الوضع الطبيعي
+            // إعادة ضبط وضع الخصم والتسوية إلى الوضع الطبيعي
             const discountEl = document.getElementById('tx_discount');
             if(discountEl) discountEl.checked = false;
+            const settlementEl = document.getElementById('tx_settlement');
+            if(settlementEl) settlementEl.checked = false;
             const receiptEl = document.getElementById('tx_receipt');
             if(receiptEl) receiptEl.readOnly = false;
             savedReceiptBeforeDiscount = '';
+            savedReceiptBeforeSettlement = '';
+            savedDescBeforeSettlement = '';
 
             generateNextReceiptNumber();
 
@@ -2504,9 +2572,12 @@ setMoodClass(
             const desc = document.getElementById('tx_desc').value.trim();
             const amount = toNumber(document.getElementById('tx_amount').value);
             const isDiscount = !!document.getElementById('tx_discount')?.checked;
+            const isSettlement = !!document.getElementById('tx_settlement')?.checked;
             const receipt = isDiscount
                 ? DISCOUNT_RECEIPT_VALUE
-                : String(document.getElementById('tx_receipt').value || '').trim();
+                : (isSettlement
+                    ? SETTLEMENT_RECEIPT_VALUE
+                    : String(document.getElementById('tx_receipt').value || '').trim());
             const btn = document.getElementById('save_tx_btn');
 
             if(!code) return alert('اختر المستأجر');
@@ -2521,8 +2592,8 @@ setMoodClass(
                 btn.innerText = 'جاري الحفظ...';
                 hideStatus();
 
-                // ✅ فحص تكرار رقم السند — يُتجاوز فقط لحركات الخصم
-                if(!isDiscount){
+                // ✅ فحص تكرار رقم السند — يُتجاوز فقط لحركات الخصم وتسوية الحساب
+                if(!isDiscount && !isSettlement){
                     const { data: exist } = await supabaseClient
                         .from('tenant_transactions')
                         .select('id')
@@ -3051,6 +3122,8 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
         /* ===================== ✏️ EDIT TRANSACTION (دفعات وخصومات) ===================== */
         let editingTx = null;
         let savedEditReceiptBeforeDiscount = '';
+        let savedEditReceiptBeforeSettlement = '';
+        let savedEditDescBeforeSettlement = '';
 
         const txEscapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -3078,13 +3151,14 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
 
             body.innerHTML = rows.map(t => {
                 const disc = isDiscountTransaction(t);
+                const settle = isSettlementTransaction(t);
                 return `
                     <tr>
                         <td>${t.date ? new Date(t.date).toLocaleDateString('en-GB') : '—'}</td>
                         <td>${txEscapeHtml(t.receipt_no || '—')}</td>
                         <td>${txEscapeHtml(t.description || '—')}</td>
                         <td>${formatMoney(toNumber(t.credit))}</td>
-                        <td><span class="tx-type-pill ${disc ? 'discount' : ''}">${disc ? 'خصم' : 'دفعة'}</span></td>
+                        <td><span class="tx-type-pill ${(disc || settle) ? 'discount' : ''}">${disc ? 'خصم' : (settle ? 'تسوية حساب' : 'دفعة')}</span></td>
                         <td><button class="tx-edit-btn" onclick="openEditTxModal('${t.id}')">✏️ تعديل</button></td>
                     </tr>
                 `;
@@ -3100,16 +3174,20 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
 
             editingTx = tx;
             savedEditReceiptBeforeDiscount = '';
+            savedEditReceiptBeforeSettlement = '';
+            savedEditDescBeforeSettlement = '';
 
             const disc = isDiscountTransaction(tx);
+            const settle = isSettlementTransaction(tx);
             document.getElementById('edit_tx_date').value = String(tx.date || '').slice(0, 10);
             document.getElementById('edit_tx_desc').value = tx.description || '';
             document.getElementById('edit_tx_amount').value = toNumber(tx.credit);
             document.getElementById('edit_tx_discount').checked = disc;
+            document.getElementById('edit_tx_settlement').checked = settle;
 
             const rEl = document.getElementById('edit_tx_receipt');
             rEl.value = tx.receipt_no || '';
-            rEl.readOnly = disc;
+            rEl.readOnly = disc || settle;
 
             document.getElementById('edit_tx_overlay').classList.add('active');
         }
@@ -3117,6 +3195,8 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
         function closeEditTxModal(){
             editingTx = null;
             savedEditReceiptBeforeDiscount = '';
+            savedEditReceiptBeforeSettlement = '';
+            savedEditDescBeforeSettlement = '';
             document.getElementById('edit_tx_overlay').classList.remove('active');
         }
 
@@ -3125,6 +3205,12 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
             if(!el) return;
 
             if(checked){
+                // ⚠️ لا يجوز تفعيل الخصم وتسوية الحساب معاً
+                const settlementEl = document.getElementById('edit_tx_settlement');
+                if(settlementEl?.checked){
+                    settlementEl.checked = false;
+                    toggleEditSettlementMode(false);
+                }
                 if(el.value !== DISCOUNT_RECEIPT_VALUE) savedEditReceiptBeforeDiscount = el.value;
                 el.value = DISCOUNT_RECEIPT_VALUE;
                 el.readOnly = true;
@@ -3133,6 +3219,38 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
                 el.value = (savedEditReceiptBeforeDiscount && savedEditReceiptBeforeDiscount !== DISCOUNT_RECEIPT_VALUE)
                     ? savedEditReceiptBeforeDiscount
                     : '';
+                // ⚠️ لا نستهلك رقم سند تلقائياً هنا — على الإدارة إدخال رقم سند صالح
+            }
+        }
+
+        // 🧾 وضع تسوية الحساب في نافذة التعديل — نفس آلية الخصم
+        function toggleEditSettlementMode(checked){
+            const el = document.getElementById('edit_tx_receipt');
+            const descEl = document.getElementById('edit_tx_desc');
+            if(!el) return;
+
+            if(checked){
+                // ⚠️ لا يجوز تفعيل الخصم وتسوية الحساب معاً
+                const discountEl = document.getElementById('edit_tx_discount');
+                if(discountEl?.checked){
+                    discountEl.checked = false;
+                    toggleEditDiscountMode(false);
+                }
+                if(el.value !== SETTLEMENT_RECEIPT_VALUE) savedEditReceiptBeforeSettlement = el.value;
+                if(descEl && descEl.value !== SETTLEMENT_RECEIPT_VALUE) savedEditDescBeforeSettlement = descEl.value;
+                el.value = SETTLEMENT_RECEIPT_VALUE;
+                el.readOnly = true;
+                if(descEl) descEl.value = SETTLEMENT_RECEIPT_VALUE; // قابل للتعديل
+            } else {
+                el.readOnly = false;
+                el.value = (savedEditReceiptBeforeSettlement && savedEditReceiptBeforeSettlement !== SETTLEMENT_RECEIPT_VALUE)
+                    ? savedEditReceiptBeforeSettlement
+                    : '';
+                if(descEl && descEl.value === SETTLEMENT_RECEIPT_VALUE){
+                    descEl.value = (savedEditDescBeforeSettlement && savedEditDescBeforeSettlement !== SETTLEMENT_RECEIPT_VALUE)
+                        ? savedEditDescBeforeSettlement
+                        : '';
+                }
                 // ⚠️ لا نستهلك رقم سند تلقائياً هنا — على الإدارة إدخال رقم سند صالح
             }
         }
@@ -3252,9 +3370,12 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
             const desc = document.getElementById('edit_tx_desc').value.trim();
             const amount = toNumber(document.getElementById('edit_tx_amount').value);
             const isDiscount = document.getElementById('edit_tx_discount').checked;
+            const isSettlement = document.getElementById('edit_tx_settlement').checked;
             const receipt = isDiscount
                 ? DISCOUNT_RECEIPT_VALUE
-                : String(document.getElementById('edit_tx_receipt').value || '').trim();
+                : (isSettlement
+                    ? SETTLEMENT_RECEIPT_VALUE
+                    : String(document.getElementById('edit_tx_receipt').value || '').trim());
 
             if(!date) return alert('أدخل التاريخ');
             if(!desc) return alert('أدخل البيان');
@@ -3280,7 +3401,7 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
                 if(!(toNumber(freshTx.credit) > 0)) throw new Error('هذه الحركة غير قابلة للتعديل');
 
                 // ✅ فحص تكرار رقم السند مع استثناء الحركة الحالية — للدفعات العادية فقط
-                if(!isDiscount){
+                if(!isDiscount && !isSettlement){
                     const { data: exist, error: dupErr } = await supabaseClient
                         .from('tenant_transactions')
                         .select('id')
