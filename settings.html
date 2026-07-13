@@ -187,6 +187,33 @@
             color: var(--gold-deep);
         }
 
+        .back-home-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,164,107,0.22);
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--shadow);
+            color: var(--gold-deep);
+            font-size: 14px;
+            font-weight: 900;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .back-home-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(201,164,107,0.12);
+        }
+
         @media (max-width: 600px) {
             .btn {
                 width: 100%;
@@ -253,7 +280,7 @@
             </form>
         </div>
 
-        <a class="back-link" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</a>
+        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
 
     </div>
 
