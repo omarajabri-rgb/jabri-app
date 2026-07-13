@@ -317,18 +317,41 @@
 
         // تحميل جميع المستأجرين
         async function loadTenantsList() {
-            const { data, error } = await supabase
-                .from('tenants')
-                .select('tenant_code, tenant_name, shop_no, phone, annual_rent, contract_date, created_at')
-                .order('tenant_code', { ascending: true });
+            const select = document.getElementById('tenant_select');
+            if (!select) return;
 
-            if (error) {
-                showStatus(`❌ حدث خطأ في تحميل المستأجرين: ${error.message}`, 'error');
-                return;
+            select.disabled = true;
+            select.innerHTML = '<option value="">⏳ جاري تحميل المستأجرين...</option>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('tenants')
+                    .select('*');
+
+                if (error) throw error;
+
+                allTenants = data || [];
+
+                // ترتيب رقمي حسب الجزء الرقمي من الكود: JC-01, JC-02, JC-03, JC-10, JC-21
+                allTenants.sort((a, b) => {
+                    const numA = parseInt(String(a.tenant_code || '').replace(/\D/g, ''), 10) || 0;
+                    const numB = parseInt(String(b.tenant_code || '').replace(/\D/g, ''), 10) || 0;
+                    return numA - numB;
+                });
+
+                select.disabled = false;
+
+                if (!allTenants.length) {
+                    select.innerHTML = '<option value="">لا يوجد مستأجرون مسجلون</option>';
+                    return;
+                }
+
+                renderTenantOptions(allTenants);
+            } catch (err) {
+                console.error('خطأ في تحميل المستأجرين:', err);
+                select.disabled = false;
+                select.innerHTML = '<option value="">حدث خطأ في تحميل المستأجرين</option>';
             }
-
-            allTenants = data || [];
-            renderTenantOptions(allTenants);
         }
 
         function renderTenantOptions(list) {
@@ -481,7 +504,9 @@
             window.location.href = 'admin.html';
         }
 
-        window.onload = loadTenantsList;
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTenantsList();
+        });
     </script>
 
 </body>
