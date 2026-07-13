@@ -227,12 +227,6 @@
             </div>
 
             <div class="field">
-                <label>🔍 بحث بالكود أو الاسم</label>
-                <input type="text" id="tenant_search" placeholder="مثال: JC-01 أو محمد" oninput="filterTenants()" />
-                <small>اكتب كود المستأجر أو اسمه لتصفية القائمة</small>
-            </div>
-
-            <div class="field">
                 <label>اختر المستأجر</label>
                 <select id="tenant_select" onchange="loadTenant()">
                     <option value="">-- اختر مستأجر --</option>
@@ -350,20 +344,6 @@
             if (currentVal && list.some(t => t.tenant_code === currentVal)) {
                 select.value = currentVal;
             }
-        }
-
-        // تصفية حسب الكود أو الاسم
-        function filterTenants() {
-            const q = document.getElementById('tenant_search').value.trim().toLowerCase();
-            if (!q) {
-                renderTenantOptions(allTenants);
-                return;
-            }
-            const filtered = allTenants.filter(t =>
-                t.tenant_code.toLowerCase().includes(q) ||
-                (t.tenant_name || '').toLowerCase().includes(q)
-            );
-            renderTenantOptions(filtered);
         }
 
         // تحميل بيانات المستأجر المختار
