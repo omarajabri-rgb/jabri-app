@@ -137,12 +137,6 @@
             color: var(--text);
         }
 
-        .btn-danger {
-            background: rgba(209, 77, 77, 0.12);
-            color: var(--danger);
-            border: 1px solid rgba(209, 77, 77, 0.18);
-        }
-
         .btn-group {
             display: flex;
             gap: 10px;
@@ -177,21 +171,6 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            color: var(--muted);
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            color: var(--gold-deep);
-        }
-
         .back-home-btn {
             display: flex;
             align-items: center;
@@ -208,7 +187,6 @@
             color: var(--gold-deep);
             font-size: 14px;
             font-weight: 900;
-            font-family: 'Tajawal', sans-serif;
             cursor: pointer;
             text-decoration: none;
             transition: 0.25s ease;
@@ -290,17 +268,24 @@
     </div>
 
     <script>
+        // ============================================================
+        // 🔥 SUPABASE CLIENT
+        // ============================================================
         const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // التحقق من الجلسة
+        // ============================================================
+        // 🔐 SESSION CHECK
+        // ============================================================
         const session = localStorage.getItem('jabri_admin_session');
         if (session !== 'active') {
             window.location.href = 'admin-login.html';
         }
 
-        // دالة لتوليد كود المستأجر التالي
+        // ============================================================
+        // 📋 GENERATE TENANT CODE
+        // ============================================================
         async function generateTenantCode() {
             const { data, error } = await supabase
                 .from('tenants')
@@ -318,13 +303,17 @@
             return `jc-${String(nextNum).padStart(2, '0')}`;
         }
 
-        // تحميل الكود عند فتح الصفحة
+        // ============================================================
+        // 🚀 LOAD PAGE
+        // ============================================================
         window.onload = async function() {
             const code = await generateTenantCode();
             document.getElementById('tenant_code').value = code;
         };
 
-        // تنسيق رقم الجوال
+        // ============================================================
+        // 📞 FORMAT PHONE NUMBER
+        // ============================================================
         document.getElementById('phone').addEventListener('input', function() {
             let val = this.value.replace(/\D/g, '');
             if (val.startsWith('0')) {
@@ -333,7 +322,9 @@
             this.value = val;
         });
 
-        // حفظ المستأجر
+        // ============================================================
+        // 💾 SAVE TENANT
+        // ============================================================
         async function saveTenant() {
             const name = document.getElementById('tenant_name').value.trim();
             const shop = document.getElementById('shop_no').value.trim();
@@ -342,7 +333,7 @@
             const contract = document.getElementById('contract_date').value;
             const password = document.getElementById('password').value.trim();
 
-            // التحقق من الحقول الإلزامية
+            // 🔍 Validation
             if (!name) {
                 showStatus('الرجاء إدخال اسم المستأجر', 'error');
                 return;
@@ -356,7 +347,7 @@
                 return;
             }
 
-            // تنسيق رقم الجوال
+            // 📞 Format phone number
             if (phone) {
                 phone = phone.replace(/\D/g, '');
                 if (phone.startsWith('0')) {
@@ -367,11 +358,27 @@
 
             const code = document.getElementById('tenant_code').value;
 
+            // ✅ Confirmation Box before saving
+            const confirmSave = confirm(
+                `⚠️ تأكيد إضافة مستأجر جديد\n\n` +
+                `الاسم: ${name}\n` +
+                `الكود: ${code}\n` +
+                `المحل: ${shop || 'غير محدد'}\n` +
+                `الجوال: ${phone || 'غير محدد'}\n` +
+                `الإيجار السنوي: ${rent} دينار\n\n` +
+                `هل أنت متأكد من الحفظ؟`
+            );
+
+            if (!confirmSave) {
+                showStatus('❌ تم إلغاء الإضافة', 'error');
+                return;
+            }
+
             try {
-                // 1. إضافة المستأجر
+                // 💾 Insert tenant
                 const { data: tenantData, error: tenantError } = await supabase
                     .from('tenants')
-                    .insert([{
+                    .insert({
                         tenant_code: code,
                         tenant_name: name,
                         shop_no: shop || null,
@@ -380,40 +387,66 @@
                         contract_date: contract || null,
                         password: password,
                         created_at: new Date().toISOString()
-                    }])
+                    })
                     .select()
                     .single();
 
-                if (tenantError) throw tenantError;
+                if (tenantError) {
+                    console.error('❌ Tenant insert error:', tenantError);
+                    throw tenantError;
+                }
 
-                // 2. إنشاء الملخص السنوي للسنة الحالية
+                console.log('✅ Tenant inserted:', tenantData);
+
+                // 📊 Insert yearly summary
                 const year = new Date().getFullYear();
                 const { error: summaryError } = await supabase
                     .from('tenant_yearly_summary')
-                    .insert([{
+                    .insert({
                         tenant_code: code,
                         year: year,
                         opening_balance: 0,
                         total_debit: parseFloat(rent),
                         total_credit: 0,
                         final_balance: parseFloat(rent)
-                    }]);
+                    });
 
-                if (summaryError) throw summaryError;
+                if (summaryError) {
+                    console.error('❌ Summary insert error:', summaryError);
+                    throw summaryError;
+                }
 
+                console.log('✅ Summary inserted for year:', year);
+
+                // ✅ Success message on page
                 showStatus(`✅ تم إضافة المستأجر ${name} بنجاح!`, 'success');
+
+                // ✅ Success Alert Box
+                alert(
+                    `✅ تم إضافة المستأجر بنجاح!\n\n` +
+                    `الاسم: ${name}\n` +
+                    `الكود: ${code}\n` +
+                    `الإيجار السنوي: ${rent} دينار\n` +
+                    `السنة: ${year}`
+                );
+
+                // 🧹 Clear form
                 clearForm();
 
-                // إعادة توليد الكود
+                // 🔄 Generate new code
                 const newCode = await generateTenantCode();
                 document.getElementById('tenant_code').value = newCode;
 
             } catch (err) {
-                console.error(err);
+                console.error('❌ Error:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
+                alert(`❌ حدث خطأ أثناء الإضافة:\n${err.message}`);
             }
         }
 
+        // ============================================================
+        // 🧹 CLEAR FORM
+        // ============================================================
         function clearForm() {
             document.getElementById('tenant_name').value = '';
             document.getElementById('shop_no').value = '';
@@ -425,6 +458,9 @@
             document.getElementById('status_msg').style.display = 'none';
         }
 
+        // ============================================================
+        // 📢 SHOW STATUS
+        // ============================================================
         function showStatus(msg, type) {
             const el = document.getElementById('status_msg');
             el.textContent = msg;
@@ -432,6 +468,9 @@
             el.style.display = 'block';
         }
 
+        // ============================================================
+        // 🔙 GO BACK
+        // ============================================================
         function goBack() {
             window.location.href = 'admin.html';
         }
