@@ -2508,12 +2508,11 @@ setMoodClass(
     }
 
     // 2) Create new yearly summary only if it truly doesn't exist
-    const prev = getPreviousSummary(tenant.tenant_code, yearNum);
-
-    const openingBalance = prev ? toNumber(prev.final_balance) : 0;
+    // ✅ Method 1 (Excel): final_balance = total_debit - total_credit (opening balance NOT added)
+    const openingBalance = 0;
     const annualRent = toNumber(tenant.annual_rent);
     const totalCredit = 0;
-    const finalBalance = openingBalance + annualRent;
+    const finalBalance = annualRent - totalCredit;
 
     const { data, error } = await supabaseClient
         .from('tenant_yearly_summary')
@@ -3260,35 +3259,27 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
         async function recalcSummariesAfterEdit(tenant, creditDeltasByYear){
             const affectedYears = Object.keys(creditDeltasByYear).map(Number);
             if(!affectedYears.length) return;
-            const startYear = Math.min(...affectedYears);
 
             const { data: rows, error } = await supabaseClient
                 .from('tenant_yearly_summary')
                 .select('*')
                 .eq('tenant_code', tenant.tenant_code)
-                .order('year');
+                .in('year', affectedYears);
             if(error) throw error;
 
-            let prevFinal = null;
             for(const row of (rows || [])){
                 const y = Number(row.year);
-                if(y < startYear){
-                    prevFinal = toNumber(row.final_balance);
-                    continue;
-                }
-
                 const delta = toNumber(creditDeltasByYear[y] || 0);
-                // نفس معادلة النظام: final_balance = opening_balance + total_debit - total_credit
-                const ob = (prevFinal === null) ? toNumber(row.opening_balance) : roundMoney(prevFinal);
+                // ✅ Method 1 (Excel): final_balance = total_debit - total_credit
+                // كل سنة مستقلة — لا يوجد ترحيل رصيد بين السنوات
                 const tc = roundMoney(toNumber(row.total_credit) + delta);
                 const td = toNumber(row.total_debit);
-                const fb = roundMoney(ob + td - tc);
-                prevFinal = fb;
+                const fb = roundMoney(td - tc);
 
-                if(ob !== toNumber(row.opening_balance) || tc !== toNumber(row.total_credit) || fb !== toNumber(row.final_balance)){
+                if(tc !== toNumber(row.total_credit) || fb !== toNumber(row.final_balance)){
                     const { error: upErr } = await supabaseClient
                         .from('tenant_yearly_summary')
-                        .update({ opening_balance: ob, total_credit: tc, final_balance: fb })
+                        .update({ total_credit: tc, final_balance: fb })
                         .eq('tenant_code', tenant.tenant_code)
                         .eq('year', y);
                     if(upErr) throw upErr;
