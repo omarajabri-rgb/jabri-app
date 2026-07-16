@@ -1361,11 +1361,12 @@
 
         // ===== تحديث لوحة التحليل كاملة من نفس مجموعة البيانات =====
         function refreshExpenseDashboard() {
-            buildCategoryOptions();
-            renderExpenseSummaryCards();
-            renderCategoryChart();
-            renderMonthlyChart();
-            applyFilters();
+            // ✅ الجدول أولاً — حتى لو فشلت المخططات لا يتأثر عرض المصروفات
+            try { applyFilters(); } catch (err) { console.error('خطأ في عرض الجدول:', err); }
+            try { buildCategoryOptions(); } catch (err) { console.error('خطأ في بناء الفئات:', err); }
+            try { renderExpenseSummaryCards(); } catch (err) { console.error('خطأ في بطاقات الملخص:', err); }
+            try { renderCategoryChart(); } catch (err) { console.error('خطأ في مخطط الفئات:', err); }
+            try { renderMonthlyChart(); } catch (err) { console.error('خطأ في المخطط الشهري:', err); }
         }
 
         async function refreshAll() {
