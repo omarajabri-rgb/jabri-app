@@ -100,6 +100,12 @@
             box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
         }
 
+        .field input[readonly] {
+            background: rgba(201,164,107,0.08);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
         .field small {
             color: var(--muted);
             font-size: 11px;
@@ -171,6 +177,13 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
+        .status-msg.info {
+            display: block;
+            background: rgba(201, 164, 107, 0.12);
+            color: var(--gold-deep);
+            border: 1px solid rgba(201, 164, 107, 0.18);
+        }
+
         .back-home-btn {
             display: flex;
             align-items: center;
@@ -197,6 +210,19 @@
             background: rgba(201,164,107,0.12);
         }
 
+        .code-display {
+            background: rgba(201,164,107,0.08);
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--gold-deep);
+            text-align: center;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+
         @media (max-width: 600px) {
             .btn-group {
                 flex-direction: column;
@@ -219,8 +245,9 @@
 
                 <div class="field">
                     <label>كود المستأجر</label>
-                    <input type="text" id="tenant_code" readonly placeholder="سيتولد تلقائياً" />
-                    <small>سيتولد تلقائياً عند الحفظ</small>
+                    <div class="code-display" id="code_display">⏳ جاري التحميل...</div>
+                    <input type="hidden" id="tenant_code" />
+                    <small>سيتم إنشاء الكود تلقائياً</small>
                 </div>
 
                 <div class="field">
@@ -256,7 +283,7 @@
                 </div>
 
                 <div class="btn-group">
-                    <button class="btn btn-gold" onclick="saveTenant()">💾 حفظ المستأجر</button>
+                    <button class="btn btn-gold" onclick="saveTenant()" id="saveBtn">💾 حفظ المستأجر</button>
                     <button class="btn btn-soft" type="button" onclick="clearForm()">🔄 تفريغ</button>
                 </div>
 
@@ -284,32 +311,75 @@
         }
 
         // ============================================================
-        // 📋 GENERATE TENANT CODE
+        // 📋 GENERATE TENANT CODE (Find first available)
         // ============================================================
         async function generateTenantCode() {
+            console.log('🔍 generateTenantCode() called...');
+            
             const { data, error } = await supabase
                 .from('tenants')
                 .select('tenant_code')
-                .order('tenant_code', { ascending: false })
-                .limit(1);
+                .order('tenant_code', { ascending: true });
 
-            if (error || !data || data.length === 0) {
+            if (error) {
+                console.error('❌ Error fetching codes:', error);
                 return 'jc-01';
             }
 
-            const lastCode = data[0].tenant_code;
-            const num = parseInt(lastCode.replace('jc-', ''));
-            const nextNum = num + 1;
-            return `jc-${String(nextNum).padStart(2, '0')}`;
+            if (!data || data.length === 0) {
+                console.log('✅ No tenants found, starting with jc-01');
+                return 'jc-01';
+            }
+
+            console.log('📋 Existing codes:', data.map(t => t.tenant_code));
+
+            const existingNumbers = data
+                .map(t => parseInt(t.tenant_code.replace('jc-', '')))
+                .filter(n => !isNaN(n))
+                .sort((a, b) => a - b);
+
+            console.log('📊 Existing numbers:', existingNumbers);
+
+            let nextNum = 1;
+            for (let i = 0; i < existingNumbers.length; i++) {
+                if (existingNumbers[i] > nextNum) {
+                    break;
+                }
+                if (existingNumbers[i] === nextNum) {
+                    nextNum++;
+                }
+            }
+
+            const newCode = `jc-${String(nextNum).padStart(2, '0')}`;
+            console.log('✅ Generated code:', newCode);
+            return newCode;
         }
 
         // ============================================================
-        // 🚀 LOAD PAGE
+        // 🚀 LOAD PAGE - Generate and display code
         // ============================================================
         window.onload = async function() {
+            console.log('🚀 Page loaded, generating code...');
+            try {
+                const code = await generateTenantCode();
+                document.getElementById('tenant_code').value = code;
+                document.getElementById('code_display').textContent = code;
+                console.log('📋 Code set to:', code);
+            } catch (err) {
+                console.error('❌ Error generating code:', err);
+                document.getElementById('code_display').textContent = '❌ خطأ';
+            }
+        };
+
+        // ============================================================
+        // 🔄 REFRESH CODE BUTTON (Optional)
+        // ============================================================
+        async function refreshCode() {
             const code = await generateTenantCode();
             document.getElementById('tenant_code').value = code;
-        };
+            document.getElementById('code_display').textContent = code;
+            showStatus(`🔄 تم تحديث الكود إلى: ${code}`, 'info');
+        }
 
         // ============================================================
         // 📞 FORMAT PHONE NUMBER
@@ -326,23 +396,31 @@
         // 💾 SAVE TENANT
         // ============================================================
         async function saveTenant() {
+            console.log('💾 saveTenant() called...');
+            
             const name = document.getElementById('tenant_name').value.trim();
             const shop = document.getElementById('shop_no').value.trim();
             let phone = document.getElementById('phone').value.trim();
             const rent = document.getElementById('annual_rent').value.trim();
             const contract = document.getElementById('contract_date').value;
             const password = document.getElementById('password').value.trim();
+            const code = document.getElementById('tenant_code').value;
+
+            console.log('📋 Form Data:', { name, shop, phone, rent, contract, password, code });
 
             // 🔍 Validation
             if (!name) {
+                console.warn('⚠️ Name is empty');
                 showStatus('الرجاء إدخال اسم المستأجر', 'error');
                 return;
             }
             if (!rent || parseFloat(rent) <= 0) {
+                console.warn('⚠️ Rent is invalid:', rent);
                 showStatus('الرجاء إدخال إيجار سنوي صحيح', 'error');
                 return;
             }
             if (!password || password.length !== 4 || !/^\d+$/.test(password)) {
+                console.warn('⚠️ Password is invalid:', password);
                 showStatus('كلمة المرور يجب أن تكون 4 أرقام', 'error');
                 return;
             }
@@ -356,38 +434,50 @@
                 phone = '962' + phone;
             }
 
-            const code = document.getElementById('tenant_code').value;
+            console.log('📞 Formatted phone:', phone);
 
-            // ✅ Confirmation Box before saving
+            // ✅ Confirmation Box
             const confirmSave = confirm(
                 `⚠️ تأكيد إضافة مستأجر جديد\n\n` +
-                `الاسم: ${name}\n` +
-                `الكود: ${code}\n` +
-                `المحل: ${shop || 'غير محدد'}\n` +
-                `الجوال: ${phone || 'غير محدد'}\n` +
-                `الإيجار السنوي: ${rent} دينار\n\n` +
+                `📋 الكود: ${code}\n` +
+                `👤 الاسم: ${name}\n` +
+                `🏪 المحل: ${shop || 'غير محدد'}\n` +
+                `📞 الجوال: ${phone || 'غير محدد'}\n` +
+                `💰 الإيجار السنوي: ${rent} دينار\n\n` +
                 `هل أنت متأكد من الحفظ؟`
             );
 
             if (!confirmSave) {
+                console.log('❌ User cancelled save');
                 showStatus('❌ تم إلغاء الإضافة', 'error');
                 return;
             }
 
+            console.log('✅ User confirmed, saving...');
+
+            // Disable button to prevent double-click
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ جاري الحفظ...';
+
             try {
                 // 💾 Insert tenant
+                console.log('📤 Inserting tenant into Supabase...');
+                const insertData = {
+                    tenant_code: code,
+                    tenant_name: name,
+                    shop_no: shop || null,
+                    phone: phone || null,
+                    annual_rent: parseFloat(rent),
+                    contract_date: contract || null,
+                    password: password,
+                    created_at: new Date().toISOString()
+                };
+                console.log('📤 Insert data:', insertData);
+
                 const { data: tenantData, error: tenantError } = await supabase
                     .from('tenants')
-                    .insert({
-                        tenant_code: code,
-                        tenant_name: name,
-                        shop_no: shop || null,
-                        phone: phone || null,
-                        annual_rent: parseFloat(rent),
-                        contract_date: contract || null,
-                        password: password,
-                        created_at: new Date().toISOString()
-                    })
+                    .insert(insertData)
                     .select()
                     .single();
 
@@ -396,11 +486,13 @@
                     throw tenantError;
                 }
 
-                console.log('✅ Tenant inserted:', tenantData);
+                console.log('✅ Tenant inserted successfully:', tenantData);
 
                 // 📊 Insert yearly summary
                 const year = new Date().getFullYear();
-                const { error: summaryError } = await supabase
+                console.log('📊 Inserting yearly summary for year:', year);
+                
+                const { data: summaryData, error: summaryError } = await supabase
                     .from('tenant_yearly_summary')
                     .insert({
                         tenant_code: code,
@@ -409,14 +501,16 @@
                         total_debit: parseFloat(rent),
                         total_credit: 0,
                         final_balance: parseFloat(rent)
-                    });
+                    })
+                    .select()
+                    .single();
 
                 if (summaryError) {
                     console.error('❌ Summary insert error:', summaryError);
                     throw summaryError;
                 }
 
-                console.log('✅ Summary inserted for year:', year);
+                console.log('✅ Summary inserted successfully:', summaryData);
 
                 // ✅ Success message on page
                 showStatus(`✅ تم إضافة المستأجر ${name} بنجاح!`, 'success');
@@ -424,10 +518,10 @@
                 // ✅ Success Alert Box
                 alert(
                     `✅ تم إضافة المستأجر بنجاح!\n\n` +
-                    `الاسم: ${name}\n` +
-                    `الكود: ${code}\n` +
-                    `الإيجار السنوي: ${rent} دينار\n` +
-                    `السنة: ${year}`
+                    `📋 الكود: ${code}\n` +
+                    `👤 الاسم: ${name}\n` +
+                    `💰 الإيجار السنوي: ${rent} دينار\n` +
+                    `📅 السنة: ${year}`
                 );
 
                 // 🧹 Clear form
@@ -436,11 +530,17 @@
                 // 🔄 Generate new code
                 const newCode = await generateTenantCode();
                 document.getElementById('tenant_code').value = newCode;
+                document.getElementById('code_display').textContent = newCode;
+                console.log('📋 New code generated:', newCode);
 
             } catch (err) {
-                console.error('❌ Error:', err);
+                console.error('❌❌❌ ERROR:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
-                alert(`❌ حدث خطأ أثناء الإضافة:\n${err.message}`);
+                alert(`❌ حدث خطأ أثناء الإضافة:\n\n${err.message}`);
+            } finally {
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 حفظ المستأجر';
             }
         }
 
@@ -448,6 +548,7 @@
         // 🧹 CLEAR FORM
         // ============================================================
         function clearForm() {
+            console.log('🧹 Clearing form...');
             document.getElementById('tenant_name').value = '';
             document.getElementById('shop_no').value = '';
             document.getElementById('phone').value = '';
