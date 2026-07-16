@@ -245,7 +245,7 @@
 
                 <div class="field">
                     <label>كود المستأجر</label>
-                    <div class="code-display" id="code_display">جاري التحميل...</div>
+                    <div class="code-display" id="code_display">⏳ جاري التحميل...</div>
                     <input type="hidden" id="tenant_code" />
                     <small>سيتم إنشاء الكود تلقائياً</small>
                 </div>
@@ -311,10 +311,13 @@
         }
 
         // ============================================================
-        // 📋 GENERATE TENANT CODE
+        // 📋 GENERATE TENANT CODE (Checks database for unique code)
         // ============================================================
         async function generateTenantCode() {
             try {
+                console.log('🔍 Checking existing tenant codes in database...');
+                
+                // 1️⃣ Get all existing codes from database
                 const { data, error } = await supabase
                     .from('tenants')
                     .select('tenant_code')
@@ -325,28 +328,42 @@
                     return 'jc-01';
                 }
 
+                // 2️⃣ If no tenants exist, start with jc-01
                 if (!data || data.length === 0) {
+                    console.log('✅ No tenants found, starting with jc-01');
                     return 'jc-01';
                 }
 
+                console.log('📋 Existing codes:', data.map(t => t.tenant_code).join(', '));
+
+                // 3️⃣ Extract numbers from codes (jc-01 → 1, jc-02 → 2, etc.)
                 const existingNumbers = data
                     .map(t => parseInt(t.tenant_code.replace('jc-', '')))
                     .filter(n => !isNaN(n))
                     .sort((a, b) => a - b);
 
+                console.log('📊 Existing numbers:', existingNumbers.join(', '));
+
+                // 4️⃣ Find first available number (fill gaps)
                 let nextNum = 1;
                 for (let i = 0; i < existingNumbers.length; i++) {
                     if (existingNumbers[i] > nextNum) {
-                        break;
+                        // Found a gap!
+                        console.log(`✅ Gap found! Using jc-${String(nextNum).padStart(2, '0')}`);
+                        return `jc-${String(nextNum).padStart(2, '0')}`;
                     }
                     if (existingNumbers[i] === nextNum) {
                         nextNum++;
                     }
                 }
 
-                return `jc-${String(nextNum).padStart(2, '0')}`;
+                // 5️⃣ No gaps, use next sequential number
+                const newCode = `jc-${String(nextNum).padStart(2, '0')}`;
+                console.log(`✅ Next available code: ${newCode}`);
+                return newCode;
+
             } catch (err) {
-                console.error('❌ Error:', err);
+                console.error('❌ Error in generateTenantCode:', err);
                 return 'jc-01';
             }
         }
@@ -354,15 +371,23 @@
         // ============================================================
         // 🚀 LOAD PAGE - Generate and display code
         // ============================================================
-        window.onload = async function() {
+        async function loadPage() {
+            console.log('🚀 Page loading...');
+            const codeDisplay = document.getElementById('code_display');
+            const codeInput = document.getElementById('tenant_code');
+            
+            codeDisplay.textContent = '⏳ جاري التحميل...';
+            
             try {
                 const code = await generateTenantCode();
-                document.getElementById('tenant_code').value = code;
-                document.getElementById('code_display').textContent = code;
+                codeInput.value = code;
+                codeDisplay.textContent = code;
+                console.log('✅ Code set to:', code);
             } catch (err) {
-                document.getElementById('code_display').textContent = '❌ خطأ';
+                console.error('❌ Error loading page:', err);
+                codeDisplay.textContent = '❌ خطأ في التحميل';
             }
-        };
+        }
 
         // ============================================================
         // 📞 FORMAT PHONE NUMBER
@@ -386,6 +411,8 @@
             const contract = document.getElementById('contract_date').value;
             const password = document.getElementById('password').value.trim();
             const code = document.getElementById('tenant_code').value;
+
+            console.log('💾 saveTenant() called with code:', code);
 
             // 🔍 Validation
             if (!name) {
@@ -433,6 +460,7 @@
 
             try {
                 // 💾 Insert tenant
+                console.log('📤 Inserting tenant with code:', code);
                 const { data: tenantData, error: tenantError } = await supabase
                     .from('tenants')
                     .insert({
@@ -449,11 +477,16 @@
                     .single();
 
                 if (tenantError) {
+                    console.error('❌ Tenant insert error:', tenantError);
                     throw tenantError;
                 }
 
+                console.log('✅ Tenant inserted:', tenantData);
+
                 // 📊 Insert yearly summary
                 const year = new Date().getFullYear();
+                console.log('📊 Inserting yearly summary for year:', year);
+                
                 const { error: summaryError } = await supabase
                     .from('tenant_yearly_summary')
                     .insert({
@@ -466,8 +499,11 @@
                     });
 
                 if (summaryError) {
+                    console.error('❌ Summary insert error:', summaryError);
                     throw summaryError;
                 }
+
+                console.log('✅ Summary inserted for year:', year);
 
                 // ✅ Success message on page
                 showStatus(`✅ تم إضافة المستأجر ${name} بنجاح!`, 'success');
@@ -488,9 +524,10 @@
                 const newCode = await generateTenantCode();
                 document.getElementById('tenant_code').value = newCode;
                 document.getElementById('code_display').textContent = newCode;
+                console.log('📋 New code generated:', newCode);
 
             } catch (err) {
-                console.error('❌ Error:', err);
+                console.error('❌❌❌ ERROR:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
                 alert(`❌ حدث خطأ أثناء الإضافة:\n\n${err.message}`);
             } finally {
@@ -529,6 +566,16 @@
         // ============================================================
         function goBack() {
             window.location.href = 'admin.html';
+        }
+
+        // ============================================================
+        // 🚀 INITIALIZE PAGE
+        // ============================================================
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPage);
+        } else {
+            loadPage();
         }
     </script>
 
