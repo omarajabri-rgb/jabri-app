@@ -854,7 +854,7 @@
     </script>
 
     <script>
-        const supabase = window.supabase.createClient(
+        const supabaseClient = window.supabase.createClient(
             'https://gzukfvxcpfblzqyjzkoz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
         );
@@ -967,7 +967,7 @@
 
         // ===== فحص دعم عمود الجهة/المستفيد =====
         async function detectPayeeSupport() {
-            const { error } = await supabase.from('complex_expenses').select('payee').limit(1);
+            const { error } = await supabaseClient.from('complex_expenses').select('payee').limit(1);
             PAYEE_SUPPORTED = !error;
             document.body.classList.toggle('no-payee', !PAYEE_SUPPORTED);
             if (!PAYEE_SUPPORTED) console.warn('عمود payee غير موجود — راجع sql/expenses_payee_migration.sql لإضافته.');
@@ -975,7 +975,7 @@
 
         // ===== تحميل البيانات (استعلام واحد لكل تحديث) =====
         async function loadAllExpenses() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('complex_expenses')
                 .select('*')
                 .order('expense_date', { ascending: false });
@@ -1408,7 +1408,7 @@
                 };
                 if (PAYEE_SUPPORTED) payload.payee = payee || null;
 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('complex_expenses')
                     .insert([payload])
                     .select()
@@ -1498,7 +1498,7 @@
                 if (PAYEE_SUPPORTED) payload.payee = payee || null;
 
                 // ✅ تحديث الصف نفسه بمعرّفه الفريد — لا يتم إنشاء مصروف جديد
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('complex_expenses')
                     .update(payload)
                     .eq('id', editingExpenseId)
@@ -1526,7 +1526,7 @@
             if (!confirm('هل أنت متأكد من حذف هذا المصروف؟ لا يمكن التراجع عن هذا الإجراء.')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('complex_expenses')
                     .delete()
                     .eq('id', id);
