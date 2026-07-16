@@ -300,7 +300,31 @@
         // ============================================================
         const supabaseUrl = 'https://gzukfvxcpfblzqyjzkoz.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Lazy client init — never throws at page load, even if the CDN
+        // script hasn't finished loading yet.
+        let db = null;
+        async function getDb() {
+            if (db) return db;
+            // Wait up to 5s for the Supabase library to load
+            const start = Date.now();
+            while (!window.supabase) {
+                if (Date.now() - start > 5000) {
+                    throw new Error('تعذر تحميل مكتبة Supabase (تحقق من الاتصال بالإنترنت)');
+                }
+                await new Promise(r => setTimeout(r, 100));
+            }
+            db = window.supabase.createClient(supabaseUrl, supabaseKey);
+            return db;
+        }
+
+        // Reject if a promise takes longer than ms (prevents infinite "loading")
+        function withTimeout(promise, ms, label) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error(label || 'انتهت مهلة الاتصال')), ms))
+            ]);
+        }
 
         // ============================================================
         // 🔐 SESSION CHECK
@@ -316,16 +340,22 @@
         async function generateTenantCode() {
             try {
                 console.log('🔍 Checking existing tenant codes in database...');
-                
-                // 1️⃣ Get all existing codes from database
-                const { data, error } = await supabase
-                    .from('tenants')
-                    .select('tenant_code')
-                    .order('tenant_code', { ascending: true });
+
+                const client = await getDb();
+
+                // 1️⃣ Get all existing codes from database (8s timeout)
+                const { data, error } = await withTimeout(
+                    client
+                        .from('tenants')
+                        .select('tenant_code')
+                        .order('tenant_code', { ascending: true }),
+                    8000,
+                    'انتهت مهلة الاتصال بقاعدة البيانات'
+                );
 
                 if (error) {
                     console.error('❌ Error fetching codes:', error);
-                    return 'jc-01';
+                    throw new Error(error.message);
                 }
 
                 // 2️⃣ If no tenants exist, start with jc-01
@@ -338,7 +368,7 @@
 
                 // 3️⃣ Extract numbers from codes (jc-01 → 1, jc-02 → 2, etc.)
                 const existingNumbers = data
-                    .map(t => parseInt(t.tenant_code.replace('jc-', '')))
+                    .map(t => parseInt(String(t.tenant_code || '').replace('jc-', '')))
                     .filter(n => !isNaN(n))
                     .sort((a, b) => a - b);
 
@@ -364,7 +394,7 @@
 
             } catch (err) {
                 console.error('❌ Error in generateTenantCode:', err);
-                return 'jc-01';
+                throw err; // Let the caller show the error + retry option
             }
         }
 
@@ -375,9 +405,12 @@
             console.log('🚀 Page loading...');
             const codeDisplay = document.getElementById('code_display');
             const codeInput = document.getElementById('tenant_code');
-            
-            codeDisplay.textContent = '⏳ جاري التحميل...';
-            
+
+            codeDisplay.textContent = '...';
+            codeDisplay.style.cursor = '';
+            codeDisplay.onclick = null;
+            codeInput.value = '';
+
             try {
                 const code = await generateTenantCode();
                 codeInput.value = code;
@@ -385,7 +418,9 @@
                 console.log('✅ Code set to:', code);
             } catch (err) {
                 console.error('❌ Error loading page:', err);
-                codeDisplay.textContent = '❌ خطأ في التحميل';
+                codeDisplay.textContent = '❌ خطأ — اضغط لإعادة المحاولة';
+                codeDisplay.style.cursor = 'pointer';
+                codeDisplay.onclick = loadPage;
             }
         }
 
@@ -415,6 +450,11 @@
             console.log('💾 saveTenant() called with code:', code);
 
             // 🔍 Validation
+            if (!code) {
+                showStatus('لم يتم إنشاء كود المستأجر بعد — أعد المحاولة', 'error');
+                loadPage();
+                return;
+            }
             if (!name) {
                 showStatus('الرجاء إدخال اسم المستأجر', 'error');
                 return;
@@ -461,7 +501,8 @@
             try {
                 // 💾 Insert tenant
                 console.log('📤 Inserting tenant with code:', code);
-                const { data: tenantData, error: tenantError } = await supabase
+                const client = await getDb();
+                const { data: tenantData, error: tenantError } = await client
                     .from('tenants')
                     .insert({
                         tenant_code: code,
@@ -487,7 +528,7 @@
                 const year = new Date().getFullYear();
                 console.log('📊 Inserting yearly summary for year:', year);
                 
-                const { error: summaryError } = await supabase
+                const { error: summaryError } = await client
                     .from('tenant_yearly_summary')
                     .insert({
                         tenant_code: code,
@@ -521,10 +562,9 @@
                 clearForm();
 
                 // 🔄 Generate new code for next tenant
-                const newCode = await generateTenantCode();
-                document.getElementById('tenant_code').value = newCode;
-                document.getElementById('code_display').textContent = newCode;
-                console.log('📋 New code generated:', newCode);
+                // (loadPage handles its own errors — a regen failure must not
+                // trigger the "save failed" alert below, the save succeeded)
+                await loadPage();
 
             } catch (err) {
                 console.error('❌❌❌ ERROR:', err);
