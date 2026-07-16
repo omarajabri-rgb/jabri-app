@@ -1264,7 +1264,7 @@
             </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="payment_entry_panel" style="display:none;">
             <div class="chip-header"><div class="chip-title">إدخل دفعة جديدة</div></div>
             <div class="form-shell">
                 <div class="entry-box">
@@ -2240,11 +2240,8 @@ try{
     let totalComplexDebit = 0;
     let tenantCount = 0;
 
-    // Use latest financial year available, minimum current year
-    const targetYear = Math.max(
-    DASHBOARD_YEAR,
-    ...allSummaries.map(s => Number(s.year) || 0)
-);
+    // ✅ لوحة التحكم مثبتة على السنة الحالية — لا تقفز لسنة مستقبلية إذا وُجد صف مسبق
+    const targetYear = DASHBOARD_YEAR;
             const latestReceiptNo = allTransactions
     .map(tx => parseInt(String(tx.receipt_no || '').replace(/\D/g, '')))
     .filter(n => !isNaN(n))
@@ -2260,8 +2257,6 @@ try{
         }
     });
     
-    // Rest of the function continues as is...
-
             const avgCommitment = totalComplexDebit > 0 ? Math.round((totalComplexCredit / totalComplexDebit) * 100) : 0;
             const nextProb = Math.max(5, Math.min(95, avgCommitment));
             const defProb = 100 - nextProb;
@@ -3131,6 +3126,11 @@ const templateConfig = getNotificationTemplateConfig(type, t, msg);
         function renderTenantTransactions(code){
             const panel = document.getElementById('tx_history_panel');
             const body = document.getElementById('tx_history_body');
+
+            // ✅ نموذج "إدخل دفعة جديدة" يظهر فقط عند اختيار مستأجر
+            const payPanel = document.getElementById('payment_entry_panel');
+            if(payPanel) payPanel.style.display = code ? '' : 'none';
+
             if(!panel || !body) return;
 
             if(!code){
