@@ -654,7 +654,8 @@
 
                     <div class="field">
                         <label for="case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
-                        <input type="text" id="case_number" placeholder="مثال: 2025/1234" required />
+                        <input type="text" id="case_number" placeholder="مثال: 2025/1234" />
+                        <small style="color:var(--muted);font-size:11px;">غير مطلوب إذا كان الإدخال إنذار عدلي</small>
                     </div>
 
                     <div class="field">
@@ -751,7 +752,7 @@
                     </div>
                     <div class="field">
                         <label for="edit_case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
-                        <input type="text" id="edit_case_number" required />
+                        <input type="text" id="edit_case_number" />
                     </div>
                     <div class="field">
                         <label for="edit_case_date">تاريخ القضية</label>
@@ -929,17 +930,20 @@
                 showStatus('الرجاء اختيار المستأجر', 'error');
                 return;
             }
-            if (!caseNumber) {
-                showStatus('الرجاء إدخال رقم القضية', 'error');
+            if (!caseNumber && !legalNotice) {
+                showStatus('الرجاء إدخال رقم القضية أو تعبئة حقل إنذار عدلي', 'error');
                 return;
             }
+
+            // ⚖️ الإنذار العدلي لا يحمل رقم قضية
+            const finalCaseNumber = caseNumber || 'إنذار عدلي';
 
             try {
                 const { data, error } = await supabaseCases
                     .from('court_cases')
                     .insert([{
                         tenant_code: tenantCode,
-                        case_number: caseNumber,
+                        case_number: finalCaseNumber,
                         case_date: caseDate || null,
                         amount: amount ? parseFloat(amount) : null,
                         case_status: caseStatus,
@@ -953,7 +957,7 @@
 
                 if (error) throw error;
 
-                showStatus(`✅ تم إضافة القضية ${caseNumber} بنجاح!`, 'success');
+                showStatus(`✅ تم إضافة ${finalCaseNumber === 'إنذار عدلي' ? 'الإنذار العدلي' : 'القضية ' + finalCaseNumber} بنجاح!`, 'success');
                 clearCaseForm();
                 loadCases();
 
@@ -1020,8 +1024,8 @@
                 showEditStatus('الرجاء اختيار المستأجر', 'error');
                 return;
             }
-            if (!caseNumber) {
-                showEditStatus('الرجاء إدخال رقم القضية', 'error');
+            if (!caseNumber && !legalNotice) {
+                showEditStatus('الرجاء إدخال رقم القضية أو تعبئة حقل إنذار عدلي', 'error');
                 return;
             }
 
@@ -1030,7 +1034,7 @@
                     .from('court_cases')
                     .update({
                         tenant_code: tenantCode,
-                        case_number: caseNumber,
+                        case_number: caseNumber || 'إنذار عدلي',
                         case_date: caseDate || null,
                         amount: amount ? parseFloat(amount) : null,
                         case_status: caseStatus,
