@@ -1106,14 +1106,6 @@
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
 
-        <!-- ⚠️ Payment Due Alerts -->
-        <section class="panel" id="payment_alerts_panel" style="display:none; border: 2px solid var(--warning);">
-            <div class="chip-header">
-                <div class="chip-title" style="color:var(--warning);" id="payment_alerts_title">📋 تنبيهات الدفعات المستحقة</div>
-            </div>
-            <div id="payment_alerts_list"></div>
-        </section>
-
         <section class="panel">
             <div class="chip-header"><div class="chip-title">لوحة الادارة</div></div>
 
@@ -1241,8 +1233,18 @@
         </section>
 
         <section class="panel">
-            <div class="chip-header"><div class="chip-title">📬 سجل التواصل والمتابعة</div></div>
+            <div class="chip-header" style="gap:8px;">
+                <div class="chip-title" id="comm_tab_btn" onclick="switchCommTab('log')" style="cursor:pointer;">📬 سجل التواصل والمتابعة</div>
+                <div class="chip-title" id="due_tab_btn" onclick="switchCommTab('due')" style="cursor:pointer; opacity:0.55;">⚠️ استحقاق دفعات</div>
+            </div>
 
+            <!-- 📄 TAB 2: استحقاق دفعات -->
+            <div id="tab_due_payments" style="display:none;">
+                <div id="due_payments_list"></div>
+            </div>
+
+            <!-- 📄 TAB 1: سجل التواصل -->
+            <div id="tab_comm_log">
             <div class="notify-log-toolbar">
                 <button class="btn btn-soft active" id="notif_filter_all" onclick="setNotificationLogFilter('all')">الكل</button>
                 <button class="btn btn-soft" id="notif_filter_read" onclick="setNotificationLogFilter('read')">مقروءة</button>
@@ -1270,6 +1272,7 @@
                     </table>
                 </div>
             </div>
+            </div><!-- /tab_comm_log -->
         </section>
 
         <section class="panel" id="payment_entry_panel" style="display:none;">
@@ -3623,7 +3626,7 @@ function getPaymentDates(contractDate) {
     return dates;
 }
 
-function getDuePaymentDate(contractDate) {
+function getDuePaymentDate(contractDate, windowDays = 30) {
     if (!contractDate) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -3631,13 +3634,23 @@ function getDuePaymentDate(contractDate) {
         date.setHours(0, 0, 0, 0);
         if (today >= date) {
             const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
-            if (diffDays <= 3) return date;
+            if (diffDays <= windowDays) return date;
         }
     }
     return null;
 }
 
-async function checkPaymentDueAlerts() {
+// 📖 تبديل بين تبويب سجل التواصل وتبويب استحقاق الدفعات
+function switchCommTab(tab) {
+    const isDue = tab === 'due';
+    document.getElementById('tab_due_payments').style.display = isDue ? 'block' : 'none';
+    document.getElementById('tab_comm_log').style.display = isDue ? 'none' : 'block';
+    document.getElementById('due_tab_btn').style.opacity = isDue ? '1' : '0.55';
+    document.getElementById('comm_tab_btn').style.opacity = isDue ? '0.55' : '1';
+}
+
+// ⚠️ تحميل قائمة استحقاق الدفعات (خلال شهر من تاريخ الاستحقاق)
+async function loadDuePayments() {
     try {
         const { data, error } = await supabaseClient
             .from('tenants')
@@ -3647,27 +3660,22 @@ async function checkPaymentDueAlerts() {
         if (error || !data) return;
 
         const dueList = data
-            .map(t => ({ name: t.tenant_name, dueDate: getDuePaymentDate(t.contract_date) }))
-            .filter(t => t.dueDate);
+            .map(t => ({ name: t.tenant_name, dueDate: getDuePaymentDate(t.contract_date, 30) }))
+            .filter(t => t.dueDate)
+            .sort((a, b) => a.dueDate - b.dueDate);
 
-        const panel = document.getElementById('payment_alerts_panel');
-        if (dueList.length === 0) {
-            panel.style.display = 'none';
-            return;
-        }
+        document.getElementById('due_tab_btn').textContent =
+            `⚠️ استحقاق دفعات${dueList.length ? ` (${dueList.length})` : ''}`;
 
-        document.getElementById('payment_alerts_title').textContent =
-            `📋 تنبيهات الدفعات المستحقة (${dueList.length})`;
+        document.getElementById('due_payments_list').innerHTML = dueList.length
+            ? dueList.map(t => `
+                <div style="padding: 10px 14px; margin-bottom: 8px; background: rgba(215,146,31,0.10); border: 1px solid rgba(215,146,31,0.35); border-radius: 12px; font-weight: 700;">
+                    ⚠️ ${t.name} - تاريخ الاستحقاق: ${t.dueDate.toLocaleDateString('en-GB')}
+                </div>`).join('')
+            : `<div class="notify-empty" style="padding: 16px; text-align: center;">لا توجد دفعات مستحقة حالياً ✅</div>`;
 
-        document.getElementById('payment_alerts_list').innerHTML = dueList.map(t => `
-            <div style="padding: 8px 12px; margin-bottom: 6px; background: rgba(215,146,31,0.10); border-radius: 12px; font-weight: 700;">
-                ⚠️ ${t.name} - تاريخ الاستحقاق: ${t.dueDate.toLocaleDateString('en-GB')}
-            </div>
-        `).join('');
-
-        panel.style.display = 'block';
     } catch (err) {
-        console.error('❌ Error checking payment alerts:', err);
+        console.error('❌ Error loading due payments:', err);
     }
 }
 
@@ -3675,7 +3683,7 @@ window.onload = async () => {
     document.body.style.opacity = '1';
     clearTransactionForm();
     await refresh();
-    checkPaymentDueAlerts();
+    loadDuePayments();
 
     document.getElementById('tenant_select').addEventListener('change', async e => {
         await renderSelectedTenant(e.target.value);
