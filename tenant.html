@@ -747,7 +747,15 @@
             <span id="account_status_chip" class="hero-status partial">-</span>
             <h1 id="t_name">...</h1>
             <div id="last_update" class="hero-note">-</div>
+            <div id="contract_date_display" class="hero-note" style="margin-top: 6px; font-weight: 800; color: var(--gold-deep);">
+                📅 تاريخ العقد: <span id="contract_date_value">—</span>
+            </div>
         </section>
+
+        <!-- Payment Due Message -->
+        <div id="payment_due_message" style="display:none; background: rgba(215,146,31,0.12); border: 2px solid var(--warning); border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; text-align: center;">
+            <span style="font-size: 16px; font-weight: 900; color: var(--warning);">⚠️ تم استحقاق دفعة</span>
+        </div>
 
         <div class="stats-grid">
             <div class="soft-card credit-card reveal">
@@ -1229,6 +1237,43 @@
             }
         });
 
+        // ============================================================
+        // ⚠️ PAYMENT DUE CHECK (3 دفعات في السنة حسب تاريخ العقد)
+        // ============================================================
+        function getPaymentDates(contractDate) {
+            if (!contractDate) return [];
+            const date = new Date(contractDate);
+            if (Number.isNaN(date.getTime())) return [];
+            const month = date.getMonth();
+            const day = date.getDate();
+            const thisYear = new Date().getFullYear();
+            const dates = [];
+            // نحسب دفعات السنة الحالية والسنة السابقة (لتغطية نهاية السنة)
+            for (const year of [thisYear - 1, thisYear]) {
+                dates.push(
+                    new Date(year, month, day),
+                    new Date(year, month + 4, day),
+                    new Date(year, month + 8, day)
+                );
+            }
+            return dates;
+        }
+
+        function isPaymentDue(contractDate) {
+            if (!contractDate) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const paymentDates = getPaymentDates(contractDate);
+            for (let date of paymentDates) {
+                date.setHours(0, 0, 0, 0);
+                if (today >= date) {
+                    const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 3) return true;
+                }
+            }
+            return false;
+        }
+
 async function init() {
     document.getElementById('loader').style.display = 'flex';
     document.body.classList.remove('loaded');
@@ -1287,6 +1332,14 @@ async function init() {
 
         // Display tenant name
         document.getElementById('t_name').innerText = sanitizeInput(tenant?.tenant_name) || tenantCode;
+
+        // 📅 Display contract date
+        document.getElementById('contract_date_value').innerText = tenant?.contract_date ? new Date(tenant.contract_date).toLocaleDateString('en-GB') : '—';
+
+        // ⚠️ Show payment due message (3 days window)
+        if (tenant && isPaymentDue(tenant.contract_date)) {
+            document.getElementById('payment_due_message').style.display = 'block';
+        }
 
         // ✅ Update burger menu with tenant info
         const tenantName = tenant?.tenant_name || tenantCode;
