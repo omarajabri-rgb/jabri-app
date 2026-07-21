@@ -679,6 +679,12 @@
                     </div>
 
                     <div class="field">
+                        <label for="legal_notice">⚖️ إنذار عدلي</label>
+                        <input type="text" id="legal_notice" placeholder="مثال: إنذار عدلي - كاتب عدل شرق عمان 2025" />
+                        <small style="color:var(--muted);font-size:11px;">يظهر في القائمة فقط إذا تم تعبئته — النص الكامل يوضع في الملاحظات</small>
+                    </div>
+
+                    <div class="field">
                         <label for="notes">ملاحظات</label>
                         <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
                     </div>
@@ -709,12 +715,13 @@
                             <th>الحالة</th>
                             <th>تاريخ الانتهاء</th>
                             <th>قضية مرتطة</th>
+                            <th>إنذار عدلي</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="casesTableBody">
                         <tr>
-                            <td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td>
+                            <td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td>
                         </tr>
                     </tbody>
                 </table>
@@ -762,6 +769,10 @@
                     <div class="field">
                         <label for="edit_related_case">قضية مرتطة</label>
                         <input type="text" id="edit_related_case" placeholder="رقم القضية المرتبطة" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_legal_notice">⚖️ إنذار عدلي</label>
+                        <input type="text" id="edit_legal_notice" placeholder="مثال: إنذار عدلي - كاتب عدل شرق عمان 2025" />
                     </div>
                     <div class="field">
                         <label for="edit_notes">ملاحظات</label>
@@ -856,12 +867,12 @@
 
                 if (error) {
                     console.error('❌ Error loading cases:', error);
-                    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
                     return;
                 }
 
@@ -880,6 +891,7 @@
                             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                             <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
                             <td>${caseItem.related_case || '—'}</td>
+                            <td>${caseItem.legal_notice ? `<span class="status-badge" style="background:rgba(201,164,107,0.16);color:var(--gold-deep);border:1px solid rgba(201,164,107,0.4);" title="${caseItem.legal_notice.replace(/"/g, '&quot;')}">⚖️ إنذار عدلي</span>` : '—'}</td>
                             <td>
                                 <div class="action-btns">
                                     <button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); openEditModal('${caseItem.id}')">✏️</button>
@@ -893,7 +905,7 @@
             } catch (err) {
                 console.error('❌ Error in loadCases:', err);
                 const tbody = document.getElementById('casesTableBody');
-                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
             }
         }
 
@@ -907,6 +919,7 @@
             const amount = document.getElementById('amount').value.trim();
             const endDate = document.getElementById('end_date').value;
             const relatedCase = document.getElementById('related_case').value.trim();
+            const legalNotice = document.getElementById('legal_notice').value.trim();
             const notes = document.getElementById('notes').value.trim();
 
             // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
@@ -932,6 +945,7 @@
                         case_status: caseStatus,
                         end_date: endDate || null,
                         related_case: relatedCase || null,
+                        legal_notice: legalNotice || null,
                         notes: notes || null
                     }])
                     .select()
@@ -969,6 +983,7 @@
                 document.getElementById('edit_amount').value = data.amount || '';
                 document.getElementById('edit_end_date').value = data.end_date || '';
                 document.getElementById('edit_related_case').value = data.related_case || '';
+                document.getElementById('edit_legal_notice').value = data.legal_notice || '';
                 document.getElementById('edit_notes').value = data.notes || '';
 
                 // Load tenants into edit dropdown
@@ -995,6 +1010,7 @@
             const amount = document.getElementById('edit_amount').value.trim();
             const endDate = document.getElementById('edit_end_date').value;
             const relatedCase = document.getElementById('edit_related_case').value.trim();
+            const legalNotice = document.getElementById('edit_legal_notice').value.trim();
             const notes = document.getElementById('edit_notes').value.trim();
 
             // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
@@ -1020,6 +1036,7 @@
                         case_status: caseStatus,
                         end_date: endDate || null,
                         related_case: relatedCase || null,
+                        legal_notice: legalNotice || null,
                         notes: notes || null
                     })
                     .eq('id', id);
@@ -1074,6 +1091,7 @@
             document.getElementById('amount').value = '';
             document.getElementById('end_date').value = '';
             document.getElementById('related_case').value = '';
+            document.getElementById('legal_notice').value = '';
             document.getElementById('notes').value = '';
             document.getElementById('status_msg').className = 'status-msg';
             document.getElementById('status_msg').style.display = 'none';
