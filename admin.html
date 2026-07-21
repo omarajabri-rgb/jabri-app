@@ -1106,6 +1106,14 @@
             <button class="btn btn-danger" onclick="logoutAdmin()">خروج الإدارة</button>
         </div>
 
+        <!-- ⚠️ Payment Due Alerts -->
+        <section class="panel" id="payment_alerts_panel" style="display:none; border: 2px solid var(--warning);">
+            <div class="chip-header">
+                <div class="chip-title" style="color:var(--warning);" id="payment_alerts_title">📋 تنبيهات الدفعات المستحقة</div>
+            </div>
+            <div id="payment_alerts_list"></div>
+        </section>
+
         <section class="panel">
             <div class="chip-header"><div class="chip-title">لوحة الادارة</div></div>
 
@@ -3593,10 +3601,81 @@ function updateNotificationComposer() {
 }
 
 
+// ============================================================
+// ⚠️ PAYMENT DUE ALERTS (3 دفعات في السنة حسب تاريخ العقد)
+// ============================================================
+function getPaymentDates(contractDate) {
+    if (!contractDate) return [];
+    const date = new Date(contractDate);
+    if (Number.isNaN(date.getTime())) return [];
+    const month = date.getMonth();
+    const day = date.getDate();
+    const thisYear = new Date().getFullYear();
+    const dates = [];
+    // دفعات السنة الحالية والسنة السابقة (لتغطية نهاية السنة)
+    for (const year of [thisYear - 1, thisYear]) {
+        dates.push(
+            new Date(year, month, day),
+            new Date(year, month + 4, day),
+            new Date(year, month + 8, day)
+        );
+    }
+    return dates;
+}
+
+function getDuePaymentDate(contractDate) {
+    if (!contractDate) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let date of getPaymentDates(contractDate)) {
+        date.setHours(0, 0, 0, 0);
+        if (today >= date) {
+            const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+            if (diffDays <= 3) return date;
+        }
+    }
+    return null;
+}
+
+async function checkPaymentDueAlerts() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('tenants')
+            .select('tenant_name, contract_date')
+            .not('contract_date', 'is', null);
+
+        if (error || !data) return;
+
+        const dueList = data
+            .map(t => ({ name: t.tenant_name, dueDate: getDuePaymentDate(t.contract_date) }))
+            .filter(t => t.dueDate);
+
+        const panel = document.getElementById('payment_alerts_panel');
+        if (dueList.length === 0) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        document.getElementById('payment_alerts_title').textContent =
+            `📋 تنبيهات الدفعات المستحقة (${dueList.length})`;
+
+        document.getElementById('payment_alerts_list').innerHTML = dueList.map(t => `
+            <div style="padding: 8px 12px; margin-bottom: 6px; background: rgba(215,146,31,0.10); border-radius: 12px; font-weight: 700;">
+                ⚠️ ${t.name} - تاريخ الاستحقاق: ${t.dueDate.toLocaleDateString('en-GB')}
+            </div>
+        `).join('');
+
+        panel.style.display = 'block';
+    } catch (err) {
+        console.error('❌ Error checking payment alerts:', err);
+    }
+}
+
 window.onload = async () => {
     document.body.style.opacity = '1';
     clearTransactionForm();
     await refresh();
+    checkPaymentDueAlerts();
 
     document.getElementById('tenant_select').addEventListener('change', async e => {
         await renderSelectedTenant(e.target.value);
