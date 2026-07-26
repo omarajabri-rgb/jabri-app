@@ -1216,6 +1216,11 @@
         <option value="cheque_notice">إشعار شيكات</option>
     </optgroup>
 
+    <!-- تنبيهات الدفعات -->
+    <optgroup label="⚠️ تنبيهات الدفعات">
+        <option value="payment_due">تم استحقاق دفعة</option>
+    </optgroup>
+
     <!-- إشعارات إدارية -->
     <optgroup label="إشعارات إدارية">
         <option value="first">المطالبة الأولى</option>
@@ -1785,6 +1790,7 @@ try{
             if(type === 'legal') return 'إنذار عدلي';
             if(type === 'lawyer') return 'تحويل للمحامي';
             if(type === 'general') return 'رسالة عامة';
+            if(type === 'payment_due') return 'تم استحقاق دفعة';
             return type || '—';
         }
 
@@ -2742,6 +2748,7 @@ showStatus(isDiscount ? `تم حفظ الخصم على سنة ${yearNum} بنج�
             if(t === 'third') return 'المطالبة الثالثة';
             if(t === 'legal') return 'إنذار عدلي';
             if(t === 'lawyer') return 'تحويل للمحامي';
+            if(t === 'payment_due') return 'تم استحقاق دفعة';
             return 'رسالة عامة';
         };
 
@@ -2854,6 +2861,13 @@ function getNotificationTemplateConfig(type, tenant, msg){
         return {
             templateName: 'general_message',
             params: []
+        };
+    }
+
+    if(type === 'payment_due'){
+        return {
+            templateName: 'payment_due_jabri',
+            params: [tenantName]
         };
     }
             return null;
@@ -3524,6 +3538,13 @@ cheque_notice: `السيد/ [اسم المستأجر] المحترم،
 
 إجمالي قيمة الشيكات:
 [إجمالي الشيكات] دينار
+
+مجمع جبري الصناعي التجاري`,
+
+// ⚠️ تنبيهات الدفعات
+payment_due: `مرحباً [اسم المستأجر]،
+
+نود تذكيركم بأن الدفعة التالية قد استحقت.
 
 مجمع جبري الصناعي التجاري`,
 
