@@ -2870,6 +2870,13 @@ function getNotificationTemplateConfig(type, tenant, msg){
             params: [tenantName]
         };
     }
+
+    if(type === 'thanks'){
+        return {
+            templateName: 'payment_thankyou',
+            params: [tenantName]
+        };
+    }
             return null;
         }
         async function createWhatsAppLog(tenant, options = {}){
@@ -3019,6 +3026,56 @@ function getNotificationTemplateConfig(type, tenant, msg){
     document.getElementById('notification_message').value = '';
     return;
 }
+
+            // If type is 'thanks', skip system notification, only send WhatsApp
+            if (type === 'thanks') {
+                const tenantPhone = sanitizePhone(t.phone || '');
+                const templateConfig = getNotificationTemplateConfig(type, t, msg);
+
+                if (tenantPhone && templateConfig) {
+                    let logId = null;
+
+                    try {
+                        const logRow = await createWhatsAppLog(t, {
+                            notificationId: null,
+                            sourceType: 'notification',
+                            sourceId: type,
+                            phone: tenantPhone,
+                            messageTitle: getNotificationTitle(type),
+                            messageBody: msg,
+                            templateName: templateConfig.templateName,
+                            remainingBalance: toNumber(t.currentBalance)
+                        });
+
+                        logId = logRow.id;
+
+                        const waRes = await sendWhatsAppTemplate(
+                            tenantPhone,
+                            templateConfig.templateName,
+                            templateConfig.params
+                        );
+
+                        const waMessageId = waRes?.messages?.[0]?.id || null;
+
+                        await markWhatsAppLogSent(logId, waMessageId);
+                        alert('✅ تم إرسال رسالة الشكر عبر واتساب بنجاح!');
+                    } catch (waErr) {
+                        console.error('WhatsApp error:', waErr);
+                        if (logId) {
+                            await markWhatsAppLogFailed(logId, waErr.message || 'Unknown error');
+                        }
+                        alert(`❌ فشل إرسال واتساب: ${waErr.message}`);
+                    }
+                } else {
+                    alert('⚠️ لا يوجد رقم هاتف للمستأجر أو القالب غير موجود');
+                }
+
+                // Clear form and exit
+                document.getElementById('notification_type').value = '';
+                document.getElementById('notification_message').value = '';
+                await refreshWhatsAppLog();
+                return;
+            }
 
             try {
                 const notifRow = await insertTenantNotificationRow(
