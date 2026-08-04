@@ -668,7 +668,7 @@
                     <span class="chevron">›</span>
                 </button>
                 <div class="submenu">
-                    <button class="menu-item" onclick="location.href='expenses.html#expense_form_panel'">➕ إضافة مصروف</button>
+                    <button class="menu-item" onclick="location.href='expenses.html#expenses_list_panel'">📋 قائمة المصروفات</button>
                 </div>
             </div>
 
@@ -851,6 +851,104 @@
             </form>
         </div>
 
+        <!-- ===== قائمة المصروفات ===== -->
+        <div class="panel" id="expenses_list_panel">
+            <div class="chip-header" style="justify-content:space-between; align-items:center;">
+                <div class="chip-title">📋 قائمة المصروفات</div>
+                <button class="btn btn-soft btn-sm" type="button" onclick="scrollToExpenseForm()">➕ إضافة مصروف</button>
+            </div>
+
+            <div class="filters-box">
+                <div class="filters-grid">
+                    <div class="field">
+                        <label for="filter_from">من تاريخ</label>
+                        <input type="date" id="filter_from" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_to">إلى تاريخ</label>
+                        <input type="date" id="filter_to" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_category">الفئة</label>
+                        <select id="filter_category">
+                            <option value="">الكل</option>
+                            <option value="كهرباء">كهرباء</option>
+                            <option value="ماء">ماء</option>
+                            <option value="صيانة عامة">صيانة عامة</option>
+                            <option value="صيانة كهرباء">صيانة كهرباء</option>
+                            <option value="صيانة مياه">صيانة مياه</option>
+                            <option value="صيانة مبانٍ">صيانة مبانٍ</option>
+                            <option value="رواتب وأجور">رواتب وأجور</option>
+                            <option value="حراسة">حراسة</option>
+                            <option value="نظافة">نظافة</option>
+                            <option value="ضرائب">ضرائب</option>
+                            <option value="رسوم حكومية">رسوم حكومية</option>
+                            <option value="اتصالات وإنترنت">اتصالات وإنترنت</option>
+                            <option value="محاماة">محاماة</option>
+                            <option value="مصاريف قضايا">مصاريف قضايا</option>
+                            <option value="مشتريات للمجمع">مشتريات للمجمع</option>
+                            <option value="وقود ومحروقات">وقود ومحروقات</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="filter_search">البحث</label>
+                        <input type="text" id="filter_search" placeholder="البيان، الجهة، الملاحظات..." />
+                    </div>
+                    <div class="field">
+                        <label for="filter_min">الحد الأدنى للمبلغ</label>
+                        <input type="number" id="filter_min" placeholder="0" step="0.01" min="0" />
+                    </div>
+                    <div class="field">
+                        <label for="filter_max">الحد الأعلى للمبلغ</label>
+                        <input type="number" id="filter_max" placeholder="بدون حد" step="0.01" min="0" />
+                    </div>
+                </div>
+
+                <div class="quick-filters" id="quick_filters">
+                    <button type="button" class="quick-pill" data-quick="today" onclick="applyQuickFilter('today', this)">اليوم</button>
+                    <button type="button" class="quick-pill" data-quick="week" onclick="applyQuickFilter('week', this)">هذا الأسبوع</button>
+                    <button type="button" class="quick-pill" data-quick="month" onclick="applyQuickFilter('month', this)">هذا الشهر</button>
+                    <button type="button" class="quick-pill" data-quick="last_month" onclick="applyQuickFilter('last_month', this)">الشهر الماضي</button>
+                    <button type="button" class="quick-pill" data-quick="year" onclick="applyQuickFilter('year', this)">هذه السنة</button>
+                    <button type="button" class="quick-pill" data-quick="all" onclick="applyQuickFilter('all', this)">الكل</button>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-gold btn-sm" onclick="applyFilters()">تطبيق الفلاتر</button>
+                    <button type="button" class="btn btn-soft btn-sm" onclick="clearFilters()">مسح الفلاتر</button>
+                </div>
+            </div>
+
+            <div class="results-bar">
+                <span id="results_count">عدد النتائج: 0</span>
+                <span id="results_total">إجمالي المصروفات: 0.00 د.أ</span>
+            </div>
+
+            <div id="table_status_msg" class="status-msg"></div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الفئة</th>
+                            <th>البيان</th>
+                            <th class="payee-only">الجهة أو المستفيد</th>
+                            <th>المبلغ</th>
+                            <th>ملاحظات</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesTableBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">لا توجد مصروفات مسجلة</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
 
     </div>
@@ -927,7 +1025,7 @@
             // 2) التمرير السلس إلى القسم المطلوب حسب رابط الصفحة (#hash)
             function scrollToHashPanel() {
                 var id = (window.location.hash || '').replace('#', '');
-                if (id !== 'expense_form_panel') return;
+                if (id !== 'expense_form_panel' && id !== 'expenses_list_panel') return;
                 var target = document.getElementById(id);
                 if (target) {
                     setTimeout(function () {
@@ -986,6 +1084,7 @@
         let isSavingExpense = false;
         let isSavingEdit = false;
         let editingExpenseId = null;
+        let searchDebounceTimer = null;
 
         // ===== أدوات مساعدة =====
         const toAmount = v => {
@@ -1030,6 +1129,7 @@
         function buildCategoryOptions() {
             const catSel = document.getElementById('category');
             const editSel = document.getElementById('edit_expense_category');
+            const filterSel = document.getElementById('filter_category');
             const legacy = legacyCategoriesInData();
 
             const mainOpts = '<option value="">-- اختر فئة --</option>' +
@@ -1042,6 +1142,12 @@
             // نافذة التعديل تشمل الفئات القديمة حتى تظهر السجلات القديمة بشكل صحيح
             editSel.innerHTML = mainOpts +
                 legacy.map(c => `<option value="${escHtml(c)}">${escHtml(c)} (فئة قديمة)</option>`).join('');
+
+            const prevFilter = filterSel.value;
+            filterSel.innerHTML = '<option value="">الكل</option>' +
+                EXPENSE_CATEGORIES.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('') +
+                legacy.map(c => `<option value="${escHtml(c)}">${escHtml(c)} (فئة قديمة)</option>`).join('');
+            if (prevFilter) filterSel.value = prevFilter;
         }
 
         // ===== فحص دعم عمود الجهة/المستفيد =====
@@ -1314,8 +1420,134 @@
             });
         }
 
+        // ===== الفلاتر (تُطبَّق على الجدول فقط — البطاقات والرسوم تبقى تحليلات عامة) =====
+        function getFilterState() {
+            return {
+                from: document.getElementById('filter_from').value,
+                to: document.getElementById('filter_to').value,
+                category: document.getElementById('filter_category').value,
+                search: document.getElementById('filter_search').value.trim().toLowerCase(),
+                min: document.getElementById('filter_min').value,
+                max: document.getElementById('filter_max').value
+            };
+        }
+
+        function filterExpenses(list, f) {
+            const fromD = f.from ? parseLocalDate(f.from) : null;
+            const toD = f.to ? parseLocalDate(f.to) : null;
+            const minA = f.min !== '' ? toAmount(f.min) : null;
+            const maxA = f.max !== '' ? toAmount(f.max) : null;
+
+            return list.filter(e => {
+                const d = parseLocalDate(e.expense_date);
+                if (fromD && (!d || d < fromD)) return false;
+                if (toD && (!d || d > toD)) return false;
+                if (f.category && String(e.category || '').trim() !== f.category) return false;
+
+                const amt = toAmount(e.amount);
+                if (minA !== null && amt < minA) return false;
+                if (maxA !== null && amt > maxA) return false;
+
+                if (f.search) {
+                    const haystack = [e.description, e.payee, e.notes]
+                        .map(v => String(v || '').toLowerCase())
+                        .join(' ');
+                    if (!haystack.includes(f.search)) return false;
+                }
+                return true;
+            });
+        }
+
+        function applyFilters() {
+            const filtered = filterExpenses(allExpenses, getFilterState())
+                .slice()
+                .sort((a, b) => (parseLocalDate(b.expense_date) || 0) - (parseLocalDate(a.expense_date) || 0));
+
+            renderExpenseTable(filtered);
+        }
+
+        function clearFilters() {
+            ['filter_from', 'filter_to', 'filter_category', 'filter_search', 'filter_min', 'filter_max']
+                .forEach(id => { document.getElementById(id).value = ''; });
+            setActiveQuickPill(null);
+            applyFilters();
+        }
+
+        function setActiveQuickPill(btn) {
+            document.querySelectorAll('#quick_filters .quick-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function applyQuickFilter(type, btn) {
+            const now = new Date();
+            const fromEl = document.getElementById('filter_from');
+            const toEl = document.getElementById('filter_to');
+
+            if (type === 'today') {
+                fromEl.value = todayLocalStr();
+                toEl.value = todayLocalStr();
+            } else if (type === 'week') {
+                // الأسبوع يبدأ من الأحد
+                const start = new Date(now);
+                start.setDate(now.getDate() - now.getDay());
+                fromEl.value = toLocalDateStr(start);
+                toEl.value = todayLocalStr();
+            } else if (type === 'month') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+                toEl.value = todayLocalStr();
+            } else if (type === 'last_month') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+                toEl.value = toLocalDateStr(new Date(now.getFullYear(), now.getMonth(), 0));
+            } else if (type === 'year') {
+                fromEl.value = toLocalDateStr(new Date(now.getFullYear(), 0, 1));
+                toEl.value = todayLocalStr();
+            } else if (type === 'all') {
+                fromEl.value = '';
+                toEl.value = '';
+            }
+
+            setActiveQuickPill(btn);
+            applyFilters();
+        }
+
+        // ===== جدول المصروفات =====
+        function renderExpenseTable(rows) {
+            const tbody = document.getElementById('expensesTableBody');
+            const colCount = PAYEE_SUPPORTED ? 7 : 6;
+
+            let total = 0;
+            rows.forEach(e => { total += toAmount(e.amount); });
+
+            document.getElementById('results_count').innerText = `عدد النتائج: ${rows.length.toLocaleString('en-US')}`;
+            document.getElementById('results_total').innerText = `إجمالي المصروفات: ${fmtJOD(total)}`;
+
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="${colCount}" class="empty-state">لا توجد مصروفات مطابقة</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(e => `
+                <tr>
+                    <td>${fmtDateDisplay(e.expense_date)}</td>
+                    <td>${escHtml(e.category || '—')}</td>
+                    <td>${escHtml(e.description || '—')}</td>
+                    <td class="payee-only">${escHtml(e.payee || '—')}</td>
+                    <td><strong>${fmtJOD(e.amount)}</strong></td>
+                    <td class="notes-cell" title="${escHtml(e.notes || '')}">${escHtml(e.notes || '—')}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn btn-soft btn-sm" onclick="openEditExpense('${e.id}')" aria-label="تعديل المصروف">✏️ تعديل</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')" aria-label="حذف المصروف">🗑️ حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         // ===== تحديث لوحة التحليل كاملة من نفس مجموعة البيانات =====
         function refreshExpenseDashboard() {
+            // ✅ الجدول أولاً — حتى لو فشلت المخططات لا يتأثر عرض المصروفات
+            try { applyFilters(); } catch (err) { console.error('خطأ في عرض الجدول:', err); }
             try { buildCategoryOptions(); } catch (err) { console.error('خطأ في بناء الفئات:', err); }
             try { renderExpenseSummaryCards(); } catch (err) { console.error('خطأ في بطاقات الملخص:', err); }
             try { renderCategoryChart(); } catch (err) { console.error('خطأ في مخطط الفئات:', err); }
@@ -1516,7 +1748,6 @@
 
         function showTableStatus(msg, type) {
             const el = document.getElementById('table_status_msg');
-            if (!el) return showStatus(msg, type);
             el.textContent = msg;
             el.className = `status-msg ${type}`;
             el.style.display = 'block';
@@ -1532,9 +1763,20 @@
             window.location.href = 'admin.html';
         }
 
+        // ===== التمرير إلى نموذج الإضافة =====
+        function scrollToExpenseForm() {
+            document.getElementById('expense_form_panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
         // ===== تحميل الصفحة =====
         window.onload = async function () {
             document.getElementById('expense_date').value = todayLocalStr();
+
+            // بحث فوري مع تأخير بسيط (debounce)
+            document.getElementById('filter_search').addEventListener('input', () => {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(applyFilters, 250);
+            });
 
             // إغلاق نافذة التعديل بزر Escape
             document.addEventListener('keydown', e => {
