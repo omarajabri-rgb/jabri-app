@@ -668,7 +668,7 @@
                     <span class="chevron">›</span>
                 </button>
                 <div class="submenu">
-                    <button class="menu-item" onclick="location.href='expenses.html#expenses_list_panel'">📋 قائمة المصروفات</button>
+                    <button class="menu-item" onclick="location.href='expenses.html#expenses_panel'">💸 مصروفات</button>
                 </div>
             </div>
 
@@ -784,10 +784,10 @@
             </div>
         </div>
 
-        <!-- ===== نموذج إضافة مصروف ===== -->
-        <div class="panel" id="expense_form_panel">
+        <!-- ===== مصروفات (نموذج الإضافة + قائمة المصروفات) ===== -->
+        <div class="panel" id="expenses_panel">
             <div class="chip-header">
-                <div class="chip-title">💸 إضافة مصروف جديد</div>
+                <div class="chip-title">💸 مصروفات</div>
             </div>
 
             <div id="status_msg" class="status-msg"></div>
@@ -849,15 +849,10 @@
                     <button class="btn btn-soft" type="button" onclick="clearExpenseForm()">🔄 تفريغ</button>
                 </div>
             </form>
-        </div>
 
-        <!-- ===== قائمة المصروفات ===== -->
-        <div class="panel" id="expenses_list_panel">
-            <div class="chip-header" style="justify-content:space-between; align-items:center;">
-                <div class="chip-title">📋 قائمة المصروفات</div>
-                <button class="btn btn-soft btn-sm" type="button" onclick="scrollToExpenseForm()">➕ إضافة مصروف</button>
-            </div>
+            <hr style="margin: 24px 0; border: 1px solid var(--line);" />
 
+            <!-- ===== قائمة المصروفات ===== -->
             <div class="filters-box">
                 <div class="filters-grid">
                     <div class="field">
@@ -1025,7 +1020,9 @@
             // 2) التمرير السلس إلى القسم المطلوب حسب رابط الصفحة (#hash)
             function scrollToHashPanel() {
                 var id = (window.location.hash || '').replace('#', '');
-                if (id !== 'expense_form_panel' && id !== 'expenses_list_panel') return;
+                // الروابط القديمة (النموذج/القائمة) تشير الآن إلى القسم الموحّد
+                if (id === 'expense_form_panel' || id === 'expenses_list_panel') id = 'expenses_panel';
+                if (id !== 'expenses_panel') return;
                 var target = document.getElementById(id);
                 if (target) {
                     setTimeout(function () {
@@ -1763,9 +1760,9 @@
             window.location.href = 'admin.html';
         }
 
-        // ===== التمرير إلى نموذج الإضافة =====
+        // ===== التمرير إلى قسم المصروفات =====
         function scrollToExpenseForm() {
-            document.getElementById('expense_form_panel').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('expenses_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ===== تحميل الصفحة =====
