@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>مجمع جبري | إدارة القضايا</title>
+    <title>مجمع جبري | إدارة القضايا والنزاعات</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -18,12 +17,14 @@
             --line: rgba(91,73,42,0.10);
             --success: #159a6f;
             --danger: #d14d4d;
+            --warning: #f59e0b;
             --shadow: 0 18px 45px rgba(87,68,37,0.10);
         }
 
         * {
             box-sizing: border-box;
             font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -40,6 +41,168 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+        /* ===== BURGER MENU ===== */
+        .burger-btn {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            width: 46px;
+            height: 46px;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            box-shadow: 0 12px 24px rgba(201,164,107,0.28);
+            z-index: 9999;
+            transition: transform .2s ease;
+        }
+        .burger-btn:hover { transform: translateY(-1px); }
+        .burger-btn span { font-size: 20px; color: #fff; line-height: 1; transition: transform .25s ease; }
+        .burger-btn.active span { transform: rotate(90deg); }
+
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(31,41,55,0.35);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s ease;
+            z-index: 9998;
+        }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 300px;
+            max-width: 86vw;
+            background: rgba(255,255,255,0.86);
+            backdrop-filter: blur(18px);
+            border-left: 1px solid rgba(255,255,255,0.6);
+            box-shadow: -18px 0 45px rgba(87,68,37,0.18);
+            border-top-left-radius: 28px;
+            border-bottom-left-radius: 28px;
+            transform: translateX(100%);
+            transition: transform .35s cubic-bezier(.4,0,.2,1);
+            z-index: 9999;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-menu.open { transform: translateX(0); }
+
+        .side-menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+            font-weight: 900;
+            font-size: 15px;
+            color: #544128;
+        }
+        .side-menu-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(201,164,107,0.22);
+            background: rgba(201,164,107,0.12);
+            color: var(--gold-deep);
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .side-menu-body { padding: 10px 0 20px; }
+
+        .menu-category { border-bottom: 1px solid rgba(91,73,42,0.06); }
+        .menu-category-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: transparent;
+            border: none;
+            padding: 15px 18px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text);
+            cursor: pointer;
+            text-align: right;
+        }
+        .menu-category-header:hover { background: rgba(201,164,107,0.08); }
+        .menu-category-header .chevron { font-size: 14px; color: var(--muted); transition: transform .25s ease; }
+        .menu-category.open .menu-category-header .chevron { transform: rotate(-90deg); }
+        .menu-category.open .menu-category-header { color: #6b4f2b; }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: max-height .3s ease;
+        }
+        .menu-category.open .submenu { max-height: 260px; }
+
+        .menu-item {
+            width: calc(100% - 28px);
+            margin: 5px 14px;
+            padding: 11px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(201,164,107,0.14);
+            background: rgba(255,255,255,0.6);
+            color: #6b4f2b;
+            font-size: 13px;
+            font-weight: 800;
+            text-align: right;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+        .menu-item:hover { background: rgba(201,164,107,0.14); border-color: rgba(201,164,107,0.28); }
+
+        .menu-leaf-btn {
+            width: calc(100% - 28px);
+            margin: 16px 14px 20px;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(209,77,77,0.18);
+            background: rgba(209,77,77,0.12);
+            color: var(--danger);
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            text-align: center;
+        }
+        .menu-leaf-btn:hover { background: rgba(209,77,77,0.18); }
+
+        /* ===== PANELS & METRICS ===== */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .metric-card {
+            background: var(--card);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow);
+            border-radius: 20px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .metric-card span { font-size: 13px; font-weight: 800; color: var(--muted); }
+        .metric-card strong { font-size: 22px; font-weight: 900; color: var(--text); }
 
         .panel {
             background: var(--card);
@@ -67,6 +230,16 @@
             color: var(--gold-deep);
             background: rgba(201,164,107,0.12);
             border: 1px solid rgba(201,164,107,0.22);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid .field.col-3 {
+            grid-column: span 3;
         }
 
         .field {
@@ -108,6 +281,16 @@
             resize: vertical;
         }
 
+        .dispute-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .btn {
             border: none;
             cursor: pointer;
@@ -122,9 +305,7 @@
             transition: 0.25s ease;
         }
 
-        .btn:hover {
-            transform: translateY(-1px);
-        }
+        .btn:hover { transform: translateY(-1px); }
 
         .btn-gold {
             background: linear-gradient(135deg, var(--gold), var(--gold-deep));
@@ -144,23 +325,25 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
-        .btn-sm {
-            padding: 8px 14px;
-            font-size: 12px;
-            border-radius: 12px;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: #fff;
-            border: none;
-        }
-
         .btn-warning {
             background: rgba(215, 146, 31, 0.15);
             color: #b78a2e;
             border: 1px solid rgba(215, 146, 31, 0.2);
         }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 10px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .form-actions .btn { flex: 1; }
 
         .status-msg {
             display: none;
@@ -186,13 +369,33 @@
             border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input, .filter-bar select {
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            font-size: 13px;
+            font-weight: 700;
+            outline: none;
+            background: #fff;
+        }
+
+        .filter-bar input { flex: 2; min-width: 200px; }
+        .filter-bar select { flex: 1; min-width: 150px; }
+
         .table-wrap {
             overflow-x: auto;
             border-radius: 18px;
             background: #fff;
             border: 1px solid rgba(201, 164, 107, 0.14);
             margin-top: 16px;
-            max-height: 500px;
+            max-height: 520px;
             overflow-y: auto;
         }
 
@@ -225,30 +428,31 @@
             vertical-align: middle;
         }
 
-        tbody tr:last-child td {
-            border-bottom: none;
+        tbody tr:last-child td { border-bottom: none; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: var(--muted);
-            font-weight: 800;
+        .status-badge.active {
+            background: rgba(215, 146, 31, 0.12);
+            color: #b78a2e;
+            border: 1px solid rgba(215, 146, 31, 0.25);
         }
 
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            color: var(--muted);
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
+        .status-badge.ended {
+            background: rgba(209, 77, 77, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(209, 77, 77, 0.18);
         }
 
-        .back-link:hover {
-            color: var(--gold-deep);
+        .action-btns {
+            display: flex;
+            gap: 6px;
         }
 
         .back-home-btn {
@@ -267,7 +471,6 @@
             color: var(--gold-deep);
             font-size: 14px;
             font-weight: 900;
-            font-family: 'Tajawal', sans-serif;
             cursor: pointer;
             text-decoration: none;
             transition: 0.25s ease;
@@ -278,59 +481,7 @@
             background: rgba(201,164,107,0.12);
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 14px;
-        }
-
-        .form-grid .field:last-child {
-            grid-column: span 3;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .form-actions .btn {
-            flex: 1;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-        }
-
-        .status-badge.active {
-            background: rgba(21, 154, 111, 0.12);
-            color: var(--success);
-            border: 1px solid rgba(21, 154, 111, 0.18);
-        }
-
-        .status-badge.ended {
-            background: rgba(209, 77, 77, 0.12);
-            color: var(--danger);
-            border: 1px solid rgba(209, 77, 77, 0.18);
-        }
-
-
-        .action-btns {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .action-btns .btn-sm {
-            padding: 6px 10px;
-            font-size: 11px;
-            border-radius: 10px;
-        }
-
+        /* ===== MODAL ===== */
         .modal {
             display: none;
             position: fixed;
@@ -344,9 +495,7 @@
             overflow-y: auto;
         }
 
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
             background: #fff;
@@ -383,161 +532,28 @@
             color: var(--muted);
         }
 
-        .modal-close:hover {
-            color: var(--danger);
-        }
+        .modal .form-grid { grid-template-columns: 1fr 1fr; }
+        .modal .form-grid .field.col-3 { grid-column: span 2; }
 
-        .modal .form-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .modal .form-grid .field:last-child {
-            grid-column: span 2;
-        }
-
-        .payment-row.debit {
-            color: var(--danger);
-        }
-
-        .payment-row.credit {
-            color: var(--success);
-        }
-
-        .total-row {
-            background: rgba(201, 164, 107, 0.10);
-            font-weight: 900;
-        }
-
-        .payment-table-wrap {
-            max-height: 250px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-
-        .payment-table-wrap table {
-            min-width: 600px;
-        }
-
-        .payment-table-wrap thead th {
-            position: sticky;
-            top: 0;
-            z-index: 5;
-        }
-
-        @media (max-width: 700px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .form-grid .field:last-child {
-                grid-column: span 1;
-            }
-            .form-actions {
-                flex-direction: column;
-            }
-            .modal .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal .form-grid .field:last-child {
-                grid-column: span 1;
-            }
-            .modal-content {
-                padding: 18px;
-            }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .field.col-3 { grid-column: span 1; }
+            .modal .form-grid { grid-template-columns: 1fr; }
+            .modal .form-grid .field.col-3 { grid-column: span 1; }
+            .form-actions { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===================== BURGER MENU (ADMIN ONLY) — mirrored from admin.html ===================== -->
-    <style>
-        .burger-btn{
-            position:fixed; top:18px; right:18px; width:46px; height:46px;
-            border-radius:15px; border:none; cursor:pointer;
-            display:flex; align-items:center; justify-content:center;
-            background:linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow:0 12px 24px rgba(201,164,107,0.28);
-            z-index:9999; transition:transform .2s ease;
-        }
-        .burger-btn:hover{ transform:translateY(-1px); }
-        .burger-btn span{ font-size:20px; color:#fff; line-height:1; transition:transform .25s ease; }
-        .burger-btn.active span{ transform:rotate(90deg); }
-
-        .menu-overlay{
-            position:fixed; inset:0; background:rgba(31,41,55,0.35);
-            backdrop-filter:blur(2px); opacity:0; pointer-events:none;
-            transition:opacity .3s ease; z-index:9998;
-        }
-        .menu-overlay.open{ opacity:1; pointer-events:auto; }
-
-        .side-menu{
-            position:fixed; top:0; right:0; height:100vh; width:300px; max-width:86vw;
-            background:rgba(255,255,255,0.86); backdrop-filter:blur(18px);
-            border-left:1px solid rgba(255,255,255,0.6);
-            box-shadow:-18px 0 45px rgba(87,68,37,0.18);
-            border-top-left-radius:28px; border-bottom-left-radius:28px;
-            transform:translateX(100%); transition:transform .35s cubic-bezier(.4,0,.2,1);
-            z-index:9999; overflow-y:auto; display:flex; flex-direction:column;
-        }
-        .side-menu.open{ transform:translateX(0); }
-
-        .side-menu-header{
-            display:flex; align-items:center; justify-content:space-between;
-            padding:20px; border-bottom:1px solid var(--line);
-            font-weight:900; font-size:15px; color:#544128;
-        }
-        .side-menu-close{
-            width:34px; height:34px; border-radius:10px;
-            border:1px solid rgba(201,164,107,0.22);
-            background:rgba(201,164,107,0.12);
-            color:var(--gold-deep); font-weight:900; cursor:pointer;
-        }
-
-        .side-menu-body{ padding:10px 0 20px; }
-
-        .menu-category{ border-bottom:1px solid rgba(91,73,42,0.06); }
-        .menu-category-header{
-            width:100%; display:flex; align-items:center; justify-content:space-between;
-            background:transparent; border:none; padding:15px 18px;
-            font-size:14px; font-weight:800; color:var(--text);
-            cursor:pointer; text-align:right;
-        }
-        .menu-category-header:hover{ background:rgba(201,164,107,0.08); }
-        .menu-category-header .chevron{ font-size:14px; color:var(--muted); transition:transform .25s ease; }
-        .menu-category.open .menu-category-header .chevron{ transform:rotate(-90deg); }
-        .menu-category.open .menu-category-header{ color:#6b4f2b; }
-
-        .submenu{ max-height:0; overflow:hidden; display:flex; flex-direction:column; transition:max-height .3s ease; }
-        .menu-category.open .submenu{ max-height:260px; }
-
-        .menu-item{
-            width:calc(100% - 28px); margin:5px 14px; padding:11px 16px;
-            border-radius:14px; border:1px solid rgba(201,164,107,0.14);
-            background:rgba(255,255,255,0.6); color:#6b4f2b;
-            font-size:13px; font-weight:800; text-align:right;
-            cursor:pointer; transition:.2s ease;
-        }
-        .menu-item:hover{ background:rgba(201,164,107,0.14); border-color:rgba(201,164,107,0.28); }
-
-        .menu-leaf-btn{
-            width:calc(100% - 28px); margin:16px 14px 20px; padding:14px;
-            border-radius:16px; border:1px solid rgba(209,77,77,0.18);
-            background:rgba(209,77,77,0.12); color:var(--danger);
-            font-size:14px; font-weight:900; cursor:pointer; text-align:center;
-        }
-        .menu-leaf-btn:hover{ background:rgba(209,77,77,0.18); }
-
-        @media (max-width:480px){
-            .side-menu{ width:88vw; }
-        }
-    </style>
-
-    <!-- زر القائمة (البرغر) — للإدارة فقط -->
+    <!-- زر القائمة -->
     <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="القائمة الرئيسية">
         <span id="burgerIcon">☰</span>
     </button>
 
     <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
+    <!-- القائمة الجانبية -->
     <aside class="side-menu" id="sideMenu">
         <div class="side-menu-header">
             <span>☰ القائمة الرئيسية</span>
@@ -545,7 +561,6 @@
         </div>
 
         <nav class="side-menu-body">
-
             <button class="menu-item" style="margin-top:12px;" onclick="location.href='admin.html'">🏠 لوحة التحكم الرئيسية</button>
 
             <div class="menu-category">
@@ -591,11 +606,213 @@
             </div>
 
             <button class="menu-leaf-btn" onclick="logoutAdmin()">🚪 خروج</button>
-
         </nav>
     </aside>
 
+    <div class="shell">
+
+        <!-- الإحصائيات العلوية -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <span>إجمالي المطالبات المسجلة</span>
+                <strong id="kpiClaimAmount">0 د.أ</strong>
+            </div>
+            <div class="metric-card">
+                <span>إجمالي المبالغ المحكوم بها</span>
+                <strong id="kpiAwardAmount" style="color: var(--primary);">0 د.أ</strong>
+            </div>
+            <div class="metric-card">
+                <span>فارق الأحكام القضائية</span>
+                <strong id="kpiWriteOffAmount" style="color: var(--danger);">0 د.أ</strong>
+            </div>
+            <div class="metric-card">
+                <span>قضايا قيد المتابعة</span>
+                <strong id="kpiActiveCases" style="color: var(--warning);">0</strong>
+            </div>
+        </div>
+
+        <!-- نموذج تسجيل قضية -->
+        <div class="panel" id="case_form_panel">
+            <div class="chip-header">
+                <div class="chip-title">➕ تسجيل قضية أو نزاع قضائي جديد</div>
+            </div>
+
+            <div id="status_msg" class="status-msg"></div>
+
+            <form id="caseForm" onsubmit="return false;">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
+                        <select id="tenant_code">
+                            <option value="">-- اختر مستأجر --</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="case_number">رقم الدعوى القضائية</label>
+                        <input type="text" id="case_number" placeholder="مثال: 2026/890" />
+                        <small style="color:var(--muted);font-size:11px;">غير مطلوب إذا كان الإدخال إنذار عدلي</small>
+                    </div>
+
+                    <div class="field">
+                        <label for="case_date">تاريخ رفع الدعوى</label>
+                        <input type="date" id="case_date" />
+                    </div>
+
+                    <div class="field">
+                        <label for="claim_amount">المطالبة الأصلية (د.أ)</label>
+                        <input type="number" id="claim_amount" placeholder="مثال: 5400" step="0.01" oninput="calculateDispute()" />
+                    </div>
+
+                    <div class="field">
+                        <label for="amount">المبلغ المحكوم به (د.أ)</label>
+                        <input type="number" id="amount" placeholder="مثال: 5000" step="0.01" oninput="calculateDispute()" />
+                    </div>
+
+                    <div class="field">
+                        <label for="end_date">📌 تاريخ الانتهاء / الإغلاق</label>
+                        <input type="date" id="end_date" />
+                        <small style="color:var(--muted);font-size:11px;">📌 تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً عند حلول التاريخ</small>
+                    </div>
+
+                    <div class="field col-3">
+                        <div class="dispute-box">
+                            <div>
+                                <strong>⚖️ فارق الحكم القضائي المحتسب:</strong>
+                                <span id="diffAmountText" style="color:var(--danger); font-weight:900; margin-right:8px;">0 د.أ</span>
+                            </div>
+                            <small style="color:var(--muted);">حقل معلوماتي يوضح الفارق بين المطالبة الأصلية وقرار المحكمة</small>
+                        </div>
+                    </div>
+
+                    <div class="field col-3">
+                        <label for="legal_notice">⚖️ مرجع الإنذار العدلي أو التنفيذ</label>
+                        <input type="text" id="legal_notice" placeholder="مثال: إنذار عدلي كاتب عدل عمان رقم..." />
+                    </div>
+
+                    <div class="field col-3">
+                        <label for="notes">ملاحظات وقرار المحكمة</label>
+                        <textarea id="notes" placeholder="أي تفاصيل قانونية أو منطوق الحكم..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-gold" onclick="saveCase()">💾 حفظ القضية</button>
+                    <button class="btn btn-soft" type="button" onclick="clearCaseForm()">🔄 تفريغ</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- جدول سجل القضايا -->
+        <div class="panel">
+            <div class="chip-header" style="justify-content:space-between; align-items:center;">
+                <div class="chip-title">📋 سجل القضايا والنزاعات</div>
+                <button class="btn btn-soft btn-sm" type="button" onclick="scrollToCaseForm()">➕ إضافة قضية</button>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchInput" placeholder="🔍 بحث برقم القضية أو اسم المستأجر..." oninput="renderFilteredCases()" />
+                <select id="statusFilter" onchange="renderFilteredCases()">
+                    <option value="ALL">جميع الحالات</option>
+                    <option value="active">قيد المتابعة (فعالة)</option>
+                    <option value="ended">منتهية</option>
+                </select>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المستأجر</th>
+                            <th>رقم القضية</th>
+                            <th>المطالبة الأصلية</th>
+                            <th>المبلغ المحكوم</th>
+                            <th>فارق الحكم</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإغلاق</th>
+                            <th>إنذار عدلي</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="casesTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">جاري تحميل السجلات...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
+
+    </div>
+
+    <!-- نافذة تعديل القضية (Modal) -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ تعديل بيانات القضية</h2>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+            <div id="edit_status_msg" class="status-msg"></div>
+            <form id="editForm" onsubmit="return false;">
+                <input type="hidden" id="edit_id" />
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="edit_tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
+                        <select id="edit_tenant_code">
+                            <option value="">-- اختر مستأجر --</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="edit_case_number">رقم القضية</label>
+                        <input type="text" id="edit_case_number" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_case_date">تاريخ القضية</label>
+                        <input type="date" id="edit_case_date" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_claim_amount">المطالبة الأصلية (د.أ)</label>
+                        <input type="number" id="edit_claim_amount" step="0.01" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_amount">المبلغ المحكوم به (د.أ)</label>
+                        <input type="number" id="edit_amount" step="0.01" />
+                    </div>
+                    <div class="field">
+                        <label for="edit_end_date">تاريخ الانتهاء</label>
+                        <input type="date" id="edit_end_date" />
+                    </div>
+                    <div class="field col-3">
+                        <label for="edit_legal_notice">مرجع الإنذار العدلي</label>
+                        <input type="text" id="edit_legal_notice" />
+                    </div>
+                    <div class="field col-3">
+                        <label for="edit_notes">ملاحظات</label>
+                        <textarea id="edit_notes"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-gold" onclick="updateCase()">💾 حفظ التعديلات</button>
+                    <button class="btn btn-soft" type="button" onclick="closeEditModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        const supabaseCases = window.supabase.createClient(
+            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
+        );
+
+        if (localStorage.getItem('jabri_admin_session') !== 'active') {
+            window.location.href = 'admin-login.html';
+        }
+
+        let casesCache = [];
+
         function logoutAdmin(){
             localStorage.removeItem('jabri_admin_session');
             window.location.href = 'admin-login.html';
@@ -626,192 +843,30 @@
         }
 
         document.addEventListener('keydown', e => {
-            if(e.key === 'Escape') closeMenu();
+            if(e.key === 'Escape') {
+                closeMenu();
+                closeEditModal();
+            }
         });
-    </script>
-    <!-- ===================== END BURGER MENU ===================== -->
 
-
-
-    <div class="shell">
-
-        <!-- ===== نموذج إضافة قضية ===== -->
-        <div class="panel" id="case_form_panel">
-            <div class="chip-header">
-                <div class="chip-title">➕ إضافة قضية جديدة</div>
-            </div>
-
-            <div id="status_msg" class="status-msg"></div>
-
-            <form id="caseForm" onsubmit="return false;">
-                <div class="form-grid">
-                    <div class="field">
-                        <label for="tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
-                        <select id="tenant_code">
-                            <option value="">-- اختر مستأجر --</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
-                        <input type="text" id="case_number" placeholder="مثال: 2025/1234" />
-                        <small style="color:var(--muted);font-size:11px;">غير مطلوب إذا كان الإدخال إنذار عدلي</small>
-                    </div>
-
-                    <div class="field">
-                        <label for="case_date">تاريخ القضية</label>
-                        <input type="date" id="case_date" />
-                    </div>
-
-                    <div class="field">
-                        <label for="amount">المبلغ المحكوم</label>
-                        <input type="number" id="amount" placeholder="مثال: 5000" step="0.01" />
-                    </div>
-
-                    <div class="field">
-                        <label for="end_date">📌 تاريخ الانتهاء</label>
-                        <input type="date" id="end_date" />
-                        <small style="color:var(--muted);font-size:11px;">📌 تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً عند وصول تاريخ الانتهاء</small>
-                    </div>
-
-                    <div class="field">
-                        <label for="related_case">قضية مرتطة</label>
-                        <input type="text" id="related_case" placeholder="رقم القضية المرتبطة" />
-                    </div>
-
-                    <div class="field">
-                        <label for="legal_notice">⚖️ إنذار عدلي</label>
-                        <input type="text" id="legal_notice" placeholder="مثال: إنذار عدلي - كاتب عدل شرق عمان 2025" />
-                        <small style="color:var(--muted);font-size:11px;">يظهر في القائمة فقط إذا تم تعبئته — النص الكامل يوضع في الملاحظات</small>
-                    </div>
-
-                    <div class="field">
-                        <label for="notes">ملاحظات</label>
-                        <textarea id="notes" placeholder="أي تفاصيل إضافية..."></textarea>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button class="btn btn-gold" onclick="saveCase()">💾 حفظ القضية</button>
-                    <button class="btn btn-soft" type="button" onclick="clearCaseForm()">🔄 تفريغ</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- ===== قائمة القضايا ===== -->
-        <div class="panel">
-            <div class="chip-header" style="justify-content:space-between; align-items:center;">
-                <div class="chip-title">📋 قائمة القضايا</div>
-                <button class="btn btn-soft btn-sm" type="button" onclick="scrollToCaseForm()">➕ إضافة قضية</button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>المستأجر</th>
-                            <th>رقم القضية</th>
-                            <th>التاريخ</th>
-                            <th>المبلغ</th>
-                            <th>الحالة</th>
-                            <th>تاريخ الانتهاء</th>
-                            <th>قضية مرتطة</th>
-                            <th>إنذار عدلي</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="casesTableBody">
-                        <tr>
-                            <td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
-
-    </div>
-
-    <!-- ===== MODAL: Edit Case ===== -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ تعديل القضية</h2>
-                <button class="modal-close" onclick="closeEditModal()">✕</button>
-            </div>
-            <div id="edit_status_msg" class="status-msg"></div>
-            <form id="editForm" onsubmit="return false;">
-                <input type="hidden" id="edit_id" />
-                <div class="form-grid">
-                    <div class="field">
-                        <label for="edit_tenant_code">المستأجر <span style="color:var(--danger);">*</span></label>
-                        <select id="edit_tenant_code">
-                            <option value="">-- اختر مستأجر --</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="edit_case_number">رقم القضية <span style="color:var(--danger);">*</span></label>
-                        <input type="text" id="edit_case_number" />
-                    </div>
-                    <div class="field">
-                        <label for="edit_case_date">تاريخ القضية</label>
-                        <input type="date" id="edit_case_date" />
-                    </div>
-                    <div class="field">
-                        <label for="edit_amount">المبلغ المحكوم</label>
-                        <input type="number" id="edit_amount" step="0.01" />
-                    </div>
-                    <div class="field">
-                        <label for="edit_end_date">📌 تاريخ الانتهاء</label>
-                        <input type="date" id="edit_end_date" />
-                        <small style="color:var(--muted);font-size:11px;">📌 تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً عند وصول تاريخ الانتهاء</small>
-                    </div>
-                    <div class="field">
-                        <label for="edit_related_case">قضية مرتطة</label>
-                        <input type="text" id="edit_related_case" placeholder="رقم القضية المرتبطة" />
-                    </div>
-                    <div class="field">
-                        <label for="edit_legal_notice">⚖️ إنذار عدلي</label>
-                        <input type="text" id="edit_legal_notice" placeholder="مثال: إنذار عدلي - كاتب عدل شرق عمان 2025" />
-                    </div>
-                    <div class="field">
-                        <label for="edit_notes">ملاحظات</label>
-                        <textarea id="edit_notes" placeholder="أي تفاصيل إضافية..."></textarea>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-gold" onclick="updateCase()">💾 حفظ التعديلات</button>
-                    <button class="btn btn-soft" type="button" onclick="closeEditModal()">إلغاء</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // ============================================================
-        // 🔥 SUPABASE CLIENT
-        // ============================================================
-        const supabaseCases = window.supabase.createClient(
-            'https://gzukfvxcpfblzqyjzkoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6dWtmdnhjcGZibHpxeWp6a296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjA3NjgsImV4cCI6MjA4OTM5Njc2OH0.7Jm1pg1MZEVj4B4IiGPU0yNmMPEPmClwUUkAv_rvGBU'
-        );
-
-        // ============================================================
-        // 🔐 SESSION CHECK
-        // ============================================================
-        if (localStorage.getItem('jabri_admin_session') !== 'active') {
-            window.location.href = 'admin-login.html';
+        function isCaseEnded(endDate) {
+            if (!endDate) return false;
+            const d = new Date(endDate);
+            if (Number.isNaN(d.getTime())) return false;
+            d.setHours(23, 59, 59, 999);
+            return new Date() > d;
         }
 
-        // ============================================================
-        // 📋 LOAD TENANTS INTO DROPDOWN
-        // ============================================================
+        function calculateDispute() {
+            const claim = parseFloat(document.getElementById('claim_amount').value) || 0;
+            const award = parseFloat(document.getElementById('amount').value) || 0;
+            const diff = claim > award ? (claim - award) : 0;
+            document.getElementById('diffAmountText').textContent = diff.toLocaleString('en-US') + ' د.أ';
+        }
+
         async function loadTenantsIntoDropdown(selectId) {
             const select = document.getElementById(selectId);
             if (!select) return;
-
-            select.innerHTML = '<option value="">⏳ جاري التحميل...</option>';
 
             try {
                 const { data, error } = await supabaseCases
@@ -819,44 +874,20 @@
                     .select('tenant_code, tenant_name')
                     .order('tenant_name');
 
-                if (error) {
-                    console.error('❌ Error loading tenants:', error);
-                    select.innerHTML = '<option value="">❗ خطأ في التحميل</option>';
-                    return;
-                }
+                if (error || !data) return;
 
                 select.innerHTML = '<option value="">-- اختر مستأجر --</option>';
-
-                if (data && data.length > 0) {
-                    data.forEach(tenant => {
-                        const option = document.createElement('option');
-                        option.value = tenant.tenant_code;
-                        option.textContent = tenant.tenant_name + ' (' + tenant.tenant_code + ')';
-                        select.appendChild(option);
-                    });
-                }
+                data.forEach(tenant => {
+                    const option = document.createElement('option');
+                    option.value = tenant.tenant_code;
+                    option.textContent = `${tenant.tenant_name} (${tenant.tenant_code})`;
+                    select.appendChild(option);
+                });
             } catch (err) {
-                console.error('❌ Error:', err);
-                select.innerHTML = '<option value="">❗ خطأ</option>';
+                console.error(err);
             }
         }
 
-        // ============================================================
-        // ✅ الحالة مرتبطة بتاريخ الانتهاء:
-        //    منتهية = يوجد تاريخ انتهاء وقد وصلنا إليه أو تجاوزناه
-        //    فعالة  = لا يوجد تاريخ انتهاء، أو التاريخ لم يأتِ بعد
-        // ============================================================
-        function isCaseEnded(endDate) {
-            if (!endDate) return false;
-            const d = new Date(endDate);
-            if (Number.isNaN(d.getTime())) return false;
-            d.setHours(23, 59, 59, 999); // القضية تبقى فعالة حتى نهاية يوم الانتهاء
-            return new Date() > d;
-        }
-
-        // ============================================================
-        // 📋 LOAD CASES
-        // ============================================================
         async function loadCases() {
             try {
                 const { data, error } = await supabaseCases
@@ -866,64 +897,105 @@
 
                 const tbody = document.getElementById('casesTableBody');
 
-                if (error) {
-                    console.error('❌ Error loading cases:', error);
-                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                if (error || !data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">لا توجد قضايا مسجلة</td></tr>`;
+                    casesCache = [];
+                    updateMetrics();
                     return;
                 }
 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = data.map(caseItem => {
-                    // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
-                    const isEnded = isCaseEnded(caseItem.end_date);
-                    const statusText = isEnded ? 'منتهية' : 'فعالة';
-                    const statusClass = isEnded ? 'ended' : 'active';
-
-                    return `
-                        <tr id="case_row_${caseItem.id}">
-                            <td>${caseItem.tenants?.tenant_name || caseItem.tenant_code}</td>
-                            <td><strong>${caseItem.case_number}</strong></td>
-                            <td>${caseItem.case_date ? new Date(caseItem.case_date).toLocaleDateString('en-GB') : '—'}</td>
-                            <td>${caseItem.amount ? Number(caseItem.amount).toLocaleString('en-US') : '—'}</td>
-                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                            <td>${caseItem.end_date ? new Date(caseItem.end_date).toLocaleDateString('en-GB') : '—'}</td>
-                            <td>${caseItem.related_case || '—'}</td>
-                            <td>${caseItem.legal_notice ? `<span class="status-badge" style="background:rgba(201,164,107,0.16);color:var(--gold-deep);border:1px solid rgba(201,164,107,0.4);" title="${caseItem.legal_notice.replace(/"/g, '&quot;')}">⚖️ إنذار عدلي</span>` : '—'}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); openEditModal('${caseItem.id}')">✏️</button>
-                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteCase('${caseItem.id}')">🗑️</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
+                casesCache = data;
+                renderFilteredCases();
+                updateMetrics();
             } catch (err) {
-                console.error('❌ Error in loadCases:', err);
-                const tbody = document.getElementById('casesTableBody');
-                tbody.innerHTML = `<tr><td colspan="9" class="empty-state">لا توجد قضايا مسجلة</td></tr>`;
+                console.error(err);
             }
         }
 
-        // ============================================================
-        // 💾 SAVE CASE
-        // ============================================================
+        function updateMetrics() {
+            let totalClaim = 0;
+            let totalAward = 0;
+            let totalWriteOff = 0;
+            let active = 0;
+
+            casesCache.forEach(c => {
+                const award = Number(c.amount || 0);
+                const notes = c.notes || '';
+                const matchClaim = notes.match(/مطالبة_أصلية:(\d+(\.\d+)?)/);
+                const claim = matchClaim ? parseFloat(matchClaim[1]) : award;
+
+                totalClaim += claim;
+                totalAward += award;
+                if (claim > award) totalWriteOff += (claim - award);
+
+                if (!isCaseEnded(c.end_date)) active++;
+            });
+
+            document.getElementById('kpiClaimAmount').textContent = totalClaim.toLocaleString('en-US') + ' د.أ';
+            document.getElementById('kpiAwardAmount').textContent = totalAward.toLocaleString('en-US') + ' د.أ';
+            document.getElementById('kpiWriteOffAmount').textContent = totalWriteOff.toLocaleString('en-US') + ' د.أ';
+            document.getElementById('kpiActiveCases').textContent = active;
+        }
+
+        function renderFilteredCases() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const tbody = document.getElementById('casesTableBody');
+
+            const filtered = casesCache.filter(c => {
+                const tenant = (c.tenants?.tenant_name || c.tenant_code || '').toLowerCase();
+                const caseNum = (c.case_number || '').toLowerCase();
+                const isEnded = isCaseEnded(c.end_date);
+                const matchesSearch = tenant.includes(search) || caseNum.includes(search);
+                const matchesStatus = status === 'ALL' || (status === 'ended' && isEnded) || (status === 'active' && !isEnded);
+                return matchesSearch && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">لا توجد نتائج مطابقة</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(c => {
+                const isEnded = isCaseEnded(c.end_date);
+                const statusText = isEnded ? 'منتهية' : 'قيد المتابعة';
+                const statusClass = isEnded ? 'ended' : 'active';
+                const award = Number(c.amount || 0);
+                const matchClaim = (c.notes || '').match(/مطالبة_أصلية:(\d+(\.\d+)?)/);
+                const claim = matchClaim ? parseFloat(matchClaim[1]) : award;
+                const diff = claim > award ? (claim - award) : 0;
+
+                return `
+                    <tr>
+                        <td><strong>${c.tenants?.tenant_name || c.tenant_code}</strong></td>
+                        <td><strong>${c.case_number}</strong></td>
+                        <td>${claim > 0 ? claim.toLocaleString('en-US') + ' د.أ' : '—'}</td>
+                        <td style="color:var(--primary); font-weight:800;">${award ? award.toLocaleString('en-US') + ' د.أ' : '—'}</td>
+                        <td style="color:var(--danger); font-weight:800;">${diff > 0 ? diff.toLocaleString('en-US') + ' د.أ' : '0 د.أ'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${c.end_date ? new Date(c.end_date).toLocaleDateString('en-GB') : '—'}</td>
+                        <td>${c.legal_notice ? `<span class="status-badge" style="background:rgba(201,164,107,0.16);color:var(--gold-deep);border:1px solid rgba(201,164,107,0.4);" title="${c.legal_notice.replace(/"/g, '&quot;')}">⚖️ مسجل</span>` : '—'}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-warning btn-sm" onclick="openEditModal('${c.id}')">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCase('${c.id}')">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         async function saveCase() {
             const tenantCode = document.getElementById('tenant_code').value;
             const caseNumber = document.getElementById('case_number').value.trim();
-            const caseDate = document.getElementById('case_date').value;
+            const claimAmount = document.getElementById('claim_amount').value;
             const amount = document.getElementById('amount').value.trim();
+            const caseDate = document.getElementById('case_date').value;
             const endDate = document.getElementById('end_date').value;
-            const relatedCase = document.getElementById('related_case').value.trim();
             const legalNotice = document.getElementById('legal_notice').value.trim();
-            const notes = document.getElementById('notes').value.trim();
+            const rawNotes = document.getElementById('notes').value.trim();
 
-            // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
             const caseStatus = isCaseEnded(endDate) ? 'ended' : 'active';
 
             if (!tenantCode) {
@@ -935,11 +1007,11 @@
                 return;
             }
 
-            // ⚖️ الإنذار العدلي لا يحمل رقم قضية
             const finalCaseNumber = caseNumber || 'إنذار عدلي';
+            const notes = `[مطالبة_أصلية:${claimAmount || amount}] ${rawNotes}`;
 
             try {
-                const { data, error } = await supabaseCases
+                const { error } = await supabaseCases
                     .from('court_cases')
                     .insert([{
                         tenant_code: tenantCode,
@@ -948,28 +1020,20 @@
                         amount: amount ? parseFloat(amount) : null,
                         case_status: caseStatus,
                         end_date: endDate || null,
-                        related_case: relatedCase || null,
                         legal_notice: legalNotice || null,
                         notes: notes || null
-                    }])
-                    .select()
-                    .single();
+                    }]);
 
                 if (error) throw error;
 
-                showStatus(`✅ تم إضافة ${finalCaseNumber === 'إنذار عدلي' ? 'الإنذار العدلي' : 'القضية ' + finalCaseNumber} بنجاح!`, 'success');
+                showStatus(`✅ تم حفظ القضية بنجاح!`, 'success');
                 clearCaseForm();
                 loadCases();
-
             } catch (err) {
-                console.error('❌ Error saving case:', err);
                 showStatus(`❌ حدث خطأ: ${err.message}`, 'error');
             }
         }
 
-        // ============================================================
-        // ✏️ EDIT CASE
-        // ============================================================
         async function openEditModal(id) {
             try {
                 const { data, error } = await supabaseCases
@@ -978,26 +1042,24 @@
                     .eq('id', id)
                     .single();
 
-                if (error) throw error;
+                if (error || !data) return;
 
                 document.getElementById('edit_id').value = data.id;
-                document.getElementById('edit_tenant_code').value = data.tenant_code || '';
                 document.getElementById('edit_case_number').value = data.case_number || '';
                 document.getElementById('edit_case_date').value = data.case_date || '';
                 document.getElementById('edit_amount').value = data.amount || '';
                 document.getElementById('edit_end_date').value = data.end_date || '';
-                document.getElementById('edit_related_case').value = data.related_case || '';
                 document.getElementById('edit_legal_notice').value = data.legal_notice || '';
-                document.getElementById('edit_notes').value = data.notes || '';
 
-                // Load tenants into edit dropdown
+                const matchClaim = (data.notes || '').match(/مطالبة_أصلية:(\d+(\.\d+)?)/);
+                document.getElementById('edit_claim_amount').value = matchClaim ? matchClaim[1] : (data.amount || '');
+                document.getElementById('edit_notes').value = (data.notes || '').replace(/\[مطالبة_أصلية:[^\]]+\]\s*/g, '');
+
                 await loadTenantsIntoDropdown('edit_tenant_code');
                 document.getElementById('edit_tenant_code').value = data.tenant_code || '';
 
                 document.getElementById('editModal').classList.add('active');
-
             } catch (err) {
-                console.error('❌ Error loading case for edit:', err);
                 alert('حدث خطأ في تحميل بيانات القضية');
             }
         }
@@ -1010,24 +1072,21 @@
             const id = document.getElementById('edit_id').value;
             const tenantCode = document.getElementById('edit_tenant_code').value;
             const caseNumber = document.getElementById('edit_case_number').value.trim();
-            const caseDate = document.getElementById('edit_case_date').value;
+            const claimAmount = document.getElementById('edit_claim_amount').value;
             const amount = document.getElementById('edit_amount').value.trim();
+            const caseDate = document.getElementById('edit_case_date').value;
             const endDate = document.getElementById('edit_end_date').value;
-            const relatedCase = document.getElementById('edit_related_case').value.trim();
             const legalNotice = document.getElementById('edit_legal_notice').value.trim();
-            const notes = document.getElementById('edit_notes').value.trim();
+            const rawNotes = document.getElementById('edit_notes').value.trim();
 
-            // ✅ الحالة تتحدد تلقائياً: منتهية فقط إذا وصل تاريخ الانتهاء أو تجاوزناه
             const caseStatus = isCaseEnded(endDate) ? 'ended' : 'active';
 
             if (!tenantCode) {
                 showEditStatus('الرجاء اختيار المستأجر', 'error');
                 return;
             }
-            if (!caseNumber && !legalNotice) {
-                showEditStatus('الرجاء إدخال رقم القضية أو تعبئة حقل إنذار عدلي', 'error');
-                return;
-            }
+
+            const notes = `[مطالبة_أصلية:${claimAmount || amount}] ${rawNotes}`;
 
             try {
                 const { error } = await supabaseCases
@@ -1039,7 +1098,6 @@
                         amount: amount ? parseFloat(amount) : null,
                         case_status: caseStatus,
                         end_date: endDate || null,
-                        related_case: relatedCase || null,
                         legal_notice: legalNotice || null,
                         notes: notes || null
                     })
@@ -1047,26 +1105,13 @@
 
                 if (error) throw error;
 
-                showEditStatus('✅ تم تحديث القضية بنجاح!', 'success');
                 closeEditModal();
                 loadCases();
-
             } catch (err) {
-                console.error('❌ Error updating case:', err);
                 showEditStatus(`❌ حدث خطأ: ${err.message}`, 'error');
             }
         }
 
-        function showEditStatus(message, type) {
-            const el = document.getElementById('edit_status_msg');
-            el.textContent = message;
-            el.className = `status-msg ${type}`;
-            el.style.display = 'block';
-        }
-
-        // ============================================================
-        // 🗑️ DELETE CASE
-        // ============================================================
         async function deleteCase(id) {
             if (!confirm('هل أنت متأكد من حذف هذه القضية؟')) return;
 
@@ -1077,33 +1122,18 @@
                     .eq('id', id);
 
                 if (error) throw error;
-
                 loadCases();
             } catch (err) {
-                console.error('❌ Error deleting case:', err);
                 alert('❌ حدث خطأ أثناء الحذف');
             }
         }
 
-        // ============================================================
-        // 🧹 CLEAR FORM
-        // ============================================================
         function clearCaseForm() {
-            document.getElementById('tenant_code').value = '';
-            document.getElementById('case_number').value = '';
-            document.getElementById('case_date').value = '';
-            document.getElementById('amount').value = '';
-            document.getElementById('end_date').value = '';
-            document.getElementById('related_case').value = '';
-            document.getElementById('legal_notice').value = '';
-            document.getElementById('notes').value = '';
-            document.getElementById('status_msg').className = 'status-msg';
+            document.getElementById('caseForm').reset();
+            calculateDispute();
             document.getElementById('status_msg').style.display = 'none';
         }
 
-        // ============================================================
-        // 📢 SHOW STATUS
-        // ============================================================
         function showStatus(message, type) {
             const el = document.getElementById('status_msg');
             el.textContent = message;
@@ -1111,32 +1141,25 @@
             el.style.display = 'block';
         }
 
-        // ============================================================
-        // 🔙 GO BACK
-        // ============================================================
+        function showEditStatus(message, type) {
+            const el = document.getElementById('edit_status_msg');
+            el.textContent = message;
+            el.className = `status-msg ${type}`;
+            el.style.display = 'block';
+        }
+
         function goBack() {
             window.location.href = 'admin.html';
         }
 
-        // ============================================================
-        // 📜 SCROLL TO FORM
-        // ============================================================
         function scrollToCaseForm() {
             document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ============================================================
-        // 🚀 LOAD PAGE
-        // ============================================================
         window.onload = function() {
-            console.log('🚀 Page loaded');
             loadTenantsIntoDropdown('tenant_code');
-            loadTenantsIntoDropdown('edit_tenant_code');
             loadCases();
-            console.log('✅ Page load complete');
         };
     </script>
-
 </body>
 </html>
-```
