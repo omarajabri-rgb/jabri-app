@@ -1,3 +1,8 @@
+السبب في هذا التداخل هو عدم تطابق عدد عناوين الأعمدة `<th>` في رأس الجدول مع خلايا الصفوف `<td>` في كود بناء الجدول (JavaScript)؛ حيث يحتوي الرأس على **9 أعمدة** (المستأجر، رقم القضية، المطالبة الأصلية، المبلغ المحكوم، فارق الحكم، الحالة، تاريخ الإغلاق، **إنذار عدلي**، الإجراءات)، بينما يقوم كود العرض بطباعة **الملاحظات** بدلاً من الإنذار العدلي أو إزاحة الأعمدة.
+
+إليك الكود المحدث بالكامل والمصحح لصفحة `cases.html` مع زر **"➕ إضافة قضية"** أعلى الجدول ومحاذاة تامة للأعمدة والتنسيق الزجاجي:
+
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -8,38 +13,51 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #f7f4ec;
-            --card: rgba(255,255,255,0.72);
-            --text: #1f2937;
-            --muted: #7a7469;
-            --gold: #c9a46b;
-            --gold-deep: #b78e54;
-            --line: rgba(91,73,42,0.10);
+            --bg: #f8f6f0;
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --surface: #ffffff;
+            --primary: #b78e54;
+            --primary-light: rgba(183, 142, 84, 0.12);
+            --primary-hover: #9a7440;
+            --gold-gradient: linear-gradient(135deg, #c9a46b, #b78e54);
+            --text-main: #1f2937;
+            --text-muted: #7a7468;
+            --border: rgba(201, 164, 107, 0.18);
             --success: #159a6f;
+            --success-bg: rgba(21, 154, 111, 0.12);
             --danger: #d14d4d;
-            --warning: #f59e0b;
-            --shadow: 0 18px 45px rgba(87,68,37,0.10);
+            --danger-bg: rgba(209, 77, 77, 0.12);
+            --warning: #d9822b;
+            --warning-bg: rgba(217, 130, 43, 0.12);
+            --shadow: 0 16px 36px rgba(87, 68, 37, 0.08);
+            --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.12);
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
         }
 
         * {
             box-sizing: border-box;
             font-family: 'Tajawal', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            color: var(--text);
-            background: radial-gradient(circle at top right, rgba(201,164,107,0.11), transparent 22%),
-                linear-gradient(135deg, #f8f4eb 0%, #f2ede3 100%);
+            background-color: var(--bg);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
-            direction: rtl;
+            padding: 24px 16px;
+            padding-top: 80px;
         }
 
-        .shell {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         /* ===== BURGER MENU ===== */
@@ -47,33 +65,45 @@
             position: fixed;
             top: 18px;
             right: 18px;
-            width: 46px;
-            height: 46px;
-            border-radius: 15px;
-            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 12px 24px rgba(201,164,107,0.28);
-            z-index: 9999;
-            transition: transform .2s ease;
+            background: var(--gold-gradient);
+            box-shadow: 0 10px 24px rgba(183, 142, 84, 0.35);
+            z-index: 10000;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .burger-btn:hover { transform: translateY(-1px); }
-        .burger-btn span { font-size: 20px; color: #fff; line-height: 1; transition: transform .25s ease; }
+
+        .burger-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(183, 142, 84, 0.45);
+        }
+
+        .burger-btn span {
+            font-size: 22px;
+            color: #fff;
+            line-height: 1;
+            transition: transform 0.3s ease;
+        }
+
         .burger-btn.active span { transform: rotate(90deg); }
 
         .menu-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(31,41,55,0.35);
-            backdrop-filter: blur(2px);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
             opacity: 0;
             pointer-events: none;
-            transition: opacity .3s ease;
+            transition: opacity 0.35s ease;
             z-index: 9998;
         }
+
         .menu-overlay.open { opacity: 1; pointer-events: auto; }
 
         .side-menu {
@@ -81,47 +111,94 @@
             top: 0;
             right: 0;
             height: 100vh;
-            width: 300px;
+            width: 320px;
             max-width: 86vw;
-            background: rgba(255,255,255,0.86);
-            backdrop-filter: blur(18px);
-            border-left: 1px solid rgba(255,255,255,0.6);
-            box-shadow: -18px 0 45px rgba(87,68,37,0.18);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            box-shadow: -12px 0 40px rgba(0, 0, 0, 0.12);
             border-top-left-radius: 28px;
             border-bottom-left-radius: 28px;
             transform: translateX(100%);
-            transition: transform .35s cubic-bezier(.4,0,.2,1);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 9999;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            padding: 24px 18px;
+            gap: 12px;
         }
+
         .side-menu.open { transform: translateX(0); }
 
-        .side-menu-header {
+        .side-menu-profile {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
-            border-bottom: 1px solid var(--line);
-            font-weight: 900;
-            font-size: 15px;
-            color: #544128;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 6px;
         }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--gold-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            box-shadow: 0 6px 14px rgba(183, 142, 84, 0.25);
+        }
+
+        .profile-text h4 {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .profile-text p {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
         .side-menu-close {
             width: 34px;
             height: 34px;
-            border-radius: 10px;
-            border: 1px solid rgba(201,164,107,0.22);
-            background: rgba(201,164,107,0.12);
-            color: var(--gold-deep);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 14px;
             font-weight: 900;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        .side-menu-body { padding: 10px 0 20px; }
+        .side-menu-close:hover {
+            background: var(--primary);
+            color: #fff;
+        }
 
-        .menu-category { border-bottom: 1px solid rgba(91,73,42,0.06); }
+        .menu-category {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: rgba(248, 246, 240, 0.6);
+            border: 1px solid var(--border);
+        }
+
         .menu-category-header {
             width: 100%;
             display: flex;
@@ -129,151 +206,209 @@
             justify-content: space-between;
             background: transparent;
             border: none;
-            padding: 15px 18px;
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--text);
+            padding: 13px 16px;
+            font-size: 13.5px;
+            font-weight: 900;
+            color: var(--text-main);
             cursor: pointer;
             text-align: right;
+            transition: all 0.2s;
         }
-        .menu-category-header:hover { background: rgba(201,164,107,0.08); }
-        .menu-category-header .chevron { font-size: 14px; color: var(--muted); transition: transform .25s ease; }
+
+        .menu-category-header:hover {
+            background: var(--primary-light);
+            color: var(--primary-hover);
+        }
+
+        .menu-category-header .chevron {
+            font-size: 13px;
+            color: var(--text-muted);
+            transition: transform 0.25s ease;
+        }
+
         .menu-category.open .menu-category-header .chevron { transform: rotate(-90deg); }
-        .menu-category.open .menu-category-header { color: #6b4f2b; }
 
         .submenu {
             max-height: 0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: max-height .3s ease;
+            gap: 4px;
+            padding: 0 10px;
+            transition: max-height 0.3s ease, padding 0.3s ease;
         }
-        .menu-category.open .submenu { max-height: 260px; }
+
+        .menu-category.open .submenu {
+            max-height: 200px;
+            padding: 6px 10px 10px;
+        }
 
         .menu-item {
-            width: calc(100% - 28px);
-            margin: 5px 14px;
-            padding: 11px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(201,164,107,0.14);
-            background: rgba(255,255,255,0.6);
-            color: #6b4f2b;
-            font-size: 13px;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: #fff;
+            color: #544128;
+            font-size: 12.5px;
             font-weight: 800;
             text-align: right;
             cursor: pointer;
-            transition: .2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-        .menu-item:hover { background: rgba(201,164,107,0.14); border-color: rgba(201,164,107,0.28); }
+
+        .menu-item:hover {
+            border-color: var(--primary);
+            background: #fff;
+            transform: translateX(-4px);
+            color: var(--primary);
+        }
+
+        .nav-single-btn {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: rgba(248, 246, 240, 0.6);
+            color: var(--text-main);
+            font-size: 13.5px;
+            font-weight: 900;
+            text-align: right;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-single-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
 
         .menu-leaf-btn {
-            width: calc(100% - 28px);
-            margin: 16px 14px 20px;
-            padding: 14px;
-            border-radius: 16px;
-            border: 1px solid rgba(209,77,77,0.18);
-            background: rgba(209,77,77,0.12);
+            width: 100%;
+            margin-top: auto;
+            padding: 13px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(209, 77, 77, 0.2);
+            background: var(--danger-bg);
             color: var(--danger);
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 900;
             cursor: pointer;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-        .menu-leaf-btn:hover { background: rgba(209,77,77,0.18); }
 
-        /* ===== PANELS & METRICS ===== */
+        .menu-leaf-btn:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* ===== METRICS & CARDS ===== */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
-            margin-bottom: 18px;
         }
 
         .metric-card {
-            background: var(--card);
+            background: var(--bg-glass);
             backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.72);
-            box-shadow: var(--shadow);
-            border-radius: 20px;
             padding: 18px 20px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .metric-card span { font-size: 13px; font-weight: 800; color: var(--muted); }
-        .metric-card strong { font-size: 22px; font-weight: 900; color: var(--text); }
+        .metric-card span {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
+        .metric-card strong {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-main);
+        }
 
         .panel {
-            background: var(--card);
+            background: var(--bg-glass);
             backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.72);
-            box-shadow: var(--shadow);
-            border-radius: 28px;
+            border-radius: var(--radius-xl);
             padding: 24px;
-            margin-bottom: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
 
-        .chip-header {
+        .panel-header {
             display: flex;
-            justify-content: flex-start;
-            margin-bottom: 16px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .chip-title {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 12px;
+        .panel-header h2 {
+            font-size: 17px;
             font-weight: 900;
-            color: var(--gold-deep);
-            background: rgba(201,164,107,0.12);
-            border: 1px solid rgba(201,164,107,0.22);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 14px;
-        }
-
-        .form-grid .field.col-3 {
-            grid-column: span 3;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
         .field {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin-bottom: 14px;
         }
 
+        .field.col-3 { grid-column: span 3; }
+
         .field label {
-            font-size: 12px;
+            font-size: 12.5px;
             font-weight: 800;
-            color: #8b6a3a;
+            color: var(--text-main);
             padding-right: 4px;
         }
 
-        .field input,
-        .field select,
-        .field textarea {
+        .field input, .field select, .field textarea {
             width: 100%;
             padding: 12px 15px;
-            border-radius: 16px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, 0.84);
-            font-size: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 13.5px;
             font-weight: 700;
             outline: none;
+            transition: all 0.2s ease;
         }
 
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(201, 164, 107, 0.15);
+        .field input:focus, .field select:focus, .field textarea:focus {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         .field textarea {
@@ -282,91 +417,65 @@
         }
 
         .dispute-box {
-            background: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            border-radius: 16px;
-            padding: 14px;
+            background: var(--warning-bg);
+            border: 1px solid rgba(217, 130, 43, 0.25);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
         .btn {
             border: none;
             cursor: pointer;
-            border-radius: 16px;
-            padding: 12px 20px;
-            font-size: 14px;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
             font-weight: 900;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: 0.25s ease;
+            transition: all 0.2s ease;
         }
 
         .btn:hover { transform: translateY(-1px); }
 
         .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            background: var(--gold-gradient);
             color: #fff;
-            box-shadow: 0 12px 24px rgba(201, 164, 107, 0.22);
+            box-shadow: 0 10px 20px rgba(183, 142, 84, 0.25);
         }
 
         .btn-soft {
             background: #fff;
-            border: 1px solid var(--line);
-            color: var(--text);
+            border: 1px solid var(--border);
+            color: var(--text-main);
         }
 
         .btn-danger {
-            background: rgba(209, 77, 77, 0.12);
+            background: var(--danger-bg);
             color: var(--danger);
-            border: 1px solid rgba(209, 77, 77, 0.18);
+            border: 1px solid rgba(209, 77, 77, 0.2);
         }
 
         .btn-warning {
-            background: rgba(215, 146, 31, 0.15);
-            color: #b78a2e;
-            border: 1px solid rgba(215, 146, 31, 0.2);
+            background: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid rgba(217, 130, 43, 0.2);
         }
 
         .btn-sm {
             padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 10px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .form-actions .btn { flex: 1; }
-
-        .status-msg {
-            display: none;
-            margin-top: 14px;
-            padding: 14px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 800;
-            text-align: center;
-        }
-
-        .status-msg.success {
-            display: block;
-            background: rgba(21, 154, 111, 0.12);
-            color: var(--success);
-            border: 1px solid rgba(21, 154, 111, 0.18);
-        }
-
-        .status-msg.error {
-            display: block;
-            background: rgba(209, 77, 77, 0.12);
-            color: var(--danger);
-            border: 1px solid rgba(209, 77, 77, 0.18);
+            font-size: 11.5px;
+            border-radius: 8px;
         }
 
         .filter-bar {
@@ -378,8 +487,8 @@
 
         .filter-bar input, .filter-bar select {
             padding: 10px 14px;
-            border-radius: 14px;
-            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
             font-size: 13px;
             font-weight: 700;
             outline: none;
@@ -391,10 +500,9 @@
 
         .table-wrap {
             overflow-x: auto;
-            border-radius: 18px;
+            border-radius: var(--radius-lg);
             background: #fff;
-            border: 1px solid rgba(201, 164, 107, 0.14);
-            margin-top: 16px;
+            border: 1px solid var(--border);
             max-height: 520px;
             overflow-y: auto;
         }
@@ -402,17 +510,18 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            text-align: right;
+            font-size: 13px;
             min-width: 1000px;
         }
 
         thead th {
-            background: rgba(201, 164, 107, 0.10);
+            background: rgba(248, 246, 240, 0.95);
             color: #6b4f2b;
             font-size: 12px;
             font-weight: 900;
-            padding: 12px 10px;
-            text-align: right;
-            border-bottom: 1px solid rgba(201, 164, 107, 0.18);
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -420,35 +529,28 @@
         }
 
         tbody td {
-            padding: 12px 10px;
+            padding: 13px 14px;
             font-size: 13px;
             font-weight: 700;
-            color: var(--text);
-            border-bottom: 1px solid rgba(91, 73, 42, 0.08);
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(91, 73, 42, 0.06);
             vertical-align: middle;
         }
 
         tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(248, 246, 240, 0.4); }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 900;
         }
 
-        .status-badge.active {
-            background: rgba(215, 146, 31, 0.12);
-            color: #b78a2e;
-            border: 1px solid rgba(215, 146, 31, 0.25);
-        }
-
-        .status-badge.ended {
-            background: rgba(209, 77, 77, 0.12);
-            color: var(--danger);
-            border: 1px solid rgba(209, 77, 77, 0.18);
-        }
+        .badge-active { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(217, 130, 43, 0.25); }
+        .badge-ended { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(209, 77, 77, 0.25); }
 
         .action-btns {
             display: flex;
@@ -461,14 +563,13 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            margin-top: 16px;
             padding: 14px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(201,164,107,0.22);
-            background: var(--card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
             backdrop-filter: blur(14px);
             box-shadow: var(--shadow);
-            color: var(--gold-deep);
+            color: var(--primary);
             font-size: 14px;
             font-weight: 900;
             cursor: pointer;
@@ -478,7 +579,7 @@
 
         .back-home-btn:hover {
             transform: translateY(-1px);
-            background: rgba(201,164,107,0.12);
+            background: var(--primary-light);
         }
 
         /* ===== MODAL ===== */
@@ -486,9 +587,9 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(4px);
-            z-index: 9999;
+            z-index: 10001;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -499,13 +600,13 @@
 
         .modal-content {
             background: #fff;
-            border-radius: 28px;
-            max-width: 800px;
+            border-radius: var(--radius-xl);
+            max-width: 750px;
             width: 100%;
             padding: 28px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow-lg);
         }
 
         .modal-header {
@@ -513,103 +614,121 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--line);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 14px;
         }
 
         .modal-header h2 {
             margin: 0;
-            color: var(--gold-deep);
+            color: var(--primary);
             font-weight: 900;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .modal-close {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            color: var(--muted);
+            color: var(--text-muted);
         }
 
         .modal .form-grid { grid-template-columns: 1fr 1fr; }
         .modal .form-grid .field.col-3 { grid-column: span 2; }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .status-msg.success { display: block; background: var(--success-bg); color: var(--success); }
+        .status-msg.error { display: block; background: var(--danger-bg); color: var(--danger); }
 
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
             .form-grid .field.col-3 { grid-column: span 1; }
             .modal .form-grid { grid-template-columns: 1fr; }
             .modal .form-grid .field.col-3 { grid-column: span 1; }
-            .form-actions { flex-direction: column; }
+            .btn-group { flex-direction: column; }
+            .filter-bar { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <!-- زر القائمة -->
+    <!-- 🍔 BURGER BUTTON -->
     <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="القائمة الرئيسية">
         <span id="burgerIcon">☰</span>
     </button>
 
     <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
-    <!-- القائمة الجانبية -->
+    <!-- 📱 SIDEBAR -->
     <aside class="side-menu" id="sideMenu">
-        <div class="side-menu-header">
-            <span>☰ القائمة الرئيسية</span>
+        <div class="side-menu-profile">
+            <div class="profile-info">
+                <div class="profile-icon">🏢</div>
+                <div class="profile-text">
+                    <h4>مجمع جبري</h4>
+                    <p>لوحة التحكم الإدارية</p>
+                </div>
+            </div>
             <button class="side-menu-close" onclick="closeMenu()">✕</button>
         </div>
 
-        <nav class="side-menu-body">
-            <button class="menu-item" style="margin-top:12px;" onclick="location.href='admin.html'">🏠 لوحة التحكم الرئيسية</button>
+        <button class="nav-single-btn" onclick="location.href='admin.html'">🏠 لوحة التحكم الرئيسية</button>
 
-            <div class="menu-category">
-                <button class="menu-category-header" onclick="toggleCategory(this)">
-                    <span>🏢 إدارة المستأجرين</span>
-                    <span class="chevron">›</span>
-                </button>
-                <div class="submenu">
-                    <button class="menu-item" onclick="location.href='add_tenant.html'">➕ إضافة مستأجر جديد</button>
-                    <button class="menu-item" onclick="location.href='edit_tenant.html'">✏️ تعديل مستأجر</button>
-                </div>
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>🏢 إدارة المستأجرين</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="location.href='add_tenant.html'">➕ إضافة مستأجر جديد</button>
+                <button class="menu-item" onclick="location.href='edit_tenant.html'">✏️ تعديل مستأجر</button>
             </div>
+        </div>
 
-            <div class="menu-category">
-                <button class="menu-category-header" onclick="toggleCategory(this)">
-                    <span>⚖️ القضايا</span>
-                    <span class="chevron">›</span>
-                </button>
-                <div class="submenu">
-                    <button class="menu-item" onclick="location.href='cases.html'">📋 قائمة القضايا</button>
-                </div>
+        <div class="menu-category open">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>⚖️ القضايا والنزاعات</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" style="color: var(--primary); font-weight: 900;" onclick="location.href='cases.html'">📋 سجل القضايا</button>
             </div>
+        </div>
 
-            <div class="menu-category">
-                <button class="menu-category-header" onclick="toggleCategory(this)">
-                    <span>💸 مصروفات المجمع</span>
-                    <span class="chevron">›</span>
-                </button>
-                <div class="submenu">
-                    <button class="menu-item" onclick="location.href='expenses.html#expenses_list_panel'">📋 قائمة المصروفات</button>
-                </div>
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>💸 مصروفات المجمع</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="location.href='expenses.html#expenses_panel'">📋 قائمة المصروفات</button>
             </div>
+        </div>
 
-            <div class="menu-category">
-                <button class="menu-category-header" onclick="toggleCategory(this)">
-                    <span>⚙️ الإعدادات</span>
-                    <span class="chevron">›</span>
-                </button>
-                <div class="submenu">
-                    <button class="menu-item" onclick="location.href='settings.html'">🔑 تغيير كلمة المرور</button>
-                    <button class="menu-item" onclick="location.href='settings.html'">🌐 إعدادات واتساب</button>
-                </div>
+        <div class="menu-category">
+            <button class="menu-category-header" onclick="toggleCategory(this)">
+                <span>⚙️ الإعدادات</span>
+                <span class="chevron">›</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="location.href='settings.html'">🔑 تغيير كلمة المرور</button>
+                <button class="menu-item" onclick="location.href='settings.html'">🌐 إعدادات واتساب</button>
             </div>
+        </div>
 
-            <button class="menu-leaf-btn" onclick="logoutAdmin()">🚪 خروج</button>
-        </nav>
+        <button class="menu-leaf-btn" onclick="logoutAdmin()">🚪 تسجيل الخروج</button>
     </aside>
 
-    <div class="shell">
+    <div class="container">
 
         <!-- الإحصائيات العلوية -->
         <div class="metrics-grid">
@@ -633,8 +752,8 @@
 
         <!-- نموذج تسجيل قضية -->
         <div class="panel" id="case_form_panel">
-            <div class="chip-header">
-                <div class="chip-title">➕ تسجيل قضية أو نزاع قضائي جديد</div>
+            <div class="panel-header">
+                <h2>➕ تسجيل قضية أو نزاع قضائي جديد</h2>
             </div>
 
             <div id="status_msg" class="status-msg"></div>
@@ -651,7 +770,6 @@
                     <div class="field">
                         <label for="case_number">رقم الدعوى القضائية</label>
                         <input type="text" id="case_number" placeholder="مثال: 2026/890" />
-                        <small style="color:var(--muted);font-size:11px;">غير مطلوب إذا كان الإدخال إنذار عدلي</small>
                     </div>
 
                     <div class="field">
@@ -672,21 +790,20 @@
                     <div class="field">
                         <label for="end_date">📌 تاريخ الانتهاء / الإغلاق</label>
                         <input type="date" id="end_date" />
-                        <small style="color:var(--muted);font-size:11px;">📌 تصبح القضية <strong style="color:var(--danger);">منتهية</strong> تلقائياً عند حلول التاريخ</small>
                     </div>
 
                     <div class="field col-3">
                         <div class="dispute-box">
                             <div>
-                                <strong>⚖️ فارق الحكم القضائي المحتسب:</strong>
-                                <span id="diffAmountText" style="color:var(--danger); font-weight:900; margin-right:8px;">0 د.أ</span>
+                                <strong style="font-size: 13.5px;">⚖️ فارق الحكم القضائي المحتسب:</strong>
+                                <span id="diffAmountText" style="color:var(--danger); font-weight:900; margin-right:8px; font-size: 15px;">0 د.أ</span>
                             </div>
-                            <small style="color:var(--muted);">حقل معلوماتي يوضح الفارق بين المطالبة الأصلية وقرار المحكمة</small>
+                            <small style="color:var(--text-muted); font-weight: 700;">حقل معلوماتي يوضح الفارق بين المطالبة الأصلية وقرار المحكمة</small>
                         </div>
                     </div>
 
                     <div class="field col-3">
-                        <label for="legal_notice">⚖️ مرجع الإنذار العدلي أو التنفيذ</label>
+                        <label for="legal_notice">مرجع الإنذار العدلي أو التنفيذ</label>
                         <input type="text" id="legal_notice" placeholder="مثال: إنذار عدلي كاتب عدل عمان رقم..." />
                     </div>
 
@@ -696,7 +813,7 @@
                     </div>
                 </div>
 
-                <div class="form-actions">
+                <div class="btn-group">
                     <button class="btn btn-gold" onclick="saveCase()">💾 حفظ القضية</button>
                     <button class="btn btn-soft" type="button" onclick="clearCaseForm()">🔄 تفريغ</button>
                 </div>
@@ -705,8 +822,8 @@
 
         <!-- جدول سجل القضايا -->
         <div class="panel">
-            <div class="chip-header" style="justify-content:space-between; align-items:center;">
-                <div class="chip-title">📋 سجل القضايا والنزاعات</div>
+            <div class="panel-header">
+                <h2>📋 سجل القضايا والنزاعات</h2>
                 <button class="btn btn-soft btn-sm" type="button" onclick="scrollToCaseForm()">➕ إضافة قضية</button>
             </div>
 
@@ -731,20 +848,20 @@
                             <th>الحالة</th>
                             <th>تاريخ الإغلاق</th>
                             <th>إنذار عدلي</th>
+                            <th>الملاحظات</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="casesTableBody">
                         <tr>
-                            <td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">جاري تحميل السجلات...</td>
+                            <td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted); font-weight:800;">جاري تحميل السجلات...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة الإدارة</button>
-
+        <button class="back-home-btn" onclick="goBack()">🏠 العودة إلى لوحة التحكم الرئيسية</button>
     </div>
 
     <!-- نافذة تعديل القضية (Modal) -->
@@ -793,7 +910,7 @@
                         <textarea id="edit_notes"></textarea>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="btn-group">
                     <button class="btn btn-gold" onclick="updateCase()">💾 حفظ التعديلات</button>
                     <button class="btn btn-soft" type="button" onclick="closeEditModal()">إلغاء</button>
                 </div>
@@ -898,7 +1015,7 @@
                 const tbody = document.getElementById('casesTableBody');
 
                 if (error || !data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">لا توجد قضايا مسجلة</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted); font-weight:800;">لا توجد قضايا مسجلة</td></tr>`;
                     casesCache = [];
                     updateMetrics();
                     return;
@@ -952,7 +1069,7 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--muted); font-weight:800;">لا توجد نتائج مطابقة</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted); font-weight:800;">لا توجد نتائج مطابقة</td></tr>`;
                 return;
             }
 
@@ -964,6 +1081,7 @@
                 const matchClaim = (c.notes || '').match(/مطالبة_أصلية:(\d+(\.\d+)?)/);
                 const claim = matchClaim ? parseFloat(matchClaim[1]) : award;
                 const diff = claim > award ? (claim - award) : 0;
+                const cleanNotes = (c.notes || '').replace(/\[مطالبة_أصلية:[^\]]+\]\s*/g, '');
 
                 return `
                     <tr>
@@ -972,9 +1090,10 @@
                         <td>${claim > 0 ? claim.toLocaleString('en-US') + ' د.أ' : '—'}</td>
                         <td style="color:var(--primary); font-weight:800;">${award ? award.toLocaleString('en-US') + ' د.أ' : '—'}</td>
                         <td style="color:var(--danger); font-weight:800;">${diff > 0 ? diff.toLocaleString('en-US') + ' د.أ' : '0 د.أ'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
                         <td>${c.end_date ? new Date(c.end_date).toLocaleDateString('en-GB') : '—'}</td>
-                        <td>${c.legal_notice ? `<span class="status-badge" style="background:rgba(201,164,107,0.16);color:var(--gold-deep);border:1px solid rgba(201,164,107,0.4);" title="${c.legal_notice.replace(/"/g, '&quot;')}">⚖️ مسجل</span>` : '—'}</td>
+                        <td>${c.legal_notice ? `<span class="badge" style="background:rgba(201,164,107,0.16);color:var(--gold-deep);border:1px solid rgba(201,164,107,0.4);" title="${c.legal_notice.replace(/"/g, '&quot;')}">⚖️ مسجل</span>` : '—'}</td>
+                        <td style="max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${cleanNotes}">${cleanNotes || '—'}</td>
                         <td>
                             <div class="action-btns">
                                 <button class="btn btn-warning btn-sm" onclick="openEditModal('${c.id}')">✏️</button>
@@ -1075,7 +1194,7 @@
             const claimAmount = document.getElementById('edit_claim_amount').value;
             const amount = document.getElementById('edit_amount').value.trim();
             const caseDate = document.getElementById('edit_case_date').value;
-            const endDate = document.getElementById('edit_end_date').value;
+            const endDate = document.getElementById('end_date') ? document.getElementById('edit_end_date').value : null;
             const legalNotice = document.getElementById('edit_legal_notice').value.trim();
             const rawNotes = document.getElementById('edit_notes').value.trim();
 
@@ -1148,12 +1267,12 @@
             el.style.display = 'block';
         }
 
-        function goBack() {
-            window.location.href = 'admin.html';
-        }
-
         function scrollToCaseForm() {
             document.getElementById('case_form_panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goBack() {
+            window.location.href = 'admin.html';
         }
 
         window.onload = function() {
@@ -1163,3 +1282,5 @@
     </script>
 </body>
 </html>
+
+```
